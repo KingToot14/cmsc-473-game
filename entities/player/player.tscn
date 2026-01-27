@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://do1dgabbmwjjn"]
+
+[ext_resource type="Texture2D" uid="uid://dcmttwi7ca43a" path="res://icon.svg" id="1_symyc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_abrql"]
+radius = 16.0
+
+[node name="player" type="CharacterBody2D" unique_id=1210066617]
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1227724529]
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("1_symyc")
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1847529886]
+shape = SubResource("CircleShape2D_abrql")
