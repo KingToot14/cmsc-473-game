@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://m5kcmqx3t3dm"]
+
+[ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_chunk.gd" id="1_j8i32"]
+
+[node name="chunk" type="Node2D" unique_id=1980708002]
+script = ExtResource("1_j8i32")
+
+[node name="walls" type="TileMapLayer" parent="." unique_id=1691444465]
+
+[node name="blocks" type="TileMapLayer" parent="." unique_id=784105609]

@@ -117,4 +117,12 @@ spawn_path = NodePath("../entities")
 
 [node name="entities" type="Node2D" parent="." unique_id=1430324138]
 
+[node name="tiles" type="Node2D" parent="." unique_id=1191194627]
+
+[node name="chunk" type="Node2D" parent="tiles" unique_id=46356306]
+
+[node name="walls" type="TileMapLayer" parent="tiles/chunk" unique_id=97398596]
+
+[node name="blocks" type="TileMapLayer" parent="tiles/chunk" unique_id=2126350232]
+
 [connection signal="pressed" from="join_ui/connect_options/join_button" to="join_ui" method="create_client"]
