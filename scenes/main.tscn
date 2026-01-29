@@ -1,5 +1,120 @@
 [gd_scene format=3 uid="uid://c6krrh5wjkitj"]
 
+[ext_resource type="Script" uid="uid://dyaogs04gmmc0" path="res://ui/main_menu/join_ui.gd" id="1_o5qli"]
+
 [node name="main" type="Node2D" unique_id=1976494311]
 
 [node name="join_ui" type="CanvasLayer" parent="." unique_id=185611908]
+script = ExtResource("1_o5qli")
+
+[node name="connect_options" type="Control" parent="join_ui" unique_id=32637596]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ip_field" type="LineEdit" parent="join_ui/connect_options" unique_id=1536200266]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.0
+offset_top = -76.0
+offset_right = 69.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+text = "127.0.0.1"
+alignment = 1
+
+[node name="ip_label" type="RichTextLabel" parent="join_ui/connect_options/ip_field" unique_id=1023099333]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -32.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "IP Address"
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="port_field" type="LineEdit" parent="join_ui/connect_options" unique_id=1858221070]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.0
+offset_top = -16.0
+offset_right = 69.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "7000"
+alignment = 1
+
+[node name="port_label" type="RichTextLabel" parent="join_ui/connect_options/port_field" unique_id=84354684]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -32.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Port"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="join_button" type="Button" parent="join_ui/connect_options" unique_id=1992856575]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = 54.0
+offset_right = 50.0
+offset_bottom = 86.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Join Game"
+
+[node name="joining_panel" type="Control" parent="join_ui" unique_id=1488995266]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="backing" type="ColorRect" parent="join_ui/joining_panel" unique_id=1872058897]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="text" type="RichTextLabel" parent="join_ui/joining_panel/backing" unique_id=1291339026]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="entity_spawner" type="MultiplayerSpawner" parent="." unique_id=121496976]
+_spawnable_scenes = PackedStringArray("uid://do1dgabbmwjjn")
+spawn_path = NodePath("../entities")
+
+[node name="entities" type="Node2D" parent="." unique_id=1430324138]
+
+[connection signal="pressed" from="join_ui/connect_options/join_button" to="join_ui" method="create_client"]

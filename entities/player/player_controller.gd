@@ -29,7 +29,7 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 
 func apply_input(_delta: float) -> void:
 	# update velocity
-	velocity = $'input_sync'.input_direction * move_speed
+	velocity.x = $'input_sync'.input_direction.x * move_speed
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor

@@ -10,13 +10,13 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connection_failed)
 
 func _on_connected_to_server() -> void:
-	print("[Server Test] Client '%s' connected" % multiplayer.get_unique_id())
+	print("[Wizbowo's Conquest] Client '%s' connected" % multiplayer.get_unique_id())
 	
 	# hide join ui
 	hide()
 
 func _on_connection_failed() -> void:
-	print("[Server Test] Client '%s' failed to connect" % multiplayer.get_unique_id())
+	print("[Wizbowo's Conquest] Client '%s' failed to connect" % multiplayer.get_unique_id())
 	
 	# re-enable connect options
 	$'connect_options'.show()
@@ -24,8 +24,8 @@ func _on_connection_failed() -> void:
 
 func create_client() -> Error:
 	# get the fields from LineEdits
-	var ip_address: String = $'connect_options/ip_field'.text
-	var port_str: String = $'connect_options/port_field'.text
+	var ip_address: String = %'ip_field'.text
+	var port_str: String = %'port_field'.text
 	
 	# check ip address
 	var regex = RegEx.new()
