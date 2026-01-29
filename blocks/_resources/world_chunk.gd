@@ -4,10 +4,21 @@ extends Node2D
 
 # --- Variables --- #
 const CONNECTION_MAP = {
-	1: Vector2i(0, 3),
-	2: Vector2i(3, 0),
-	4: Vector2i(1, 0),
-	8: Vector2i(0, 1),
+	  0: Vector2i(0, 0),   4: Vector2i(1, 0),   6: Vector2i(2, 0),    2: Vector2i(3, 0),
+	 12: Vector2i(4, 0),  10: Vector2i(5, 0),  13: Vector2i(6, 0),   14: Vector2i(7, 0),
+	 47: Vector2i(8, 0), 143: Vector2i(9, 0),  95: Vector2i(10, 0),  63: Vector2i(11, 0),
+	
+	  8: Vector2i(0, 1), 140: Vector2i(1, 1), 206: Vector2i(2, 1),   74: Vector2i(3, 1),
+	  5: Vector2i(4, 1),   3: Vector2i(5, 1),   7: Vector2i(6, 1),   11: Vector2i(7, 1),
+	 31: Vector2i(8, 1),  79: Vector2i(9, 1), 207: Vector2i(10, 1), 175: Vector2i(11, 1),
+	
+	  9: Vector2i(0, 2), 173: Vector2i(1, 2), 255: Vector2i(2, 2),   91: Vector2i(3, 2),
+	141: Vector2i(4, 2),  78: Vector2i(5, 2),  45: Vector2i(6, 2),  142: Vector2i(7, 2),
+	127: Vector2i(8, 2), 191: Vector2i(9, 2), 111: Vector2i(10, 2), 159: Vector2i(11, 2),
+	
+	  1: Vector2i(0, 3),  37: Vector2i(1, 3),  55: Vector2i(2, 3),   19: Vector2i(3, 3),
+	 39: Vector2i(4, 3),  27: Vector2i(5, 3),  23: Vector2i(6, 3),   75: Vector2i(7, 3),
+	223: Vector2i(8, 3), 239: Vector2i(9, 3), 15: Vector2i(10, 3)
 }
 
 @export var chunk_pos := -Vector2i.ONE
@@ -21,11 +32,15 @@ func _ready() -> void:
 	_randomize_chunk()
 
 #region Tile Management
-func calculate_connections(x: int, y: int) -> int:
+func calculate_connections(x: int, y: int, is_wall := false) -> int:
 	if x < 0 or x >= TileManager.CHUNK_SIZE or y < 0 or y >= TileManager.CHUNK_SIZE:
 		return 0
 	
 	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	
+	# don't run on empty blocks
+	if not is_wall and TileManager.get_block_in_chunk(chunk, x, y) <= 0:
+		return 0
 	
 	# cardinal neighbors
 	var value := 0
@@ -93,11 +108,6 @@ func autotile_block_chunk() -> void:
 			var tile := TileManager.get_block_in_chunk(chunk, x, y)
 			var connections := calculate_connections(x, y)
 			
-			print(x, ", ", y, " | ", connections)
-			
-			if connections == 1 or connections == 2 or connections == 4 or connections == 8:
-				print(connections)
-			
-			blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP.get(connections, Vector2.ZERO))
+			blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP[connections])
 
 #endregion
