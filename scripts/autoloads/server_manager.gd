@@ -12,27 +12,30 @@ func _ready() -> void:
 		# disable ui for servers
 		get_tree().current_scene.get_node(^'join_ui').hide()
 		
+		# start world generation
+		get_tree().current_scene.get_node(^'world_generation').generate_world()
+		
 		start_server()
 
 #region Server Connections
 func start_server() -> Error:
-	print("[Server Test] Starting server on port %s" % SERVER_PORT)
+	print("[Wizbowo's Conquest] Starting server on port %s" % SERVER_PORT)
 	
 	# create the server peer
 	var peer := ENetMultiplayerPeer.new()
 	var error = peer.create_server(SERVER_PORT)
 	
 	if error:
-		print("[Server Test] ERROR: %s" % error_string(error))
+		print("[Wizbowo's Conquest] ERROR: %s" % error_string(error))
 		return error
 	
-	print("[Server Test] Status: %s" % error_string(error))
+	print("[Wizbowo's Conquest] Status: %s" % error_string(error))
 	
 	multiplayer.peer_connected.connect(_on_player_connect)
 	multiplayer.peer_disconnected.connect(_on_player_disconnect)
 	multiplayer.multiplayer_peer = peer
 	
-	print("[Server Test] Server started")
+	print("[Wizbowo's Conquest] Server started")
 	
 	return Error.OK
 
@@ -41,7 +44,7 @@ func join_server(ip_address := '127.0.0.1', port := 7000) -> Error:
 	var error := peer.create_client(ip_address, port)
 	
 	if error:
-		print("[Server Test] ERROR: %s" % error_string(error))
+		print("[Wizbowo's Conquest] ERROR: %s" % error_string(error))
 		return error
 	
 	# set multiplayer
@@ -54,7 +57,7 @@ func _on_player_connect(id: int) -> void:
 		return
 	
 	# setup player
-	print("[Server Test] Client '%s' has joined the server" % id)
+	print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
 	
 	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
 	player.name = "player_%s" % id
@@ -68,7 +71,7 @@ func _on_player_disconnect(id: int) -> void:
 	if not multiplayer.is_server():
 		return
 	
-	print("[Server Test] Client '%s' has left the server" % id)
+	print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
 	
 	var player = get_tree().current_scene.get_node('entities/player_%s' % id)
 	

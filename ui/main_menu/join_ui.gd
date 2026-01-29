@@ -8,6 +8,8 @@ extends CanvasLayer
 func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
+	
+	show()
 
 func _on_connected_to_server() -> void:
 	print("[Wizbowo's Conquest] Client '%s' connected" % multiplayer.get_unique_id())
