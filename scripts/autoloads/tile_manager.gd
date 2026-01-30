@@ -8,13 +8,24 @@ var chunks: Array[PackedInt32Array]
 var chunk_map: Dictionary[Vector2i, PackedInt32Array] = {}
 
 # --- Functions --- #
-func _ready() -> void:
-	if multiplayer.is_server():
-		add_chunk()
+#func _ready() -> void:
+	#if multiplayer.is_server():
+		#add_chunk()
 
 #region Positions
 func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> void:
 	pass
+
+func set_world_size(new_size: Vector2i) -> void:
+	world_size = new_size
+	
+	chunks = []
+	
+	@warning_ignore_start("integer_division")
+	for x in range(roundi(world_size.x / CHUNK_SIZE)):
+		for y in range(roundi(world_size.y / CHUNK_SIZE)):
+			add_chunk()
+	@warning_ignore_restore("integer_division")
 
 #endregion
 
@@ -138,10 +149,10 @@ func get_chunk(x: int, y: int) -> PackedInt32Array:
 		return chunk_map.get(Vector2i(x, y))
 
 func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
-	@warning_ignore("integer_division")
+	@warning_ignore_start("integer_division")
 	var chunk_x := floori(world_x / CHUNK_SIZE)
-	@warning_ignore("integer_division")
 	var chunk_y := floori(world_y / CHUNK_SIZE)
+	@warning_ignore_restore("integer_division")
 	
 	return get_chunk(chunk_x, chunk_y)
 

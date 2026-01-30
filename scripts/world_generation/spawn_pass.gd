@@ -1,4 +1,4 @@
-class_name ResetPass
+class_name SpawnPass
 extends WorldGenPass
 
 # --- Variables --- #
@@ -6,5 +6,5 @@ extends WorldGenPass
 
 # --- Functions --- #
 func perform_pass(gen: WorldGeneration) -> void:
-	# setup tile manager
-	TileManager.set_world_size(gen.world_size)
+	# sets the world spawn position
+	gen.world_spawn = gen.world_size / 2.0

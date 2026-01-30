@@ -2,7 +2,8 @@ class_name WorldGeneration
 extends Node
 
 # --- Variables --- #
-var world_size := Vector2i(8400, 2400)
+var world_size := Vector2i(16*10, 16*10)
+var world_spawn := Vector2i.ZERO
 
 var display_seed: String
 var logical_seed: String
@@ -11,6 +12,3 @@ var logical_seed: String
 func generate_world() -> void:
 	# perform passes
 	ResetPass.new().start_pass(self)
-
-func generate_chunks() -> void:
-	pass
