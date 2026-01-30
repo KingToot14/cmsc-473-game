@@ -12,3 +12,9 @@ var logical_seed: String
 func generate_world() -> void:
 	# perform passes
 	ResetPass.new().start_pass(self)
+	
+	# create terrain
+	TerrainPass.new().start_pass(self)
+	
+	# cleanup
+	SpawnPass.new().start_pass(self)
