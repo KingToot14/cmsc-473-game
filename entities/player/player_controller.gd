@@ -26,7 +26,9 @@ func _ready() -> void:
 		$'snapshop_interpolator'.enabled = true
 		$'sprite'.top_level = true
 	else:
+		# update position + control camera
 		position = spawn_point
+		$'camera'.enabled = true
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	apply_input(delta)

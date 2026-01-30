@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://dyaogs04gmmc0" path="res://ui/main_menu/join_ui.gd" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bv73vyepe1qva" path="res://scripts/world_generation/world_generation.gd" id="2_0wfyh"]
-[ext_resource type="Script" uid="uid://cgf3t6cmohs3w" path="res://scripts/testing_camera.gd" id="3_sugp2"]
 
 [node name="main" type="Node2D" unique_id=1976494311]
 
@@ -121,10 +120,6 @@ metadata/_custom_type_script = "uid://bv73vyepe1qva"
 [node name="entity_spawner" type="MultiplayerSpawner" parent="." unique_id=121496976]
 _spawnable_scenes = PackedStringArray("uid://do1dgabbmwjjn")
 spawn_path = NodePath("../entities")
-
-[node name="camera" type="Camera2D" parent="." unique_id=1113222913]
-position = Vector2(240, 135)
-script = ExtResource("3_sugp2")
 
 [node name="entities" type="Node2D" parent="." unique_id=1430324138]
 
