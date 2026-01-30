@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://d350u8evihs1u" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
 [ext_resource type="Script" uid="uid://dour8fehaaugp" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
+[ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_sglur"]
 properties/0/path = NodePath(".:owner_id")
@@ -50,8 +51,14 @@ update_root = false
 auto_start = false
 metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 
+[node name="chunk_loader" type="Node" parent="." unique_id=51122964 node_paths=PackedStringArray("player")]
+script = ExtResource("6_qiwj3")
+player = NodePath("..")
+metadata/_custom_type_script = "uid://br2yvj337a0vt"
+
 [node name="camera" type="Camera2D" parent="." unique_id=608371352]
 enabled = false
+zoom = Vector2(0.5, 0.5)
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1227724529]
 scale = Vector2(0.25, 0.25)

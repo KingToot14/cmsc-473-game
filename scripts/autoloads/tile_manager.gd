@@ -2,15 +2,13 @@ extends Node
 
 # --- Variables --- #
 const CHUNK_SIZE := 16
+const TILE_SIZE := 8
 
 var chunks: Array[PackedInt32Array]
 var chunk_map: Dictionary[Vector2i, PackedInt32Array] = {}
+var visual_chunks: Dictionary[Vector2i, WorldChunk] = {}
 
 # --- Functions --- #
-#func _ready() -> void:
-	#if multiplayer.is_server():
-		#add_chunk()
-
 #region Positions
 func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
@@ -26,6 +24,40 @@ func load_chunks() -> void:
 		for y in range(roundi(Globals.world_size.y / CHUNK_SIZE)):
 			add_chunk()
 	@warning_ignore_restore("integer_division")
+	
+	#var sub_chunks = chunks.slice(0, 60, 1, true)
+	#var packed = PackedByteArray()
+	#
+	#var start = Time.get_ticks_usec()
+	#
+	#for chunk in sub_chunks:
+		#for x in range(CHUNK_SIZE):
+			#for y in range(CHUNK_SIZE):
+				#chunk[x + y * CHUNK_SIZE] |= (randi_range(0, 256) << 0)
+				#chunk[x + y * CHUNK_SIZE] |= (randi_range(0, 256) << 10)
+		#
+		#packed.append_array(chunk.to_byte_array())
+	#
+	#print(packed.size())
+	##print(len(packed.compress(FileAccess.COMPRESSION_FASTLZ)))
+	##print(len(packed.compress(FileAccess.COMPRESSION_DEFLATE)))
+	#print(len(packed.compress(FileAccess.COMPRESSION_ZSTD)))
+	##print(len(packed.compress(FileAccess.COMPRESSION_GZIP)))
+	#
+	#var end = Time.get_ticks_usec()
+	#print("Compression: ", end - start)
+	#
+	#var offset := 0
+	#var restored: Array[PackedInt32Array] = []
+	#
+	#while offset < len(packed):
+		#restored.append(packed.slice(offset, offset + CHUNK_SIZE * CHUNK_SIZE * 4).to_int32_array())
+		#print(len(restored[-1]))
+		#offset += CHUNK_SIZE * CHUNK_SIZE * 4
+	#
+	#print("Decompression: ", Time.get_ticks_usec() - end)
+	#
+	#print(restored == sub_chunks)
 
 #endregion
 
@@ -141,20 +173,36 @@ func add_chunk() -> void:
 	
 	chunks.append(tiles)
 
+@warning_ignore_start("integer_division")
 func get_chunk(x: int, y: int) -> PackedInt32Array:
+	if x < 0 or x >= Globals.world_size.x / CHUNK_SIZE or y < 0 or y >= Globals.world_size.y / CHUNK_SIZE:
+		return PackedInt32Array()
+	
 	if multiplayer.is_server():
-		@warning_ignore("integer_division")
 		return chunks[x + y * (Globals.world_size.y / CHUNK_SIZE)]
 	else:
 		return chunk_map.get(Vector2i(x, y))
 
 func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
-	@warning_ignore_start("integer_division")
 	var chunk_x := floori(world_x / CHUNK_SIZE)
 	var chunk_y := floori(world_y / CHUNK_SIZE)
-	@warning_ignore_restore("integer_division")
 	
 	return get_chunk(chunk_x, chunk_y)
+
+func set_chunk(x: int, y: int, data: PackedInt32Array) -> void:
+	if x < 0 or x >= Globals.world_size.x / CHUNK_SIZE or y < 0 or y >= Globals.world_size.y / CHUNK_SIZE:
+		return
+	
+	if multiplayer.is_server():
+		chunks[x + y * (Globals.world_size.y / CHUNK_SIZE)] = data
+	else:
+		chunk_map[Vector2i(x, y)] = data
+
+func set_chunk_from_world(world_x: int, world_y: int, data: PackedInt32Array) -> void:
+	var chunk_x := floori(world_x / CHUNK_SIZE)
+	var chunk_y := floori(world_y / CHUNK_SIZE)
+	
+	set_chunk(chunk_x, chunk_y, data)
 
 func create_chunk_object(x: int, y: int) -> void:
 	var chunk := preload("uid://m5kcmqx3t3dm").instantiate() as WorldChunk
@@ -163,5 +211,12 @@ func create_chunk_object(x: int, y: int) -> void:
 	chunk.load_from_data()
 	
 	get_tree().current_scene.get_node(^'tiles').add_child(chunk)
+
+@warning_ignore_restore("integer_division")
+
+#endregion
+
+#region Multiplayer
+
 
 #endregion

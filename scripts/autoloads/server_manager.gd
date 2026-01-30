@@ -58,17 +58,26 @@ func _on_player_connect(id: int) -> void:
 	if not multiplayer.is_server():
 		return
 	
-	# setup player
 	print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
 	
+	# wait for world generation
+	var gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
+	if gen.generating:
+		await gen.done_generating
+	
+	# setup player
 	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
 	player.name = "player_%s" % id
 	player.owner_id = id
 	
+	# set position
 	player.spawn_point = Globals.world_spawn
 	player.position = Globals.world_spawn
 	
 	get_tree().current_scene.get_node(^'entities').add_child(player)
+	
+	# send data
+	player.get_node(^'chunk_loader').send_whole_area()
 
 func _on_player_disconnect(id: int) -> void:
 	if not multiplayer.is_server():
