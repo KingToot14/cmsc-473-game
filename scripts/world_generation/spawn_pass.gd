@@ -10,4 +10,4 @@ func get_pass_name() -> String:
 
 func perform_pass(_gen: WorldGeneration) -> void:
 	# sets the world spawn position
-	Globals.world_spawn = Globals.world_size / 2.0
+	Globals.world_spawn = Globals.world_size / 2.0 * 8

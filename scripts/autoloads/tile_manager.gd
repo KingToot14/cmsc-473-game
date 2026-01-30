@@ -4,9 +4,12 @@ extends Node
 const CHUNK_SIZE := 16
 const TILE_SIZE := 8
 
-var chunks: Array[PackedInt32Array]
-var chunk_map: Dictionary[Vector2i, PackedInt32Array] = {}
-var visual_chunks: Dictionary[Vector2i, WorldChunk] = {}
+var chunks: Array[PackedInt32Array]:
+	set(_chunks):
+		print_stack()
+		chunks = _chunks
+var chunk_map: Dictionary[int, PackedInt32Array] = {}
+var visual_chunks: Dictionary[int, WorldChunk] = {}
 
 # --- Functions --- #
 #region Positions
@@ -14,50 +17,11 @@ func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
 
 func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
-	return Vector2i(world_x % CHUNK_SIZE, world_y % CHUNK_SIZE)
-
-func load_chunks() -> void:
-	chunks = []
-	
-	@warning_ignore_start("integer_division")
-	for x in range(roundi(Globals.world_size.x / CHUNK_SIZE)):
-		for y in range(roundi(Globals.world_size.y / CHUNK_SIZE)):
-			add_chunk()
-	@warning_ignore_restore("integer_division")
-	
-	#var sub_chunks = chunks.slice(0, 60, 1, true)
-	#var packed = PackedByteArray()
-	#
-	#var start = Time.get_ticks_usec()
-	#
-	#for chunk in sub_chunks:
-		#for x in range(CHUNK_SIZE):
-			#for y in range(CHUNK_SIZE):
-				#chunk[x + y * CHUNK_SIZE] |= (randi_range(0, 256) << 0)
-				#chunk[x + y * CHUNK_SIZE] |= (randi_range(0, 256) << 10)
-		#
-		#packed.append_array(chunk.to_byte_array())
-	#
-	#print(packed.size())
-	##print(len(packed.compress(FileAccess.COMPRESSION_FASTLZ)))
-	##print(len(packed.compress(FileAccess.COMPRESSION_DEFLATE)))
-	#print(len(packed.compress(FileAccess.COMPRESSION_ZSTD)))
-	##print(len(packed.compress(FileAccess.COMPRESSION_GZIP)))
-	#
-	#var end = Time.get_ticks_usec()
-	#print("Compression: ", end - start)
-	#
-	#var offset := 0
-	#var restored: Array[PackedInt32Array] = []
-	#
-	#while offset < len(packed):
-		#restored.append(packed.slice(offset, offset + CHUNK_SIZE * CHUNK_SIZE * 4).to_int32_array())
-		#print(len(restored[-1]))
-		#offset += CHUNK_SIZE * CHUNK_SIZE * 4
-	#
-	#print("Decompression: ", Time.get_ticks_usec() - end)
-	#
-	#print(restored == sub_chunks)
+	@warning_ignore("integer_division")
+	return Vector2i(
+		clampi(world_x / CHUNK_SIZE, 0, Globals.world_chunks.x),
+		clampi(world_y / CHUNK_SIZE, 0, Globals.world_chunks.y)
+	)
 
 #endregion
 
@@ -94,6 +58,9 @@ func get_wall_in_chunk(chunk: PackedInt32Array, x: int, y: int) -> int:
 	if x < 0 or x >= CHUNK_SIZE or y < 0 or y >= CHUNK_SIZE:
 		return 0
 	
+	if len(chunk) < x + y * CHUNK_SIZE:
+		return 0
+	
 	var tile := chunk[x + y * CHUNK_SIZE]
 	
 	# wall id is bit 10 - 19
@@ -102,6 +69,9 @@ func get_wall_in_chunk(chunk: PackedInt32Array, x: int, y: int) -> int:
 func get_block_in_chunk(chunk: PackedInt32Array, x: int, y: int) -> int:
 	# check bounds
 	if x < 0 or x >= CHUNK_SIZE or y < 0 or y >= CHUNK_SIZE:
+		return 0
+	
+	if len(chunk) <= x + y * CHUNK_SIZE:
 		return 0
 	
 	var tile := chunk[x + y * CHUNK_SIZE]
@@ -164,24 +134,24 @@ func set_block_in_chunk(chunk: PackedInt32Array, x: int, y: int, block_id: int) 
 #endregion
 
 #region Chunk Access
-func add_chunk() -> void:
+@warning_ignore_start("integer_division")
+func empty_chunk(chunk_x: int, chunk_y: int) -> void:
 	var tiles := PackedInt32Array()
 	
 	for x in range(CHUNK_SIZE):
 		for y in range(CHUNK_SIZE):
 			tiles.append(0)
 	
-	chunks.append(tiles)
+	chunks[chunk_x + chunk_y * roundi(Globals.world_chunks.x)] = tiles
 
-@warning_ignore_start("integer_division")
 func get_chunk(x: int, y: int) -> PackedInt32Array:
-	if x < 0 or x >= Globals.world_size.x / CHUNK_SIZE or y < 0 or y >= Globals.world_size.y / CHUNK_SIZE:
+	if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
 		return PackedInt32Array()
 	
 	if multiplayer.is_server():
-		return chunks[x + y * (Globals.world_size.y / CHUNK_SIZE)]
+		return chunks[x + y * (Globals.world_chunks.x)]
 	else:
-		return chunk_map.get(Vector2i(x, y))
+		return chunk_map.get(x | y << 20, PackedInt32Array())
 
 func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	var chunk_x := floori(world_x / CHUNK_SIZE)
@@ -190,13 +160,13 @@ func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	return get_chunk(chunk_x, chunk_y)
 
 func set_chunk(x: int, y: int, data: PackedInt32Array) -> void:
-	if x < 0 or x >= Globals.world_size.x / CHUNK_SIZE or y < 0 or y >= Globals.world_size.y / CHUNK_SIZE:
+	if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
 		return
 	
 	if multiplayer.is_server():
-		chunks[x + y * (Globals.world_size.y / CHUNK_SIZE)] = data
+		chunks[x + y * (Globals.world_chunks.x)] = data
 	else:
-		chunk_map[Vector2i(x, y)] = data
+		chunk_map[x | y << 20] = data
 
 func set_chunk_from_world(world_x: int, world_y: int, data: PackedInt32Array) -> void:
 	var chunk_x := floori(world_x / CHUNK_SIZE)
@@ -204,19 +174,66 @@ func set_chunk_from_world(world_x: int, world_y: int, data: PackedInt32Array) ->
 	
 	set_chunk(chunk_x, chunk_y, data)
 
-func create_chunk_object(x: int, y: int) -> void:
+func create_chunk_object(x: int, y: int) -> WorldChunk:
 	var chunk := preload("uid://m5kcmqx3t3dm").instantiate() as WorldChunk
 	chunk.chunk_pos = Vector2i(x, y)
+	chunk.position = Vector2(x * 8 * CHUNK_SIZE, y * 8 * CHUNK_SIZE)
 	
-	chunk.load_from_data()
+	chunk.autotile_block_chunk()
 	
 	get_tree().current_scene.get_node(^'tiles').add_child(chunk)
+	
+	return chunk
+
+func load_chunks() -> void:
+	var width := roundi(Globals.world_chunks.x)
+	var height := roundi(Globals.world_chunks.y)
+	
+	chunks = []
+	chunks.resize(width * height)
+	
+	for x in range(width):
+		for y in range(height):
+			empty_chunk(x, y)
+
+func load_chunk_region(
+		new_chunks: Array[PackedInt32Array], start_x: int, start_y: int, width: int, height: int
+	) -> void:
+	
+	if multiplayer.is_server():
+		pass
+	else:
+		var index := 0
+		for x in range(max(0, start_x), start_x + width + 1):
+			for y in range(start_y, start_y + height + 1):
+				var chunk := new_chunks[index]
+				var map_index = x | y << 20
+				
+				if map_index in chunk_map and map_index in visual_chunks:
+					if chunk != chunk_map[map_index]:
+						chunk_map[map_index] = chunk
+						visual_chunks[map_index].autotile_block_chunk()
+				else:
+					chunk_map[map_index] = chunk
+					visual_chunks[map_index] = create_chunk_object(x, y)
+					visual_chunks[map_index].autotile_block_chunk()
+				
+				index += 1
 
 @warning_ignore_restore("integer_division")
 
 #endregion
 
 #region Multiplayer
-
+func pack_chunks(start_x: int, start_y: int, end_x: int, end_y: int) -> PackedByteArray:
+	var packed = PackedByteArray()
+	
+	for x in range(start_x, end_x + 1):
+		for y in range(start_y, end_y + 1):
+			packed.append_array(get_chunk(x, y).to_byte_array())
+	
+	print("Data: ", len(packed))
+	
+	return packed.compress(FileAccess.COMPRESSION_ZSTD)
 
 #endregion
