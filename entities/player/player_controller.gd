@@ -10,6 +10,8 @@ const INTERPOLATE_SPEED := 10.0
 		$'input_sync'.set_multiplayer_authority(id)
 		owner_id = id
 
+@export var spawn_point: Vector2i
+
 @export var move_speed := 20.0
 
 # --- Functions --- #
@@ -23,6 +25,10 @@ func _ready() -> void:
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshop_interpolator'.enabled = true
 		$'sprite'.top_level = true
+	else:
+		# update position + control camera
+		position = spawn_point
+		$'camera'.enabled = true
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	apply_input(delta)

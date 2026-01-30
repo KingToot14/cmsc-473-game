@@ -24,12 +24,13 @@ const CONNECTION_MAP = {
 @export var chunk_pos := -Vector2i.ONE
 
 @export_tool_button("Randomize Chunk", "RandomNumberGenerator")
+@warning_ignore("unused_private_class_variable")
 var _dummy = _randomize_chunk
 
 # --- Functions --- #
-func _ready() -> void:
+#func _ready() -> void:
 	#load_from_data()
-	_randomize_chunk()
+	#_randomize_chunk()
 
 #region Tile Management
 func calculate_connections(x: int, y: int, is_wall := false) -> int:
@@ -102,6 +103,8 @@ func autotile_block_chunk() -> void:
 	var blocks: TileMapLayer = $'blocks'
 	
 	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	
+	print(len(chunk))
 	
 	for x in range(TileManager.CHUNK_SIZE):
 		for y in range(TileManager.CHUNK_SIZE):

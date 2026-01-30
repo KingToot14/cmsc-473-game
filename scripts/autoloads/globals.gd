@@ -1,9 +1,20 @@
 extends Node
 
 # --- Variables --- #
+var world_size := Vector2i(160, 160):
+	set(_size):
+		@warning_ignore("integer_division")
+		world_chunks = _size / TileManager.CHUNK_SIZE
+		world_size = _size
 
+@warning_ignore("integer_division")
+var world_chunks := world_size / TileManager.CHUNK_SIZE
+var world_spawn: Vector2i
 
 # --- Functions --- #
+func _ready() -> void:
+	world_size = world_size
+
 func parse_arguments() -> Dictionary:
 	var arguments: Dictionary = {}
 	
