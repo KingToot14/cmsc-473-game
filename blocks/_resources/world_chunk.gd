@@ -37,32 +37,34 @@ func calculate_connections(x: int, y: int, is_wall := false) -> int:
 	if x < 0 or x >= TileManager.CHUNK_SIZE or y < 0 or y >= TileManager.CHUNK_SIZE:
 		return 0
 	
-	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	#var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	var world_x = chunk_pos.x * TileManager.CHUNK_SIZE + x
+	var world_y = chunk_pos.y * TileManager.CHUNK_SIZE + y
 	
 	# don't run on empty blocks
-	if not is_wall and TileManager.get_block_in_chunk(chunk, x, y) <= 0:
+	if not is_wall and TileManager.get_block(world_x, world_y) <= 0:
 		return 0
 	
 	# cardinal neighbors
 	var value := 0
 	
-	if TileManager.get_block_in_chunk(chunk, x, y - 1) > 0:
+	if TileManager.get_block(world_x, world_y - 1) > 0:
 		value += 1
-	if TileManager.get_block_in_chunk(chunk, x - 1, y) > 0:
+	if TileManager.get_block(world_x - 1, world_y) > 0:
 		value += 2
-	if TileManager.get_block_in_chunk(chunk, x + 1, y) > 0:
+	if TileManager.get_block(world_x + 1, world_y) > 0:
 		value += 4
-	if TileManager.get_block_in_chunk(chunk, x, y + 1) > 0:
+	if TileManager.get_block(world_x, world_y + 1) > 0:
 		value += 8
 	
 	# diagonal neighbors
-	if value & 1 and value & 2 and TileManager.get_block_in_chunk(chunk, x - 1, y - 1) > -1:
+	if value & 1 and value & 2 and TileManager.get_block(world_x - 1, world_y - 1) > -1:
 		value += 16
-	if value & 1 and value & 4 and TileManager.get_block_in_chunk(chunk, x + 1, y - 1) > -1:
+	if value & 1 and value & 4 and TileManager.get_block(world_x + 1, world_y - 1) > -1:
 		value += 32
-	if value & 8 and value & 2 and TileManager.get_block_in_chunk(chunk, x - 1, y + 1) > -1:
+	if value & 8 and value & 2 and TileManager.get_block(world_x - 1, world_y + 1) > -1:
 		value += 64
-	if value & 8 and value & 4 and TileManager.get_block_in_chunk(chunk, x + 1, y + 1) > -1:
+	if value & 8 and value & 4 and TileManager.get_block(world_x + 1, world_y + 1) > -1:
 		value += 128
 	
 	return value
@@ -99,15 +101,55 @@ func load_from_data() -> void:
 		for y in range(TileManager.CHUNK_SIZE):
 			print(TileManager.get_block_in_chunk(chunk, x, y))
 
-func autotile_block_chunk() -> void:
+func autotile_block_chunk(check_neighbors := true) -> void:
 	var blocks: TileMapLayer = $'blocks'
-	
 	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
 	
-	print(len(chunk))
-	
+	# autotile self
 	for x in range(TileManager.CHUNK_SIZE):
 		for y in range(TileManager.CHUNK_SIZE):
+			var tile := TileManager.get_block_in_chunk(chunk, x, y)
+			var connections := calculate_connections(x, y)
+			
+			blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP[connections])
+	
+	if check_neighbors:
+		autotile_other_region(
+			chunk_pos.x - 1, chunk_pos.y,
+			TileManager.CHUNK_SIZE - 1, 0, TileManager.CHUNK_SIZE - 1, TileManager.CHUNK_SIZE
+		)
+		autotile_other_region(
+			chunk_pos.x + 1, chunk_pos.y,
+			0, 0, 0, TileManager.CHUNK_SIZE
+		)
+		autotile_other_region(
+			chunk_pos.x, chunk_pos.y - 1,
+			0, TileManager.CHUNK_SIZE - 1, TileManager.CHUNK_SIZE, TileManager.CHUNK_SIZE - 1
+		)
+		autotile_other_region(
+			chunk_pos.x, chunk_pos.y + 1,
+			0, 0, TileManager.CHUNK_SIZE, 0
+		)
+
+func autotile_other_region(cx: int, cy: int, start_x: int, start_y: int, end_x: int, end_y: int) -> void:
+	var chunk := TileManager.get_visual_chunk(cx, cy)
+	if not chunk:
+		return
+	
+	chunk.autotile_region(start_x, start_y, end_x, end_y, false)
+
+func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int, check_neighbors := true) -> void:
+	var blocks: TileMapLayer = $'blocks'
+	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	
+	if check_neighbors:
+		start_x -= 1
+		start_y += 1
+		end_x -= 1
+		end_y += 1
+	
+	for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
+		for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
 			var tile := TileManager.get_block_in_chunk(chunk, x, y)
 			var connections := calculate_connections(x, y)
 			

@@ -31,6 +31,9 @@ func _get_tile(world_x: int, world_y: int) -> int:
 	var x := world_x % CHUNK_SIZE
 	var y := world_y % CHUNK_SIZE
 	
+	if chunk.is_empty():
+		return 0
+	
 	return chunk[x + y * CHUNK_SIZE]
 
 func get_wall(world_x: int, world_y: int) -> int:
@@ -159,6 +162,9 @@ func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	
 	return get_chunk(chunk_x, chunk_y)
 
+func get_visual_chunk(x: int, y: int) -> WorldChunk:
+	return visual_chunks.get(x | y << 20)
+
 func set_chunk(x: int, y: int, data: PackedInt32Array) -> void:
 	if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
 		return
@@ -176,6 +182,7 @@ func set_chunk_from_world(world_x: int, world_y: int, data: PackedInt32Array) ->
 
 func create_chunk_object(x: int, y: int) -> WorldChunk:
 	var chunk := preload("uid://m5kcmqx3t3dm").instantiate() as WorldChunk
+	chunk.name = "chunk_%s_%s" % [x, y]
 	chunk.chunk_pos = Vector2i(x, y)
 	chunk.position = Vector2(x * 8 * CHUNK_SIZE, y * 8 * CHUNK_SIZE)
 	
@@ -204,6 +211,8 @@ func load_chunk_region(
 		pass
 	else:
 		var index := 0
+		var dirty: Array[WorldChunk] = []
+		
 		for x in range(max(0, start_x), start_x + width + 1):
 			for y in range(start_y, start_y + height + 1):
 				var chunk := new_chunks[index]
@@ -212,13 +221,16 @@ func load_chunk_region(
 				if map_index in chunk_map and map_index in visual_chunks:
 					if chunk != chunk_map[map_index]:
 						chunk_map[map_index] = chunk
-						visual_chunks[map_index].autotile_block_chunk()
+						dirty.append(visual_chunks[map_index])
 				else:
 					chunk_map[map_index] = chunk
 					visual_chunks[map_index] = create_chunk_object(x, y)
-					visual_chunks[map_index].autotile_block_chunk()
+					dirty.append(visual_chunks[map_index])
 				
 				index += 1
+		
+		for chunk in dirty:
+			chunk.autotile_block_chunk()
 
 @warning_ignore_restore("integer_division")
 
