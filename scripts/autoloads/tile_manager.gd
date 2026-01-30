@@ -2,7 +2,6 @@ extends Node
 
 # --- Variables --- #
 const CHUNK_SIZE := 16
-var world_size: Vector2i = Vector2i(8400, 2400)
 
 var chunks: Array[PackedInt32Array]
 var chunk_map: Dictionary[Vector2i, PackedInt32Array] = {}
@@ -13,17 +12,18 @@ var chunk_map: Dictionary[Vector2i, PackedInt32Array] = {}
 		#add_chunk()
 
 #region Positions
-func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> void:
-	pass
+func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
+	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
 
-func set_world_size(new_size: Vector2i) -> void:
-	world_size = new_size
-	
+func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
+	return Vector2i(world_x % CHUNK_SIZE, world_y % CHUNK_SIZE)
+
+func load_chunks() -> void:
 	chunks = []
 	
 	@warning_ignore_start("integer_division")
-	for x in range(roundi(world_size.x / CHUNK_SIZE)):
-		for y in range(roundi(world_size.y / CHUNK_SIZE)):
+	for x in range(roundi(Globals.world_size.x / CHUNK_SIZE)):
+		for y in range(roundi(Globals.world_size.y / CHUNK_SIZE)):
 			add_chunk()
 	@warning_ignore_restore("integer_division")
 
@@ -39,7 +39,7 @@ func _get_tile(world_x: int, world_y: int) -> int:
 
 func get_wall(world_x: int, world_y: int) -> int:
 	# check bounds
-	if world_x < 0 or world_x >= world_size.x or world_y < 0 or world_y >= world_size.y:
+	if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
 		return 0
 	
 	var tile := _get_tile(world_x, world_y)
@@ -49,7 +49,7 @@ func get_wall(world_x: int, world_y: int) -> int:
 
 func get_block(world_x: int, world_y: int) -> int:
 	# check bounds
-	if world_x < 0 or world_x >= world_size.x or world_y < 0 or world_y >= world_size.y:
+	if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
 		return 0
 	
 	var tile := _get_tile(world_x, world_y)
@@ -79,7 +79,7 @@ func get_block_in_chunk(chunk: PackedInt32Array, x: int, y: int) -> int:
 
 func set_wall(world_x: int, world_y: int, wall_id: int) -> void:
 	# check bounds
-	if world_x < 0 or world_x >= world_size.x or world_y < 0 or world_y >= world_size.y:
+	if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
 		return
 	
 	var chunk := get_chunk_from_world(world_x, world_y)
@@ -94,7 +94,7 @@ func set_wall(world_x: int, world_y: int, wall_id: int) -> void:
 
 func set_block(world_x: int, world_y: int, block_id: int) -> void:
 	# check bounds
-	if world_x < 0 or world_x >= world_size.x or world_y < 0 or world_y >= world_size.y:
+	if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
 		return
 	
 	var chunk := get_chunk_from_world(world_x, world_y)
@@ -144,7 +144,7 @@ func add_chunk() -> void:
 func get_chunk(x: int, y: int) -> PackedInt32Array:
 	if multiplayer.is_server():
 		@warning_ignore("integer_division")
-		return chunks[x + y * (world_size.y / CHUNK_SIZE)]
+		return chunks[x + y * (Globals.world_size.y / CHUNK_SIZE)]
 	else:
 		return chunk_map.get(Vector2i(x, y))
 
@@ -155,5 +155,13 @@ func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	@warning_ignore_restore("integer_division")
 	
 	return get_chunk(chunk_x, chunk_y)
+
+func create_chunk_object(x: int, y: int) -> void:
+	var chunk := preload("uid://m5kcmqx3t3dm").instantiate() as WorldChunk
+	chunk.chunk_pos = Vector2i(x, y)
+	
+	chunk.load_from_data()
+	
+	get_tree().current_scene.get_node(^'tiles').add_child(chunk)
 
 #endregion

@@ -5,6 +5,9 @@ extends WorldGenPass
 
 
 # --- Functions --- #
-func perform_pass(gen: WorldGeneration) -> void:
+func get_pass_name() -> String:
+	return "Spawning Spawn"
+
+func perform_pass(_gen: WorldGeneration) -> void:
 	# sets the world spawn position
-	gen.world_spawn = gen.world_size / 2.0
+	Globals.world_spawn = Globals.world_size / 2.0

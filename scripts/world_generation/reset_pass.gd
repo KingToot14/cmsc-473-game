@@ -5,6 +5,9 @@ extends WorldGenPass
 
 
 # --- Functions --- #
-func perform_pass(gen: WorldGeneration) -> void:
+func get_pass_name() -> String:
+	return "Preparing World"
+
+func perform_pass(_gen: WorldGeneration) -> void:
 	# setup tile manager
-	TileManager.set_world_size(gen.world_size)
+	TileManager.load_chunks()

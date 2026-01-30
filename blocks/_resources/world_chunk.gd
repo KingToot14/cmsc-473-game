@@ -27,9 +27,9 @@ const CONNECTION_MAP = {
 var _dummy = _randomize_chunk
 
 # --- Functions --- #
-func _ready() -> void:
+#func _ready() -> void:
 	#load_from_data()
-	_randomize_chunk()
+	#_randomize_chunk()
 
 #region Tile Management
 func calculate_connections(x: int, y: int, is_wall := false) -> int:

@@ -1,7 +1,8 @@
 extends Node
 
 # --- Variables --- #
-
+var world_size := Vector2i(160, 160)
+var world_spawn: Vector2i
 
 # --- Functions --- #
 func parse_arguments() -> Dictionary:

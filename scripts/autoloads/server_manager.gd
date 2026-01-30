@@ -16,6 +16,8 @@ func _ready() -> void:
 		get_tree().current_scene.get_node(^'world_generation').generate_world()
 		
 		start_server()
+	else:
+		get_tree().current_scene.get_node(^'join_ui').show()
 
 #region Server Connections
 func start_server() -> Error:
@@ -63,7 +65,8 @@ func _on_player_connect(id: int) -> void:
 	player.name = "player_%s" % id
 	player.owner_id = id
 	
-	player.position = Vector2(randf_range(20.0, 460.0), randf_range(20.0, 250.0))
+	player.spawn_point = Globals.world_spawn
+	player.position = Globals.world_spawn
 	
 	get_tree().current_scene.get_node(^'entities').add_child(player)
 

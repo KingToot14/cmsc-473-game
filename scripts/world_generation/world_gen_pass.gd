@@ -16,6 +16,9 @@ func set_restricted_seeds(seeds: Array[String]) -> WorldGenPass:
 	
 	return self
 
+func get_pass_name() -> String:
+	return ""
+
 func start_pass(gen: WorldGeneration) -> void:
 	# check seed restrictions
 	if not allowed_seeds.is_empty() and gen.logical_seed not in allowed_seeds:
@@ -23,6 +26,9 @@ func start_pass(gen: WorldGeneration) -> void:
 	
 	if not restricted_seeds.is_empty() and gen.logical_seed in restricted_seeds:
 		return
+	
+	# debugging
+	print("[Wizbowo's Conquest] Pass: %s" % get_pass_name())
 	
 	# perform pass
 	perform_pass(gen)
