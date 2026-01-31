@@ -1,7 +1,12 @@
 class_name WorldGenPass
 extends RefCounted
 
+# --- Signals --- #
+signal done_with_pass()
+
 # --- Variables --- #
+var running := false
+
 var allowed_seeds = []
 var restricted_seeds = []
 
@@ -29,9 +34,14 @@ func start_pass(gen: WorldGeneration) -> void:
 	
 	# debugging
 	print("[Wizbowo's Conquest] Pass: %s" % get_pass_name())
+	running = true
 	
 	# perform pass
 	perform_pass(gen)
 
 func perform_pass(_gen: WorldGeneration) -> void:
-	return
+	exit_pass()
+
+func exit_pass() -> void:
+	running = false
+	done_with_pass.emit()

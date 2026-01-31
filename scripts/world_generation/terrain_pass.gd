@@ -17,6 +17,8 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	
 	for x in range(Globals.world_size.x):
 		fill_column(x, surface_depth, underground_depth)
+	
+	exit_pass()
 
 func fill_column(x: int, surface_depth: int, underground_depth: int) -> void:
 	for y in range(Globals.world_size.y):

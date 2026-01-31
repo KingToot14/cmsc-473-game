@@ -145,7 +145,7 @@ func empty_chunk(chunk_x: int, chunk_y: int) -> void:
 		for y in range(CHUNK_SIZE):
 			tiles.append(0)
 	
-	chunks[chunk_x + chunk_y * roundi(Globals.world_chunks.x)] = tiles
+	chunks[chunk_x + chunk_y * Globals.world_chunks.x] = tiles
 
 func get_chunk(x: int, y: int) -> PackedInt32Array:
 	if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
@@ -154,7 +154,8 @@ func get_chunk(x: int, y: int) -> PackedInt32Array:
 	if multiplayer.is_server():
 		return chunks[x + y * (Globals.world_chunks.x)]
 	else:
-		return chunk_map.get(x | y << 20, PackedInt32Array())
+		var chunk = chunk_map.get(x | y << 20, PackedInt32Array())
+		return chunk
 
 func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	var chunk_x := floori(world_x / CHUNK_SIZE)
@@ -186,9 +187,9 @@ func create_chunk_object(x: int, y: int) -> WorldChunk:
 	chunk.chunk_pos = Vector2i(x, y)
 	chunk.position = Vector2(x * 8 * CHUNK_SIZE, y * 8 * CHUNK_SIZE)
 	
-	chunk.autotile_block_chunk()
-	
 	get_tree().current_scene.get_node(^'tiles').add_child(chunk)
+	
+	chunk.autotile_block_chunk()
 	
 	return chunk
 
@@ -213,8 +214,8 @@ func load_chunk_region(
 		var index := 0
 		var dirty: Array[WorldChunk] = []
 		
-		for x in range(max(0, start_x), start_x + width + 1):
-			for y in range(start_y, start_y + height + 1):
+		for x in range(max(0, start_x), min(Globals.world_chunks.x, start_x + width + 1)):
+			for y in range(start_y, min(Globals.world_chunks.x, start_y + height + 1)):
 				var chunk := new_chunks[index]
 				var map_index = x | y << 20
 				
@@ -231,6 +232,9 @@ func load_chunk_region(
 		
 		for chunk in dirty:
 			chunk.autotile_block_chunk()
+			
+			if chunk.processing:
+				await chunk.done_processing
 
 @warning_ignore_restore("integer_division")
 
@@ -243,8 +247,6 @@ func pack_chunks(start_x: int, start_y: int, end_x: int, end_y: int) -> PackedBy
 	for x in range(start_x, end_x + 1):
 		for y in range(start_y, end_y + 1):
 			packed.append_array(get_chunk(x, y).to_byte_array())
-	
-	print("Data: ", len(packed))
 	
 	return packed.compress(FileAccess.COMPRESSION_ZSTD)
 
