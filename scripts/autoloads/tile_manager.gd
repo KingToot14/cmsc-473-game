@@ -11,7 +11,17 @@ var chunks: Array[PackedInt32Array]:
 var chunk_map: Dictionary[int, PackedInt32Array] = {}
 var visual_chunks: Dictionary[int, WorldChunk] = {}
 
+var _get_chunk: Callable
+
 # --- Functions --- #
+func _ready() -> void:
+	var args := Globals.parse_arguments()
+	
+	if OS.has_feature('dedicated_server') or args.get('server', false):
+		_get_chunk = _get_chunk_server
+	else:
+		_get_chunk = _get_chunk_client
+
 #region Positions
 func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
@@ -147,15 +157,22 @@ func empty_chunk(chunk_x: int, chunk_y: int) -> void:
 	
 	chunks[chunk_x + chunk_y * Globals.world_chunks.x] = tiles
 
-func get_chunk(x: int, y: int) -> PackedInt32Array:
+func _get_chunk_server(x: int, y: int) -> PackedInt32Array:
 	if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
 		return PackedInt32Array()
 	
-	if multiplayer.is_server():
-		return chunks[x + y * (Globals.world_chunks.x)]
+	return chunks[x + y * (Globals.world_chunks.x)]
+
+func _get_chunk_client(x: int, y: int) -> PackedInt32Array:
+	var index := x | y << 20
+	
+	if index in chunk_map:
+		return chunk_map[index]
 	else:
-		var chunk = chunk_map.get(x | y << 20, PackedInt32Array())
-		return chunk
+		return PackedInt32Array()
+
+func get_chunk(x: int, y: int) -> PackedInt32Array:
+	return _get_chunk.call(x, y)
 
 func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
 	var chunk_x := floori(world_x / CHUNK_SIZE)

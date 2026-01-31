@@ -129,7 +129,7 @@ func autotile_block_chunk(check_neighbors := true) -> void:
 		for x in range(TileManager.CHUNK_SIZE):
 			variants[x + y * TileManager.CHUNK_SIZE] = calculate_connections(x, y)
 			checked += 1
-		if checked % 16 == 0:
+		if checked % 8 == 0:
 			await get_tree().process_frame
 	
 	# autotile self
@@ -186,15 +186,13 @@ func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int, check_n
 		for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
 			variants[x + y * TileManager.CHUNK_SIZE] = calculate_connections(x, y)
 			checked += 1
-		if checked % 16 == 0:
+		if checked % 8 == 0:
 			await get_tree().process_frame
 	
 	for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
 		for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
 			var tile := TileManager.get_block_in_chunk(chunk, x, y)
-			#var connections := calculate_connections(x, y)
 			
 			blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP[variants[x + y * TileManager.CHUNK_SIZE]])
-			#blocks.set_cell(Vector2i(x, y), tile, Vector2i.ZERO)
 
 #endregion
