@@ -16,13 +16,21 @@ func generate_world() -> void:
 	generating = true
 	
 	# perform passes
-	ResetPass.new().start_pass(self)
+	await run_pass(ResetPass.new())
 	
 	# create terrain
-	TerrainPass.new().start_pass(self)
+	await run_pass(TerrainPass.new())
 	
 	# cleanup
-	SpawnPass.new().start_pass(self)
+	await run_pass(SpawnPass.new())
 	
 	generating = false
 	done_generating.emit()
+
+func run_pass(gen_pass: WorldGenPass) -> void:
+	gen_pass.start_pass(self)
+	
+	if gen_pass.running:
+		await gen_pass.done_with_pass
+	
+	await get_tree().process_frame
