@@ -10,8 +10,6 @@ var current_chunk: Vector2i
 # --- Functions --- #
 func _ready() -> void:
 	if not multiplayer.is_server():
-		set_process(false)
-		
 		if len(TileManager.tiles) == 0:
 			TileManager.load_chunks()
 		
@@ -31,27 +29,30 @@ func _process(_delta: float) -> void:
 	)
 	
 	if new_chunk != current_chunk and new_chunk.distance_squared_to(current_chunk) < 2:
-		send_boundary_cross(new_chunk - current_chunk)
+		if multiplayer.is_server():
+			send_boundary(new_chunk - current_chunk)
+		else:
+			clear_boundary(current_chunk - new_chunk)
 	
 	current_chunk = new_chunk
 
-func send_boundary_cross(boundary: Vector2i) -> void:
+func clear_boundary(boundary: Vector2i) -> void:
 	var center_chunk := TileManager.world_to_chunk(
 		roundi(player.position.x / 8),
 		roundi(player.position.y / 8)
 	)
 	var start_chunk := (center_chunk - LOAD_RANGE)
-	var end_chunk := center_chunk + LOAD_RANGE
+	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
 	
 	match boundary:
 		Vector2i(-1,  0):
-			end_chunk.x = start_chunk.x
+			end_chunk.x = start_chunk.x + 1
 		Vector2i( 1,  0):
-			start_chunk.x = end_chunk.x
+			start_chunk.x = end_chunk.x - 1
 		Vector2i( 0, -1):
-			end_chunk.y = start_chunk.y
+			end_chunk.y = start_chunk.y + 1
 		Vector2i( 0,  1):
-			start_chunk.y = end_chunk.y
+			start_chunk.y = end_chunk.y - 1
 	
 	# clamp positions
 	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
@@ -59,14 +60,50 @@ func send_boundary_cross(boundary: Vector2i) -> void:
 	end_chunk.x = clampi(end_chunk.x, 0, Globals.world_chunks.x)
 	end_chunk.y = clampi(end_chunk.y, 0, Globals.world_chunks.y)
 	
+	var width  = end_chunk.x - start_chunk.x
+	var height = end_chunk.y - start_chunk.y
+	
+	start_chunk *= TileManager.CHUNK_SIZE
+	width *= TileManager.CHUNK_SIZE
+	height *= TileManager.CHUNK_SIZE
+	
+	Globals.world_map.clear_region(start_chunk.x, start_chunk.y, width, height)
+
+func send_boundary(boundary: Vector2i) -> void:
+	var center_chunk := TileManager.world_to_chunk(
+		roundi(player.position.x / 8),
+		roundi(player.position.y / 8)
+	)
+	var start_chunk := (center_chunk - LOAD_RANGE)
+	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
+	
+	match boundary:
+		Vector2i(-1,  0):
+			end_chunk.x = start_chunk.x + 1
+		Vector2i( 1,  0):
+			start_chunk.x = end_chunk.x - 1
+		Vector2i( 0, -1):
+			end_chunk.y = start_chunk.y + 1
+		Vector2i( 0,  1):
+			start_chunk.y = end_chunk.y - 1
+	
+	# clamp positions
+	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
+	start_chunk.y = clampi(start_chunk.y, 0, Globals.world_chunks.y)
+	end_chunk.x = clampi(end_chunk.x, 0, Globals.world_chunks.x)
+	end_chunk.y = clampi(end_chunk.y, 0, Globals.world_chunks.y)
+	
+	var width  = end_chunk.x - start_chunk.x
+	var height = end_chunk.y - start_chunk.y
+	
 	# pack data
 	var meta = (
 		(start_chunk.x << 0) |
 		(start_chunk.y << 10) |
-		((end_chunk.x - start_chunk.x) << 20) |
-		((end_chunk.y - start_chunk.y) << 30)
+		(width << 20) |
+		(height << 30)
 	)
-	var data := TileManager.pack_chunks(start_chunk.x, start_chunk.y, end_chunk.x, end_chunk.y)
+	var data := TileManager.pack_chunks(start_chunk.x, start_chunk.y, width, height)
 	
 	load_chunks.rpc_id(player.owner_id, meta, data)
 
@@ -76,7 +113,7 @@ func send_whole_area() -> void:
 		roundi(player.position.y / 8)
 	)
 	var start_chunk := (center_chunk - LOAD_RANGE)
-	var end_chunk := center_chunk + LOAD_RANGE
+	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
 	
 	# clamp positions
 	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)

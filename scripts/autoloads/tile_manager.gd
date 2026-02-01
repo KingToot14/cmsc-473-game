@@ -286,8 +286,6 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 		
 		packed.append_array(tiles.slice(x, x + width).to_byte_array())
 	
-	print(len(packed))
-	
 	return packed.compress(FileAccess.COMPRESSION_ZSTD)
 
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:

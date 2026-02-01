@@ -116,11 +116,18 @@ func load_from_data() -> void:
 func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
 	
-	print(start_x, " | ", start_y)
-	
 	for y in range(height):
 		for x in range(width):
 			blocks.set_cell(Vector2i(start_x + x, start_y + y), TileManager.get_block(x, y), Vector2i(0, 0))
+
+func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
+	var blocks: TileMapLayer = $'blocks'
+	
+	print("Clearing Region")
+	
+	for y in range(height):
+		for x in range(width):
+			blocks.set_cell(Vector2i(start_x + x, start_y + y), 0, Vector2i(0, 0))
 
 func autotile_block_chunk(check_neighbors := true) -> void:
 	processing = true
