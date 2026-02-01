@@ -4,18 +4,13 @@ extends Node
 const CHUNK_SIZE := 16
 const TILE_SIZE := 8
 
+const MASK_WALL  := ((2**10 - 1) << 10)
+const MASK_BLOCK := ((2**10 - 1) << 0)
+
 var tiles: PackedInt32Array
 var visual_chunks: Dictionary[int, WorldChunk] = {}
 
 # --- Functions --- #
-#func _ready() -> void:
-	#var args := Globals.parse_arguments()
-	#
-	#if OS.has_feature('dedicated_server') or args.get('server', false):
-		#_get_chunk = _get_chunk_server
-	#else:
-		#_get_chunk = _get_chunk_client
-
 #region Positions
 func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
@@ -46,7 +41,7 @@ func get_wall(x: int, y: int) -> int:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & (2**10 - 1)
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
 	
 	## check bounds
 	#if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
@@ -63,7 +58,7 @@ func get_block(x: int, y: int) -> int:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & (2**10 - 1)
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
 	
 	# check bounds
 	#if world_x < 0 or world_x >= Globals.world_size.x or world_y < 0 or world_y >= Globals.world_size.y:
@@ -106,7 +101,7 @@ func set_wall(x: int, y: int, wall_id: int) -> void:
 		return
 	
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~((2**10 - 1) << 10)
+	tiles[x + y * Globals.world_size.x] &= ~MASK_WALL
 	tiles[x + y * Globals.world_size.x] |= (wall_id << 10)
 	
 	# check bounds
@@ -123,13 +118,18 @@ func set_wall(x: int, y: int, wall_id: int) -> void:
 	## set wall id
 	#chunk[x + y * CHUNK_SIZE] |= (wall_id << 10)
 
+func set_block_unsafe(x: int, y: int, block_id: int) -> void:
+	# clear tile id
+	tiles[x + y * Globals.world_size.x] &= ~MASK_BLOCK
+	tiles[x + y * Globals.world_size.x] |= (block_id << 0)
+
 func set_block(x: int, y: int, block_id: int) -> void:
 	# check bounds
 	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
 		return
 	
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~((2**10 - 1) << 0)
+	tiles[x + y * Globals.world_size.x] &= ~MASK_BLOCK
 	tiles[x + y * Globals.world_size.x] |= (block_id << 0)
 	
 	#var chunk := get_chunk_from_world(world_x, world_y)
@@ -289,9 +289,16 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 	return packed.compress(FileAccess.COMPRESSION_ZSTD)
 
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
+	var processed := 0
+	
 	for y in range(height):
 		for x in range(width):
-			set_block(x, y, data[x + y * width])
+			set_block_unsafe(start_x + x, start_y + y, data[x + y * width])
+			processed += 1
+			
+			if processed >= 100:
+				processed = 0
+				await get_tree().process_frame
 	
 	Globals.world_map.load_region(start_x, start_y, width, height)
 
