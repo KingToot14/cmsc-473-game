@@ -12,4 +12,3 @@ tile_set = ExtResource("2_otdea")
 
 [node name="blocks" type="TileMapLayer" parent="." unique_id=784105609]
 tile_set = ExtResource("2_otdea")
-navigation_enabled = false
