@@ -113,7 +113,63 @@ func load_from_data() -> void:
 		for y in range(TileManager.CHUNK_SIZE):
 			print(TileManager.get_block_in_chunk(chunk, x, y))
 
-func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
+func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
+	# calculate variations
+	var variations := PackedByteArray()
+	variations.resize(width * height)
+	var index := 0
+	
+	var start := Time.get_ticks_usec()
+	
+	var prev := TileManager.get_row(start_x - 1, start_y - 1, width + 2)
+	var curr := TileManager.get_row(start_x - 1, start_y + 0, width + 2)
+	var next := TileManager.get_row(start_x - 1, start_y + 1, width + 2)
+	
+	for y in range(height):
+		for x in range(width):
+			var value := 0
+			
+			if prev[x] > 0:
+				value += 1
+			if curr[x - 1] > 0:
+				value += 2
+			if curr[x + 1] > 0:
+				value += 4
+			if next[x] > 0:
+				value += 8
+			
+			# diagonal neighbors
+			if value & 1 and value & 2 and prev[x - 1] > 0:
+				value += 16
+			if value & 1 and value & 4 and prev[x + 1] > 0:
+				value += 32
+			if value & 8 and value & 2 and next[x - 1] > 0:
+				value += 64
+			if value & 8 and value & 4 and next[x + 1] > 0:
+				value += 128
+			
+			variations[index] = value
+			index += 1
+		
+		# update window
+		prev = curr
+		curr = next
+		next = TileManager.get_row(start_x - 1, start_y + y + 1, width + 2)
+	
+	# apply tiles
+	var blocks = $'blocks'
+	index = 0
+	
+	for y in range(height):
+		for x in range(width):
+			blocks.set_cell(
+				Vector2i(start_x + x, start_y + y),
+				TileManager.get_block(start_x + x, start_y + y),
+				CONNECTION_MAP.get(variations[index])
+			)
+			index += 1
+
+func load_region(start_x: int, start_y: int, width: int, height: int, autotile := true) -> void:
 	var blocks: TileMapLayer = $'blocks'
 	
 	for y in range(height):
@@ -121,7 +177,11 @@ func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 			blocks.set_cell(
 				Vector2i(start_x + x, start_y + y),
 				TileManager.get_block(start_x + x, start_y + y),
-				Vector2i(0, 0))
+				Vector2i(0, 0)
+			)
+	
+	if autotile:
+		autotile_region(start_x, start_y, width, height)
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
@@ -184,33 +244,33 @@ func autotile_block_chunk(check_neighbors := true) -> void:
 	#
 	#chunk.autotile_region(start_x, start_y, end_x, end_y, false)
 
-func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int, check_neighbors := true) -> void:
-	var blocks: TileMapLayer = $'blocks'
-	var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
-	
-	if check_neighbors:
-		start_x -= 1
-		start_y += 1
-		end_x -= 1
-		end_y += 1
-	
-	# calculate variants
-	var variants = PackedByteArray()
-	var checked := 0
-	variants.resize(TileManager.CHUNK_SIZE * TileManager.CHUNK_SIZE)
-	
-	for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
-		for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
-			variants[x + y * TileManager.CHUNK_SIZE] = calculate_connections(x, y)
-			checked += 1
-		if checked % 8 == 0:
-			await get_tree().process_frame
-	
-	for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
-		for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
-			pass
-			#var tile := TileManager.get_block_in_chunk(chunk, x, y)
-			#
-			#blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP[variants[x + y * TileManager.CHUNK_SIZE]])
+#func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int, check_neighbors := true) -> void:
+	#var blocks: TileMapLayer = $'blocks'
+	#var chunk = TileManager.get_chunk(chunk_pos.x, chunk_pos.y)
+	#
+	#if check_neighbors:
+		#start_x -= 1
+		#start_y += 1
+		#end_x -= 1
+		#end_y += 1
+	#
+	## calculate variants
+	#var variants = PackedByteArray()
+	#var checked := 0
+	#variants.resize(TileManager.CHUNK_SIZE * TileManager.CHUNK_SIZE)
+	#
+	#for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
+		#for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
+			#variants[x + y * TileManager.CHUNK_SIZE] = calculate_connections(x, y)
+			#checked += 1
+		#if checked % 8 == 0:
+			#await get_tree().process_frame
+	#
+	#for x in range(max(start_x, 0), min(end_x, TileManager.CHUNK_SIZE)):
+		#for y in range(max(start_y, 0), min(end_y, TileManager.CHUNK_SIZE)):
+			#pass
+			##var tile := TileManager.get_block_in_chunk(chunk, x, y)
+			##
+			##blocks.set_cell(Vector2i(x, y), tile, CONNECTION_MAP[variants[x + y * TileManager.CHUNK_SIZE]])
 
 #endregion
