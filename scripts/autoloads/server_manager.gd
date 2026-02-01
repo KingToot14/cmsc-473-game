@@ -12,8 +12,13 @@ func _ready() -> void:
 		# disable ui for servers
 		get_tree().current_scene.get_node(^'join_ui').hide()
 		
+		# get seed
+		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
+		var world_seed = args.get('seed', randi())
+		
 		# start world generation
-		get_tree().current_scene.get_node(^'world_generation').generate_world()
+		world_gen.set_seed(world_seed)
+		world_gen.generate_world()
 		
 		start_server()
 	else:
