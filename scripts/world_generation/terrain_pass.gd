@@ -15,6 +15,8 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	var surface_depth := floori(Globals.world_size.y * SURFACE_HEIGHT_TARGET)
 	var underground_depth := floori(surface_depth + Globals.world_size.y * UNDERGROUND_OFFSET)
 	
+	print(surface_depth)
+	
 	for x in range(Globals.world_size.x):
 		fill_column(x, surface_depth, underground_depth)
 	

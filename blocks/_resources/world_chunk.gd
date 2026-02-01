@@ -119,16 +119,20 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	variations.resize(width * height)
 	var index := 0
 	
-	var start := Time.get_ticks_usec()
-	
 	var prev := TileManager.get_row(start_x - 1, start_y - 1, width + 2)
 	var curr := TileManager.get_row(start_x - 1, start_y + 0, width + 2)
 	var next := TileManager.get_row(start_x - 1, start_y + 1, width + 2)
 	
 	for y in range(height):
-		for x in range(width):
+		for x in range(1, width + 1):
 			var value := 0
 			
+			# skip air
+			if curr[x] <= 0:
+				variations[index] = 0
+				index += 1
+				continue
+
 			if prev[x] > 0:
 				value += 1
 			if curr[x - 1] > 0:
@@ -147,15 +151,18 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 				value += 64
 			if value & 8 and value & 4 and next[x + 1] > 0:
 				value += 128
-			
+
 			variations[index] = value
 			index += 1
+			
+			if index % 128 == 0:
+				await get_tree().process_frame
 		
 		# update window
 		prev = curr
 		curr = next
-		next = TileManager.get_row(start_x - 1, start_y + y + 1, width + 2)
-	
+		next = TileManager.get_row(start_x - 1, start_y + y + 2, width + 2)
+
 	# apply tiles
 	var blocks = $'blocks'
 	index = 0
@@ -171,7 +178,7 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 
 func load_region(start_x: int, start_y: int, width: int, height: int, autotile := true) -> void:
 	var blocks: TileMapLayer = $'blocks'
-	
+
 	for y in range(height):
 		for x in range(width):
 			blocks.set_cell(
@@ -181,7 +188,7 @@ func load_region(start_x: int, start_y: int, width: int, height: int, autotile :
 			)
 	
 	if autotile:
-		autotile_region(start_x, start_y, width, height)
+		autotile_region(start_x - 1, start_y - 1, width + 2, height + 2)
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
