@@ -28,13 +28,10 @@ func _process(_delta: float) -> void:
 		roundi(player.position.y / 8.0)
 	)
 	
-	if new_chunk != current_chunk and new_chunk.distance_squared_to(current_chunk) < 2:
-		if multiplayer.is_server():
+	if multiplayer.is_server():
+		if new_chunk != current_chunk and new_chunk.distance_squared_to(current_chunk) <= 6:
 			send_boundary(new_chunk - current_chunk)
-		else:
-			clear_boundary(current_chunk - new_chunk)
-	
-	current_chunk = new_chunk
+			current_chunk = new_chunk
 
 func clear_boundary(boundary: Vector2i) -> void:
 	var center_chunk := TileManager.world_to_chunk(
@@ -124,6 +121,9 @@ func send_whole_area() -> void:
 	var width  = end_chunk.x - start_chunk.x
 	var height = end_chunk.y - start_chunk.y
 	
+	if width == 0 or height == 0:
+		return
+	
 	# pack data
 	var meta = (
 		(start_chunk.x << 0) |
@@ -164,24 +164,3 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 			offset += 4
 	
 	TileManager.load_region(tiles, start_x, start_y, width, height)
-	
-	#while offset < len(data):
-		#chunks.append(
-			#data.slice(offset, offset + TileManager.CHUNK_SIZE * TileManager.CHUNK_SIZE * 4).to_int32_array()
-		#)
-		#offset += TileManager.CHUNK_SIZE * TileManager.CHUNK_SIZE * 4
-	#
-	#TileManager.load_chunk_region(chunks, start_x, start_y, width, height)
-
-#func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedByteArray:
-	#var packed = PackedByteArray()
-	#var offset := 0
-	#
-	#packed.resize(width * height * 4)
-	#
-	#for y in range(height):
-		#for x in range(width):
-			#packed.encode_u32(offset, tiles[start_x + x + (start_y + y) * Globals.world_size.x])
-			#offset += 4
-	#
-	#return packed.compress(FileAccess.COMPRESSION_ZSTD)

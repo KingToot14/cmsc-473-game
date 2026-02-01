@@ -8,7 +8,6 @@ const MASK_WALL  := ((2**10 - 1) << 10)
 const MASK_BLOCK := ((2**10 - 1) << 0)
 
 var tiles: PackedInt32Array
-var visual_chunks: Dictionary[int, WorldChunk] = {}
 
 # --- Functions --- #
 #region Positions
@@ -69,9 +68,6 @@ func get_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array
 	var underflow := 0
 	var overflow := 0
 	
-	#start_x = max(0, start_x)
-	#width = min(world_size.x, start_x + width) - start_x
-	
 	if start_x < 0:
 		underflow = -start_x
 		start_x = 0
@@ -92,65 +88,9 @@ func get_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array
 #endregion
 
 #region Chunk Access
-@warning_ignore_start("integer_division")
-#func _get_chunk_server(x: int, y: int) -> PackedInt32Array:
-	#if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
-		#return PackedInt32Array()
-	#
-	#return chunks[x + y * (Globals.world_chunks.x)]
-#
-#func _get_chunk_client(x: int, y: int) -> PackedInt32Array:
-	#var index := x | y << 20
-	#
-	#if index in chunk_map:
-		#return chunk_map[index]
-	#else:
-		#return PackedInt32Array()
-#
-#func get_chunk(x: int, y: int) -> PackedInt32Array:
-	#return _get_chunk.call(x, y)
-#
-#func get_chunk_from_world(world_x: int, world_y: int) -> PackedInt32Array:
-	#var chunk_x := floori(world_x / CHUNK_SIZE)
-	#var chunk_y := floori(world_y / CHUNK_SIZE)
-	#
-	#return get_chunk(chunk_x, chunk_y)
-
-func get_visual_chunk(x: int, y: int) -> WorldChunk:
-	return visual_chunks.get(x | y << 20)
-
-#func set_chunk(x: int, y: int, data: PackedInt32Array) -> void:
-	#if x < 0 or x >= Globals.world_chunks.x or y < 0 or y >= Globals.world_chunks.y:
-		#return
-	#
-	#if multiplayer.is_server():
-		#chunks[x + y * (Globals.world_chunks.x)] = data
-	#else:
-		#chunk_map[x | y << 20] = data
-#
-#func set_chunk_from_world(world_x: int, world_y: int, data: PackedInt32Array) -> void:
-	#var chunk_x := floori(world_x / CHUNK_SIZE)
-	#var chunk_y := floori(world_y / CHUNK_SIZE)
-	#
-	#set_chunk(chunk_x, chunk_y, data)
-
-func create_chunk_object(x: int, y: int) -> WorldChunk:
-	var chunk := preload("uid://m5kcmqx3t3dm").instantiate() as WorldChunk
-	chunk.name = "chunk_%s_%s" % [x, y]
-	chunk.chunk_pos = Vector2i(x, y)
-	chunk.position = Vector2(x * 8 * CHUNK_SIZE, y * 8 * CHUNK_SIZE)
-	
-	get_tree().current_scene.get_node(^'tiles').add_child(chunk)
-	
-	chunk.autotile_block_chunk()
-	
-	return chunk
-
 func load_chunks() -> void:
 	tiles = []
 	tiles.resize(Globals.world_size.x * Globals.world_size.y)
-
-@warning_ignore_restore("integer_division")
 
 #endregion
 
