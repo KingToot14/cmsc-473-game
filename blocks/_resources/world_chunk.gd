@@ -106,7 +106,7 @@ func load_region(start_x: int, start_y: int, width: int, height: int, autotile :
 			blocks.set_cell(
 				Vector2i(start_x + x, start_y + y),
 				TileManager.get_block(start_x + x, start_y + y),
-				Vector2i(0, 0)
+				Vector2i(2, 2)
 			)
 	
 	if autotile:

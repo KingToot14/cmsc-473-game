@@ -17,8 +17,10 @@ const SURFACE_HEIGHT_TARGET := 0.23
 const SURFACE_HEIGHT_LOW := 0.26 
 const UNDERGROUND_OFFSET := 0.20
 
+const BEACH_PADDING := 300
+
 var feature := TerrainFeature.FLAT
-var feature_timer := 300
+var feature_timer := BEACH_PADDING
 
 var surface_depth := 0
 var underground_depth := 0
@@ -87,17 +89,20 @@ func perform_pass(gen: WorldGeneration) -> void:
 			feature_timer = 0
 		
 		# store history for later
-		if (world_size.x - x) < 800 and (world_size.x - x) >= 300:
-			surface_history[world_size.x - x - 300] = surface_depth
+		if (world_size.x - x) < 800 and (world_size.x - x) >= BEACH_PADDING:
+			surface_history[world_size.x - x - BEACH_PADDING] = surface_depth
 		
 		# snap to flat near beach
-		if (world_size.x - x) == 300:
+		if (world_size.x - x) == BEACH_PADDING:
 			feature = TerrainFeature.FLAT
-			feature_timer = 300
+			feature_timer = BEACH_PADDING
 			surface_depth = min(surface_depth, floori(world_size.y * SURFACE_HEIGHT_TARGET))
+			
+			if surface_history[0] > surface_depth:
+				smooth_terrain()
 		
 		# adjust underground height
-		underground_depth += randi_range(-2, 2)
+		underground_depth += gen.rng.randi_range(-2, 2)
 		
 		# keep underground close to surface
 		if (underground_depth - surface_depth) <= floori(world_size.y * 0.06):
@@ -126,7 +131,11 @@ func fill_column(x: int) -> void:
 			TileManager.set_block(x, y, 3)
 
 func refill_column(x: int, surface: int) -> void:
-	pass
+	for y in range(Globals.world_size.y):
+		if y < surface:
+			TileManager.set_block(x, y, 0)
+		elif TileManager.get_block(x, y) != 3:
+			TileManager.set_block(x, y, 2)
 
 func adjust_surface_height(gen: WorldGeneration) -> void:
 	var offset := 0
@@ -161,4 +170,17 @@ func adjust_surface_height(gen: WorldGeneration) -> void:
 	surface_depth += offset
 
 func smooth_terrain() -> void:
-	pass
+	# smooth terrain towards target height
+	for i in range(floori(len(surface_history) / 2.0)):
+		for x in range(len(surface_history) - i * 2):
+			surface_history[x] -= 1
+			
+			if surface_history[x] <= surface_depth:
+				break
+		
+		if surface_history[0] <= surface_depth:
+			break
+	
+	# refill columns in history
+	for x in range(len(surface_history)):
+		refill_column(Globals.world_size.x - BEACH_PADDING - x, surface_history[x])
