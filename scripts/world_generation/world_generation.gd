@@ -57,6 +57,7 @@ func generate_world() -> void:
 	await run_pass(SmoothPass.new())
 	
 	# cleanup
+	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
 	
 	generating = false
