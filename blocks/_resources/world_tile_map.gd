@@ -1,5 +1,4 @@
-@tool
-class_name WorldChunk
+class_name WorldTileMap
 extends Node2D
 
 # --- Variables --- #
