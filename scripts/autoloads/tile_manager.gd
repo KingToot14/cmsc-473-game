@@ -4,6 +4,7 @@ extends Node
 const CHUNK_SIZE := 16
 const TILE_SIZE := 8
 
+const MASK_TEN := (20**10 - 1)
 const MASK_WALL  := ((2**10 - 1) << 10)
 const MASK_BLOCK := ((2**10 - 1) << 0)
 
@@ -26,7 +27,7 @@ func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
 #region Tile Access
 func get_wall_unsafe(x: int, y: int) -> int:
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
 
 func get_wall(x: int, y: int) -> int:
 	# check bounds
@@ -34,11 +35,11 @@ func get_wall(x: int, y: int) -> int:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
 
 func get_block_unsafe(x: int, y: int) -> int:
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
 
 func get_block(x: int, y: int) -> int:
 	# check bounds
@@ -46,7 +47,7 @@ func get_block(x: int, y: int) -> int:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
 
 func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
 	# clear tile id
