@@ -24,6 +24,10 @@ func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
 #endregion
 
 #region Tile Access
+func get_wall_unsafe(x: int, y: int) -> int:
+	# get wall id (10 to 19)
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
+
 func get_wall(x: int, y: int) -> int:
 	# check bounds
 	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
@@ -32,6 +36,10 @@ func get_wall(x: int, y: int) -> int:
 	# get wall id (10 to 19)
 	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
 
+func get_block_unsafe(x: int, y: int) -> int:
+	# get block id (0 to 9)
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
+
 func get_block(x: int, y: int) -> int:
 	# check bounds
 	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
@@ -39,6 +47,11 @@ func get_block(x: int, y: int) -> int:
 	
 	# get block id (0 to 9)
 	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
+
+func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
+	# clear tile id
+	tiles[x + y * Globals.world_size.x] &= ~MASK_WALL
+	tiles[x + y * Globals.world_size.x] |= (wall_id << 10)
 
 func set_wall(x: int, y: int, wall_id: int) -> void:
 	# check bounds
@@ -122,7 +135,7 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			set_block_unsafe(start_x + x, start_y + y, data[x + y * width])
 			processed += 1
 			
-			if processed >= 100:
+			if processed >= 128:
 				processed = 0
 				await get_tree().process_frame
 	

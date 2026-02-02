@@ -125,7 +125,24 @@ spawn_path = NodePath("../entities")
 
 [node name="entities" type="Node2D" parent="." unique_id=1430324138]
 
+[node name="background" type="Node2D" parent="." unique_id=1195479764]
+
+[node name="sky" type="Parallax2D" parent="background" unique_id=698714807]
+repeat_size = Vector2(480, 270)
+repeat_times = 3
+
+[node name="fill" type="ColorRect" parent="background/sky" unique_id=1057822045]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.29803923, 0.6862745, 0.8784314, 1)
+
 [node name="tiles" type="Node2D" parent="." unique_id=1191194627]
+z_index = 50
 script = ExtResource("3_jyhfs")
 
 [node name="walls" type="TileMapLayer" parent="tiles" unique_id=1336934811]
