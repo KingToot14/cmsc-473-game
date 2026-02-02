@@ -129,16 +129,34 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
+	var dirty_y := start_y + height
+	var dirty_x := start_x + width
+	var dirty_height := 0
+	var dirty_width := 0
 	
 	for y in range(height):
 		for x in range(width):
-			set_block_unsafe(start_x + x, start_y + y, data[x + y * width])
-			processed += 1
+			var new_block = data[x + y * width]
+			
+			if new_block != get_block_unsafe(start_x + x, start_y + y):
+				set_block_unsafe(start_x + x, start_y + y, new_block)
+				
+				# shrink update region
+				dirty_x = min(dirty_x, start_x + x)
+				dirty_y = min(dirty_y, start_y + y)
+				dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
+				dirty_height = start_y + y - dirty_y + 1
+				
+				processed += 1
 			
 			if processed >= 128:
 				processed = 0
 				await get_tree().process_frame
 	
-	Globals.world_map.load_region(start_x, start_y, width, height)
+	# only change updated tiles
+	if dirty_width == 0 or dirty_height == 0:
+		return
+	
+	Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion

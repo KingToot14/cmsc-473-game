@@ -115,8 +115,6 @@ func load_region(start_x: int, start_y: int, width: int, height: int, autotile :
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
 	
-	print("Clearing region")
-	
 	for y in range(height):
 		for x in range(width):
 			blocks.set_cell(Vector2i(start_x + x, start_y + y), 0, Vector2i(0, 0))

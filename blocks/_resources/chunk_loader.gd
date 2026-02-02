@@ -29,7 +29,8 @@ func _process(_delta: float) -> void:
 	)
 	
 	if multiplayer.is_server():
-		if new_chunk != current_chunk and new_chunk.distance_squared_to(current_chunk) <= 6:
+		var diff := (new_chunk - current_chunk).abs()
+		if diff.x + diff.y == 1:
 			send_boundary(new_chunk - current_chunk)
 			current_chunk = new_chunk
 
@@ -132,6 +133,9 @@ func send_whole_area() -> void:
 		(height << 30)
 	)
 	var data := TileManager.pack_chunks(start_chunk.x, start_chunk.y, width, height)
+	
+	if len(data) == 0:
+		return
 	
 	load_chunks.rpc_id(player.owner_id, meta, data)
 
