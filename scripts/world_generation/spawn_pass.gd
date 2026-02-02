@@ -19,5 +19,3 @@ func perform_pass(_gen: WorldGeneration) -> void:
 		spawn_position.y += 1
 	
 	Globals.world_spawn = spawn_position
-	
-	exit_pass()

@@ -26,5 +26,3 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		# update window
 		above = TileManager.get_row(0, y, world_size.x)
-	
-	exit_pass()

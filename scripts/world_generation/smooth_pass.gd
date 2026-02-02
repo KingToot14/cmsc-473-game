@@ -17,5 +17,3 @@ func perform_pass(_gen: WorldGeneration) -> void:
 				# remove single blocks
 				if TileManager.get_block_unsafe(x - 1, y) <= 0 and TileManager.get_block_unsafe(x + 1, y) <= 0:
 					TileManager.set_block_unsafe(x, y, 0)
-	
-	exit_pass()

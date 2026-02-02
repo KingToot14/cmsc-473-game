@@ -11,5 +11,3 @@ func get_pass_name() -> String:
 func perform_pass(_gen: WorldGeneration) -> void:
 	# setup tile manager
 	TileManager.load_chunks()
-	
-	exit_pass()

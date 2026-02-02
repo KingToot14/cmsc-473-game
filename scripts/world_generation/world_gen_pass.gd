@@ -38,6 +38,9 @@ func start_pass(gen: WorldGeneration) -> void:
 	
 	# perform pass
 	perform_pass(gen)
+	
+	# exit
+	exit_pass()
 
 func perform_pass(_gen: WorldGeneration) -> void:
 	exit_pass()
