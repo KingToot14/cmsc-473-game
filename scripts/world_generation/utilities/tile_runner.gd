@@ -9,8 +9,8 @@ enum ReplaceMode {
 }
 
 # --- Variables --- #
-var size := 0
-var steps := 0
+var size := 0.0
+var steps := 0.0
 var replace_tile := 0
 var replace_mode := ReplaceMode.REPLACE
 
@@ -24,10 +24,10 @@ var restricted_tiles: Array[int] = []
 var size_decay := 1.0
 
 # --- Functions --- #
-func _init(new_size: int, new_steps: int, x: int, y: int, tile_id: int) -> void:
+func _init(new_size: float, new_steps: float, x: int, y: int, tile_id: int) -> void:
 	initialize(new_size, new_steps, x, y, tile_id)
 
-func initialize(new_size: int, new_steps: int, x: int, y: int, tile_id: int) -> void:
+func initialize(new_size: float, new_steps: float, x: int, y: int, tile_id: int) -> void:
 	size = new_size
 	steps = new_steps
 	position = Vector2(x, y)
@@ -75,9 +75,9 @@ func start(gen: WorldGeneration) -> void:
 	var curr_steps := steps
 	var curr_size := size
 	
-	while curr_size > 0 and curr_steps > 0:
+	while curr_size > 0.0 and curr_steps > 0.0:
 		@warning_ignore("integer_division")
-		curr_size = floori(size_decay * size * floori(curr_steps / steps)) + floori(size * (1.0 - size_decay))
+		curr_size = (size_decay * size * (curr_steps / steps)) + (size * (1.0 - size_decay))
 		curr_steps -= 1
 		
 		# calculate bounding box
