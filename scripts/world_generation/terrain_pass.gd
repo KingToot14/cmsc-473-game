@@ -106,9 +106,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		# keep underground close to surface
 		if (underground_depth - surface_depth) <= floori(world_size.y * 0.06):
-			underground_depth -= 1
-		if (underground_depth - surface_depth) >= floori(world_size.y * 0.30):
 			underground_depth += 1
+		if (underground_depth - surface_depth) >= floori(world_size.y * 0.30):
+			underground_depth -= 1
 		
 		# apply depth
 		fill_column(x)

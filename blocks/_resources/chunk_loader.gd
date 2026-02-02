@@ -30,7 +30,7 @@ func _process(_delta: float) -> void:
 	
 	if multiplayer.is_server():
 		var diff := (new_chunk - current_chunk).abs()
-		if diff.x + diff.y == 1:
+		if diff.x + diff.y >= 1:
 			send_boundary(new_chunk - current_chunk)
 			current_chunk = new_chunk
 

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dyaogs04gmmc0" path="res://ui/main_menu/join_ui.gd" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bv73vyepe1qva" path="res://scripts/world_generation/world_generation.gd" id="2_0wfyh"]
-[ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_chunk.gd" id="3_jyhfs"]
+[ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_tile_map.gd" id="3_jyhfs"]
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/main_set.tres" id="4_tbgi4"]
 
 [node name="main" type="Node2D" unique_id=1976494311]

@@ -4,7 +4,8 @@ extends Node
 # --- Variables --- #
 @export var player: PlayerController
 @export var input_direction: Vector2
-@export var input_jump := 0.0
+@export var input_jump := false
+@export var input_free_cam := false
 
 # --- Functions --- #
 func _ready() -> void:
@@ -17,9 +18,6 @@ func _ready() -> void:
 	
 	NetworkTime.before_tick_loop.connect(_gather)
 
-func _process(_delta: float) -> void:
-	input_jump = Input.get_action_strength(&'jump')
-
 func _gather() -> void:
 	if not is_multiplayer_authority():
 		return
@@ -28,3 +26,6 @@ func _gather() -> void:
 		Input.get_axis(&'move_left', &'move_right'),
 		Input.get_axis(&'move_up', &'move_down')
 	)
+	
+	input_jump = Input.is_action_pressed(&'jump')
+	input_free_cam = Input.is_action_pressed(&'free_cam')

@@ -76,8 +76,8 @@ func _on_player_connect(id: int) -> void:
 	player.owner_id = id
 	
 	# set position
-	player.spawn_point = Globals.world_spawn
-	player.position = Globals.world_spawn
+	player.spawn_point = Globals.world_spawn * 8.0
+	player.position = Globals.world_spawn * 8.0
 	
 	get_tree().current_scene.get_node(^'entities').add_child(player)
 	
