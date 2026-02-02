@@ -12,7 +12,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# create surface-level rocks
-	for i in range(world_size.x * 0.015):
+	for i in range(world_size.x * world_size.y * 0.00002):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.surface_high
 		
@@ -21,12 +21,13 @@ func perform_pass(gen: WorldGeneration) -> void:
 			y += 1
 		
 		var size := gen.rng.randi_range(6, 10)
-		var steps := gen.rng.randi_range(5, 20)
+		var steps := gen.rng.randi_range(5, 10)
 		
-		TileRunner.new(size, steps, x, y, 3).set_replace_mode(TileRunner.ReplaceMode.BOTH).start(gen)
+		TileRunner.new(size, steps, x, y, 3).set_replace_mode(TileRunner.ReplaceMode.BOTH) \
+			.set_size_decay(0.0).set_direction(0.0, 1.0).start(gen)
 	
 	# create small rocks
-	for i in range(world_size.x * 0.45):
+	for i in range(world_size.x * world_size.y * 0.0002):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.surface_high, gen.surface_low)
 		
@@ -40,7 +41,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 		TileRunner.new(size, steps, x, y, 3).start(gen)
 	
 	# create tiny rocks
-	for i in range(world_size.x * 10):
+	for i in range(world_size.x * world_size.y * 0.0045):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.surface_low, gen.underground_low)
 		var size := gen.rng.randi_range(2, 7)

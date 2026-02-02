@@ -34,13 +34,13 @@ func initialize(new_size: float, new_steps: float, x: int, y: int, tile_id: int)
 	
 	replace_tile = tile_id
 
-func set_direction(new_direction: Vector2) -> TileRunner:
-	direction = new_direction
+func set_direction(x: float, y: float) -> TileRunner:
+	direction = Vector2(x, y)
 	
 	return self
 
-func set_direction_change(new_change: Vector2) -> TileRunner:
-	direction_change = new_change
+func set_direction_change(x: float, y: float) -> TileRunner:
+	direction_change = Vector2(x, y)
 	
 	return self
 

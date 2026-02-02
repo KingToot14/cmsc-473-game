@@ -12,7 +12,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# create tiny streaks of dirt
-	for i in range(floori(world_size.x * 12.5)):
+	for i in range(floori(world_size.x * world_size.y * 0.005)):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.underground_high, world_size.y)
 		var size := gen.rng.randi_range(2, 6)

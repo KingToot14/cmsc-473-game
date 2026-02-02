@@ -54,6 +54,7 @@ func generate_world() -> void:
 	await run_pass(TerrainPass.new())
 	await run_pass(RocksInDirtPass.new())
 	await run_pass(DirtInRocksPass.new())
+	await run_pass(SmallHolesPass.new())
 	
 	# after terrain, before decoration
 	await run_pass(SmoothPass.new())
@@ -61,6 +62,8 @@ func generate_world() -> void:
 	# cleanup
 	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
+	
+	print("[Wizbowo's Conquest] Done Generating World")
 	
 	generating = false
 	done_generating.emit()
