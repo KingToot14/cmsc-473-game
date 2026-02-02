@@ -53,7 +53,11 @@ func generate_world() -> void:
 	# create terrain
 	await run_pass(TerrainPass.new())
 	
+	# after terrain, before decoration
+	await run_pass(SmoothPass.new())
+	
 	# cleanup
+	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
 	
 	generating = false

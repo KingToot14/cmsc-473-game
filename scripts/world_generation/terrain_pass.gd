@@ -124,18 +124,18 @@ func perform_pass(gen: WorldGeneration) -> void:
 func fill_column(x: int) -> void:
 	for y in range(Globals.world_size.y):
 		if y < surface_depth:
-			TileManager.set_block(x, y, 0)
+			TileManager.set_block_unsafe(x, y, 0)
 		elif y < underground_depth:
-			TileManager.set_block(x, y, 2)
+			TileManager.set_block_unsafe(x, y, 2)
 		else:
-			TileManager.set_block(x, y, 3)
+			TileManager.set_block_unsafe(x, y, 3)
 
 func refill_column(x: int, surface: int) -> void:
 	for y in range(Globals.world_size.y):
 		if y < surface:
-			TileManager.set_block(x, y, 0)
-		elif TileManager.get_block(x, y) != 3:
-			TileManager.set_block(x, y, 2)
+			TileManager.set_block_unsafe(x, y, 0)
+		elif TileManager.get_block_unsafe(x, y) != 3:
+			TileManager.set_block_unsafe(x, y, 2)
 
 func adjust_surface_height(gen: WorldGeneration) -> void:
 	var offset := 0

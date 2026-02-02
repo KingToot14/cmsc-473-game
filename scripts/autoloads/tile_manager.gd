@@ -4,6 +4,7 @@ extends Node
 const CHUNK_SIZE := 16
 const TILE_SIZE := 8
 
+const MASK_TEN := (20**10 - 1)
 const MASK_WALL  := ((2**10 - 1) << 10)
 const MASK_BLOCK := ((2**10 - 1) << 0)
 
@@ -24,13 +25,21 @@ func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
 #endregion
 
 #region Tile Access
+func get_wall_unsafe(x: int, y: int) -> int:
+	# get wall id (10 to 19)
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
+
 func get_wall(x: int, y: int) -> int:
 	# check bounds
 	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_WALL
+	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
+
+func get_block_unsafe(x: int, y: int) -> int:
+	# get block id (0 to 9)
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
 
 func get_block(x: int, y: int) -> int:
 	# check bounds
@@ -38,7 +47,12 @@ func get_block(x: int, y: int) -> int:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_BLOCK
+	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
+
+func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
+	# clear tile id
+	tiles[x + y * Globals.world_size.x] &= ~MASK_WALL
+	tiles[x + y * Globals.world_size.x] |= (wall_id << 10)
 
 func set_wall(x: int, y: int, wall_id: int) -> void:
 	# check bounds
@@ -116,16 +130,34 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
+	var dirty_y := start_y + height
+	var dirty_x := start_x + width
+	var dirty_height := 0
+	var dirty_width := 0
 	
 	for y in range(height):
 		for x in range(width):
-			set_block_unsafe(start_x + x, start_y + y, data[x + y * width])
-			processed += 1
+			var new_block = data[x + y * width]
 			
-			if processed >= 100:
+			if new_block != get_block_unsafe(start_x + x, start_y + y):
+				set_block_unsafe(start_x + x, start_y + y, new_block)
+				
+				# shrink update region
+				dirty_x = min(dirty_x, start_x + x)
+				dirty_y = min(dirty_y, start_y + y)
+				dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
+				dirty_height = start_y + y - dirty_y + 1
+				
+				processed += 1
+			
+			if processed >= 128:
 				processed = 0
 				await get_tree().process_frame
 	
-	Globals.world_map.load_region(start_x, start_y, width, height)
+	# only change updated tiles
+	if dirty_width == 0 or dirty_height == 0:
+		return
+	
+	Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion

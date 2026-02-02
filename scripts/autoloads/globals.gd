@@ -1,7 +1,7 @@
 extends Node
 
 # --- Variables --- #
-var world_size := Vector2i(4200, 1600):
+var world_size := Vector2i(4200, 1200):
 	set(_size):
 		@warning_ignore("integer_division")
 		world_chunks = _size / TileManager.CHUNK_SIZE
