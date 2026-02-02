@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://do1dgabbmwjjn"]
 
 [ext_resource type="Script" uid="uid://qyyemd8s1jod" path="res://entities/player/player_controller.gd" id="1_abrql"]
-[ext_resource type="Script" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
+[ext_resource type="Script" uid="uid://bq3fpsk3a0egi" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
 [ext_resource type="Script" uid="uid://d350u8evihs1u" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
 [ext_resource type="Script" uid="uid://dour8fehaaugp" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
@@ -37,7 +37,7 @@ player = NodePath("..")
 script = ExtResource("3_bls4j")
 root = NodePath("..")
 state_properties = Array[String]([":global_transform", ":velocity"])
-input_properties = Array[String](["input_sync:input_direction", "input_sync:input_jump"])
+input_properties = Array[String](["input_sync:input_direction", "input_sync:input_jump", "input_sync:input_free_cam"])
 metadata/_custom_type_script = "uid://d350u8evihs1u"
 
 [node name="tick_interpolator" type="Node" parent="." unique_id=219849010 node_paths=PackedStringArray("root")]

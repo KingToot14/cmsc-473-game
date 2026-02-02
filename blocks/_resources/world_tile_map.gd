@@ -43,7 +43,7 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 		for x in range(1, width + 1):
 			var value := 0
 			
-			if curr.is_empty():
+			if curr.is_empty() or next.is_empty():
 				variations[index] = 0
 				index += 1
 				continue
