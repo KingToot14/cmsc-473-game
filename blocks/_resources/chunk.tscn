@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://m5kcmqx3t3dm"]
 
 [ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_tile_map.gd" id="1_j8i32"]
-[ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/main_set.tres" id="2_otdea"]
+[ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="2_otdea"]
 
 [node name="chunk" type="Node2D" unique_id=1980708002]
 script = ExtResource("1_j8i32")

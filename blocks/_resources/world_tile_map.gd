@@ -29,7 +29,7 @@ func _ready() -> void:
 	Globals.world_map = self
 
 #region Tile Management
-func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
+func autotile_region(start_x: int, start_y: int, width: int, height: int, is_wall := false) -> void:
 	# calculate variations
 	var variations := PackedByteArray()
 	variations.resize(width * height)
@@ -44,9 +44,13 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	if width <= 0 or height <= 0:
 		return
 	
-	var prev := TileManager.get_block_row(start_x - 1, start_y - 1, width + 2)
-	var curr := TileManager.get_block_row(start_x - 1, start_y + 0, width + 2)
-	var next := TileManager.get_block_row(start_x - 1, start_y + 1, width + 2)
+	var row_getter: Callable = TileManager.get_block_row
+	if is_wall:
+		row_getter = TileManager.get_wall_row
+	
+	var prev: PackedInt32Array = row_getter.call(start_x - 1, start_y - 1, width + 2)
+	var curr: PackedInt32Array = row_getter.call(start_x - 1, start_y + 0, width + 2)
+	var next: PackedInt32Array = row_getter.call(start_x - 1, start_y + 1, width + 2)
 	
 	for y in range(height):
 		for x in range(1, width + 1):
@@ -85,40 +89,61 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 			variations[index] = value
 			index += 1
 			
-			if index % 64 == 0:
+			if index % 32 == 0:
 				await get_tree().process_frame
 		
 		# update window
 		prev = curr
 		curr = next
-		next = TileManager.get_block_row(start_x - 1, start_y + y + 2, width + 2)
+		next = row_getter.call(start_x - 1, start_y + y + 2, width + 2)
 
 	# apply tiles
-	var blocks = $'blocks'
+	var tilemap: TileMapLayer
+	var block_getter: Callable
+	
+	if is_wall:
+		tilemap = $'walls'
+		block_getter = TileManager.get_wall_unsafe
+	else:
+		tilemap = $'blocks'
+		block_getter = TileManager.get_block_unsafe
+	
 	index = 0
 	
 	for y in range(height):
 		for x in range(width):
-			blocks.set_cell(
+			tilemap.set_cell(
 				Vector2i(start_x + x, start_y + y),
-				TileManager.get_block_unsafe(start_x + x, start_y + y),
+				block_getter.call(start_x + x, start_y + y),
 				CONNECTION_MAP.get(variations[index])
 			)
 			index += 1
 
-func load_region(start_x: int, start_y: int, width: int, height: int, autotile := true) -> void:
-	var blocks: TileMapLayer = $'blocks'
-
+func load_region(start_x: int, start_y: int, width: int, height: int, is_wall := false) -> void:
+	var tilemap: TileMapLayer
+	var block_getter: Callable
+	
+	if is_wall:
+		tilemap = $'walls'
+		block_getter = TileManager.get_wall_unsafe
+	else:
+		tilemap = $'blocks'
+		block_getter = TileManager.get_block_unsafe
+	
+	var processed := 0
 	for y in range(height):
 		for x in range(width):
-			blocks.set_cell(
+			tilemap.set_cell(
 				Vector2i(start_x + x, start_y + y),
-				TileManager.get_block(start_x + x, start_y + y),
+				block_getter.call(start_x + x, start_y + y),
 				Vector2i(2, 2)
 			)
+			
+			if processed == 64:
+				await get_tree().process_frame
+				processed = 0
 	
-	if autotile:
-		autotile_region(start_x - 1, start_y - 1, width + 2, height + 2)
+	autotile_region(start_x - 1, start_y - 1, width + 2, height + 2, is_wall)
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'

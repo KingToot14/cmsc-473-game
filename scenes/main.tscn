@@ -4,7 +4,8 @@
 [ext_resource type="Script" uid="uid://bv73vyepe1qva" path="res://scripts/world_generation/world_generation.gd" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_tile_map.gd" id="3_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://6jr8n5613hvp" path="res://backgrounds/forest/background.png" id="3_tbgi4"]
-[ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/main_set.tres" id="4_tbgi4"]
+[ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="4_tbgi4"]
+[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://blocks/_resources/walls.tres" id="5_tefeu"]
 
 [node name="main" type="Node2D" unique_id=1976494311]
 
@@ -177,7 +178,7 @@ z_index = 50
 script = ExtResource("3_jyhfs")
 
 [node name="walls" type="TileMapLayer" parent="tiles" unique_id=1336934811]
-tile_set = ExtResource("4_tbgi4")
+tile_set = ExtResource("5_tefeu")
 navigation_enabled = false
 
 [node name="blocks" type="TileMapLayer" parent="tiles" unique_id=592496937]
