@@ -12,9 +12,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# create sliding window
-	var prev := TileManager.get_row(0, 0, world_size.x)
-	var curr := TileManager.get_row(0, 1, world_size.x)
-	var next := TileManager.get_row(0, 2, world_size.x)
+	var prev := TileManager.get_block_row(0, 0, world_size.x)
+	var curr := TileManager.get_block_row(0, 1, world_size.x)
+	var next := TileManager.get_block_row(0, 2, world_size.x)
 	
 	for y in range(1, gen.surface_low + 1):
 		for x in range(1, world_size.x - 1):
@@ -30,4 +30,4 @@ func perform_pass(gen: WorldGeneration) -> void:
 		# update window
 		prev = curr
 		curr = next
-		next = TileManager.get_row(0, y + 2, world_size.x)
+		next = TileManager.get_block_row(0, y + 2, world_size.x)

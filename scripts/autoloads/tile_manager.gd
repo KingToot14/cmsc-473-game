@@ -4,13 +4,23 @@ extends Node
 const CHUNK_SIZE := 16
 const TILE_SIZE := 8
 
-const MASK_TEN := (20**10 - 1)
-const MASK_WALL  := ((2**10 - 1) << 10)
-const MASK_BLOCK := ((2**10 - 1) << 0)
+const MASK_TEN := (1 << 10) - 1
+const MASK_WALL  := ((1 << 10) - 1) << 10
+const MASK_BLOCK := ((1 << 10) - 1) << 0
 
 var tiles: PackedInt32Array
+var world_width: int
+var world_height: int
 
 # --- Functions --- #
+func _ready() -> void:
+	Globals.world_size_changed.connect(_update_world_size)
+	_update_world_size(Globals.world_size)
+
+func _update_world_size(size: Vector2i) -> void:
+	world_width = size.x
+	world_height = size.y
+
 #region Positions
 func chunk_to_world(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
@@ -27,75 +37,91 @@ func world_to_chunk(world_x: int, world_y: int) -> Vector2i:
 #region Tile Access
 func get_wall_unsafe(x: int, y: int) -> int:
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
+	return (tiles[x + y * world_width] >> 10) & MASK_TEN
 
 func get_wall(x: int, y: int) -> int:
 	# check bounds
-	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
+	if x < 0 or x >= world_width or y < 0 or y >= Globals.world_height:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * Globals.world_size.x] >> 10) & MASK_TEN
+	return (tiles[x + y * world_width] >> 10) & MASK_TEN
 
 func get_block_unsafe(x: int, y: int) -> int:
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
+	return (tiles[x + y * world_width] >> 0) & MASK_TEN
 
 func get_block(x: int, y: int) -> int:
 	# check bounds
-	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[x + y * Globals.world_size.x] >> 0) & MASK_TEN
+	return (tiles[x + y * world_width] >> 0) & MASK_TEN
 
 func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~MASK_WALL
-	tiles[x + y * Globals.world_size.x] |= (wall_id << 10)
+	var idx = x + y * world_width
+	tiles[idx] &= ~MASK_WALL
+	tiles[idx] |= (wall_id << 10)
 
 func set_wall(x: int, y: int, wall_id: int) -> void:
 	# check bounds
-	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return
 	
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~MASK_WALL
-	tiles[x + y * Globals.world_size.x] |= (wall_id << 10)
+	var idx = x + y * world_width
+	tiles[idx] &= ~MASK_WALL
+	tiles[idx] |= (wall_id << 10)
 
 func set_block_unsafe(x: int, y: int, block_id: int) -> void:
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~MASK_BLOCK
-	tiles[x + y * Globals.world_size.x] |= (block_id << 0)
+	var idx = x + y * world_width
+	tiles[idx] &= ~MASK_BLOCK
+	tiles[idx] |= (block_id << 0)
 
 func set_block(x: int, y: int, block_id: int) -> void:
 	# check bounds
-	if x < 0 or x >= Globals.world_size.x or y < 0 or y >= Globals.world_size.y:
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return
 	
 	# clear tile id
-	tiles[x + y * Globals.world_size.x] &= ~MASK_BLOCK
-	tiles[x + y * Globals.world_size.x] |= (block_id << 0)
+	var idx = x + y * world_width
+	tiles[idx] &= ~MASK_BLOCK
+	tiles[idx] |= (block_id << 0)
 
-func get_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
-	var world_size = Globals.world_size
-	var underflow := 0
-	var overflow := 0
+func get_block_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
+	var world_w := world_width
+	var world_h := world_height
 	
-	if start_x < 0:
-		underflow = -start_x
-		start_x = 0
+	var row := PackedInt32Array()
+	row.resize(width)
 	
-	if start_x + width > world_size.x:
-		overflow = (start_x + width) - world_size.x
-		start_x = world_size.x - width
+	# return default row if out of bounds
+	if y < 0 or y >= world_h:
+		row.fill(default)
+		return row
 	
-	var row := tiles.slice(start_x + y * world_size.x, (start_x + width) + y * world_size.x)
+	var base_index := y * world_w
+	var mask := MASK_TEN
 	
-	for x in range(underflow):
-		row[x] = default
-	for x in range(overflow):
-		row[-(x + 1)] = default
+	var left := maxi(start_x, 0)
+	var right := mini(start_x + width, world_w)
+	
+	# pad left
+	for i in range(0, left - start_x):
+		row[i] = default
+	
+	# fill center
+	var index := left - start_x
+	for i in range(base_index + left, base_index + right):
+		row[index] = (tiles[i] >> 0) & mask
+		index += 1
+	
+	# pad right
+	for i in range(index, width):
+		row[i] = default
 	
 	return row
 
@@ -104,7 +130,7 @@ func get_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array
 #region Chunk Access
 func load_chunks() -> void:
 	tiles = []
-	tiles.resize(Globals.world_size.x * Globals.world_size.y)
+	tiles.resize(world_width * world_height)
 
 #endregion
 
@@ -122,7 +148,7 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 	#var offset := 0
 	
 	for y in range(height):
-		var x = start_x + (start_y + y) * Globals.world_size.x
+		var x = start_x + (start_y + y) * world_width
 		
 		packed.append_array(tiles.slice(x, x + width).to_byte_array())
 	
@@ -138,9 +164,13 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 	for y in range(height):
 		for x in range(width):
 			var new_block = data[x + y * width]
+			var idx = (start_x + x) + (start_y + y) * world_width
 			
-			if new_block != get_block_unsafe(start_x + x, start_y + y):
-				set_block_unsafe(start_x + x, start_y + y, new_block)
+			# only update new blocks
+			if new_block != (tiles[x + y * world_width] >> 0) & MASK_TEN:
+				# update block
+				tiles[idx] &= ~MASK_BLOCK
+				tiles[idx] |= (new_block << 0)
 				
 				# shrink update region
 				dirty_x = min(dirty_x, start_x + x)

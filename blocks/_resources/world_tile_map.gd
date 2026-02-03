@@ -35,9 +35,18 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	variations.resize(width * height)
 	var index := 0
 	
-	var prev := TileManager.get_row(start_x - 1, start_y - 1, width + 2)
-	var curr := TileManager.get_row(start_x - 1, start_y + 0, width + 2)
-	var next := TileManager.get_row(start_x - 1, start_y + 1, width + 2)
+	# clamp bounds
+	start_x = maxi(start_x, 0)
+	start_y = maxi(start_y, 0)
+	width   = mini(start_x + width,  Globals.world_size.x) - start_x
+	height  = mini(start_y + height, Globals.world_size.y) - start_y
+	
+	if width <= 0 or height <= 0:
+		return
+	
+	var prev := TileManager.get_block_row(start_x - 1, start_y - 1, width + 2)
+	var curr := TileManager.get_block_row(start_x - 1, start_y + 0, width + 2)
+	var next := TileManager.get_block_row(start_x - 1, start_y + 1, width + 2)
 	
 	for y in range(height):
 		for x in range(1, width + 1):
@@ -76,13 +85,13 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 			variations[index] = value
 			index += 1
 			
-			if index % 128 == 0:
+			if index % 64 == 0:
 				await get_tree().process_frame
 		
 		# update window
 		prev = curr
 		curr = next
-		next = TileManager.get_row(start_x - 1, start_y + y + 2, width + 2)
+		next = TileManager.get_block_row(start_x - 1, start_y + y + 2, width + 2)
 
 	# apply tiles
 	var blocks = $'blocks'
@@ -92,7 +101,7 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 		for x in range(width):
 			blocks.set_cell(
 				Vector2i(start_x + x, start_y + y),
-				TileManager.get_block(start_x + x, start_y + y),
+				TileManager.get_block_unsafe(start_x + x, start_y + y),
 				CONNECTION_MAP.get(variations[index])
 			)
 			index += 1

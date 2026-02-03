@@ -2,7 +2,7 @@ class_name ChunkLoader
 extends Node
 
 # --- Variables --- #
-const LOAD_RANGE := Vector2i(5, 3)
+const LOAD_RANGE := Vector2i(6, 4)
 
 @export var player: PlayerController
 var current_chunk: Vector2i
@@ -85,25 +85,7 @@ func send_boundary(boundary: Vector2i) -> void:
 		Vector2i( 0,  1):
 			start_chunk.y = end_chunk.y - 1
 	
-	# clamp positions
-	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
-	start_chunk.y = clampi(start_chunk.y, 0, Globals.world_chunks.y)
-	end_chunk.x = clampi(end_chunk.x, 0, Globals.world_chunks.x)
-	end_chunk.y = clampi(end_chunk.y, 0, Globals.world_chunks.y)
-	
-	var width  = end_chunk.x - start_chunk.x
-	var height = end_chunk.y - start_chunk.y
-	
-	# pack data
-	var meta = (
-		(start_chunk.x << 0) |
-		(start_chunk.y << 10) |
-		(width << 20) |
-		(height << 30)
-	)
-	var data := TileManager.pack_chunks(start_chunk.x, start_chunk.y, width, height)
-	
-	load_chunks.rpc_id(player.owner_id, meta, data)
+	send_region(start_chunk, end_chunk)
 
 func send_whole_area() -> void:
 	var center_chunk := TileManager.world_to_chunk(
@@ -113,6 +95,9 @@ func send_whole_area() -> void:
 	var start_chunk := (center_chunk - LOAD_RANGE)
 	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
 	
+	send_region(start_chunk, end_chunk)
+
+func send_region(start_chunk: Vector2i, end_chunk: Vector2i) -> void:
 	# clamp positions
 	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
 	start_chunk.y = clampi(start_chunk.y, 0, Globals.world_chunks.y)
