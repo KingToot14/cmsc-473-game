@@ -1,11 +1,15 @@
 extends Node
 
+# -- Signals --- #
+signal world_size_changed(size: Vector2i)
+
 # --- Variables --- #
 var world_size := Vector2i(4200, 1200):
 	set(_size):
 		@warning_ignore("integer_division")
 		world_chunks = _size / TileManager.CHUNK_SIZE
 		world_size = _size
+		world_size_changed.emit(world_size)
 
 @warning_ignore("integer_division")
 var world_chunks := world_size / TileManager.CHUNK_SIZE

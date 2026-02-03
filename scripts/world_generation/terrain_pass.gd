@@ -75,10 +75,10 @@ func perform_pass(gen: WorldGeneration) -> void:
 		feature_timer -= 1
 		
 		# store extremes
-		surface_high     = maxi(surface_high, surface_depth)
+		surface_high     = mini(surface_high, surface_depth)
 		surface_low      = maxi(surface_low, surface_depth)
-		underground_high = maxi(underground_high, surface_depth)
-		underground_low  = maxi(underground_low, surface_depth)
+		underground_high = mini(underground_high, underground_depth)
+		underground_low  = maxi(underground_low, underground_depth)
 		
 		# check bounds
 		if surface_depth <= floori(world_size.y * SURFACE_HEIGHT_HIGH):
@@ -118,8 +118,6 @@ func perform_pass(gen: WorldGeneration) -> void:
 	gen.surface_low = surface_low
 	gen.underground_high = underground_high
 	gen.underground_low = underground_low
-	
-	exit_pass()
 
 func fill_column(x: int) -> void:
 	for y in range(Globals.world_size.y):

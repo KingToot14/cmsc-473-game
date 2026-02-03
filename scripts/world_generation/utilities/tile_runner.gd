@@ -9,8 +9,8 @@ enum ReplaceMode {
 }
 
 # --- Variables --- #
-var size := 0
-var steps := 0
+var size := 0.0
+var steps := 0.0
 var replace_tile := 0
 var replace_mode := ReplaceMode.REPLACE
 
@@ -21,21 +21,26 @@ var direction_change := Vector2(0.5, 0.5)
 var allowed_tiles: Array[int] = []
 var restricted_tiles: Array[int] = []
 
+var size_decay := 1.0
+
 # --- Functions --- #
-func _init(new_size: int, new_steps: int, x: int, y: int, tile_id: int) -> void:
+func _init(new_size: float, new_steps: float, x: int, y: int, tile_id: int) -> void:
+	initialize(new_size, new_steps, x, y, tile_id)
+
+func initialize(new_size: float, new_steps: float, x: int, y: int, tile_id: int) -> void:
 	size = new_size
 	steps = new_steps
 	position = Vector2(x, y)
 	
 	replace_tile = tile_id
 
-func set_direction(new_direction: Vector2) -> TileRunner:
-	direction = new_direction
+func set_direction(x: float, y: float) -> TileRunner:
+	direction = Vector2(x, y)
 	
 	return self
 
-func set_direction_change(new_change: Vector2) -> TileRunner:
-	direction_change = new_change
+func set_direction_change(x: float, y: float) -> TileRunner:
+	direction_change = Vector2(x, y)
 	
 	return self
 
@@ -54,6 +59,11 @@ func set_replace_mode(mode: ReplaceMode) -> TileRunner:
 	
 	return self
 
+func set_size_decay(decay: float) -> TileRunner:
+	size_decay = clamp(decay, 0.0, 1.0)
+	
+	return self
+
 func start(gen: WorldGeneration) -> void:
 	# randomize direction
 	if direction == Vector2.ZERO:
@@ -65,9 +75,9 @@ func start(gen: WorldGeneration) -> void:
 	var curr_steps := steps
 	var curr_size := size
 	
-	while curr_size > 0 and curr_steps > 0:
+	while curr_size > 0.0 and curr_steps > 0.0:
 		@warning_ignore("integer_division")
-		curr_size = size * floori(curr_steps / steps)
+		curr_size = (size_decay * size * (curr_steps / steps)) + (size * (1.0 - size_decay))
 		curr_steps -= 1
 		
 		# calculate bounding box
@@ -77,12 +87,12 @@ func start(gen: WorldGeneration) -> void:
 		var end_y := clampi(floori(position.y + curr_size / 2.0), 0, world_size.y)
 		
 		# replace tiles
-		for y in range(start_y, end_y + 1):
-			for x in range(start_x, end_x + 1):
+		for y in range(start_y, end_y):
+			for x in range(start_x, end_x):
 				# check distance
 				var threshold := (curr_size / 2.0) * gen.rng.randf_range(0.90, 1.10)
 				
-				if abs(position.x - x) + abs(position.y - y) < threshold:
+				if abs(position.x - x) + abs(position.y - y) > threshold:
 					continue
 				
 				var block := TileManager.get_block_unsafe(x, y)

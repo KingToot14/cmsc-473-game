@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dyaogs04gmmc0" path="res://ui/main_menu/join_ui.gd" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bv73vyepe1qva" path="res://scripts/world_generation/world_generation.gd" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_tile_map.gd" id="3_jyhfs"]
+[ext_resource type="Texture2D" uid="uid://6jr8n5613hvp" path="res://backgrounds/forest/background.png" id="3_tbgi4"]
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/main_set.tres" id="4_tbgi4"]
 
 [node name="main" type="Node2D" unique_id=1976494311]
@@ -127,19 +128,49 @@ spawn_path = NodePath("../entities")
 
 [node name="background" type="Node2D" parent="." unique_id=1195479764]
 
-[node name="sky" type="Parallax2D" parent="background" unique_id=698714807]
-repeat_size = Vector2(480, 270)
-repeat_times = 3
+[node name="layer_1" type="Parallax2D" parent="background" unique_id=698714807]
+scroll_scale = Vector2(0, 0)
+repeat_size = Vector2(1440, 810)
 
-[node name="fill" type="ColorRect" parent="background/sky" unique_id=1057822045]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 480.0
-offset_bottom = 270.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.29803923, 0.6862745, 0.8784314, 1)
+[node name="sprite" type="Sprite2D" parent="background/layer_1" unique_id=453390010]
+texture = ExtResource("3_tbgi4")
+vframes = 5
+
+[node name="layer_2" type="Parallax2D" parent="background" unique_id=1081296847]
+scroll_scale = Vector2(0.1, 0)
+repeat_size = Vector2(1440, 810)
+
+[node name="sprite" type="Sprite2D" parent="background/layer_2" unique_id=1183965369]
+texture = ExtResource("3_tbgi4")
+vframes = 5
+frame = 1
+
+[node name="layer_3" type="Parallax2D" parent="background" unique_id=694896544]
+scroll_scale = Vector2(0.2, 0)
+repeat_size = Vector2(1440, 810)
+
+[node name="sprite" type="Sprite2D" parent="background/layer_3" unique_id=2072890722]
+texture = ExtResource("3_tbgi4")
+vframes = 5
+frame = 2
+
+[node name="layer_4" type="Parallax2D" parent="background" unique_id=878093720]
+scroll_scale = Vector2(0.5, 0)
+repeat_size = Vector2(1440, 810)
+
+[node name="sprite" type="Sprite2D" parent="background/layer_4" unique_id=124492712]
+texture = ExtResource("3_tbgi4")
+vframes = 5
+frame = 3
+
+[node name="layer_5" type="Parallax2D" parent="background" unique_id=809503557]
+scroll_scale = Vector2(0.7, 0)
+repeat_size = Vector2(1440, 810)
+
+[node name="sprite" type="Sprite2D" parent="background/layer_5" unique_id=1459122372]
+texture = ExtResource("3_tbgi4")
+vframes = 5
+frame = 4
 
 [node name="tiles" type="Node2D" parent="." unique_id=1191194627]
 z_index = 50
