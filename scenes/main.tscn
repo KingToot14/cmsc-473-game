@@ -179,10 +179,14 @@ script = ExtResource("3_jyhfs")
 
 [node name="walls" type="TileMapLayer" parent="tiles" unique_id=1336934811]
 tile_set = ExtResource("5_tefeu")
+occlusion_enabled = false
+rendering_quadrant_size = 8
 navigation_enabled = false
 
 [node name="blocks" type="TileMapLayer" parent="tiles" unique_id=592496937]
 tile_set = ExtResource("4_tbgi4")
+occlusion_enabled = false
+rendering_quadrant_size = 8
 navigation_enabled = false
 
 [connection signal="pressed" from="join_ui/connect_options/join_button" to="join_ui" method="create_client"]
