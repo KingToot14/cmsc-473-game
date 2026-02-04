@@ -131,9 +131,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	
 	for y in range(height):
 		for x in range(width):
-			#var block := TileManager.get_block(start_x + x, start_y + y)
-			#var wall  := TileManager.get_wall(start_x + x, start_y + y)
-			
 			# set blocks
 			if tile_type[index] == 0:
 				blocks.set_cell(

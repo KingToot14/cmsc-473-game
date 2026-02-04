@@ -82,6 +82,7 @@ func _on_player_connect(id: int) -> void:
 	get_tree().current_scene.get_node(^'entities').add_child(player)
 	
 	# send data
+	await get_tree().process_frame
 	player.get_node(^'chunk_loader').send_whole_area()
 
 func _on_player_disconnect(id: int) -> void:

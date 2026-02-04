@@ -14,6 +14,8 @@ var world_size := Vector2i(4200, 1200):
 @warning_ignore("integer_division")
 var world_chunks := world_size / TileManager.CHUNK_SIZE
 var world_spawn: Vector2i
+
+var server_map: ServerTileMap
 var world_map: WorldTileMap
 
 # --- Functions --- #
