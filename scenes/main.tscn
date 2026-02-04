@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://6jr8n5613hvp" path="res://backgrounds/forest/background.png" id="3_tbgi4"]
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="4_tbgi4"]
 [ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://blocks/_resources/walls.tres" id="5_tefeu"]
+[ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 
 [node name="main" type="Node2D" unique_id=1976494311]
 
@@ -173,17 +174,23 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 4
 
-[node name="tiles" type="Node2D" parent="." unique_id=1191194627]
+[node name="server_tiles" type="TileMapLayer" parent="." unique_id=1791430910]
+tile_set = ExtResource("4_tbgi4")
+physics_quadrant_size = 8
+script = ExtResource("7_o6xl0")
+metadata/_custom_type_script = "uid://dtgcrr7uk7csi"
+
+[node name="world_tiles" type="Node2D" parent="." unique_id=1191194627]
 z_index = 50
 script = ExtResource("3_jyhfs")
 
-[node name="walls" type="TileMapLayer" parent="tiles" unique_id=1336934811]
+[node name="walls" type="TileMapLayer" parent="world_tiles" unique_id=1336934811]
 tile_set = ExtResource("5_tefeu")
 occlusion_enabled = false
 rendering_quadrant_size = 8
 navigation_enabled = false
 
-[node name="blocks" type="TileMapLayer" parent="tiles" unique_id=592496937]
+[node name="blocks" type="TileMapLayer" parent="world_tiles" unique_id=592496937]
 tile_set = ExtResource("4_tbgi4")
 occlusion_enabled = false
 rendering_quadrant_size = 8
