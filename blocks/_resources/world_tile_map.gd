@@ -1,6 +1,13 @@
 class_name WorldTileMap
 extends Node2D
 
+# --- Enums --- #
+enum UpdateState {
+	UNLOADED,
+	DIRTY,
+	TILED
+}
+
 # --- Variables --- #
 const CONNECTION_MAP = {
 	  0: Vector2i(0, 0),   4: Vector2i(1, 0),   6: Vector2i(2, 0),    2: Vector2i(3, 0),
@@ -20,9 +27,7 @@ const CONNECTION_MAP = {
 	223: Vector2i(8, 3), 239: Vector2i(9, 3), 15: Vector2i(10, 3)
 }
 
-@export var chunk_pos := -Vector2i.ONE
-
-var processing := false
+var chunk_states: Dictionary[Vector2i, UpdateState] = {}
 
 # --- Functions --- #
 func _ready() -> void:
@@ -32,7 +37,9 @@ func _ready() -> void:
 func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	# calculate variations
 	var variations := PackedByteArray()
+	var tile_type := PackedByteArray()
 	variations.resize(width * height)
+	tile_type.resize(width * height)
 	var index := 0
 	
 	# clamp bounds
@@ -44,81 +51,135 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	if width <= 0 or height <= 0:
 		return
 	
-	var prev := TileManager.get_block_row(start_x - 1, start_y - 1, width + 2)
-	var curr := TileManager.get_block_row(start_x - 1, start_y + 0, width + 2)
-	var next := TileManager.get_block_row(start_x - 1, start_y + 1, width + 2)
+	var prev: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y - 1, width + 2)
+	var curr: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y + 0, width + 2)
+	var next: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y + 1, width + 2)
+	var mask := (1 << 10) - 1
 	
 	for y in range(height):
 		for x in range(1, width + 1):
 			var value := 0
+			var block := (curr[x] >> 0) & mask
+			var wall := (curr[x] >> 10) & mask
 			
 			if curr.is_empty() or next.is_empty():
 				variations[index] = 0
 				index += 1
 				continue
 			
-			# skip air
-			if curr[x] <= 0:
-				variations[index] = 0
-				index += 1
-				continue
-
-			if prev[x] > 0:
-				value += 1
-			if curr[x - 1] > 0:
-				value += 2
-			if curr[x + 1] > 0:
-				value += 4
-			if next[x] > 0:
-				value += 8
+			if block != 0:
+				# tile block
+				if ((prev[x] >> 0) & mask) > 0:
+					value += 1
+				if ((curr[x - 1] >> 0) & mask) > 0:
+					value += 2
+				if ((curr[x + 1] >> 0) & mask) > 0:
+					value += 4
+				if ((next[x] >> 0) & mask) > 0:
+					value += 8
+				
+				# diagonal neighbors
+				if value & 1 and value & 2 and ((prev[x - 1] >> 0) & mask) > 0:
+					value += 16
+				if value & 1 and value & 4 and ((prev[x + 1] >> 0) & mask) > 0:
+					value += 32
+				if value & 8 and value & 2 and ((next[x - 1] >> 0) & mask) > 0:
+					value += 64
+				if value & 8 and value & 4 and ((next[x + 1] >> 0) & mask) > 0:
+					value += 128
+				
+				tile_type[index] = 0
+			elif wall != 0:
+				# tile wall
+				if ((prev[x] >> 10) & mask) > 0:
+					value += 1
+				if ((curr[x - 1] >> 10) & mask) > 0:
+					value += 2
+				if ((curr[x + 1] >> 10) & mask) > 0:
+					value += 4
+				if ((next[x] >> 10) & mask) > 0:
+					value += 8
+				
+				# diagonal neighbors
+				if value & 1 and value & 2 and ((prev[x - 1] >> 10) & mask) > 0:
+					value += 16
+				if value & 1 and value & 4 and ((prev[x + 1] >> 10) & mask) > 0:
+					value += 32
+				if value & 8 and value & 2 and ((next[x - 1] >> 10) & mask) > 0:
+					value += 64
+				if value & 8 and value & 4 and ((next[x + 1] >> 10) & mask) > 0:
+					value += 128
+				
+				tile_type[index] = 1
 			
-			# diagonal neighbors
-			if value & 1 and value & 2 and prev[x - 1] > 0:
-				value += 16
-			if value & 1 and value & 4 and prev[x + 1] > 0:
-				value += 32
-			if value & 8 and value & 2 and next[x - 1] > 0:
-				value += 64
-			if value & 8 and value & 4 and next[x + 1] > 0:
-				value += 128
-
 			variations[index] = value
 			index += 1
 			
-			if index % 64 == 0:
-				await get_tree().process_frame
+			#if index % 32 == 0:
+				#await get_tree().process_frame
 		
 		# update window
 		prev = curr
 		curr = next
-		next = TileManager.get_block_row(start_x - 1, start_y + y + 2, width + 2)
+		next = TileManager.get_visual_row(start_x - 1, start_y + y + 2, width + 2)
 
 	# apply tiles
-	var blocks = $'blocks'
+	var blocks: TileMapLayer = $'blocks'
+	var walls: TileMapLayer = $'walls'
+	
 	index = 0
 	
 	for y in range(height):
 		for x in range(width):
-			blocks.set_cell(
-				Vector2i(start_x + x, start_y + y),
-				TileManager.get_block_unsafe(start_x + x, start_y + y),
-				CONNECTION_MAP.get(variations[index])
-			)
+			#var block := TileManager.get_block(start_x + x, start_y + y)
+			#var wall  := TileManager.get_wall(start_x + x, start_y + y)
+			
+			# set blocks
+			if tile_type[index] == 0:
+				blocks.set_cell(
+					Vector2i(start_x + x, start_y + y),
+					TileManager.get_block_unsafe(start_x + x, start_y + y),
+					CONNECTION_MAP.get(variations[index])
+				)
+			
+			# set walls
+			if tile_type[index] == 1:
+				walls.set_cell(
+					Vector2i(start_x + x, start_y + y),
+					TileManager.get_wall_unsafe(start_x + x, start_y + y),
+					CONNECTION_MAP.get(variations[index])
+				)
+			
 			index += 1
+			
+			#if index % 128:
+				#await get_tree().process_frame
 
-func load_region(start_x: int, start_y: int, width: int, height: int, autotile := true) -> void:
+func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
-
+	var walls: TileMapLayer = $'walls'
+	
+	var processed := 0
 	for y in range(height):
 		for x in range(width):
-			blocks.set_cell(
-				Vector2i(start_x + x, start_y + y),
-				TileManager.get_block(start_x + x, start_y + y),
-				Vector2i(2, 2)
-			)
-	
-	if autotile:
-		autotile_region(start_x - 1, start_y - 1, width + 2, height + 2)
+			var block := TileManager.get_block_unsafe(start_x + x, start_y + y)
+			var wall  := TileManager.get_wall_unsafe(start_x + x, start_y + y)
+			
+			# set blocks
+			if block == 0:
+				blocks.erase_cell(Vector2i(start_x + x, start_y + y))
+			else:
+				blocks.set_cell(Vector2i(start_x + x, start_y + y), block, Vector2i(2, 2))
+			
+			# set walls
+			if wall == 0:
+				walls.erase_cell(Vector2i(start_x + x, start_y + y))
+			else:
+				walls.set_cell(Vector2i(start_x + x, start_y + y), wall, Vector2i(2, 2))
+			
+			if processed == 32:
+				await get_tree().process_frame
+				processed = 0
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'

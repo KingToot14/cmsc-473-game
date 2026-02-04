@@ -2,11 +2,14 @@ extends Node
 
 # --- Variables --- #
 const CHUNK_SIZE := 16
+const CHUNK_AREA := CHUNK_SIZE * CHUNK_SIZE
 const TILE_SIZE := 8
 
 const MASK_TEN := (1 << 10) - 1
+const MASK_TWENTY := (1 << 20) - 1
 const MASK_WALL  := ((1 << 10) - 1) << 10
 const MASK_BLOCK := ((1 << 10) - 1) << 0
+const MASK_VISUAL := MASK_BLOCK | MASK_BLOCK
 
 var tiles: PackedInt32Array
 var world_width: int
@@ -41,7 +44,7 @@ func get_wall_unsafe(x: int, y: int) -> int:
 
 func get_wall(x: int, y: int) -> int:
 	# check bounds
-	if x < 0 or x >= world_width or y < 0 or y >= Globals.world_height:
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return 0
 	
 	# get wall id (10 to 19)
@@ -125,6 +128,74 @@ func get_block_row(start_x: int, y: int, width: int, default := 1) -> PackedInt3
 	
 	return row
 
+func get_wall_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
+	var world_w := world_width
+	var world_h := world_height
+	
+	var row := PackedInt32Array()
+	row.resize(width)
+	
+	# return default row if out of bounds
+	if y < 0 or y >= world_h:
+		row.fill(default)
+		return row
+	
+	var base_index := y * world_w
+	var mask := MASK_TEN
+	
+	var left := maxi(start_x, 0)
+	var right := mini(start_x + width, world_w)
+	
+	# pad left
+	for i in range(0, left - start_x):
+		row[i] = default
+	
+	# fill center
+	var index := left - start_x
+	for i in range(base_index + left, base_index + right):
+		row[index] = (tiles[i] >> 10) & mask
+		index += 1
+	
+	# pad right
+	for i in range(index, width):
+		row[i] = default
+	
+	return row
+
+func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
+	var world_w := world_width
+	var world_h := world_height
+	
+	var row := PackedInt32Array()
+	row.resize(width)
+	
+	# return default row if out of bounds
+	if y < 0 or y >= world_h:
+		row.fill(default)
+		return row
+	
+	var base_index := y * world_w
+	var mask := MASK_TWENTY
+	
+	var left := maxi(start_x, 0)
+	var right := mini(start_x + width, world_w)
+	
+	# pad left
+	for i in range(0, left - start_x):
+		row[i] = default
+	
+	# fill center
+	var index := left - start_x
+	for i in range(base_index + left, base_index + right):
+		row[index] = tiles[i] & mask
+		index += 1
+	
+	# pad right
+	for i in range(index, width):
+		row[i] = default
+	
+	return row
+
 #endregion
 
 #region Chunk Access
@@ -156,27 +227,34 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
-	var dirty_y := start_y + height
+	
 	var dirty_x := start_x + width
-	var dirty_height := 0
+	var dirty_y := start_y + height
 	var dirty_width := 0
+	var dirty_height := 0
 	
 	for y in range(height):
 		for x in range(width):
-			var new_block = data[x + y * width]
-			var idx = (start_x + x) + (start_y + y) * world_width
+			var tile := data[x + y * width]
+			var idx := (start_x + x) + (start_y + y) * world_width
 			
-			# only update new blocks
-			if new_block != (tiles[x + y * world_width] >> 0) & MASK_TEN:
-				# update block
-				tiles[idx] &= ~MASK_BLOCK
-				tiles[idx] |= (new_block << 0)
+			# only update tiles 
+			if tiles[idx] != tile:
+				# update tile
+				tiles[idx] = tile
 				
 				# shrink update region
 				dirty_x = min(dirty_x, start_x + x)
 				dirty_y = min(dirty_y, start_y + y)
 				dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
 				dirty_height = start_y + y - dirty_y + 1
+				
+				# set chunk as dirty
+				@warning_ignore('integer_division')
+				Globals.world_map.chunk_states[Vector2i(
+					(start_x + x) / CHUNK_SIZE,
+					(start_y + y) / CHUNK_SIZE
+				)] = WorldTileMap.UpdateState.DIRTY
 				
 				processed += 1
 			
@@ -185,9 +263,7 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 				await get_tree().process_frame
 	
 	# only change updated tiles
-	if dirty_width == 0 or dirty_height == 0:
-		return
-	
-	Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
+	if dirty_width != 0 and dirty_height != 0:
+		Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion

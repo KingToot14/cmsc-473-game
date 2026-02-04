@@ -2,7 +2,9 @@ class_name ChunkLoader
 extends Node
 
 # --- Variables --- #
-const LOAD_RANGE := Vector2i(6, 4)
+const UNLOAD_RANGE := Vector2i(10, 8)
+const LOAD_RANGE := Vector2i(7, 5)
+const VISUAL_RANGE := Vector2i(5, 3)
 
 @export var player: PlayerController
 var current_chunk: Vector2i
@@ -28,11 +30,16 @@ func _process(_delta: float) -> void:
 		roundi(player.position.y / 8.0)
 	)
 	
-	if multiplayer.is_server():
-		var diff := (new_chunk - current_chunk).abs()
-		if diff.x + diff.y >= 1:
+	var diff := (new_chunk - current_chunk).abs()
+	if diff.x + diff.y >= 1:
+		if multiplayer.is_server():
+			# server sends chunk updates
 			send_boundary(new_chunk - current_chunk)
-			current_chunk = new_chunk
+		else:
+			# client autotiles
+			autotile_boundary(new_chunk - current_chunk)
+		
+		current_chunk = new_chunk
 
 func clear_boundary(boundary: Vector2i) -> void:
 	var center_chunk := TileManager.world_to_chunk(
@@ -42,15 +49,14 @@ func clear_boundary(boundary: Vector2i) -> void:
 	var start_chunk := (center_chunk - LOAD_RANGE)
 	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
 	
-	match boundary:
-		Vector2i(-1,  0):
-			end_chunk.x = start_chunk.x + 1
-		Vector2i( 1,  0):
-			start_chunk.x = end_chunk.x - 1
-		Vector2i( 0, -1):
-			end_chunk.y = start_chunk.y + 1
-		Vector2i( 0,  1):
-			start_chunk.y = end_chunk.y - 1
+	if boundary.x < 0:
+		end_chunk.x = start_chunk.x - boundary.x
+	elif boundary.x > 0:
+		start_chunk.x = end_chunk.x - boundary.x
+	if boundary.y < 0:
+		end_chunk.y = start_chunk.y - boundary.y
+	elif boundary.y > 0:
+		start_chunk.y = end_chunk.y - boundary.y
 	
 	# clamp positions
 	start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
@@ -75,17 +81,61 @@ func send_boundary(boundary: Vector2i) -> void:
 	var start_chunk := (center_chunk - LOAD_RANGE)
 	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
 	
-	match boundary:
-		Vector2i(-1,  0):
-			end_chunk.x = start_chunk.x + 1
-		Vector2i( 1,  0):
-			start_chunk.x = end_chunk.x - 1
-		Vector2i( 0, -1):
-			end_chunk.y = start_chunk.y + 1
-		Vector2i( 0,  1):
-			start_chunk.y = end_chunk.y - 1
+	if boundary.x < 0:
+		end_chunk.x = start_chunk.x - boundary.x
+	elif boundary.x > 0:
+		start_chunk.x = end_chunk.x - boundary.x
+	if boundary.y < 0:
+		end_chunk.y = start_chunk.y - boundary.y
+	elif boundary.y > 0:
+		start_chunk.y = end_chunk.y - boundary.y
 	
 	send_region(start_chunk, end_chunk)
+
+func autotile_boundary(boundary: Vector2i) -> void:
+	var center_chunk := TileManager.world_to_chunk(
+		roundi(player.position.x / 8),
+		roundi(player.position.y / 8)
+	)
+	var start_chunk := (center_chunk - VISUAL_RANGE)
+	var end_chunk := center_chunk + VISUAL_RANGE + Vector2i.ONE
+	
+	if boundary.x < 0:
+		end_chunk.x = start_chunk.x - boundary.x
+	elif boundary.x > 0:
+		start_chunk.x = end_chunk.x - boundary.x
+	if boundary.y < 0:
+		end_chunk.y = start_chunk.y - boundary.y
+	elif boundary.y > 0:
+		start_chunk.y = end_chunk.y - boundary.y
+	
+	var dirty_chunks: Array[Vector2i] = []
+	
+	# only tile dirty chunks
+	for y in range(start_chunk.y, end_chunk.y):
+		for x in range(start_chunk.x, end_chunk.x):
+			var state = Globals.world_map.chunk_states.get(Vector2i(x, y), WorldTileMap.UpdateState.UNLOADED)
+			if state == WorldTileMap.UpdateState.DIRTY:
+				dirty_chunks.append(Vector2i(x, y))
+	
+	# sort chunks by distance
+	dirty_chunks.sort_custom(func(a: Vector2i, b: Vector2i):
+		return a.distance_squared_to(current_chunk) < b.distance_squared_to(current_chunk)
+	)
+	
+	# autotile each chunk
+	for chunk in dirty_chunks:
+		Globals.world_map.autotile_region(
+			chunk.x * TileManager.CHUNK_SIZE - 1,
+			chunk.y * TileManager.CHUNK_SIZE - 1,
+			TileManager.CHUNK_SIZE + 2,
+			TileManager.CHUNK_SIZE + 2
+		)
+		
+		# mark as tiled
+		Globals.world_map.chunk_states[Vector2i(chunk.x, chunk.y)] = WorldTileMap.UpdateState.TILED
+		
+		await get_tree().process_frame
 
 func send_whole_area() -> void:
 	var center_chunk := TileManager.world_to_chunk(
@@ -133,7 +183,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	var height  := (meta >> 30) & (2**10 - 1)
 	
 	data = data.decompress(
-		width * height * TileManager.CHUNK_SIZE * TileManager.CHUNK_SIZE * 4,
+		width * height * TileManager.CHUNK_AREA * 4,
 		FileAccess.COMPRESSION_ZSTD
 	)
 	
