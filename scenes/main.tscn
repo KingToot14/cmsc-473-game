@@ -124,9 +124,11 @@ metadata/_custom_type_script = "uid://bv73vyepe1qva"
 
 [node name="entity_spawner" type="MultiplayerSpawner" parent="." unique_id=121496976]
 _spawnable_scenes = PackedStringArray("uid://do1dgabbmwjjn")
-spawn_path = NodePath("../entities")
+spawn_path = NodePath("../players")
 
-[node name="entities" type="Node2D" parent="." unique_id=1430324138]
+[node name="players" type="Node2D" parent="." unique_id=1430324138]
+
+[node name="entities" type="Node2D" parent="." unique_id=2069981181]
 
 [node name="background" type="Node2D" parent="." unique_id=1195479764]
 

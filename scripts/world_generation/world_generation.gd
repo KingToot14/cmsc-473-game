@@ -61,6 +61,9 @@ func generate_world() -> void:
 	# after terrain, before decoration
 	await run_pass(SmoothPass.new())
 	
+	# decoration
+	await run_pass(TreePass.new())
+	
 	# cleanup
 	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
