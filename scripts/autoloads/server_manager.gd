@@ -79,7 +79,7 @@ func _on_player_connect(id: int) -> void:
 	player.spawn_point = Globals.world_spawn * 8.0
 	player.position = Globals.world_spawn * 8.0
 	
-	get_tree().current_scene.get_node(^'entities').add_child(player)
+	get_tree().current_scene.get_node(^'players').add_child(player)
 	
 	# send data
 	await get_tree().process_frame
@@ -91,7 +91,7 @@ func _on_player_disconnect(id: int) -> void:
 	
 	print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
 	
-	var player = get_tree().current_scene.get_node('entities/player_%s' % id)
+	var player = get_tree().current_scene.get_node('players/player_%s' % id)
 	
 	if player:
 		player.queue_free()

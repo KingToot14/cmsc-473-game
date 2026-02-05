@@ -19,13 +19,13 @@ func _ready() -> void:
 	
 	await player.ready
 	
-	current_chunk = TileManager.world_to_chunk(
+	current_chunk = TileManager.tile_to_chunk(
 		roundi(player.position.x / 8.0),
 		roundi(player.position.y / 8.0)
 	)
 
 func _process(_delta: float) -> void:
-	var new_chunk = TileManager.world_to_chunk(
+	var new_chunk = TileManager.tile_to_chunk(
 		roundi(player.position.x / 8.0),
 		roundi(player.position.y / 8.0)
 	)
@@ -42,7 +42,7 @@ func _process(_delta: float) -> void:
 		current_chunk = new_chunk
 
 func clear_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.world_to_chunk(
+	var center_chunk := TileManager.tile_to_chunk(
 		roundi(player.position.x / 8),
 		roundi(player.position.y / 8)
 	)
@@ -74,7 +74,7 @@ func clear_boundary(boundary: Vector2i) -> void:
 	Globals.world_map.clear_region(start_chunk.x, start_chunk.y, width, height)
 
 func send_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.world_to_chunk(
+	var center_chunk := TileManager.tile_to_chunk(
 		roundi(player.position.x / 8),
 		roundi(player.position.y / 8)
 	)
@@ -93,7 +93,7 @@ func send_boundary(boundary: Vector2i) -> void:
 	send_region(start_chunk, end_chunk)
 
 func autotile_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.world_to_chunk(
+	var center_chunk := TileManager.tile_to_chunk(
 		roundi(player.position.x / 8),
 		roundi(player.position.y / 8)
 	)
@@ -141,7 +141,7 @@ func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int) -> void
 		await get_tree().process_frame
 
 func send_whole_area() -> void:
-	var center_chunk := TileManager.world_to_chunk(
+	var center_chunk := TileManager.tile_to_chunk(
 		roundi(player.position.x / 8),
 		roundi(player.position.y / 8)
 	)
@@ -186,7 +186,13 @@ func send_region(start_chunk: Vector2i, end_chunk: Vector2i, autotile := false) 
 		height * TileManager.CHUNK_SIZE
 	)
 	
+	# send tile data
 	load_chunks.rpc_id(player.owner_id, meta, data)
+	
+	# load chunk entities
+	for x in range(start_chunk.x, end_chunk.x):
+		for y in range(start_chunk.y, end_chunk.y):
+			EntityManager.load_chunk(Vector2i(x, y), player.owner_id)
 
 @rpc("authority", "call_remote", "reliable")
 func load_chunks(meta: int, data: PackedByteArray) -> void:
