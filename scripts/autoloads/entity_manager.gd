@@ -110,8 +110,6 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	# TODO: verify attack
 	
-	print("Received: ", snapshot)
-	
 	# send to relavent players
 	for player in entity.interested_players:
 		entity.hp.receive_damage_snapshot.rpc_id(player, snapshot)
@@ -134,6 +132,10 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 			loaded_entities[entity_info.entity_id] = entity
 			
 			get_tree().current_scene.get_node(^'entities').add_child(entity)
+		
+		# mark player as interested
+		var entity: Entity = loaded_entities[entity_info.entity_id]
+		entity.interested_players[player_id] = true
 		
 		# send to player
 		load_tile_entity.rpc_id(player_id,

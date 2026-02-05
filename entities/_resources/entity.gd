@@ -4,7 +4,7 @@ extends Node2D
 # --- Variables --- #
 var id := 0
 var data: Dictionary[StringName, Variant]
-var interested_players: Array[int] = []
+var interested_players: Dictionary[int, bool] = {}
 
 @export var hp: EntityHp
 
