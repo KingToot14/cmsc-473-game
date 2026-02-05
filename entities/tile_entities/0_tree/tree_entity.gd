@@ -48,3 +48,12 @@ func setup_entity() -> void:
 	
 	tree_top.position.y = -(height + 1) * 8.0
 	tree_top.show()
+
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed(&'test_input'):
+		return
+	
+	hp.take_damage({
+		&'damage': 25,
+		&'player_id': multiplayer.get_unique_id()
+	})
