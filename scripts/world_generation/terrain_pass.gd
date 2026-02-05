@@ -116,7 +116,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# set world paramters
 	gen.surface_high = surface_high
 	gen.surface_low = surface_low
-	gen.underground_high = underground_high
+	gen.underground_high = max(underground_high, surface_low + 20)
 	gen.underground_low = underground_low
 
 func fill_column(x: int) -> void:

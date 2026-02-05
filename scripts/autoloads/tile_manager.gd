@@ -25,7 +25,7 @@ func _update_world_size(size: Vector2i) -> void:
 	world_height = size.y
 
 #region Positions
-func chunk_to_tile(chunk_x: int, chunk_y: int, x: int, y: int) -> Vector2i:
+func chunk_to_tile(chunk_x: int, chunk_y: int, x: int = 0, y: int = 0) -> Vector2i:
 	return Vector2i(chunk_x * CHUNK_SIZE + x, chunk_y * CHUNK_SIZE + y)
 
 func tile_to_chunk(tile_x: int, tile_y: int) -> Vector2i:
@@ -33,6 +33,16 @@ func tile_to_chunk(tile_x: int, tile_y: int) -> Vector2i:
 	return Vector2i(
 		clampi(tile_x / CHUNK_SIZE, 0, Globals.world_chunks.x),
 		clampi(tile_y / CHUNK_SIZE, 0, Globals.world_chunks.y)
+	)
+
+func tile_to_world(tile_x: int, tile_y: int) -> Vector2:
+	return Vector2(tile_x * 8.0, tile_y * 8.0)
+
+func world_to_tile(world_x: int, world_y: int) -> Vector2i:
+	@warning_ignore("integer_division")
+	return Vector2i(
+		clampi(world_x / 8, 0, Globals.world_size.x),
+		clampi(world_y / 8, 0, Globals.world_size.y)
 	)
 
 #endregion

@@ -13,7 +13,7 @@ var loaded_tile_entities: Dictionary[int, Entity] = {}
 # --- Functions --- #
 func _ready() -> void:
 	# crawl files to add enemies to the list
-	crawl_registry('res://entities/enemies', enemy_registry)
+	crawl_registry('res://entities/dynamic_entities', enemy_registry)
 	crawl_registry('res://entities/tile_entities', tile_entity_registry)
 
 func crawl_registry(root_dir: String, registry: Array[String]) -> void:
@@ -42,14 +42,6 @@ func create_entity(
 	) -> void:
 	
 	pass
-	
-	#var entity: Entity = load(enemy_registry.get(registry_id)).instantiate()
-	#entity.position = position
-	#
-	#entity.initialize(curr_id, spawn_data)
-	#curr_id += 1
-	#
-	#get_tree().current_scene.get_node(^'entities').add_child(entity)
 
 func create_tile_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
@@ -65,14 +57,6 @@ func create_tile_entity(
 		anchored_entities[chunk] = []
 	
 	anchored_entities[chunk].append(entity_info)
-	
-	#var entity: Entity = load(tile_entity_registry.get(registry_id)).instantiate()
-	#entity.position = position
-	#
-	#entity.initialize(curr_id, spawn_data)
-	#curr_id += 1
-	#
-	#get_tree().current_scene.get_node(^'entities').add_child(entity)
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(
@@ -92,9 +76,13 @@ func load_tile_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant], spawn_id: int
 	) -> void:
 	
+	# don't re-instantiate existing entities
+	if loaded_tile_entities.get(spawn_id):
+		return
+	
 	# setup new entity
 	var entity: Entity = load(tile_entity_registry.get(registry_id)).instantiate()
-	entity.position = position
+	entity.position = TileManager.tile_to_world(position.x, position.y)
 	entity.name = "entity_%s" % spawn_id
 	
 	entity.initialize(spawn_id, spawn_data)
