@@ -183,16 +183,17 @@ script = ExtResource("7_o6xl0")
 metadata/_custom_type_script = "uid://dtgcrr7uk7csi"
 
 [node name="world_tiles" type="Node2D" parent="." unique_id=1191194627]
-z_index = 50
 script = ExtResource("3_jyhfs")
 
 [node name="walls" type="TileMapLayer" parent="world_tiles" unique_id=1336934811]
+z_index = 10
 tile_set = ExtResource("5_tefeu")
 occlusion_enabled = false
 rendering_quadrant_size = 8
 navigation_enabled = false
 
 [node name="blocks" type="TileMapLayer" parent="world_tiles" unique_id=592496937]
+z_index = 50
 tile_set = ExtResource("4_tbgi4")
 occlusion_enabled = false
 rendering_quadrant_size = 8
