@@ -4,6 +4,8 @@ extends Node
 const SERVER_IP = '127.0.0.1'
 const SERVER_PORT = 7000
 
+var connected_players: Dictionary[int, PlayerController] = {}
+
 # --- Functions --- #
 func _ready() -> void:
 	var args := Globals.parse_arguments()
@@ -74,6 +76,7 @@ func _on_player_connect(id: int) -> void:
 	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
 	player.name = "player_%s" % id
 	player.owner_id = id
+	connected_players[id] = player
 	
 	# set position
 	player.spawn_point = Globals.world_spawn * 8.0
@@ -92,6 +95,7 @@ func _on_player_disconnect(id: int) -> void:
 	print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
 	
 	var player = get_tree().current_scene.get_node('players/player_%s' % id)
+	connected_players.erase(id)
 	
 	if player:
 		player.queue_free()

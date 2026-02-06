@@ -65,7 +65,23 @@ func _input(event: InputEvent) -> void:
 func _on_death(from_server: bool) -> void:
 	hide()
 	
-	print("(%s) Tree %s died (from server? %s)" % [Time.get_ticks_usec(), id, from_server])
+	# server spawns items
+	if multiplayer.is_server():
+		print("Spawning Items")
+		
+		print(position)
+		print(TileManager.world_to_tile(floori(position.x), floori(position.y)))
+		print()
+		
+		EntityManager.create_entity(
+			# item drop
+			0,
+			TileManager.world_to_tile(floori(position.x), floori(position.y)) + Vector2i(0, -10),
+			{
+				'item': 0,
+				'quantity': randi_range(1, 2)
+			}
+		)
 	
 	if from_server:
 		queue_free()

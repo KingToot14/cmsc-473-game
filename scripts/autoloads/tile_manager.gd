@@ -45,6 +45,13 @@ func world_to_tile(world_x: int, world_y: int) -> Vector2i:
 		clampi(world_y / 8, 0, Globals.world_size.y)
 	)
 
+func world_to_chunk(world_x: int, world_y) -> Vector2i:
+	@warning_ignore("integer_division")
+	return Vector2i(
+		clampi(world_x / (8 * CHUNK_SIZE), 0, Globals.world_chunks.x),
+		clampi(world_y / (8 * CHUNK_SIZE), 0, Globals.world_chunks.y)
+	)
+
 #endregion
 
 #region Tile Access

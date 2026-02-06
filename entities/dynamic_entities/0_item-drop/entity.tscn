@@ -1,7 +1,25 @@
 [gd_scene format=3 uid="uid://bgb0dk7lc5p22"]
 
-[ext_resource type="Script" uid="uid://b6a1ebw2o1kln" path="res://entities/_resources/entity.gd" id="1_nu8wb"]
+[ext_resource type="Script" uid="uid://cj532dptk6urm" path="res://entities/dynamic_entities/0_item-drop/item_drop_entity.gd" id="1_nu8wb"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_x7v6d"]
 
-[node name="entity" type="Node2D" unique_id=1040933523]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x7v6d"]
+size = Vector2(8, 8)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_x7v6d"]
+radius = 16.0
+
+[node name="entity" type="CharacterBody2D" unique_id=551616400]
 script = ExtResource("1_nu8wb")
-metadata/_custom_type_script = "uid://b6a1ebw2o1kln"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
+shape = SubResource("RectangleShape2D_x7v6d")
+
+[node name="collection_range" type="Area2D" parent="." unique_id=510789130]
+
+[node name="shape" type="CollisionShape2D" parent="collection_range" unique_id=1076774422]
+shape = SubResource("CircleShape2D_x7v6d")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=114185450]
+z_index = 100
+texture = ExtResource("2_x7v6d")
