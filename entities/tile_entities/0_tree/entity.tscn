@@ -7,11 +7,7 @@
 
 [node name="tree" type="Node2D" unique_id=2081166833 node_paths=PackedStringArray("hp")]
 script = ExtResource("1_h6ae8")
-process_on_client = null
-dynamic = false
 hp = NodePath("hp")
-free_on_despawn = null
-despawn_time = null
 
 [node name="hp" type="Node" parent="." unique_id=663159688 node_paths=PackedStringArray("entity")]
 script = ExtResource("2_awuoa")

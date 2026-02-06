@@ -72,7 +72,7 @@ func _on_death(from_server: bool) -> void:
 			0,
 			TileManager.world_to_tile(floori(position.x), floori(position.y)) + Vector2i(0, -10),
 			{
-				'item': 0,
+				'item_id': 0,
 				'quantity': randi_range(1, 2)
 			}
 		)

@@ -35,6 +35,12 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 	id = new_id
 	data = spawn_data
 	
+	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	
+	var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
+	if interpolator:
+		interpolator.interested_players = interested_players.keys()
+	
 	setup_entity()
 	
 	if hp:
@@ -71,7 +77,7 @@ func add_interest(player_id: int) -> void:
 	check_interest()
 
 func remove_interest(player_id: int) -> void:
-	interested_players[player_id] = false
+	interested_players.erase(player_id)
 	
 	check_interest()
 
@@ -88,6 +94,11 @@ func check_interest() -> void:
 	if interest_count == 0:
 		lost_all_interest.emit()
 		_despawn_timer = despawn_time
+	
+	# update interpolator
+	var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
+	if interpolator:
+		interpolator.interested_players = interested_players.keys()
 
 func scan_interest() -> void:
 	var load_range := ChunkLoader.LOAD_RANGE
@@ -99,7 +110,7 @@ func scan_interest() -> void:
 		
 		# skip out of range players
 		if abs(diff.x) > load_range.x or abs(diff.y) > load_range.y:
-			interested_players[player_id] = false
+			interested_players.erase(player_id)
 			continue
 		
 		# set interested
