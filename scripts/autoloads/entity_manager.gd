@@ -8,7 +8,7 @@ var tile_entity_registry: Array[String] = []
 
 var anchored_entities: Dictionary[Vector2i, Array] = {}
 
-var loaded_entities: Dictionary[int, Entity] = {}
+var loaded_entities: Dictionary[int, Node2D] = {}
 
 # --- Functions --- #
 func _ready() -> void:
@@ -117,7 +117,7 @@ func load_tile_entity(
 	if not entity_path:
 		return
 	
-	var entity: Entity = load(entity_path).instantiate()
+	var entity: TileEntity = load(entity_path).instantiate()
 	entity.position = TileManager.tile_to_world(position.x, position.y)
 	entity.name = "entity_%s" % spawn_id
 	
@@ -131,7 +131,7 @@ func load_tile_entity(
 #region Entity Management
 @rpc('any_peer', 'call_remote', "reliable")
 func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
-	var entity: Entity = loaded_entities[entity_id]
+	var entity: Node2D = loaded_entities[entity_id]
 	
 	if not (entity and entity.hp):
 		return
@@ -160,7 +160,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		# create entity server-side
 		if not entity_info.entity_id in loaded_entities:
 			@warning_ignore("confusable_local_declaration")
-			var entity: Entity = load(tile_entity_registry.get(entity_info.registry_id)).instantiate()
+			var entity: TileEntity = load(tile_entity_registry.get(entity_info.registry_id)).instantiate()
 			entity.position = TileManager.tile_to_world(
 				entity_info.anchor_point.x,
 				entity_info.anchor_point.y
@@ -173,7 +173,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 			get_tree().current_scene.get_node(^'entities').add_child(entity)
 		
 		# mark player as interested
-		var entity: Entity = loaded_entities[entity_info.entity_id]
+		var entity: TileEntity = loaded_entities[entity_info.entity_id]
 		if not is_instance_valid(entity):
 			loaded_entities.erase(entity_info.entity_id)
 			return
@@ -188,10 +188,10 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 func unload_chunk(chunk: Vector2i, player_id: int) -> void:
 	print("Loaded chunk %s from player '%s'" % [chunk, player_id])
 
-func erase_entity(entity: Entity) -> void:
+func erase_entity(entity: Node2D) -> void:
 	loaded_entities.erase(entity.id)
 	
-	if multiplayer.is_server() and not entity.dynamic:
+	if multiplayer.is_server() and entity is TileEntity:
 		var chunk: Array = anchored_entities.get(entity.current_chunk, [])
 		chunk.erase(entity.id)
 		

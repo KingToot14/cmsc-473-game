@@ -6,7 +6,7 @@ signal hp_modified()
 signal died(from_server: bool)
 
 # --- Variables --- #
-@export var entity: Entity
+@export var entity: Node2D
 @export var max_hp := 100
 var curr_hp := 0
 

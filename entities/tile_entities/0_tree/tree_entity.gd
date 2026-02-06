@@ -1,5 +1,5 @@
 class_name TreeEntity
-extends Entity
+extends TileEntity
 
 # --- Variables --- #
 
