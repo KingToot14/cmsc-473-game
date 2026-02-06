@@ -112,3 +112,10 @@ func scan_interest() -> void:
 	check_interest()
 
 #endregion
+
+#region Life Cycle
+func standard_death() -> void:
+	EntityManager.erase_entity(self)
+	queue_free()
+
+#endregion

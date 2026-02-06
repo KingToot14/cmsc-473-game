@@ -67,12 +67,6 @@ func _on_death(from_server: bool) -> void:
 	
 	# server spawns items
 	if multiplayer.is_server():
-		print("Spawning Items")
-		
-		print(position)
-		print(TileManager.world_to_tile(floori(position.x), floori(position.y)))
-		print()
-		
 		EntityManager.create_entity(
 			# item drop
 			0,
@@ -84,4 +78,4 @@ func _on_death(from_server: bool) -> void:
 		)
 	
 	if from_server:
-		queue_free()
+		standard_death()

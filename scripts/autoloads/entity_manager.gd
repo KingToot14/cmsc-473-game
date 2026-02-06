@@ -94,9 +94,6 @@ func load_entity(
 		return
 	
 	var entity: Entity = load(entity_path).instantiate()
-	print(position)
-	print(TileManager.tile_to_world(position.x, position.y))
-	print()
 	
 	entity.position = TileManager.tile_to_world(position.x, position.y)
 	entity.name = "entity_%s" % spawn_id
@@ -190,6 +187,16 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 
 func unload_chunk(chunk: Vector2i, player_id: int) -> void:
 	print("Loaded chunk %s from player '%s'" % [chunk, player_id])
+
+func erase_entity(entity: Entity) -> void:
+	loaded_entities.erase(entity.id)
+	
+	if multiplayer.is_server() and not entity.dynamic:
+		var chunk: Array = anchored_entities.get(entity.current_chunk, [])
+		chunk.erase(entity.id)
+		
+		if len(chunk):
+			anchored_entities.erase(entity.current_chunk)
 
 #endregion
 
