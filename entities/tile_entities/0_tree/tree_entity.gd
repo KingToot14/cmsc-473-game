@@ -6,6 +6,10 @@ extends Entity
 
 # --- Functions --- #
 func setup_entity() -> void:
+	# setup signals
+	hp.died.connect(_on_death)
+	
+	# create deterministic rng
 	var rng := RandomNumberGenerator.new()
 	rng.seed = data.get(&'branch_seed', 0)
 	
@@ -57,3 +61,11 @@ func _input(event: InputEvent) -> void:
 		&'damage': 25,
 		&'player_id': multiplayer.get_unique_id()
 	})
+
+func _on_death(from_server: bool) -> void:
+	hide()
+	
+	print("(%s) Tree %s died (from server? %s)" % [Time.get_ticks_usec(), id, from_server])
+	
+	if from_server:
+		queue_free()

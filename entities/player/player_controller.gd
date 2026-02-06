@@ -27,7 +27,6 @@ func _ready() -> void:
 	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshop_interpolator'.enabled = true
-		$'sprite'.top_level = true
 	else:
 		# update position + control camera
 		position = spawn_point

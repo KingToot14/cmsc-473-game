@@ -3,7 +3,7 @@ extends Node
 
 # --- Signals --- #
 signal hp_modified()
-signal died()
+signal died(from_server: bool)
 
 # --- Variables --- #
 @export var entity: Entity
@@ -24,9 +24,7 @@ func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)
 	
 	# deal damage
-	modify_health(-damage)
-	
-	print("Took %s damage from %s" % [damage, dmg_info.get(&'player_id', 0)])
+	modify_health(-damage, false)
 	
 	# build attack snapshot
 	snapshots[sequence_id] = dmg_info.merged({
@@ -38,13 +36,11 @@ func take_damage(dmg_info: Dictionary) -> void:
 	# send data to server
 	EntityManager.entity_take_damage.rpc_id(1, entity.id, snapshots[sequence_id - 1])
 
-@rpc('authority', 'call_local', 'reliable')
+@rpc('authority', 'call_remote', 'reliable')
 func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	var damage: int = snapshot.get(&'damage', 0)
 	var player_id: int = snapshot.get(&'player_id', 0)
 	var seq_id: int = snapshot.get(&'sequence_id', 0)
-	
-	print("Received snapshot: ", snapshot)
 	
 	if player_id == multiplayer.get_unique_id():
 		var prev_snapshot: Dictionary = snapshots.get(seq_id)
@@ -55,15 +51,14 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 		# calculate difference in health
 		var diff = snapshot.get(&'damage', 0) - prev_snapshot.get(&'damage', 0)
 		
-		if diff > 0:
-			modify_health(-diff)
+		modify_health(-diff, true)
 	else:
-		modify_health(-damage)
+		modify_health(-damage, true)
 
-func modify_health(delta: int) -> void:
+func modify_health(delta: int, from_server: bool) -> void:
 	curr_hp += delta
 	hp_modified.emit()
 	
 	if curr_hp <= 0:
 		# TODO: Add effects and prediction to this area
-		died.emit()
+		died.emit(from_server)

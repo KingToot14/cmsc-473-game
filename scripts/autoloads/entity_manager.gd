@@ -109,6 +109,13 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 		return
 	
 	# TODO: verify attack
+	var damage: int = snapshot.get(&'damage', 0)
+	
+	# apply damage
+	entity.hp.modify_health(-damage, true)
+	
+	if entity.hp.curr_hp <= 0:
+		snapshot[&'entity_dead'] = true
 	
 	# send to relavent players
 	for player in entity.interested_players:

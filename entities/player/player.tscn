@@ -49,7 +49,7 @@ metadata/_custom_type_script = "uid://dour8fehaaugp"
 [node name="snapshop_interpolator" type="Node" parent="." unique_id=1391114518 node_paths=PackedStringArray("root", "visual_root")]
 script = ExtResource("5_qiwj3")
 root = NodePath("..")
-visual_root = NodePath("../sprite")
+visual_root = NodePath("..")
 update_root = false
 auto_start = false
 metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
