@@ -23,11 +23,10 @@ func _ready() -> void:
 	
 	$'rollback_sync'.process_settings()
 	
-	$'snapshop_interpolator'.owner_id = owner_id
+	$'snapshot_interpolator'.owner_id = owner_id
 	
 	if owner_id != multiplayer.get_unique_id():
-		$'snapshop_interpolator'.enabled = true
-		$'sprite'.top_level = true
+		$'snapshot_interpolator'.enabled = true
 	else:
 		# update position + control camera
 		position = spawn_point

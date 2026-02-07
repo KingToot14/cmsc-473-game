@@ -19,35 +19,25 @@ func _ready() -> void:
 	
 	await player.ready
 	
-	current_chunk = TileManager.tile_to_chunk(
-		roundi(player.position.x / 8.0),
-		roundi(player.position.y / 8.0)
-	)
+	current_chunk = TileManager.world_to_chunk(floori(player.position.x), floori(player.position.y))
 
 func _process(_delta: float) -> void:
-	var new_chunk = TileManager.tile_to_chunk(
-		roundi(player.position.x / 8.0),
-		roundi(player.position.y / 8.0)
-	)
+	var new_chunk = TileManager.world_to_chunk(floori(player.position.x), floori(player.position.y))
 	
-	var diff := (new_chunk - current_chunk).abs()
-	if diff.x + diff.y >= 1:
+	var diff: Vector2i = new_chunk - current_chunk
+	if abs(diff.x) + abs(diff.y) >= 1:
+		current_chunk = new_chunk
+		
 		if multiplayer.is_server():
 			# server sends chunk updates
-			send_boundary(new_chunk - current_chunk)
+			send_boundary(diff)
 		else:
 			# client autotiles
-			autotile_boundary(new_chunk - current_chunk)
-		
-		current_chunk = new_chunk
+			autotile_boundary(diff)
 
 func clear_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.tile_to_chunk(
-		roundi(player.position.x / 8),
-		roundi(player.position.y / 8)
-	)
-	var start_chunk := (center_chunk - LOAD_RANGE)
-	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
+	var start_chunk := current_chunk - LOAD_RANGE
+	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
 	
 	if boundary.x < 0:
 		end_chunk.x = start_chunk.x - boundary.x
@@ -74,12 +64,8 @@ func clear_boundary(boundary: Vector2i) -> void:
 	Globals.world_map.clear_region(start_chunk.x, start_chunk.y, width, height)
 
 func send_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.tile_to_chunk(
-		roundi(player.position.x / 8),
-		roundi(player.position.y / 8)
-	)
-	var start_chunk := (center_chunk - LOAD_RANGE)
-	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
+	var start_chunk := current_chunk - LOAD_RANGE
+	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
 	
 	if boundary.x < 0:
 		end_chunk.x = start_chunk.x - boundary.x
@@ -93,12 +79,8 @@ func send_boundary(boundary: Vector2i) -> void:
 	send_region(start_chunk, end_chunk)
 
 func autotile_boundary(boundary: Vector2i) -> void:
-	var center_chunk := TileManager.tile_to_chunk(
-		roundi(player.position.x / 8),
-		roundi(player.position.y / 8)
-	)
-	var start_chunk := (center_chunk - VISUAL_RANGE)
-	var end_chunk := center_chunk + VISUAL_RANGE + Vector2i.ONE
+	var start_chunk := current_chunk - VISUAL_RANGE
+	var end_chunk := current_chunk + VISUAL_RANGE + Vector2i.ONE
 	
 	if boundary.x < 0:
 		end_chunk.x = start_chunk.x - boundary.x
@@ -141,12 +123,8 @@ func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int) -> void
 		await get_tree().process_frame
 
 func send_whole_area() -> void:
-	var center_chunk := TileManager.tile_to_chunk(
-		roundi(player.position.x / 8),
-		roundi(player.position.y / 8)
-	)
-	var start_chunk := (center_chunk - LOAD_RANGE)
-	var end_chunk := center_chunk + LOAD_RANGE + Vector2i.ONE
+	var start_chunk := (current_chunk - LOAD_RANGE)
+	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
 	
 	send_region(start_chunk, end_chunk, true)
 

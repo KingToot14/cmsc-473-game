@@ -1,4 +1,4 @@
-class_name SnapshopInterpolator
+class_name SnapshotInterpolator
 extends Node
 
 # --- Variables --- #
@@ -12,6 +12,9 @@ const BUFFER_SIZE := PHYSICS_TICKS * BUFFER_SEC
 @export var visual_root: Node2D
 @export var update_root := true
 @export var auto_start := true
+
+@export var update_all := false
+var interested_players: Array[int] = []
 
 var owner_id := 0:
 	set(id):
@@ -38,7 +41,11 @@ func _physics_process(_delta: float) -> void:
 	if is_multiplayer_authority():
 		if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
 			# send snapshot
-			send_snapshot.rpc(root.global_position, NetworkTime.tick)
+			if update_all:
+				interested_players = ServerManager.connected_players.keys()
+			
+			for player_id in interested_players:
+				send_snapshot.rpc_id(player_id, root.global_position, NetworkTime.tick)
 	else:
 		interpolate_snapshots()
 
