@@ -28,6 +28,8 @@ var _despawn_timer := 0.0
 func _ready() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 	
+	_despawn_timer = despawn_time
+	
 	if not process_on_client and not multiplayer.is_server():
 		set_process(false)
 
@@ -36,10 +38,6 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 	data = spawn_data
 	
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
-	
-	var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
-	if interpolator:
-		interpolator.interested_players = interested_players.keys()
 	
 	setup_entity()
 	

@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bgb0dk7lc5p22"]
 
 [ext_resource type="Script" uid="uid://cj532dptk6urm" path="res://entities/dynamic_entities/0_item-drop/item_drop_entity.gd" id="1_nu8wb"]
-[ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="2_mgq5h"]
 [ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_x7v6d"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x7v6d"]
@@ -12,13 +11,9 @@ radius = 16.0
 
 [node name="entity" type="CharacterBody2D" unique_id=551616400]
 script = ExtResource("1_nu8wb")
-
-[node name="snapshot_interpolator" type="Node" parent="." unique_id=1770257662 node_paths=PackedStringArray("root", "visual_root")]
-script = ExtResource("2_mgq5h")
-root = NodePath("..")
-visual_root = NodePath("..")
-update_root = false
-metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
+gravity = 500.0
+terminal_velocity = 500.0
+process_on_client = true
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
 shape = SubResource("RectangleShape2D_x7v6d")

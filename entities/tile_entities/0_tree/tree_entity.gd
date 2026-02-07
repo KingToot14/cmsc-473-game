@@ -2,7 +2,8 @@ class_name TreeEntity
 extends TileEntity
 
 # --- Variables --- #
-
+var height := 0
+var branch_seed := 0
 
 # --- Functions --- #
 func setup_entity() -> void:
@@ -11,7 +12,8 @@ func setup_entity() -> void:
 	
 	# create deterministic rng
 	var rng := RandomNumberGenerator.new()
-	rng.seed = data.get(&'branch_seed', 0)
+	branch_seed = data.get(&'branch_seed', 0)
+	rng.seed = branch_seed
 	
 	# create visuals
 	var sprite: TileMapLayer = $'sprite'
@@ -24,7 +26,7 @@ func setup_entity() -> void:
 	sprite.set_cell(Vector2i(1, 0), variant, Vector2i(1, 0))
 	
 	# main body
-	var height := rng.randi_range(15, 21)
+	height = rng.randi_range(15, 21)
 	var last_branch_l := 0
 	var last_branch_r := 0
 	
@@ -67,15 +69,20 @@ func _on_death(from_server: bool) -> void:
 	
 	# server spawns items
 	if multiplayer.is_server():
-		EntityManager.create_entity(
-			# item drop
-			0,
-			TileManager.world_to_tile(floori(position.x), floori(position.y)) + Vector2i(0, -10),
-			{
-				'item_id': 0,
-				'quantity': randi_range(1, 2)
-			}
-		)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = branch_seed
+		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
+		
+		for y in range(height):
+			EntityManager.create_entity(
+				# item drop
+				0,
+				base_position + Vector2i(rng.randi_range(0, 1), -height - 1),
+				{ 
+					'item_id': 0,
+					'quantity': randi_range(1, 2)
+				}
+			)
 	
 	if from_server:
 		standard_death()

@@ -2,9 +2,9 @@ class_name ItemDropEntity
 extends Entity
 
 # --- Variables --- #
-@export var gravity := 100.0
+@export var gravity := 980.0
 @export var air_resistance := 0.5
-@export var terminal_velocity := 10.0
+@export var terminal_velocity := 980.0
 
 var texture: Texture2D
 var item_id := 0
