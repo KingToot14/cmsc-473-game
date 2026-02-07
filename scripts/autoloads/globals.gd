@@ -18,6 +18,8 @@ var world_spawn: Vector2i
 var server_map: ServerTileMap
 var world_map: WorldTileMap
 
+var hovered_hitbox: TileEntityHitbox
+
 # --- Functions --- #
 func _ready() -> void:
 	world_size = world_size

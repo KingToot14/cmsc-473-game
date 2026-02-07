@@ -13,7 +13,7 @@ func setup_entity() -> void:
 	rng.seed = branch_seed
 	
 	# create visuals
-	var sprite: TileMapLayer = $'sprite'
+	var sprite: TileMapLayer = $'visuals/sprite'
 	var variant: int = data.get(&'variant', 0)
 	
 	# trunk
@@ -70,7 +70,11 @@ func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
 		return
 	
-	hp_pool[0].take_damage({
+	# only break hovered tree
+	if $'hitbox' != Globals.hovered_hitbox:
+		return
+	
+	hp_pool[4].take_damage({
 		&'damage': 25,
 		&'player_id': multiplayer.get_unique_id()
 	})
@@ -80,6 +84,8 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 	
 	# server spawns items
 	if multiplayer.is_server():
+		# calculate number of layers destroyed
+		
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))

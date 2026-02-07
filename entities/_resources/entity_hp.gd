@@ -46,9 +46,9 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	var seq_id: int = snapshot.get(&'sequence_id', 0)
 	
 	if player_id == multiplayer.get_unique_id():
-		var prev_snapshot: Dictionary = snapshots.get(seq_id)
+		var prev_snapshot: Dictionary = snapshots.get(seq_id, {})
 		
-		if not prev_snapshot:
+		if prev_snapshot.is_empty():
 			return
 		
 		# calculate difference in health

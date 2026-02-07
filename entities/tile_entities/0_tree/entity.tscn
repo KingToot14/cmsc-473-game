@@ -3,12 +3,18 @@
 [ext_resource type="Script" uid="uid://dw56xaq3k2uek" path="res://entities/tile_entities/0_tree/tree_entity.gd" id="1_h6ae8"]
 [ext_resource type="TileSet" uid="uid://bslwlmjmcwrva" path="res://entities/tile_entities/0_tree/tree_tiles.tres" id="2_54gn5"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/tile_entity_hitbox.gd" id="4_awuoa"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ered6"]
+size = Vector2(12, 112)
 
 [node name="tree" type="Node2D" unique_id=2081166833]
 script = ExtResource("1_h6ae8")
 
-[node name="sprite" type="TileMapLayer" parent="." unique_id=1112404873]
+[node name="visuals" type="CanvasGroup" parent="." unique_id=1326278262]
 z_index = 25
+
+[node name="sprite" type="TileMapLayer" parent="visuals" unique_id=1112404873]
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAEAAAABAAAAAAABAAAAAAABAAEAAAABAAEAAAAAAP//AAACAAAAAAABAP//AAADAAAAAAAAAP7/AAACAAIAAAABAP7/AAADAAEAAAAAAP3/AAACAAAAAAABAP3/AAADAAIAAAAAAPz/AAACAAEAAAABAPz/AAADAAAAAAAAAPv/AAACAAMAAAABAPv/AAADAAAAAAAAAPr/AAACAAAAAAABAPr/AAADAAMAAAAAAPn/AAACAAIAAAABAPn/AAADAAAAAAAAAPj/AAACAAAAAAABAPj/AAADAAEAAAAAAPf/AAACAAEAAAABAPf/AAADAAAAAAAAAPb/AAACAAAAAAABAPb/AAADAAIAAAAAAPX/AAACAAMAAAABAPX/AAADAAAAAAAAAPT/AAACAAIAAAABAPT/AAADAAAAAAAAAPP/AAACAAEAAAABAPP/AAADAAEAAAAAAPL/AAACAAAAAAABAPL/AAADAAMAAAAAAPH/AAACAAAAAAABAPH/AAADAAAAAAA=")
 tile_set = ExtResource("2_54gn5")
 
@@ -16,3 +22,10 @@ tile_set = ExtResource("2_54gn5")
 z_index = 30
 position = Vector2(8, -128)
 texture = ExtResource("3_ered6")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=1642795612]
+position = Vector2(8, -56)
+script = ExtResource("4_awuoa")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1673221865]
+shape = SubResource("RectangleShape2D_ered6")
