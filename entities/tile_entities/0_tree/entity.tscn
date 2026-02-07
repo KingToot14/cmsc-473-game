@@ -2,17 +2,10 @@
 
 [ext_resource type="Script" uid="uid://dw56xaq3k2uek" path="res://entities/tile_entities/0_tree/tree_entity.gd" id="1_h6ae8"]
 [ext_resource type="TileSet" uid="uid://bslwlmjmcwrva" path="res://entities/tile_entities/0_tree/tree_tiles.tres" id="2_54gn5"]
-[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_awuoa"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
 
-[node name="tree" type="Node2D" unique_id=2081166833 node_paths=PackedStringArray("hp")]
+[node name="tree" type="Node2D" unique_id=2081166833]
 script = ExtResource("1_h6ae8")
-hp = NodePath("hp")
-
-[node name="hp" type="Node" parent="." unique_id=663159688 node_paths=PackedStringArray("entity")]
-script = ExtResource("2_awuoa")
-entity = NodePath("..")
-metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="sprite" type="TileMapLayer" parent="." unique_id=1112404873]
 z_index = 25

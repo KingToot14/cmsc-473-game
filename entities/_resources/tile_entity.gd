@@ -15,7 +15,7 @@ var interest_count := 0
 
 var current_chunk: Vector2i
 
-@export var hp: EntityHp
+@export var hp_pool: Array[EntityHp]
 
 # --- Functions --- #
 func _ready() -> void:
@@ -27,7 +27,7 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 	
 	setup_entity()
 	
-	if hp:
+	for hp in hp_pool:
 		hp.setup()
 
 func setup_entity() -> void:

@@ -7,9 +7,6 @@ var branch_seed := 0
 
 # --- Functions --- #
 func setup_entity() -> void:
-	# setup signals
-	hp.died.connect(_on_death)
-	
 	# create deterministic rng
 	var rng := RandomNumberGenerator.new()
 	branch_seed = data.get(&'branch_seed', 0)
@@ -27,6 +24,20 @@ func setup_entity() -> void:
 	
 	# main body
 	height = rng.randi_range(15, 21)
+	hp_pool.resize(height)
+	
+	for i in range(height):
+		var hp := EntityHp.new()
+		hp.name = "HP_%s" % i
+		
+		hp.entity = self
+		hp.set_max_hp(100)
+		
+		hp_pool[i] = hp
+		hp_pool[i].died.connect(_on_death.bind(i))
+		
+		add_child(hp)
+	
 	var last_branch_l := 0
 	var last_branch_r := 0
 	
@@ -59,12 +70,12 @@ func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
 		return
 	
-	hp.take_damage({
+	hp_pool[0].take_damage({
 		&'damage': 25,
 		&'player_id': multiplayer.get_unique_id()
 	})
 
-func _on_death(from_server: bool) -> void:
+func _on_death(from_server: bool, pool_id: int) -> void:
 	hide()
 	
 	# server spawns items
