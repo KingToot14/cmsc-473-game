@@ -10,8 +10,9 @@ size = Vector2(8, 8)
 radius = 16.0
 
 [node name="entity" type="CharacterBody2D" unique_id=551616400]
+collision_layer = 32
+collision_mask = 3
 script = ExtResource("1_nu8wb")
-gravity = 500.0
 terminal_velocity = 500.0
 process_on_client = true
 

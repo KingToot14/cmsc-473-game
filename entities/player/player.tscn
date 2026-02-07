@@ -23,6 +23,8 @@ height = 22.0
 [node name="player" type="CharacterBody2D" unique_id=1210066617]
 z_index = 100
 y_sort_enabled = true
+collision_layer = 2
+collision_mask = 25
 script = ExtResource("1_abrql")
 move_speed = 300.0
 

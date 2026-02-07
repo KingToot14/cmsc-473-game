@@ -17,6 +17,9 @@ func _process(delta: float) -> void:
 	if interest_count == 0:
 		return
 	
+	if is_on_floor():
+		return
+	
 	# air resistance
 	if velocity.x < 0:
 		velocity.x = minf(0.0, velocity.x + air_resistance * delta)
@@ -27,6 +30,9 @@ func _process(delta: float) -> void:
 	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
 	
 	move_and_slide()
+	
+	if is_on_floor():
+		pass
 
 func setup_entity() -> void:
 	velocity = data.get(&'velocity', Vector2.ZERO)

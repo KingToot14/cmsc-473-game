@@ -62,7 +62,39 @@ func create_entity(
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
 	for player in entity.interested_players:
-		load_entity.rpc_id(player, registry_id, position, entity.data, entity.id)
+		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
+
+func create_entities(
+		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant]
+	) -> void:
+	
+	var entity_path: String = enemy_registry.get(registry_id)
+	if not entity_path:
+		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
+		return
+	
+	# create new entity
+	var start_id := curr_id
+	var interested_players: Array[int]
+	
+	for position in positions:
+		var entity: Entity = load(entity_path).instantiate()
+		entity.position = TileManager.tile_to_world(position.x, position.y)
+		entity.name = "entity_%s" % curr_id
+		
+		entity.initialize(curr_id, spawn_data)
+		loaded_entities[curr_id] = entity
+		curr_id += 1
+		
+		# check interest
+		entity.scan_interest()
+		interested_players = entity.interested_players.keys()
+		
+		get_tree().current_scene.get_node(^'entities').add_child(entity)
+	
+	# send to players
+	for player in interested_players:
+		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id, curr_id - 1)
 
 func create_tile_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
@@ -103,6 +135,36 @@ func load_entity(
 	loaded_entities[spawn_id] = entity
 	
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
+
+@rpc('authority', 'call_remote', 'reliable')
+func load_entities(
+		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant], 
+		spawn_id_start: int, spawn_id_end: int
+	) -> void:
+	
+	# setup new entity
+	var entity_path: String = enemy_registry.get(registry_id)
+	if not entity_path:
+		return
+	
+	for i in range(len(positions)):
+		var position := positions[i]
+		var spawn_id := spawn_id_start + i
+		
+		# don't re-instantiate existing entities
+		if loaded_entities.get(spawn_id):
+			continue
+		
+		var entity: Entity = load(entity_path).instantiate()
+		entity.add_interest(multiplayer.get_unique_id())
+		
+		entity.position = TileManager.tile_to_world(position.x, position.y)
+		entity.name = "entity_%s" % spawn_id
+		
+		entity.initialize(spawn_id, spawn_data)
+		loaded_entities[spawn_id] = entity
+		
+		get_tree().current_scene.get_node(^'entities').add_child(entity)
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_tile_entity(

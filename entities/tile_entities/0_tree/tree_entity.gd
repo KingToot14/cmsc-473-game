@@ -72,17 +72,21 @@ func _on_death(from_server: bool) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
+		var positions: Array[Vector2i] = []
+		positions.resize(height)
 		
 		for y in range(height):
-			EntityManager.create_entity(
-				# item drop
-				0,
-				base_position + Vector2i(rng.randi_range(0, 1), -height - 1),
-				{ 
-					'item_id': 0,
-					'quantity': randi_range(1, 2)
-				}
-			)
+			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -height - 1)
+		
+		EntityManager.create_entities(
+			# item drop
+			0,
+			positions,
+			{ 
+				'item_id': 0,
+				'quantity': randi_range(1, 2)
+			}
+		)
 	
 	if from_server:
 		standard_death()
