@@ -33,6 +33,7 @@ func setup_entity() -> void:
 	for i in range(height):
 		var hp := EntityHp.new()
 		hp.name = "HP_%s" % i
+		hp.pool_id = i
 		
 		hp.entity = self
 		hp.set_max_hp(100)
@@ -118,21 +119,22 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 	if multiplayer.is_server():
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
+		
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
 		var positions: Array[Vector2i] = []
 		positions.resize(curr_height - pool_id)
 		
 		# create items for each layer
-		for y in range(pool_id, curr_height):
-			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + 2))
+		for y in range(curr_height - pool_id):
+			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
 		
 		EntityManager.create_entities(
 			# item drop
 			0,
 			positions,
 			{
-				'item_id': 0,
-				'quantity': randi_range(1, 2)
+				&'item_id': 0,
+				&'quantity': randi_range(1, 2)
 			}
 		)
 	

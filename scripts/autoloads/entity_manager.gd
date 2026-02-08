@@ -60,6 +60,10 @@ func create_entity(
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
 	for player in entity.interested_players:
+		if player not in ServerManager.connected_players.keys():
+			entity.remove_interest(player)
+			continue
+		
 		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
 
 func create_entities(
@@ -92,6 +96,9 @@ func create_entities(
 	
 	# send to players
 	for player in interested_players:
+		if player not in ServerManager.connected_players.keys():
+			continue
+		
 		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id, curr_id - 1)
 
 func create_tile_entity(
@@ -209,6 +216,10 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	# send to relavent players
 	for player in entity.interested_players:
+		if player not in ServerManager.connected_players.keys():
+			entity.remove_interest(player)
+			continue
+		
 		entity.hp_pool[pool_id].receive_damage_snapshot.rpc_id(player, snapshot)
 
 #endregion
