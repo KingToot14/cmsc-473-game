@@ -9,6 +9,8 @@ const INTERPOLATE_SPEED := 10.0
 		# make sure only the client updates the movement
 		$'input_sync'.set_multiplayer_authority(id)
 		owner_id = id
+		
+		Globals.player = self
 
 @export var spawn_point: Vector2i
 

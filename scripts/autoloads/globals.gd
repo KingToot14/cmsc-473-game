@@ -20,6 +20,8 @@ var world_map: WorldTileMap
 
 var hovered_hitbox: TileEntityHitbox
 
+var player: PlayerController
+
 # --- Functions --- #
 func _ready() -> void:
 	world_size = world_size

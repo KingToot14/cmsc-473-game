@@ -83,14 +83,14 @@ func resize_tree() -> void:
 	# hide leaves
 	$'tree_top'.hide()
 	
-	# clear old trees
-	for y in range(curr_height, height):
-		sprite.erase_cell(Vector2i(0, -(y + 1)))
-		sprite.erase_cell(Vector2i(1, -(y + 1)))
-	
 	# set stump texture
 	sprite.set_cell(Vector2i(0, -(curr_height + 1)), variant, Vector2i(0, 2))
 	sprite.set_cell(Vector2i(1, -(curr_height + 1)), variant, Vector2i(1, 2))
+	
+	# clear old trees
+	for y in range(curr_height + 1, height):
+		sprite.erase_cell(Vector2i(0, -(y + 1)))
+		sprite.erase_cell(Vector2i(1, -(y + 1)))
 	
 	# hitbox
 	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
@@ -104,7 +104,13 @@ func _input(event: InputEvent) -> void:
 	if $'hitbox' != Globals.hovered_hitbox:
 		return
 	
-	damage_layer(4, 25)
+	# calculate global mouse position
+	var mouse_position := get_global_mouse_position()
+	var world_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
+	
+	var layer = abs(world_position.y - tile_position.y) - 1
+	
+	damage_layer(layer, 25)
 
 func damage_layer(layer_id: int, damage: int) -> void:
 	var hp := hp_pool[layer_id]
@@ -163,6 +169,7 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			}
 		)
 	
-	curr_height = pool_id - 1
+	curr_height = pool_id
 	
-	resize_tree()
+	if curr_height > 0:
+		resize_tree()

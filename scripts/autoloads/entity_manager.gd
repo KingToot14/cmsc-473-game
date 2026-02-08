@@ -99,7 +99,7 @@ func create_entities(
 		if player not in ServerManager.connected_players.keys():
 			continue
 		
-		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id, curr_id - 1)
+		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id)
 
 func create_tile_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
@@ -144,7 +144,7 @@ func load_entity(
 @rpc('authority', 'call_remote', 'reliable')
 func load_entities(
 		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant], 
-		spawn_id_start: int, spawn_id_end: int
+		spawn_id_start: int
 	) -> void:
 	
 	# setup new entity

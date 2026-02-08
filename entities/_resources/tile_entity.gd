@@ -14,6 +14,7 @@ var interested_players: Dictionary[int, bool] = {}
 var interest_count := 0
 
 var current_chunk: Vector2i
+var tile_position: Vector2i
 
 @export var hp_pool: Array[EntityHp]
 
@@ -26,6 +27,7 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 	data = spawn_data
 	
 	setup_entity()
+	tile_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
 	
 	for hp in hp_pool:
 		hp.setup()
