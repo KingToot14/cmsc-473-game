@@ -69,3 +69,6 @@ func modify_health(delta: int, from_server: bool) -> void:
 func set_max_hp(hp: int) -> void:
 	max_hp = hp
 	curr_hp = hp
+
+func get_hp_percent() -> float:
+	return 1.0 * curr_hp / max_hp

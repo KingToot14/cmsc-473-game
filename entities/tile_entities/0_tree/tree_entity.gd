@@ -19,6 +19,8 @@ func setup_entity() -> void:
 	var sprite: TileMapLayer = $'sprite'
 	variant = data.get(&'variant', 0)
 	
+	sprite.clear()
+	
 	# trunk
 	sprite.set_cell(Vector2i(0, 1), variant, Vector2i(0, 1))
 	sprite.set_cell(Vector2i(1, 1), variant, Vector2i(1, 1))
@@ -87,8 +89,8 @@ func resize_tree() -> void:
 		sprite.erase_cell(Vector2i(1, -(y + 1)))
 	
 	# set stump texture
-	sprite.set_cell(Vector2i(0, -(curr_height)), variant, Vector2i(0, 2))
-	sprite.set_cell(Vector2i(1, -(curr_height)), variant, Vector2i(1, 2))
+	sprite.set_cell(Vector2i(0, -(curr_height + 1)), variant, Vector2i(0, 2))
+	sprite.set_cell(Vector2i(1, -(curr_height + 1)), variant, Vector2i(1, 2))
 	
 	# hitbox
 	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
@@ -102,10 +104,33 @@ func _input(event: InputEvent) -> void:
 	if $'hitbox' != Globals.hovered_hitbox:
 		return
 	
-	hp_pool[4].take_damage({
-		&'damage': 25,
+	damage_layer(4, 25)
+
+func damage_layer(layer_id: int, damage: int) -> void:
+	var hp := hp_pool[layer_id]
+	
+	# deal damage to pool
+	hp.take_damage({
+		&'damage': damage,
 		&'player_id': multiplayer.get_unique_id()
 	})
+	
+	# update sprite
+	var threshold := hp.get_hp_percent()
+	var sprite: TileMapLayer = $'sprite'
+	
+	if threshold < 0.25:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 3))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 3))
+	elif threshold < 0.50:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 2))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 2))
+	elif threshold < 0.75:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 1))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 1))
+	else:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 0))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 0))
 
 func _on_death(from_server: bool, pool_id: int) -> void:
 	# destroy tree when last layer is broken
