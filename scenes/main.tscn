@@ -9,7 +9,6 @@
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 
 [node name="main" type="Node2D" unique_id=1976494311]
-position = Vector2(102, 0)
 
 [node name="join_ui" type="CanvasLayer" parent="." unique_id=185611908]
 visible = false

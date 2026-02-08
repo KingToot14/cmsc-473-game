@@ -34,6 +34,18 @@ func _ready() -> void:
 		position = spawn_point
 		$'camera'.enabled = true
 
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed(&'test_input'):
+		return
+	
+	var mouse_pos := get_local_mouse_position() + global_position
+	var tile_pos := TileManager.world_to_tile(floori(mouse_pos.x), floori(mouse_pos.y))
+	
+	var this_pos := TileManager.world_to_tile(floori(global_position.x), floori(global_position.y))
+	
+	print(mouse_pos, " | ", tile_pos, " | ", global_position, " | ", this_pos)
+	print(TileManager.get_block(tile_pos.x, tile_pos.y))
+
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
