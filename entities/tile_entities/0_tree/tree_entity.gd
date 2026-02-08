@@ -2,8 +2,11 @@ class_name TreeEntity
 extends TileEntity
 
 # --- Variables --- #
-var height := 0
 var branch_seed := 0
+
+var height := 0
+var curr_height := 0
+var variant := 0
 
 # --- Functions --- #
 func setup_entity() -> void:
@@ -13,8 +16,8 @@ func setup_entity() -> void:
 	rng.seed = branch_seed
 	
 	# create visuals
-	var sprite: TileMapLayer = $'visuals/sprite'
-	var variant: int = data.get(&'variant', 0)
+	var sprite: TileMapLayer = $'sprite'
+	variant = data.get(&'variant', 0)
 	
 	# trunk
 	sprite.set_cell(Vector2i(0, 1), variant, Vector2i(0, 1))
@@ -24,6 +27,7 @@ func setup_entity() -> void:
 	
 	# main body
 	height = rng.randi_range(15, 21)
+	curr_height = height
 	hp_pool.resize(height)
 	
 	for i in range(height):
@@ -49,7 +53,7 @@ func setup_entity() -> void:
 			if branch == last_branch_l:
 				branch = 0
 			last_branch_l = branch
-		sprite.set_cell(Vector2i(0, -y - 1), variant, Vector2i(2, branch))
+		sprite.set_cell(Vector2i(0, -(y + 1)), variant, Vector2i(2, branch))
 		
 		# right
 		branch = 0
@@ -58,13 +62,36 @@ func setup_entity() -> void:
 			if branch == last_branch_r or branch == last_branch_l:
 				branch = 0
 			last_branch_r = branch
-		sprite.set_cell(Vector2i(1, -y - 1), variant, Vector2i(3, branch))
+		sprite.set_cell(Vector2i(1, -(y + 1)), variant, Vector2i(3, branch))
 	
 	# tree top
 	var tree_top := $'tree_top'
 	
-	tree_top.position.y = -(height + 1) * 8.0
+	tree_top.position.y = -(height + 2) * 8.0
 	tree_top.show()
+	
+	# hitbox
+	$'hitbox'.position.y = -(height * 8.0 / 2.0)
+	$'hitbox/shape'.shape.size.y = (height * 8.0)
+
+func resize_tree() -> void:
+	var sprite: TileMapLayer = $'sprite'
+	
+	# hide leaves
+	$'tree_top'.hide()
+	
+	# clear old trees
+	for y in range(curr_height, height):
+		sprite.erase_cell(Vector2i(0, -(y + 1)))
+		sprite.erase_cell(Vector2i(1, -(y + 1)))
+	
+	# set stump texture
+	sprite.set_cell(Vector2i(0, -(curr_height)), variant, Vector2i(0, 2))
+	sprite.set_cell(Vector2i(1, -(curr_height)), variant, Vector2i(1, 2))
+	
+	# hitbox
+	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
+	$'hitbox/shape'.shape.size.y = (curr_height * 8.0)
 
 func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
@@ -80,30 +107,35 @@ func _input(event: InputEvent) -> void:
 	})
 
 func _on_death(from_server: bool, pool_id: int) -> void:
-	hide()
+	# destroy tree when last layer is broken
+	if pool_id == 0:
+		hide()
+		
+		if from_server:
+			standard_death()
 	
 	# server spawns items
 	if multiplayer.is_server():
-		# calculate number of layers destroyed
-		
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
 		var positions: Array[Vector2i] = []
-		positions.resize(height)
+		positions.resize(curr_height - pool_id)
 		
-		for y in range(height):
-			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -height - 1)
+		# create items for each layer
+		for y in range(pool_id, curr_height):
+			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + 2))
 		
 		EntityManager.create_entities(
 			# item drop
 			0,
 			positions,
-			{ 
+			{
 				'item_id': 0,
 				'quantity': randi_range(1, 2)
 			}
 		)
 	
-	if from_server:
-		standard_death()
+	curr_height = pool_id - 1
+	
+	resize_tree()

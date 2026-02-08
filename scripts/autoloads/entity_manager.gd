@@ -156,7 +156,7 @@ func load_entities(
 		var entity: Entity = load(entity_path).instantiate()
 		entity.add_interest(multiplayer.get_unique_id())
 		
-		entity.position = TileManager.tile_to_world(position.x, position.y)
+		entity.position = TileManager.tile_to_world(position.x, position.y, true)
 		entity.name = "entity_%s" % spawn_id
 		
 		entity.initialize(spawn_id, spawn_data)

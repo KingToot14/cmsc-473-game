@@ -35,8 +35,12 @@ func tile_to_chunk(tile_x: int, tile_y: int) -> Vector2i:
 		clampi(tile_y / CHUNK_SIZE, 0, Globals.world_chunks.y)
 	)
 
-func tile_to_world(tile_x: int, tile_y: int) -> Vector2:
-	return Vector2(tile_x * 8.0, tile_y * 8.0)
+func tile_to_world(tile_x: int, tile_y: int, center := false) -> Vector2:
+	var offset := 0.0
+	if center:
+		offset = 4.0
+	
+	return Vector2(tile_x * 8.0 + offset, tile_y * 8.0 + offset)
 
 func world_to_tile(world_x: int, world_y: int) -> Vector2i:
 	@warning_ignore("integer_division")
