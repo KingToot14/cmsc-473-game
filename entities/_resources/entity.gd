@@ -17,7 +17,7 @@ var current_chunk: Vector2i
 
 @export var process_on_client := false
 
-@export var hp: EntityHp
+@export var hp_pool: Array[EntityHp]
 
 @export_group("Despawning")
 @export var free_on_despawn := true
@@ -41,7 +41,7 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 	
 	setup_entity()
 	
-	if hp:
+	for hp in hp_pool:
 		hp.setup()
 
 func _process(delta: float) -> void:

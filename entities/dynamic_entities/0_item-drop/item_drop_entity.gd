@@ -2,9 +2,11 @@ class_name ItemDropEntity
 extends Entity
 
 # --- Variables --- #
+const UPWARD_RANDOM_POWER := 200.0
+
 @export var gravity := 980.0
-@export var air_resistance := 0.5
-@export var terminal_velocity := 980.0
+@export var air_resistance := 100.0
+@export var terminal_velocity := 380.0
 
 var texture: Texture2D
 var item_id := 0
@@ -35,9 +37,18 @@ func _process(delta: float) -> void:
 		pass
 
 func setup_entity() -> void:
-	velocity = data.get(&'velocity', Vector2.ZERO)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = id
+	
 	item_id  = data.get(&'item_id', -1)
 	quantity = data.get(&'quantity', 1)
+	var spawn_type: StringName = data.get(&'spawn_type', &'upward_random')
 	
 	if item_id == -1:
 		standard_death()
+		return
+	
+	# spawn behavior
+	match spawn_type:
+		&'upward_random':
+			velocity = Vector2(rng.randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER

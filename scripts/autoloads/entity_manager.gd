@@ -3,8 +3,8 @@ extends Node
 # --- Variables --- #
 var curr_id := 0
 
-var enemy_registry: Array[String] = []
-var tile_entity_registry: Array[String] = []
+var enemy_registry: Dictionary[int, String] = {}
+var tile_entity_registry: Dictionary[int, String] = {}
 
 var anchored_entities: Dictionary[Vector2i, Array] = {}
 
@@ -16,10 +16,8 @@ func _ready() -> void:
 	crawl_registry('res://entities/dynamic_entities', enemy_registry)
 	crawl_registry('res://entities/tile_entities', tile_entity_registry)
 
-func crawl_registry(root_dir: String, registry: Array[String]) -> void:
+func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
-	
-	registry.resize(len(entity_dir.get_directories()))
 	
 	for dir_name in entity_dir.get_directories():
 		var id_str := dir_name.split('_')[0]
@@ -62,6 +60,10 @@ func create_entity(
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
 	for player in entity.interested_players:
+		if player not in ServerManager.connected_players.keys():
+			entity.remove_interest(player)
+			continue
+		
 		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
 
 func create_entities(
@@ -94,7 +96,10 @@ func create_entities(
 	
 	# send to players
 	for player in interested_players:
-		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id, curr_id - 1)
+		if player not in ServerManager.connected_players.keys():
+			continue
+		
+		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id)
 
 func create_tile_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
@@ -139,7 +144,7 @@ func load_entity(
 @rpc('authority', 'call_remote', 'reliable')
 func load_entities(
 		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant], 
-		spawn_id_start: int, spawn_id_end: int
+		spawn_id_start: int
 	) -> void:
 	
 	# setup new entity
@@ -158,7 +163,7 @@ func load_entities(
 		var entity: Entity = load(entity_path).instantiate()
 		entity.add_interest(multiplayer.get_unique_id())
 		
-		entity.position = TileManager.tile_to_world(position.x, position.y)
+		entity.position = TileManager.tile_to_world(position.x, position.y, true)
 		entity.name = "entity_%s" % spawn_id
 		
 		entity.initialize(spawn_id, spawn_data)
@@ -196,21 +201,26 @@ func load_tile_entity(
 func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	var entity: Node2D = loaded_entities[entity_id]
 	
-	if not (entity and entity.hp):
+	if not (entity and len(entity.hp_pool) > 0):
 		return
 	
 	# TODO: verify attack
 	var damage: int = snapshot.get(&'damage', 0)
+	var pool_id: int = snapshot.get(&'pool_id', 0)
 	
 	# apply damage
-	entity.hp.modify_health(-damage, true)
+	entity.hp_pool[pool_id].modify_health(-damage, true)
 	
-	if entity.hp.curr_hp <= 0:
+	if entity.hp_pool[pool_id].curr_hp <= 0:
 		snapshot[&'entity_dead'] = true
 	
 	# send to relavent players
 	for player in entity.interested_players:
-		entity.hp.receive_damage_snapshot.rpc_id(player, snapshot)
+		if player not in ServerManager.connected_players.keys():
+			entity.remove_interest(player)
+			continue
+		
+		entity.hp_pool[pool_id].receive_damage_snapshot.rpc_id(player, snapshot)
 
 #endregion
 
@@ -256,7 +266,7 @@ func erase_entity(entity: Node2D) -> void:
 	
 	if multiplayer.is_server() and entity is TileEntity:
 		var chunk: Array = anchored_entities.get(entity.current_chunk, [])
-		chunk.erase(entity.id)
+		chunk.erase(entity)
 		
 		if len(chunk):
 			anchored_entities.erase(entity.current_chunk)

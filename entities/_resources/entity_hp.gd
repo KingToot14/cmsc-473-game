@@ -7,6 +7,8 @@ signal died(from_server: bool)
 
 # --- Variables --- #
 @export var entity: Node2D
+@export var pool_id := 0
+
 @export var max_hp := 100
 var curr_hp := 0
 
@@ -29,6 +31,7 @@ func take_damage(dmg_info: Dictionary) -> void:
 	# build attack snapshot
 	snapshots[sequence_id] = dmg_info.merged({
 		&'sequence_id': sequence_id,
+		&'pool_id': pool_id
 	})
 	
 	sequence_id += 1
@@ -43,9 +46,9 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	var seq_id: int = snapshot.get(&'sequence_id', 0)
 	
 	if player_id == multiplayer.get_unique_id():
-		var prev_snapshot: Dictionary = snapshots.get(seq_id)
+		var prev_snapshot: Dictionary = snapshots.get(seq_id, {})
 		
-		if not prev_snapshot:
+		if prev_snapshot.is_empty():
 			return
 		
 		# calculate difference in health
@@ -62,3 +65,10 @@ func modify_health(delta: int, from_server: bool) -> void:
 	if curr_hp <= 0:
 		# TODO: Add effects and prediction to this area
 		died.emit(from_server)
+
+func set_max_hp(hp: int) -> void:
+	max_hp = hp
+	curr_hp = hp
+
+func get_hp_percent() -> float:
+	return 1.0 * curr_hp / max_hp
