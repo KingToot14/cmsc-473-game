@@ -222,6 +222,27 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 		
 		entity.hp_pool[pool_id].receive_damage_snapshot.rpc_id(player, snapshot)
 
+@rpc('any_peer', 'call_remote', 'reliable')
+func entity_send_update(entity_id: int, data: Dictionary) -> void:
+	var entity: Node2D = loaded_entities.get(entity_id)
+	
+	if not entity:
+		return
+	
+	# send to all interested players
+	for player in entity.interested_players.keys():
+		entity_receive_update.rpc_id(player, entity_id, data)
+
+@rpc('authority', 'call_remote', 'reliable')
+func entity_receive_update(entity_id: int, data: Dictionary) -> void:
+	var entity: Node2D = loaded_entities.get(entity_id)
+	
+	if not entity:
+		return
+	
+	# load update
+	entity.receive_update(data)
+
 #endregion
 
 #region Interest Management

@@ -11,8 +11,13 @@ const UPWARD_RANDOM_POWER := 200.0
 var texture: Texture2D
 var item_id := 0
 var quantity := 1
+var merged := false
 
 # --- Functions --- #
+func _ready() -> void:
+	$'merge_range'.monitoring = false
+	$'merge_range'.area_entered.connect(_on_area_entered)
+
 func _process(delta: float) -> void:
 	super(delta)
 	
@@ -33,8 +38,9 @@ func _process(delta: float) -> void:
 	
 	move_and_slide()
 	
-	if is_on_floor():
-		pass
+	# attempt to merge with nearby items
+	if is_on_floor() and multiplayer.is_server():
+		$'merge_range'.monitoring = true
 
 func setup_entity() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -52,3 +58,43 @@ func setup_entity() -> void:
 	match spawn_type:
 		&'upward_random':
 			velocity = Vector2(rng.randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
+
+func _on_area_entered(area: Area2D) -> void:
+	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
+		return
+	
+	# don't merge already merged items
+	if merged:
+		return
+	
+	var other_item: ItemDropEntity = area.get_parent()
+	
+	# make sure item ids match
+	if item_id != other_item.item_id:
+		return
+	
+	# make sure there's enough space
+	if quantity + other_item.quantity > 9999:
+		return
+	
+	other_item.merged = true
+	quantity += other_item.quantity
+	
+	EntityManager.entity_send_update(id, {
+		&'type': &'merge-owner',
+		&'quantity': other_item.quantity
+	})
+	EntityManager.entity_send_update(other_item.id, {
+		&'type': &'merge-kill'
+	})
+
+func receive_update(update_data: Dictionary) -> void:
+	super(update_data)
+	
+	var type: StringName = update_data.get(&'type', &'none')
+	
+	match type:
+		&'merge-owner':
+			quantity += update_data.get(&'quantity', 0)
+		&'merge-kill':
+			standard_death()
