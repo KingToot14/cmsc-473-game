@@ -33,7 +33,11 @@ func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> voi
 		hp.setup()
 
 func setup_entity() -> void:
-	pass
+	return
+
+func receive_update(update_data: Dictionary) -> void:
+	if update_data.get(&'kill'):
+		standard_death()
 
 #region Interest
 func add_interest(player_id: int) -> void:
