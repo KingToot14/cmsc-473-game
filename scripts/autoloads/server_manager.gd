@@ -1,8 +1,7 @@
 extends Node
 
-# --- Variables --- #
-const SERVER_IP = '127.0.0.1'
-const SERVER_PORT = 7000
+# --- Variables --- # 
+const DEFAULT_PORT = 7000
 
 var connected_players: Dictionary[int, PlayerController] = {}
 
@@ -17,6 +16,25 @@ func _ready() -> void:
 		# get seed
 		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
 		var world_seed = args.get('seed', randi())
+		
+		# world generation flags
+		var world_name: String = args.get('world_name', '')
+		var delete_mode: bool = args.get('delete', false)
+		
+		# TODO: Add world loading + deletion
+		if not world_name.strip_edges().is_empty():
+			if delete_mode:
+				print("[Wizbowo's Conquest] Deleting world '%s' (Not implemented)" % world_name)
+				get_tree().quit()
+				return
+			else:
+				print("[Wizbowo's Conquest] Loading world '%s' (Not implemented)" % world_name)
+				get_tree().quit()
+				return
+		elif delete_mode:
+			printerr("[Wizbowo's Conquest] Must specify world name to delete")
+			get_tree().quit()
+			return
 		
 		# start world generation
 		world_gen.set_seed(world_seed)
@@ -33,17 +51,32 @@ func _ready() -> void:
 			ChunkLoader.LOAD_RANGE.y * 2 * TileManager.CHUNK_SIZE
 		)
 		
-		start_server()
+		# start server
+		var port = args.get('port', DEFAULT_PORT)
+		if port is String:
+			if port.is_valid_int():
+				port = int(port)
+			else:
+				printerr("[Wizbowo's Conquest] Port '%s' is not a valid integer" % port)
+		
+		var max_connections = args.get('max_connections', 32)
+		if max_connections is String:
+			if max_connections.is_valid_int():
+				max_connections = int(max_connections)
+			else:
+				printerr("[Wizbowo's Conquest] Max Connections '%s' is not a valid integer" % max_connections)
+		
+		start_server(port, max_connections)
 	else:
 		get_tree().current_scene.get_node(^'join_ui').show()
 
 #region Server Connections
-func start_server() -> Error:
-	print("[Wizbowo's Conquest] Starting server on port %s" % SERVER_PORT)
+func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
+	print("[Wizbowo's Conquest] Starting server on port %s" % DEFAULT_PORT)
 	
 	# create the server peer
 	var peer := ENetMultiplayerPeer.new()
-	var error = peer.create_server(SERVER_PORT)
+	var error = peer.create_server(DEFAULT_PORT, max_connections)
 	
 	if error:
 		print("[Wizbowo's Conquest] ERROR: %s" % error_string(error))
