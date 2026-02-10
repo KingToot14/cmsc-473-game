@@ -128,3 +128,12 @@ func standard_death() -> void:
 	queue_free()
 
 #endregion
+
+#region Interaction
+func interact_with() -> bool:
+	return true
+
+func break_place() -> bool:
+	return true
+
+#endregion
