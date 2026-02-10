@@ -1,4 +1,4 @@
-class_name Item
+dadad5wasdwasdclass_name Item
 extends Resource
 
 # --- Enums --- #

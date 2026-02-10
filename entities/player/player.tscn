@@ -54,7 +54,6 @@ root = NodePath("..")
 visual_root = NodePath("..")
 update_root = false
 auto_start = false
-update_all = true
 metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 
 [node name="chunk_loader" type="Node" parent="." unique_id=51122964 node_paths=PackedStringArray("player")]
