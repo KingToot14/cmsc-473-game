@@ -45,6 +45,7 @@ func setup_entity() -> void:
 		hp_pool[i].died.connect(_on_death.bind(i))
 		
 		add_child(hp)
+		hp_pool[i].setup()
 	
 	var last_branch_l := 0
 	var last_branch_r := 0
@@ -147,7 +148,7 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			standard_death()
 	
 	# server spawns items
-	if multiplayer.is_server():
+	if multiplayer and multiplayer.is_server():
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		

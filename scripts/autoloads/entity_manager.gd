@@ -6,7 +6,8 @@ var curr_id := 0
 var enemy_registry: Dictionary[int, String] = {}
 var tile_entity_registry: Dictionary[int, String] = {}
 
-var anchored_entities: Dictionary[Vector2i, Dictionary] = {}
+var tile_entities: Dictionary[Vector2i, Dictionary] = {}
+var dynamic_entities: Dictionary[Vector2i, Dictionary] = {}
 
 var loaded_entities: Dictionary[int, Node2D] = {}
 
@@ -113,10 +114,10 @@ func create_tile_entity(
 	# add to chunk container
 	var chunk := TileManager.tile_to_chunk(position.x, position.y)
 	
-	if chunk not in anchored_entities:
-		anchored_entities[chunk] = {}
+	if chunk not in tile_entities:
+		tile_entities[chunk] = {}
 	
-	anchored_entities[chunk][curr_id - 1] = entity_info
+	tile_entities[chunk][curr_id - 1] = entity_info
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(
@@ -213,6 +214,17 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	# apply damage
 	entity.hp_pool[pool_id].modify_health(-damage, true)
 	
+	# store hp
+	if entity is TileEntity:
+		var entity_info: TileEntityInfo = tile_entities[entity.current_chunk][entity.id]
+		
+		if &'hp' not in entity_info.data:
+			entity_info.data[&'hp'] = {}
+		
+		entity_info.data[&'hp'][pool_id] = entity.hp_pool[pool_id].curr_hp
+	else:
+		pass
+	
 	if entity.hp_pool[pool_id].curr_hp <= 0:
 		snapshot[&'entity_dead'] = true
 	
@@ -249,11 +261,11 @@ func entity_receive_update(entity_id: int, data: Dictionary) -> void:
 
 #region Interest Management
 func load_chunk(chunk: Vector2i, player_id: int) -> void:
-	if chunk not in anchored_entities:
+	if chunk not in tile_entities:
 		return
 	
-	for entity_id in anchored_entities[chunk]:
-		var entity_info: TileEntityInfo = anchored_entities[chunk][entity_id]
+	for entity_id in tile_entities[chunk]:
+		var entity_info: TileEntityInfo = tile_entities[chunk][entity_id]
 		
 		# create entity server-side
 		if not entity_info.entity_id in loaded_entities:
@@ -271,11 +283,11 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 			get_tree().current_scene.get_node(^'entities').add_child(entity)
 		
 		# mark player as interested
-		var entity: TileEntity = loaded_entities[entity_info.entity_id]
-		if not is_instance_valid(entity):
+		if not is_instance_valid(loaded_entities[entity_info.entity_id]):
 			loaded_entities.erase(entity_info.entity_id)
 			return
 		
+		var entity: TileEntity = loaded_entities[entity_info.entity_id]
 		entity.add_interest(player_id)
 		
 		# send to player
@@ -290,11 +302,14 @@ func erase_entity(entity: Node2D) -> void:
 	loaded_entities.erase(entity.id)
 	
 	if multiplayer.is_server() and entity is TileEntity:
-		var chunk: Dictionary = anchored_entities.get(entity.current_chunk, {})
+		var chunk: Dictionary = tile_entities.get(entity.current_chunk, {})
 		chunk.erase(entity)
 		
 		if len(chunk) == 0:
-			anchored_entities.erase(entity.id)
+			tile_entities.erase(entity.id)
+
+func move_dynamic_entity() -> void:
+	pass
 
 #endregion
 
