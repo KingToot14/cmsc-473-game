@@ -12,6 +12,7 @@ var texture: Texture2D
 var item_id := 0
 var quantity := 1
 var merged := false
+var spawned := false
 
 # --- Functions --- #
 func _ready() -> void:
@@ -36,6 +37,10 @@ func _process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	
+	# update server for synching
+	if multiplayer.is_server():
+		data[&'velocity'] = velocity
+	
 	move_and_slide()
 	
 	# attempt to merge with nearby items
@@ -43,11 +48,15 @@ func _process(delta: float) -> void:
 		$'merge_range'.monitoring = true
 
 func setup_entity() -> void:
+	# load from data
+	item_id  = data.get(&'item_id', -1)
+	quantity = data.get(&'quantity', 1)
+	merged   = data.get(&'merged', false)
+	velocity = data.get(&'velocity', Vector2.ZERO)
+	
 	var rng := RandomNumberGenerator.new()
 	rng.seed = id
 	
-	item_id  = data.get(&'item_id', -1)
-	quantity = data.get(&'quantity', 1)
 	var spawn_type: StringName = data.get(&'spawn_type', &'upward_random')
 	
 	if item_id == -1:
@@ -57,6 +66,10 @@ func setup_entity() -> void:
 	# item info
 	var item_info: Item = Globals.get_item(item_id)
 	$'sprite'.texture = item_info.texture
+	
+	# don't run spawn logic if already spawned
+	if not data.get(&'spawned', true):
+		return
 	
 	# spawn behavior
 	match spawn_type:
@@ -81,8 +94,8 @@ func _on_area_entered(area: Area2D) -> void:
 	if quantity + other_item.quantity > 9999:
 		return
 	
-	other_item.merged = true
 	quantity += other_item.quantity
+	data[&'quantity'] = quantity
 	
 	EntityManager.entity_send_update(id, {
 		&'type': &'merge-owner',
@@ -91,6 +104,10 @@ func _on_area_entered(area: Area2D) -> void:
 	EntityManager.entity_send_update(other_item.id, {
 		&'type': &'merge-kill'
 	})
+	
+	# clear other item
+	other_item.merged = true
+	other_item.standard_death()
 
 func receive_update(update_data: Dictionary) -> void:
 	super(update_data)

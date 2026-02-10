@@ -9,6 +9,7 @@ signal despawn()
 
 # --- Variables --- #
 var id := 0
+var registry_id := 0
 var data: Dictionary[StringName, Variant]
 var interested_players: Dictionary[int, bool] = {}
 var interest_count := 0
@@ -33,8 +34,9 @@ func _ready() -> void:
 	if not process_on_client and not multiplayer.is_server():
 		set_process(false)
 
-func initialize(new_id: int, spawn_data: Dictionary[StringName, Variant]) -> void:
+func initialize(new_id: int, reg_id: int, spawn_data: Dictionary[StringName, Variant]) -> void:
 	id = new_id
+	registry_id = reg_id
 	data = spawn_data
 	
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
@@ -61,8 +63,9 @@ func _process(delta: float) -> void:
 	var new_chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 	
 	if new_chunk != current_chunk:
-		current_chunk = new_chunk
+		EntityManager.move_dynamic_entity(id, current_chunk, new_chunk)
 		
+		current_chunk = new_chunk
 		scan_interest()
 
 func setup_entity() -> void:
