@@ -84,10 +84,10 @@ func standard_death() -> void:
 #endregion
 
 #region Interaction
-func interact_with() -> bool:
+func interact_with(_tile_position: Vector2i) -> bool:
 	return true
 
-func break_place() -> bool:
+func break_place(_tile_position: Vector2i) -> bool:
 	return true
 
 #endregion

@@ -1,5 +1,5 @@
 class_name InputSynchronizer
-extends Node
+extends Node2D
 
 # --- Variables --- #
 @export var player: PlayerController
@@ -20,18 +20,24 @@ func _ready() -> void:
 	NetworkTime.before_tick_loop.connect(_gather)
 
 func _input(event: InputEvent) -> void:
+	# calculate global mouse position
+	var mouse_position := get_global_mouse_position()
+	var tile_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
+	
 	# only used for client-side interaction
 	if event.is_action_pressed(&'interact'):
-		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with():
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(tile_position):
 			return
 	if event.is_action_pressed(&'break_place'):
 		# check hovered hitbox
-		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place():
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
 			return
 		
-		# check blocks
+		# check blocks TODO: Add simple destroying functionality for testing
+		if TileManager.destroy_block(tile_position.x, tile_position.y):
+			return
 		
-		# check walls
+		# check walls TODO: See above
 
 func _gather() -> void:
 	if not is_multiplayer_authority():
