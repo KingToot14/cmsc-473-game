@@ -33,11 +33,11 @@ func _input(event: InputEvent) -> void:
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
 			return
 		
-		# check blocks TODO: Add simple destroying functionality for testing
+		# check blocks
 		if TileManager.destroy_block(tile_position.x, tile_position.y):
 			return
 		
-		# check walls TODO: See above
+		# check walls
 		if TileManager.destroy_wall(tile_position.x, tile_position.y):
 			return
 
