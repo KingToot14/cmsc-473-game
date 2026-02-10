@@ -249,6 +249,35 @@ func destroy_block(x: int, y: int) -> bool:
 	
 	return true
 
+func destroy_wall(x: int, y: int) -> bool:
+	# do not process if no block exists
+	if not TileManager.get_wall(x, y):
+		return false
+	
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# TODO: Check player's current tool
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# set tile to air
+	TileManager.set_wall_unsafe(x, y, 0)
+	Globals.world_map.update_tile(x, y)
+	
+	# sync to server
+	update_tile_state.rpc_id(1,
+		x, y, TileManager.tiles[x + y * world_width],
+		0,
+		multiplayer.get_unique_id()
+	)
+	
+	return true
+
 @rpc('any_peer', 'call_remote', 'reliable')
 func update_tile_state(x: int, y: int, tile: int, wepaon_id: int, player_id: int) -> void:
 	# check bounds
