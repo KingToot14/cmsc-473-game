@@ -100,12 +100,8 @@ func resize_tree() -> void:
 #endregion
 
 #region Interaction
-func break_place() -> bool:
-	# calculate global mouse position
-	var mouse_position := get_global_mouse_position()
-	var world_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
-	
-	var layer = abs(world_position.y - tile_position.y) - 1
+func break_place(tile_pos: Vector2i) -> bool:
+	var layer = abs(tile_pos.y - tile_position.y) - 1
 	
 	# TODO: Deal damage based on axe/tool
 	damage_layer(layer, 25)
