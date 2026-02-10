@@ -6,15 +6,15 @@ var curr_id := 0
 var enemy_registry: Dictionary[int, String] = {}
 var tile_entity_registry: Dictionary[int, String] = {}
 
-var anchored_entities: Dictionary[Vector2i, Array] = {}
+var anchored_entities: Dictionary[Vector2i, Dictionary] = {}
 
 var loaded_entities: Dictionary[int, Node2D] = {}
 
 # --- Functions --- #
 func _ready() -> void:
 	# crawl files to add enemies to the list
-	crawl_registry('res://entities/dynamic_entities', enemy_registry)
-	crawl_registry('res://entities/tile_entities', tile_entity_registry)
+	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
+	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
 
 func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
@@ -31,6 +31,8 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void
 		
 		if dir.file_exists('entity.tscn'):
 			registry[id] = root_dir.path_join(dir_name).path_join('entity.tscn')
+		elif dir.file_exists('entity.tscn.remap'):
+			registry[id] = root_dir.path_join(dir_name).path_join('entity.tscn').trim_suffix('.remap')
 		else:
 			printerr("[Wizbowo's Conquest] No file 'entity.tscn' found in directory %s" % dir_name)
 
@@ -112,9 +114,9 @@ func create_tile_entity(
 	var chunk := TileManager.tile_to_chunk(position.x, position.y)
 	
 	if chunk not in anchored_entities:
-		anchored_entities[chunk] = []
+		anchored_entities[chunk] = {}
 	
-	anchored_entities[chunk].append(entity_info)
+	anchored_entities[chunk][curr_id - 1] = entity_info
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(
@@ -250,7 +252,9 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 	if chunk not in anchored_entities:
 		return
 	
-	for entity_info: TileEntityInfo in anchored_entities[chunk]:
+	for entity_id in anchored_entities[chunk]:
+		var entity_info: TileEntityInfo = anchored_entities[chunk][entity_id]
+		
 		# create entity server-side
 		if not entity_info.entity_id in loaded_entities:
 			@warning_ignore("confusable_local_declaration")
@@ -286,11 +290,11 @@ func erase_entity(entity: Node2D) -> void:
 	loaded_entities.erase(entity.id)
 	
 	if multiplayer.is_server() and entity is TileEntity:
-		var chunk: Array = anchored_entities.get(entity.current_chunk, [])
+		var chunk: Dictionary = anchored_entities.get(entity.current_chunk, {})
 		chunk.erase(entity)
 		
-		if len(chunk):
-			anchored_entities.erase(entity.current_chunk)
+		if len(chunk) == 0:
+			anchored_entities.erase(entity.id)
 
 #endregion
 
