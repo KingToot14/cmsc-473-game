@@ -219,6 +219,96 @@ func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt
 
 #endregion
 
+#region Safe Interactions
+func destroy_block(x: int, y: int) -> bool:
+	# do not process if no block exists
+	if not TileManager.get_block(x, y):
+		return false
+	
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# TODO: Check player's current tool
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# set tile to air
+	TileManager.set_block_unsafe(x, y, 0)
+	Globals.world_map.update_tile(x, y)
+	
+	# sync to server
+	update_tile_state.rpc_id(1,
+		x, y, TileManager.tiles[x + y * world_width],
+		0,
+		multiplayer.get_unique_id()
+	)
+	
+	return true
+
+func destroy_wall(x: int, y: int) -> bool:
+	# do not process if no block exists
+	if not TileManager.get_wall(x, y):
+		return false
+	
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# TODO: Check player's current tool
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# set tile to air
+	TileManager.set_wall_unsafe(x, y, 0)
+	Globals.world_map.update_tile(x, y)
+	
+	# sync to server
+	update_tile_state.rpc_id(1,
+		x, y, TileManager.tiles[x + y * world_width],
+		0,
+		multiplayer.get_unique_id()
+	)
+	
+	return true
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func update_tile_state(x: int, y: int, tile: int, wepaon_id: int, player_id: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# TODO: Verify weapon id
+	
+	# TODO: Consider adding interest system to players
+	
+	# update local copy
+	TileManager.tiles[x + y * world_width] = tile
+	Globals.server_map.update_tile(x, y)
+	
+	# sync with all clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tile)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_tile_state(x: int, y: int, tile: int) -> void:
+	# don't update unchanged tiles
+	if TileManager.tiles[x + y * world_width] == tile:
+		return
+	
+	TileManager.tiles[x + y * world_width] = tile
+	Globals.world_map.update_tile(x, y)
+
+#endregion
+
 #region Chunk Access
 func load_chunks() -> void:
 	tiles = []

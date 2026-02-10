@@ -185,4 +185,26 @@ func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 		for x in range(width):
 			blocks.set_cell(Vector2i(start_x + x, start_y + y), 0, Vector2i(0, 0))
 
+func update_tile(x: int, y: int) -> void:
+	var blocks: TileMapLayer = $'blocks'
+	var walls: TileMapLayer = $'walls'
+	
+	var block := TileManager.get_block_unsafe(x, y)
+	var wall := TileManager.get_wall_unsafe(x, y)
+	
+	# set blocks
+	if block == 0:
+		blocks.erase_cell(Vector2i(x, y))
+	else:
+		blocks.set_cell(Vector2i(x, y), block, Vector2i(2, 2))
+	
+	# set walls
+	if wall == 0:
+		walls.erase_cell(Vector2i(x, y))
+	else:
+		walls.set_cell(Vector2i(x, y), wall, Vector2i(2, 2))
+	
+	# autotile neighbors
+	autotile_region(x - 1, y - 1, 3, 3)
+
 #endregion

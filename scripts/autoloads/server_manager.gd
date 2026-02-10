@@ -1,8 +1,7 @@
 extends Node
 
-# --- Variables --- #
-const SERVER_IP = '127.0.0.1'
-const SERVER_PORT = 7000
+# --- Variables --- # 
+const DEFAULT_PORT = 7000
 
 var connected_players: Dictionary[int, PlayerController] = {}
 
@@ -18,21 +17,66 @@ func _ready() -> void:
 		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
 		var world_seed = args.get('seed', randi())
 		
+		# world generation flags
+		var world_name: String = args.get('world_name', '')
+		var delete_mode: bool = args.get('delete', false)
+		
+		# TODO: Add world loading + deletion
+		if not world_name.strip_edges().is_empty():
+			if delete_mode:
+				print("[Wizbowo's Conquest] Deleting world '%s' (Not implemented)" % world_name)
+				get_tree().quit()
+				return
+			else:
+				print("[Wizbowo's Conquest] Loading world '%s' (Not implemented)" % world_name)
+				get_tree().quit()
+				return
+		elif delete_mode:
+			printerr("[Wizbowo's Conquest] Must specify world name to delete")
+			get_tree().quit()
+			return
+		
 		# start world generation
 		world_gen.set_seed(world_seed)
-		world_gen.generate_world()
+		await world_gen.generate_world()
 		
-		start_server()
+		# load initial spawn tilemap
+		print("[Wizbowo's Conquest] Loading Spawn Area Collision")
+		var center_chunk := TileManager.tile_to_chunk(Globals.world_spawn.x, Globals.world_spawn.y)
+		
+		await Globals.server_map.load_tiles(
+			(center_chunk - ChunkLoader.LOAD_RANGE).x * TileManager.CHUNK_SIZE,
+			(center_chunk - ChunkLoader.LOAD_RANGE).y * TileManager.CHUNK_SIZE,
+			ChunkLoader.LOAD_RANGE.x * 2 * TileManager.CHUNK_SIZE,
+			ChunkLoader.LOAD_RANGE.y * 2 * TileManager.CHUNK_SIZE
+		)
+		
+		# start server
+		var port = args.get('port', DEFAULT_PORT)
+		if port is String:
+			if port.is_valid_int():
+				port = int(port)
+			else:
+				printerr("[Wizbowo's Conquest] Port '%s' is not a valid integer" % port)
+		
+		var max_connections = args.get('max_connections', 32)
+		if max_connections is String:
+			if max_connections.is_valid_int():
+				max_connections = int(max_connections)
+			else:
+				printerr("[Wizbowo's Conquest] Max Connections '%s' is not a valid integer" % max_connections)
+		
+		start_server(port, max_connections)
 	else:
 		get_tree().current_scene.get_node(^'join_ui').show()
 
 #region Server Connections
-func start_server() -> Error:
-	print("[Wizbowo's Conquest] Starting server on port %s" % SERVER_PORT)
+func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
+	print("[Wizbowo's Conquest] Starting server on port %s" % DEFAULT_PORT)
 	
 	# create the server peer
 	var peer := ENetMultiplayerPeer.new()
-	var error = peer.create_server(SERVER_PORT)
+	var error = peer.create_server(DEFAULT_PORT, max_connections)
 	
 	if error:
 		print("[Wizbowo's Conquest] ERROR: %s" % error_string(error))
@@ -79,8 +123,9 @@ func _on_player_connect(id: int) -> void:
 	connected_players[id] = player
 	
 	# set position
-	player.spawn_point = Globals.world_spawn * 8.0
-	player.position = Globals.world_spawn * 8.0
+	var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
+	player.spawn_point = world_position
+	player.position = world_position
 	
 	get_tree().current_scene.get_node(^'players').add_child(player)
 	

@@ -141,7 +141,7 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 
 [node name="layer_2" type="Parallax2D" parent="background" unique_id=1081296847]
-scroll_scale = Vector2(0.1, 0)
+scroll_scale = Vector2(0.05, 0)
 repeat_size = Vector2(1440, 810)
 
 [node name="sprite" type="Sprite2D" parent="background/layer_2" unique_id=1183965369]
@@ -150,7 +150,7 @@ vframes = 5
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background" unique_id=694896544]
-scroll_scale = Vector2(0.2, 0)
+scroll_scale = Vector2(0.1, 0)
 repeat_size = Vector2(1440, 810)
 
 [node name="sprite" type="Sprite2D" parent="background/layer_3" unique_id=2072890722]
@@ -158,8 +158,21 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 2
 
+[node name="fog" type="ColorRect" parent="background/layer_3" unique_id=1327032755]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -720.0
+offset_top = -405.0
+offset_right = 720.0
+offset_bottom = 405.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.47058824)
+
 [node name="layer_4" type="Parallax2D" parent="background" unique_id=878093720]
-scroll_scale = Vector2(0.5, 0)
+scroll_scale = Vector2(0.2, 0)
 repeat_size = Vector2(1440, 810)
 
 [node name="sprite" type="Sprite2D" parent="background/layer_4" unique_id=124492712]
@@ -167,8 +180,21 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 3
 
+[node name="fog" type="ColorRect" parent="background/layer_4" unique_id=358934040]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -720.0
+offset_top = -405.0
+offset_right = 720.0
+offset_bottom = 405.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.23529412)
+
 [node name="layer_5" type="Parallax2D" parent="background" unique_id=809503557]
-scroll_scale = Vector2(0.7, 0)
+scroll_scale = Vector2(0.4, 0)
 repeat_size = Vector2(1440, 810)
 
 [node name="sprite" type="Sprite2D" parent="background/layer_5" unique_id=1459122372]

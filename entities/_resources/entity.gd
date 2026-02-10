@@ -66,7 +66,11 @@ func _process(delta: float) -> void:
 		scan_interest()
 
 func setup_entity() -> void:
-	pass
+	return
+
+func receive_update(update_data: Dictionary) -> void:
+	if update_data.get(&'kill'):
+		standard_death()
 
 #region Interest
 func add_interest(player_id: int) -> void:
@@ -122,5 +126,14 @@ func scan_interest() -> void:
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	queue_free()
+
+#endregion
+
+#region Interaction
+func interact_with(_tile_position: Vector2i) -> bool:
+	return true
+
+func break_place(_tile_position: Vector2i) -> bool:
+	return true
 
 #endregion

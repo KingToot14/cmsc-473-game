@@ -1,9 +1,6 @@
 class_name TileEntityHitbox
 extends Area2D
 
-# --- Signals --- #
-signal interacted_with()
-
 # --- Variables --- #
 @export var entity: Node2D
 

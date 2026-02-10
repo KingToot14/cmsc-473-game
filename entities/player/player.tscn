@@ -31,7 +31,7 @@ move_speed = 300.0
 [node name="server_sync" type="MultiplayerSynchronizer" parent="." unique_id=1684896443]
 replication_config = SubResource("SceneReplicationConfig_sglur")
 
-[node name="input_sync" type="Node" parent="." unique_id=1334925596 node_paths=PackedStringArray("player")]
+[node name="input_sync" type="Node2D" parent="." unique_id=1003629162 node_paths=PackedStringArray("player")]
 script = ExtResource("2_sglur")
 player = NodePath("..")
 
