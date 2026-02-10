@@ -24,9 +24,6 @@ func _process(delta: float) -> void:
 	if interest_count == 0:
 		return
 	
-	if is_on_floor():
-		return
-	
 	# air resistance
 	if velocity.x < 0:
 		velocity.x = minf(0.0, velocity.x + air_resistance * delta)
@@ -34,7 +31,10 @@ func _process(delta: float) -> void:
 		velocity.x = maxf(0.0, velocity.x - air_resistance * delta)
 	
 	# gravity
-	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	if not is_on_floor():
+		velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	else:
+		velocity.y = 0.0
 	
 	move_and_slide()
 	
@@ -53,6 +53,10 @@ func setup_entity() -> void:
 	if item_id == -1:
 		standard_death()
 		return
+	
+	# item info
+	var item_info: Item = Globals.get_item(item_id)
+	$'sprite'.texture = item_info.texture
 	
 	# spawn behavior
 	match spawn_type:

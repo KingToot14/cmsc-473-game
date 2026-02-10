@@ -165,7 +165,7 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			positions,
 			{
 				&'item_id': 0,
-				&'quantity': randi_range(1, 2)
+				&'quantity': rng.randi_range(1, 2)
 			}
 		)
 	
