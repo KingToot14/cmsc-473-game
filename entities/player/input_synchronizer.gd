@@ -38,6 +38,8 @@ func _input(event: InputEvent) -> void:
 			return
 		
 		# check walls TODO: See above
+		if TileManager.destroy_wall(tile_position.x, tile_position.y):
+			return
 
 func _gather() -> void:
 	if not is_multiplayer_authority():
