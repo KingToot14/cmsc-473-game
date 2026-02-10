@@ -9,6 +9,7 @@ var curr_height := 0
 var variant := 0
 
 # --- Functions --- #
+#region Visuals
 func setup_entity() -> void:
 	# create deterministic rng
 	var rng := RandomNumberGenerator.new()
@@ -96,22 +97,25 @@ func resize_tree() -> void:
 	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
 	$'hitbox/shape'.shape.size.y = (curr_height * 8.0)
 
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&'test_input'):
-		return
-	
-	# only break hovered tree
-	if $'hitbox' != Globals.hovered_hitbox:
-		return
-	
+#endregion
+
+#region Interaction
+func break_place() -> bool:
 	# calculate global mouse position
 	var mouse_position := get_global_mouse_position()
 	var world_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 	
 	var layer = abs(world_position.y - tile_position.y) - 1
 	
+	# TODO: Deal damage based on axe/tool
 	damage_layer(layer, 25)
+	
+	# TODO: Only return true if atempting to break with an axe
+	return true
 
+#endregion
+
+#region Damage
 func damage_layer(layer_id: int, damage: int) -> void:
 	var hp := hp_pool[layer_id]
 	
@@ -173,3 +177,5 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 	
 	if curr_height > 0:
 		resize_tree()
+
+#endregion

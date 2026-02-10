@@ -12,11 +12,26 @@ func _ready() -> void:
 	# disable processing on anything but the owner
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
 		set_process(false)
+		set_process_input(false)
 		set_physics_process(false)
 		set_process_input(false)
 		return
 	
 	NetworkTime.before_tick_loop.connect(_gather)
+
+func _input(event: InputEvent) -> void:
+	# only used for client-side interaction
+	if event.is_action_pressed(&'interact'):
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with():
+			return
+	if event.is_action_pressed(&'break_place'):
+		# check hovered hitbox
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place():
+			return
+		
+		# check blocks
+		
+		# check walls
 
 func _gather() -> void:
 	if not is_multiplayer_authority():

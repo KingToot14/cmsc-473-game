@@ -3,9 +3,6 @@ extends Node2D
 
 # --- Signals --- #
 signal interest_changed(interest: int)
-signal lost_all_interest()
-
-signal despawn()
 
 # --- Variables --- #
 var id := 0
@@ -83,5 +80,14 @@ func scan_interest() -> void:
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	queue_free()
+
+#endregion
+
+#region Interaction
+func interact_with() -> bool:
+	return true
+
+func break_place() -> bool:
+	return true
 
 #endregion
