@@ -20,7 +20,18 @@ func _ready() -> void:
 		
 		# start world generation
 		world_gen.set_seed(world_seed)
-		world_gen.generate_world()
+		await world_gen.generate_world()
+		
+		# load initial spawn tilemap
+		print("[Wizbowo's Conquest] Loading Spawn Area Collision")
+		var center_chunk := TileManager.tile_to_chunk(Globals.world_spawn.x, Globals.world_spawn.y)
+		
+		await Globals.server_map.load_tiles(
+			(center_chunk - ChunkLoader.LOAD_RANGE).x * TileManager.CHUNK_SIZE,
+			(center_chunk - ChunkLoader.LOAD_RANGE).y * TileManager.CHUNK_SIZE,
+			ChunkLoader.LOAD_RANGE.x * 2 * TileManager.CHUNK_SIZE,
+			ChunkLoader.LOAD_RANGE.y * 2 * TileManager.CHUNK_SIZE
+		)
 		
 		start_server()
 	else:
@@ -79,8 +90,9 @@ func _on_player_connect(id: int) -> void:
 	connected_players[id] = player
 	
 	# set position
-	player.spawn_point = Globals.world_spawn * 8.0
-	player.position = Globals.world_spawn * 8.0
+	var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
+	player.spawn_point = world_position
+	player.position = world_position
 	
 	get_tree().current_scene.get_node(^'players').add_child(player)
 	
