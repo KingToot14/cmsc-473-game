@@ -45,6 +45,7 @@ func setup_entity() -> void:
 		hp_pool[i].died.connect(_on_death.bind(i))
 		
 		add_child(hp)
+		hp_pool[i].setup()
 	
 	var last_branch_l := 0
 	var last_branch_r := 0
@@ -147,17 +148,18 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			standard_death()
 	
 	# server spawns items
-	if multiplayer.is_server():
+	if multiplayer and multiplayer.is_server():
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		
-		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
-		var positions: Array[Vector2i] = []
+		var base_position: Vector2 = TileManager.world_to_tile(floori(position.x), floori(position.y))
+		var positions: Array[Vector2] = []
 		positions.resize(curr_height - pool_id)
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
-			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+			positions[y] = base_position + Vector2(rng.randi_range(0, 1), -(y + pool_id + 2))
+			positions[y] = TileManager.tile_to_world(positions[y].x, positions[y].y)
 		
 		EntityManager.create_entities(
 			# item drop
@@ -165,7 +167,7 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			positions,
 			{
 				&'item_id': 0,
-				&'quantity': randi_range(1, 2)
+				&'quantity': rng.randi_range(1, 2)
 			}
 		)
 	

@@ -20,7 +20,15 @@ func _ready() -> void:
 	curr_hp = max_hp
 
 func setup() -> void:
-	curr_hp = entity.data.get(&'hp', curr_hp)
+	var hp_pools: Dictionary = entity.data.get(&'hp', {})
+	
+	if hp_pools.is_empty() or pool_id not in hp_pools:
+		return
+	
+	curr_hp = hp_pools[pool_id]
+	
+	if curr_hp <= 0:
+		died.emit(true)
 
 func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)

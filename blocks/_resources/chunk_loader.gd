@@ -166,11 +166,6 @@ func send_region(start_chunk: Vector2i, end_chunk: Vector2i, autotile := false) 
 	
 	# send tile data
 	load_chunks.rpc_id(player.owner_id, meta, data)
-	
-	# load chunk entities
-	for x in range(start_chunk.x, end_chunk.x):
-		for y in range(start_chunk.y, end_chunk.y):
-			EntityManager.load_chunk(Vector2i(x, y), player.owner_id)
 
 @rpc("authority", "call_remote", "reliable")
 func load_chunks(meta: int, data: PackedByteArray) -> void:
@@ -186,22 +181,22 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 		FileAccess.COMPRESSION_ZSTD
 	)
 	
-	start_x *= TileManager.CHUNK_SIZE
-	start_y *= TileManager.CHUNK_SIZE
-	width *= TileManager.CHUNK_SIZE
-	height *= TileManager.CHUNK_SIZE
+	var world_start_x = start_x * TileManager.CHUNK_SIZE
+	var world_start_y = start_y * TileManager.CHUNK_SIZE
+	var world_width   = width * TileManager.CHUNK_SIZE
+	var world_height  = height * TileManager.CHUNK_SIZE
 	
 	var tiles := PackedInt32Array()
 	var offset := 0
 	
-	tiles.resize(width * height)
+	tiles.resize(world_width * world_height)
 	
-	for y in range(height):
-		for x in range(width):
-			tiles[x + y * width] = data.decode_u32(offset)
+	for y in range(world_height):
+		for x in range(world_width):
+			tiles[x + y * world_width] = data.decode_u32(offset)
 			offset += 4
 	
-	await TileManager.load_region(tiles, start_x, start_y, width, height)
+	await TileManager.load_region(tiles, world_start_x, world_start_y, world_width, world_height)
 	
 	# autotile initial packet
 	if autotile:
@@ -215,3 +210,8 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 			(start_x + width) / TileManager.CHUNK_SIZE,
 			(start_y + height) / TileManager.CHUNK_SIZE
 		)
+	
+	# load entities
+	for x in range(width):
+		for y in range(height):
+			EntityManager.load_chunk.rpc_id(1, Vector2i(start_x + x, start_y + y), player.owner_id)

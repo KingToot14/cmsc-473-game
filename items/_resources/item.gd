@@ -17,3 +17,5 @@ enum ItemType {
 @export var item_type: ItemType
 
 # --- Functions --- #
+func consume() -> void:
+	pass

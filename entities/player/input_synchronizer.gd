@@ -29,6 +29,9 @@ func _input(event: InputEvent) -> void:
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(tile_position):
 			return
 	if event.is_action_pressed(&'break_place'):
+		# consume items
+		
+		
 		# check hovered hitbox
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
 			return

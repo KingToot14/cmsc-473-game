@@ -6,7 +6,8 @@ var curr_id := 0
 var enemy_registry: Dictionary[int, String] = {}
 var tile_entity_registry: Dictionary[int, String] = {}
 
-var anchored_entities: Dictionary[Vector2i, Dictionary] = {}
+var tile_entities: Dictionary[Vector2i, Dictionary] = {}
+var dynamic_entities: Dictionary[Vector2i, Dictionary] = {}
 
 var loaded_entities: Dictionary[int, Node2D] = {}
 
@@ -49,10 +50,15 @@ func create_entity(
 	
 	# create new entity
 	var entity: Entity = load(entity_path).instantiate()
-	entity.position = TileManager.tile_to_world(position.x, position.y)
+	var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	entity.position = position
+	if chunk not in dynamic_entities:
+		dynamic_entities[chunk] = {}
+	dynamic_entities[chunk][curr_id] = true
+	
 	entity.name = "entity_%s" % curr_id
 	
-	entity.initialize(curr_id, spawn_data)
+	entity.initialize(curr_id, registry_id, spawn_data.merged({&'spawned': true}))
 	loaded_entities[curr_id] = entity
 	curr_id += 1
 	
@@ -69,7 +75,7 @@ func create_entity(
 		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
 
 func create_entities(
-		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant]
+		registry_id: int, positions: Array[Vector2], spawn_data: Dictionary[StringName, Variant]
 	) -> void:
 	
 	var entity_path: String = enemy_registry.get(registry_id)
@@ -83,10 +89,15 @@ func create_entities(
 	
 	for position in positions:
 		var entity: Entity = load(entity_path).instantiate()
-		entity.position = TileManager.tile_to_world(position.x, position.y)
+		var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+		entity.position = position
+		if chunk not in dynamic_entities:
+			dynamic_entities[chunk] = {}
+		dynamic_entities[chunk][curr_id] = true
+		
 		entity.name = "entity_%s" % curr_id
 		
-		entity.initialize(curr_id, spawn_data)
+		entity.initialize(curr_id, registry_id, spawn_data.merged({&'spawned': true}))
 		loaded_entities[curr_id] = entity
 		curr_id += 1
 		
@@ -113,14 +124,14 @@ func create_tile_entity(
 	# add to chunk container
 	var chunk := TileManager.tile_to_chunk(position.x, position.y)
 	
-	if chunk not in anchored_entities:
-		anchored_entities[chunk] = {}
+	if chunk not in tile_entities:
+		tile_entities[chunk] = {}
 	
-	anchored_entities[chunk][curr_id - 1] = entity_info
+	tile_entities[chunk][curr_id - 1] = entity_info
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant], spawn_id: int
+		registry_id: int, position: Vector2, spawn_data: Dictionary[StringName, Variant], spawn_id: int
 	) -> void:
 	
 	# don't re-instantiate existing entities
@@ -135,17 +146,17 @@ func load_entity(
 	var entity: Entity = load(entity_path).instantiate()
 	entity.add_interest(multiplayer.get_unique_id())
 	
-	entity.position = TileManager.tile_to_world(position.x, position.y)
+	entity.position = position
 	entity.name = "entity_%s" % spawn_id
 	
-	entity.initialize(spawn_id, spawn_data)
+	entity.initialize(spawn_id, registry_id, spawn_data)
 	loaded_entities[spawn_id] = entity
 	
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entities(
-		registry_id: int, positions: Array[Vector2i], spawn_data: Dictionary[StringName, Variant], 
+		registry_id: int, positions: Array[Vector2], spawn_data: Dictionary[StringName, Variant], 
 		spawn_id_start: int
 	) -> void:
 	
@@ -165,10 +176,10 @@ func load_entities(
 		var entity: Entity = load(entity_path).instantiate()
 		entity.add_interest(multiplayer.get_unique_id())
 		
-		entity.position = TileManager.tile_to_world(position.x, position.y, true)
+		entity.position = position
 		entity.name = "entity_%s" % spawn_id
 		
-		entity.initialize(spawn_id, spawn_data)
+		entity.initialize(spawn_id, registry_id, spawn_data)
 		loaded_entities[spawn_id] = entity
 		
 		get_tree().current_scene.get_node(^'entities').add_child(entity)
@@ -191,7 +202,7 @@ func load_tile_entity(
 	entity.position = TileManager.tile_to_world(position.x, position.y)
 	entity.name = "entity_%s" % spawn_id
 	
-	entity.initialize(spawn_id, spawn_data)
+	entity.initialize(spawn_id, registry_id, spawn_data)
 	loaded_entities[spawn_id] = entity
 	
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
@@ -212,6 +223,20 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	# apply damage
 	entity.hp_pool[pool_id].modify_health(-damage, true)
+	
+	# store hp
+	if entity is TileEntity:
+		var entity_info: TileEntityInfo = tile_entities[entity.current_chunk][entity.id]
+		
+		if &'hp' not in entity_info.data:
+			entity_info.data[&'hp'] = {}
+		
+		entity_info.data[&'hp'][pool_id] = entity.hp_pool[pool_id].curr_hp
+	else:
+		if &'hp' not in entity.data:
+			entity.data[&'hp'] = {}
+		
+		entity.data[&'hp'][pool_id] = entity.hp_pool[pool_id].curr_hp
 	
 	if entity.hp_pool[pool_id].curr_hp <= 0:
 		snapshot[&'entity_dead'] = true
@@ -248,12 +273,10 @@ func entity_receive_update(entity_id: int, data: Dictionary) -> void:
 #endregion
 
 #region Interest Management
+@rpc('any_peer', 'call_remote', 'reliable')
 func load_chunk(chunk: Vector2i, player_id: int) -> void:
-	if chunk not in anchored_entities:
-		return
-	
-	for entity_id in anchored_entities[chunk]:
-		var entity_info: TileEntityInfo = anchored_entities[chunk][entity_id]
+	for entity_id in tile_entities.get(chunk, {}).keys():
+		var entity_info: TileEntityInfo = tile_entities[chunk][entity_id]
 		
 		# create entity server-side
 		if not entity_info.entity_id in loaded_entities:
@@ -265,22 +288,37 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 			)
 			entity.name = "entity_%s" % entity_info.entity_id
 			
-			entity.initialize(entity_info.entity_id, entity_info.data)
+			entity.initialize(entity_info.entity_id, entity_info.registry_id, entity_info.data)
 			loaded_entities[entity_info.entity_id] = entity
 			
 			get_tree().current_scene.get_node(^'entities').add_child(entity)
 		
 		# mark player as interested
-		var entity: TileEntity = loaded_entities[entity_info.entity_id]
-		if not is_instance_valid(entity):
+		if not is_instance_valid(loaded_entities[entity_info.entity_id]):
 			loaded_entities.erase(entity_info.entity_id)
 			return
 		
+		var entity: TileEntity = loaded_entities[entity_info.entity_id]
 		entity.add_interest(player_id)
 		
 		# send to player
 		load_tile_entity.rpc_id(player_id,
 			entity_info.registry_id, entity_info.anchor_point, entity_info.data, entity_info.entity_id
+		)
+	
+	for entity_id in dynamic_entities.get(chunk, {}).keys():
+		if entity_id not in loaded_entities:
+			continue
+		
+		var entity: Entity = loaded_entities[entity_id]
+		entity.add_interest(player_id)
+		
+		load_entity.rpc_id(
+			player_id,
+			entity.registry_id, entity.position,
+			# do not run spawn logic when syncing existing entities
+			entity.data.merged({&'spawned': false}, true),
+			entity.id
 		)
 
 func unload_chunk(chunk: Vector2i, player_id: int) -> void:
@@ -290,11 +328,31 @@ func erase_entity(entity: Node2D) -> void:
 	loaded_entities.erase(entity.id)
 	
 	if multiplayer.is_server() and entity is TileEntity:
-		var chunk: Dictionary = anchored_entities.get(entity.current_chunk, {})
+		var chunk: Dictionary = tile_entities.get(entity.current_chunk, {})
 		chunk.erase(entity)
 		
 		if len(chunk) == 0:
-			anchored_entities.erase(entity.id)
+			tile_entities.erase(entity.current_chunk)
+	if multiplayer.is_server() and entity is Entity:
+		var chunk: Vector2i = entity.current_chunk
+		
+		if chunk in dynamic_entities and entity.id in dynamic_entities[chunk]:
+			dynamic_entities[chunk].erase(entity.id)
+			if dynamic_entities[chunk].is_empty():
+				dynamic_entities.erase(chunk)
+
+func move_dynamic_entity(entity_id: int, prev_chunk: Vector2i, curr_chunk: Vector2i) -> void:
+	# erase old chunk
+	if prev_chunk in dynamic_entities and entity_id in dynamic_entities[prev_chunk]:
+		dynamic_entities[prev_chunk].erase(entity_id)
+		if dynamic_entities[prev_chunk].is_empty():
+			dynamic_entities.erase(prev_chunk)
+	
+	# add new chunk
+	if curr_chunk not in dynamic_entities:
+		dynamic_entities[curr_chunk] = {}
+	
+	dynamic_entities[curr_chunk][entity_id] = true
 
 #endregion
 

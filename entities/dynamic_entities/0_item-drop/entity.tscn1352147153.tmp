@@ -16,8 +16,12 @@ radius = 8.0
 collision_layer = 32
 platform_floor_layers = 4294967041
 script = ExtResource("1_nu8wb")
+gravity = null
+air_resistance = null
 terminal_velocity = 300.0
 process_on_client = true
+free_on_despawn = null
+despawn_time = null
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
 shape = SubResource("RectangleShape2D_x7v6d")
