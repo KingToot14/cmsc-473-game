@@ -9,6 +9,10 @@ extends CanvasLayer
 @export var normal_button_color := Color.WHITE
 @export var disabled_button_color := Color.WHITE
 
+@export var title_rotate_range := 4.0
+@export var title_rotate_msecs := 5000.0
+@onready var title_texture: TextureRect = $'title'
+
 var ip_valid := false
 var port_valid := false
 
@@ -30,6 +34,9 @@ func _ready() -> void:
 	# update validity
 	_on_ip_changed(%'ip_field'.text)
 	_on_port_changed(%'port_field'.text)
+
+func _process(_delta: float) -> void:
+	title_texture.rotation_degrees = sin(Time.get_ticks_msec() / title_rotate_msecs) * title_rotate_range
 
 func _on_connected_to_server() -> void:
 	print("[Wizbowo's Conquest] Client '%s' connected" % multiplayer.get_unique_id())
