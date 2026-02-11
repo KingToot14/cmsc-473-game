@@ -97,16 +97,12 @@ func create_client() -> Error:
 	var port_str: String = %'port_field'.text
 	
 	# check ip address
-	var regex = RegEx.new()
-	regex.compile(r'([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})')
-	var matches = regex.search(ip_address)
-	
-	if not matches:
+	if not ip_address.is_valid_ip_address():
 		print("[Server Test] ERROR: The entered IP Address was not valid: '%s'" % ip_address)
 		return Error.ERR_INVALID_PARAMETER
 	
 	# check port
-	if not port_str.is_valid_int():
+	if not (port_str.is_valid_int() and int(port_str) >= 0):
 		print("[Server Test] ERROR: The entered port is not a positive integer: '%s'" % port_str)
 		return Error.ERR_INVALID_PARAMETER
 	
