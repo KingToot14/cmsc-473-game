@@ -16,6 +16,8 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Wizbowo's Conquest"
 run/main_scene="uid://c6krrh5wjkitj"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="/wizbowos_conquest"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -59,6 +61,10 @@ folder_colors={
 "res://sound/": "purple",
 "res://ui/": "pink"
 }
+
+[gui]
+
+theme/custom="uid://c4gjo7vh3bnh0"
 
 [input]
 
