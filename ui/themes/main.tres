@@ -1,0 +1,33 @@
+[gd_resource type="Theme" format=3 uid="uid://c4gjo7vh3bnh0"]
+
+[ext_resource type="FontFile" uid="uid://co0b8pqaps6ji" path="res://ui/fonts/chunky-pixel-10.ttf" id="1_1moc1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5fqn5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ucrr4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d8xj2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_buodl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5aooy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eo3d3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1moc1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5lfg1"]
+
+[resource]
+Button/styles/disabled = SubResource("StyleBoxEmpty_5fqn5")
+Button/styles/focus = SubResource("StyleBoxEmpty_ucrr4")
+Button/styles/hover = SubResource("StyleBoxEmpty_d8xj2")
+Button/styles/normal = SubResource("StyleBoxEmpty_buodl")
+Button/styles/pressed = SubResource("StyleBoxEmpty_5aooy")
+LineEdit/font_sizes/font_size = 14
+LineEdit/fonts/font = ExtResource("1_1moc1")
+LineEdit/styles/focus = SubResource("StyleBoxEmpty_eo3d3")
+LineEdit/styles/normal = SubResource("StyleBoxEmpty_1moc1")
+LineEdit/styles/read_only = SubResource("StyleBoxEmpty_5lfg1")
+RichTextLabel/font_sizes/normal_font_size = 14
+RichTextLabel/fonts/normal_font = ExtResource("1_1moc1")
