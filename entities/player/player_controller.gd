@@ -15,6 +15,10 @@ const INTERPOLATE_SPEED := 10.0
 @export var spawn_point: Vector2i
 
 @export var move_speed := 20.0
+@export var jump_power := 180.0
+
+@export var gravity := 980.0
+@export var terminal_velocity := 380.0
 
 var free_cam_mode := false
 var free_cam_pressed := false
@@ -42,18 +46,6 @@ func _ready() -> void:
 		#$'camera'.enabled = true
 #	$inventory_ui/inventory_container.setup_ui(my_inventory)
 
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&'test_input'):
-		return
-	
-	var mouse_pos := get_local_mouse_position() + global_position
-	var tile_pos := TileManager.world_to_tile(floori(mouse_pos.x), floori(mouse_pos.y))
-	
-	var this_pos := TileManager.world_to_tile(floori(global_position.x), floori(global_position.y))
-	
-	print(mouse_pos, " | ", tile_pos, " | ", global_position, " | ", this_pos)
-	print(TileManager.get_block(tile_pos.x, tile_pos.y))
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
 		$inventory_ui.visible = !$inventory_ui.visible
@@ -66,16 +58,16 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	if active:
 		apply_input(delta)
 
-func apply_input(_delta: float) -> void:
-	var gravity := 980.0
-	var terminal_velocity := 380.0
+func apply_input(delta: float) -> void:
+	# fixes a NetFox bug with is_on_floor()
+	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
-			velocity.y = -400
+			velocity.y = -jump_power
 			pass
 	
-		# gravity
-	velocity.y = clampf(velocity.y + gravity * _delta, -terminal_velocity, terminal_velocity)
+	# gravity
+	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -89,9 +81,6 @@ func apply_input(_delta: float) -> void:
 	velocity.x = $'input_sync'.input_direction.x * move_speed
 	if free_cam_mode:
 		velocity.y = $'input_sync'.input_direction.y * move_speed
-	else:
-		# apply normal gravity
-		pass
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor

@@ -2,6 +2,8 @@ class_name TreeEntity
 extends TileEntity
 
 # --- Variables --- #
+const APPLE_DROP_ODDS := 1.0
+
 var branch_seed := 0
 
 var height := 0
@@ -160,12 +162,22 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 		# create items for each layer
 		for y in range(curr_height - pool_id):
 			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
-			positions[y] = TileManager.tile_to_world(positions[y].x, positions[y].y)
+			# convert from tile position to world position
+			positions[y] = TileManager.tile_to_world(
+				floori(positions[y].x),
+				floori(positions[y].y)
+			)
 			#consistent with seed
-			apple_positions.append(base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2)))
-			apple_positions[-1] = TileManager.tile_to_world(apple_positions[y].x, apple_positions[y].y)
-			#rng.randi_range(0, 1) determines left or right side of the tree
-			#-(y + pool_id + 2)) determines what y value
+			
+			if rng.randf() < APPLE_DROP_ODDS:
+				apple_positions.append(base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2)))
+				# convert from tile position to world position
+				apple_positions[-1] = TileManager.tile_to_world(
+					floori(apple_positions[-1].x),
+					floori(apple_positions[-1].y)
+				)
+				#rng.randi_range(0, 1) determines left or right side of the tree
+				#-(y + pool_id + 2)) determines what y value
 		
 		EntityManager.create_entities(
 			# item drop
