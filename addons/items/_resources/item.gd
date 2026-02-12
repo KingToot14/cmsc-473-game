@@ -1,0 +1,19 @@
+class_name Item
+extends Resource
+
+# --- Enums --- #
+enum ItemType {
+	MATERIAL,
+	BLOCK,
+	CONSUMABLE
+}
+
+# --- Variables --- #
+@export var item_name: String
+@export var texture: Texture2D
+
+@export_multiline var tooltip: String
+@export var sprite_scale := Vector2(1, 1)
+@export var item_type: ItemType
+
+# --- Functions --- #

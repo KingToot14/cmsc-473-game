@@ -22,7 +22,7 @@ func load_tiles(start_x: int, start_y: int, width: int, height: int) -> void:
 			
 			processed += 1
 			
-			if processed == 32:
+			if processed == 256 * 4:
 				await get_tree().process_frame
 				processed = 0
 
