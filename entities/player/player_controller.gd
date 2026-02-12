@@ -15,6 +15,10 @@ const INTERPOLATE_SPEED := 10.0
 @export var spawn_point: Vector2i
 
 @export var move_speed := 20.0
+@export var jump_power := 180.0
+
+@export var gravity := 980.0
+@export var terminal_velocity := 380.0
 
 var free_cam_mode := false
 var free_cam_pressed := false
@@ -55,13 +59,11 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 		apply_input(delta)
 
 func apply_input(delta: float) -> void:
-	var gravity := 980.0
-	var terminal_velocity := 380.0
-	
+	# fixes a NetFox bug with is_on_floor()
 	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
-			velocity.y = -400
+			velocity.y = -jump_power
 			pass
 	
 	# gravity

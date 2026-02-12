@@ -28,7 +28,8 @@ y_sort_enabled = true
 collision_layer = 2
 collision_mask = 25
 script = ExtResource("1_abrql")
-move_speed = 300.0
+move_speed = 120.0
+jump_power = 350.0
 
 [node name="server_sync" type="MultiplayerSynchronizer" parent="." unique_id=1684896443]
 replication_config = SubResource("SceneReplicationConfig_sglur")
