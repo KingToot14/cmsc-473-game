@@ -13,7 +13,7 @@ enum ItemType {
 @export var texture: Texture2D
 
 @export_multiline var tooltip: String
-
+@export var sprite_scale := Vector2(1, 1)
 @export var item_type: ItemType
 
 # --- Functions --- #

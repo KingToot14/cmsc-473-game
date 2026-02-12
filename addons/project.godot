@@ -31,6 +31,7 @@ Globals="*uid://dvxwg7wlne07g"
 ServerManager="*uid://dc2gk5amixqah"
 TileManager="*uid://u5whg16t7ttu"
 EntityManager="*uid://cbrcmetbd2pq8"
+ItemDatabase="*uid://bvstgw18ita5g"
 
 [display]
 

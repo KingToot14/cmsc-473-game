@@ -11,6 +11,8 @@ var anchored_entities: Dictionary[Vector2i, Dictionary] = {}
 var loaded_entities: Dictionary[int, Node2D] = {}
 
 # --- Functions --- #
+
+
 func _ready() -> void:
 	# crawl files to add enemies to the list
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)

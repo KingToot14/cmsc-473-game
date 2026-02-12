@@ -173,16 +173,16 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			}
 		)
 		
-		if (rng.randi_range(1,10) == 1): #1/10 chance of dropping apple
-			EntityManager.create_entities(
-				# item drop
-				0, #points to item drop entity
-				apple_positions,
-				{
-					&'item_id': 1, #references apple item id
-					&'quantity': 1 #drops 1 apple
-				}
-			)
+		
+		EntityManager.create_entities(
+			# item drop
+			0, #points to item drop entity
+			apple_positions,
+			{
+				&'item_id': 1, #references apple item id
+				&'quantity': 1 #drops 1 apple
+			}
+		)
 	
 	curr_height = pool_id
 	

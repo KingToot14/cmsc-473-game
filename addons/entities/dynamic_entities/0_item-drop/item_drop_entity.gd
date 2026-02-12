@@ -54,7 +54,10 @@ func setup_entity() -> void:
 		standard_death()
 		return
 	
-	# spawn behavior
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item:
+		var sprite_node = $sprite
+		sprite_node.texture = item.texture
 	match spawn_type:
 		&'upward_random':
 			velocity = Vector2(rng.randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
