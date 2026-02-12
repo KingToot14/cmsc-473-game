@@ -39,7 +39,7 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void
 
 #region Entity Spawning
 func create_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
+		registry_id: int, position: Vector2i, spawn_data: Dictionary
 	) -> void:
 	
 	# setup new entity
@@ -75,7 +75,7 @@ func create_entity(
 		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
 
 func create_entities(
-		registry_id: int, positions: Array[Vector2], spawn_data: Dictionary[StringName, Variant]
+		registry_id: int, positions: Array[Vector2], spawn_data: Array[Dictionary]
 	) -> void:
 	
 	var entity_path: String = enemy_registry.get(registry_id)
@@ -87,7 +87,9 @@ func create_entities(
 	var start_id := curr_id
 	var interested_players: Array[int]
 	
-	for position in positions:
+	for i in range(len(positions)):
+		var position: Vector2 = positions[i]
+		
 		var entity: Entity = load(entity_path).instantiate()
 		var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 		entity.position = position
@@ -97,7 +99,7 @@ func create_entities(
 		
 		entity.name = "entity_%s" % curr_id
 		
-		entity.initialize(curr_id, registry_id, spawn_data.merged({&'spawned': true}))
+		entity.initialize(curr_id, registry_id, spawn_data[i].merged({&'spawned': true}))
 		loaded_entities[curr_id] = entity
 		curr_id += 1
 		
@@ -115,7 +117,7 @@ func create_entities(
 		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id)
 
 func create_tile_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant]
+		registry_id: int, position: Vector2i, spawn_data: Dictionary
 	) -> void:
 	
 	var entity_info := TileEntityInfo.new(curr_id, registry_id, position, spawn_data)
@@ -131,7 +133,7 @@ func create_tile_entity(
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(
-		registry_id: int, position: Vector2, spawn_data: Dictionary[StringName, Variant], spawn_id: int
+		registry_id: int, position: Vector2, spawn_data: Dictionary, spawn_id: int
 	) -> void:
 	
 	# don't re-instantiate existing entities
@@ -156,7 +158,7 @@ func load_entity(
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entities(
-		registry_id: int, positions: Array[Vector2], spawn_data: Dictionary[StringName, Variant], 
+		registry_id: int, positions: Array[Vector2], spawn_data: Array[Dictionary], 
 		spawn_id_start: int
 	) -> void:
 	
@@ -179,14 +181,14 @@ func load_entities(
 		entity.position = position
 		entity.name = "entity_%s" % spawn_id
 		
-		entity.initialize(spawn_id, registry_id, spawn_data)
+		entity.initialize(spawn_id, registry_id, spawn_data[i])
 		loaded_entities[spawn_id] = entity
 		
 		get_tree().current_scene.get_node(^'entities').add_child(entity)
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_tile_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary[StringName, Variant], spawn_id: int
+		registry_id: int, position: Vector2i, spawn_data: Dictionary, spawn_id: int
 	) -> void:
 	
 	# don't re-instantiate existing entities
@@ -251,13 +253,23 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func entity_send_update(entity_id: int, data: Dictionary) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	var entity: Node2D = loaded_entities.get(entity_id)
 	
 	if not entity:
 		return
 	
+	# update server entity
+	data.merge(entity.receive_update(data), true)
+	
 	# send to all interested players
 	for player in entity.interested_players.keys():
+		# make sure player still exists
+		if entity is Entity and not entity.check_player(player):
+			continue
+		
 		entity_receive_update.rpc_id(player, entity_id, data)
 
 @rpc('authority', 'call_remote', 'reliable')
@@ -361,11 +373,11 @@ class TileEntityInfo:
 	var entity_id: int
 	var registry_id: int
 	var anchor_point: Vector2i
-	var data: Dictionary[StringName, Variant]
+	var data: Dictionary
 	var current_instance: Entity
 	
 	@warning_ignore('shadowed_variable')
-	func _init(entity_id: int, registry_id: int, anchor_point: Vector2i, data: Dictionary[StringName, Variant]):
+	func _init(entity_id: int, registry_id: int, anchor_point: Vector2i, data: Dictionary):
 		self.entity_id = entity_id
 		self.registry_id = registry_id
 		self.anchor_point = anchor_point

@@ -7,4 +7,5 @@
 script = ExtResource("1_wry5j")
 item_name = "Wood"
 texture = ExtResource("2_5rmet")
+max_stack = 9999
 metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
