@@ -1,6 +1,9 @@
 class_name ChunkLoader
 extends Node
 
+# --- Signals --- #
+signal area_loaded()
+
 # --- Variables --- #
 const UNLOAD_RANGE := Vector2i(10, 8)
 const LOAD_RANGE := Vector2i(7, 5)
@@ -11,6 +14,8 @@ var current_chunk: Vector2i
 
 # --- Functions --- #
 func _ready() -> void:
+	set_process(false)
+	
 	if not multiplayer.is_server():
 		if len(TileManager.tiles) == 0:
 			TileManager.load_chunks()
@@ -176,6 +181,11 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	var height   := (meta >> 30) & (2**10 - 1)
 	var autotile := (meta >> 40) == 1
 	
+	@warning_ignore('integer_division')
+	var center_x = start_x + width / 2
+	@warning_ignore('integer_division')
+	var center_y = start_y + height / 2
+	
 	data = data.decompress(
 		width * height * TileManager.CHUNK_AREA * 4,
 		FileAccess.COMPRESSION_ZSTD
@@ -201,17 +211,32 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	# autotile initial packet
 	if autotile:
 		await get_tree().process_frame
-		set_process(true)
 		
 		@warning_ignore('integer_division')
-		autotile_region(
-			start_x / TileManager.CHUNK_SIZE,
-			start_y / TileManager.CHUNK_SIZE,
-			(start_x + width) / TileManager.CHUNK_SIZE,
-			(start_y + height) / TileManager.CHUNK_SIZE
+		await autotile_region(
+			center_x - VISUAL_RANGE.x,
+			center_y - VISUAL_RANGE.y,
+			center_x + VISUAL_RANGE.x,
+			center_y + VISUAL_RANGE.y
 		)
 	
 	# load entities
 	for x in range(width):
 		for y in range(height):
 			EntityManager.load_chunk.rpc_id(1, Vector2i(start_x + x, start_y + y), player.owner_id)
+	
+	# this probably isn't a perfect solution, but should allow the server to load entities
+	await get_tree().create_timer(2.0).timeout
+	
+	# send update to server
+	done_loading.rpc_id(1, &'initial-load')
+	await get_tree().create_timer(0.5).timeout
+	
+	set_process(true)
+	area_loaded.emit()
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func done_loading(message: StringName) -> void:
+	if message == &'initial-load':
+		set_process(true)
+		area_loaded.emit()

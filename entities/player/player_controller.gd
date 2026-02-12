@@ -19,6 +19,8 @@ const INTERPOLATE_SPEED := 10.0
 var free_cam_mode := false
 var free_cam_pressed := false
 
+var active := true
+
 # --- Functions --- #
 func _ready() -> void:
 	await get_tree().process_frame
@@ -27,12 +29,15 @@ func _ready() -> void:
 	
 	$'snapshot_interpolator'.owner_id = owner_id
 	
+	# disable movement while loading new areas (for now, just on spawn)
+	active = false
+	$'chunk_loader'.area_loaded.connect(done_initial_load, CONNECT_ONE_SHOT)
+	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
 	else:
 		# update position + control camera
 		position = spawn_point
-		$'camera'.enabled = true
 
 func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
@@ -51,7 +56,8 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
-	apply_input(delta)
+	if active:
+		apply_input(delta)
 
 func apply_input(_delta: float) -> void:
 	# check free cam
@@ -81,3 +87,10 @@ func update_is_on_floor() -> void:
 	velocity = Vector2.ZERO
 	move_and_slide()
 	velocity = temp_velocity
+
+func done_initial_load() -> void:
+	active = true
+	$'camera'.enabled = true
+	
+	# hide ui
+	get_tree().current_scene.get_node(^'join_ui').hide()
