@@ -228,7 +228,10 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	# this probably isn't a perfect solution, but should allow the server to load entities
 	await get_tree().create_timer(2.0).timeout
 	
+	# send update to server
 	done_loading.rpc_id(1, &'initial-load')
+	await get_tree().create_timer(0.5).timeout
+	
 	set_process(true)
 	area_loaded.emit()
 
