@@ -23,11 +23,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-NetworkTime="*res://addons/netfox/network-time.gd"
-NetworkTimeSynchronizer="*res://addons/netfox/network-time-synchronizer.gd"
-NetworkRollback="*res://addons/netfox/rollback/network-rollback.gd"
-NetworkEvents="*res://addons/netfox/network-events.gd"
-NetworkPerformance="*res://addons/netfox/network-performance.gd"
+NetworkTime="*uid://3tslgdkiy3v4"
+NetworkTimeSynchronizer="*uid://bhbw2x4cgyr27"
+NetworkRollback="*uid://b8o7rgfcbxvg6"
+NetworkEvents="*uid://c6nqonyiteii4"
+NetworkPerformance="*uid://c37hk28wierq6"
 Globals="*uid://dvxwg7wlne07g"
 ServerManager="*uid://dc2gk5amixqah"
 TileManager="*uid://u5whg16t7ttu"
