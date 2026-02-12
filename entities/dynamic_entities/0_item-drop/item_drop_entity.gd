@@ -8,21 +8,31 @@ const UPWARD_RANDOM_POWER := 200.0
 @export var air_resistance := 100.0
 @export var terminal_velocity := 380.0
 
+@export var fly_speed := 500.0
+
 var texture: Texture2D
 var item_id := 0
 var quantity := 1
 var merged := false
 var spawned := false
 
+var target_player: PlayerController
+
 # --- Functions --- #
 func _ready() -> void:
 	$'merge_range'.monitoring = false
-	$'merge_range'.area_entered.connect(_on_area_entered)
+	$'merge_range'.area_entered.connect(_on_merge_area_entered)
 
 func _process(delta: float) -> void:
 	super(delta)
 	
 	if interest_count == 0:
+		return
+	
+	# chase player
+	if target_player:
+		pass
+		
 		return
 	
 	# air resistance
@@ -78,7 +88,19 @@ func setup_entity() -> void:
 		&'upward_random':
 			velocity = Vector2(rng.randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
 
-func _on_area_entered(area: Area2D) -> void:
+func _on_collect_area_entered(area: Area2D) -> void:
+	if not area.is_in_group(&'item_collect'):
+		return
+	
+	var player: PlayerController = area.get_parent()
+	
+	# collect item
+	EntityManager.entity_send_update(id, {
+		&'type': &'collect',
+		&'player_id': player.owner_id
+	})
+
+func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
 		return
 	
@@ -121,3 +143,5 @@ func receive_update(update_data: Dictionary) -> void:
 			quantity += update_data.get(&'quantity', 0)
 		&'merge-kill':
 			standard_death()
+		&'collect':
+			target_player = ServerManager.connected_players[update_data.get(&'player_id', 0)]

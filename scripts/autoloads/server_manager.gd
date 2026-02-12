@@ -76,7 +76,7 @@ func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
 	
 	# create the server peer
 	var peer := ENetMultiplayerPeer.new()
-	var error = peer.create_server(DEFAULT_PORT, max_connections)
+	var error = peer.create_server(port, max_connections)
 	
 	if error:
 		print("[Wizbowo's Conquest] ERROR: %s" % error_string(error))
@@ -101,6 +101,7 @@ func join_server(ip_address := '127.0.0.1', port := 7000) -> Error:
 		return error
 	
 	# set multiplayer
+	multiplayer.peer_disconnected.connect(_on_player_disconnect)
 	multiplayer.multiplayer_peer = peer
 	
 	return Error.OK
@@ -134,15 +135,13 @@ func _on_player_connect(id: int) -> void:
 	player.get_node(^'chunk_loader').send_whole_area()
 
 func _on_player_disconnect(id: int) -> void:
-	if not multiplayer.is_server():
-		return
-	
-	print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
-	
 	var player = get_tree().current_scene.get_node('players/player_%s' % id)
 	connected_players.erase(id)
 	
 	if player:
 		player.queue_free()
+	
+	if multiplayer.is_server():
+		print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
 
 #endregion

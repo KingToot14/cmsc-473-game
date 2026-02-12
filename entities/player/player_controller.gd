@@ -10,7 +10,11 @@ const INTERPOLATE_SPEED := 10.0
 		$'input_sync'.set_multiplayer_authority(id)
 		owner_id = id
 		
-		Globals.player = self
+		# set server reference
+		ServerManager.connected_players[id] = self
+		
+		if multiplayer and multiplayer.get_unique_id() == id:
+			Globals.player = self
 
 @export var spawn_point: Vector2i
 
@@ -41,9 +45,8 @@ func _ready() -> void:
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
 	else:
-		# update position + control camera
+		# update position
 		position = spawn_point
-		#$'camera'.enabled = true
 #	$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -94,9 +97,12 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
+#region Loading
 func done_initial_load() -> void:
 	active = true
 	$'camera'.enabled = true
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
+
+#endregion
