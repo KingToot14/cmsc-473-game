@@ -18,6 +18,7 @@ const INTERPOLATE_SPEED := 10.0
 
 var free_cam_mode := false
 var free_cam_pressed := false
+var my_inventory := inventory.new()
 
 var active := true
 
@@ -38,6 +39,8 @@ func _ready() -> void:
 	else:
 		# update position + control camera
 		position = spawn_point
+		$'camera'.enabled = true
+#	$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
@@ -51,6 +54,10 @@ func _input(event: InputEvent) -> void:
 	print(mouse_pos, " | ", tile_pos, " | ", global_position, " | ", this_pos)
 	print(TileManager.get_block(tile_pos.x, tile_pos.y))
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"inventory_toggle"):
+		$inventory_ui.visible = !$inventory_ui.visible
+
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
@@ -60,6 +67,16 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 		apply_input(delta)
 
 func apply_input(_delta: float) -> void:
+	var gravity := 980.0
+	var terminal_velocity := 380.0
+	if $'input_sync'.input_jump:
+		if is_on_floor():
+			velocity.y = -400
+			pass
+	
+		# gravity
+	velocity.y = clampf(velocity.y + gravity * _delta, -terminal_velocity, terminal_velocity)
+	
 	# check free cam
 	if $'input_sync'.input_free_cam:
 		if not free_cam_pressed:
