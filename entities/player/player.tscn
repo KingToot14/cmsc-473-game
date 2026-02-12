@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Texture2D" uid="uid://c0disvwd880p7" path="res://entities/player/main.png" id="7_qiwj3"]
+[ext_resource type="Script" uid="uid://cc2pcdii6gntf" path="res://entities/player/inventory_ui.gd" id="8_bectd"]
+[ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="9_wvtmh"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_sglur"]
 properties/0/path = NodePath(".:owner_id")
@@ -72,3 +74,18 @@ texture = ExtResource("7_qiwj3")
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1847529886]
 position = Vector2(0, -11)
 shape = SubResource("CapsuleShape2D_qiwj3")
+
+[node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
+
+[node name="inventory_container" type="PanelContainer" parent="inventory_ui" unique_id=1820420625]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("8_bectd")
+
+[node name="inventory_grid" type="GridContainer" parent="inventory_ui/inventory_container" unique_id=2144958426]
+layout_mode = 2
+columns = 10
+
+[node name="inventory_slot" type="PanelContainer" parent="inventory_ui/inventory_container/inventory_grid" unique_id=618968979]
+layout_mode = 2
+script = ExtResource("9_wvtmh")
