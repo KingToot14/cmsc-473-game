@@ -19,6 +19,8 @@ const INTERPOLATE_SPEED := 10.0
 var free_cam_mode := false
 var free_cam_pressed := false
 
+var active := true
+
 # --- Functions --- #
 func _ready() -> void:
 	await get_tree().process_frame
@@ -26,6 +28,10 @@ func _ready() -> void:
 	$'rollback_sync'.process_settings()
 	
 	$'snapshot_interpolator'.owner_id = owner_id
+	
+	# disable movement while loading new areas (for now, just on spawn)
+	active = false
+	$'chunk_loader'.area_loaded.connect(set_active.bind(true), CONNECT_ONE_SHOT)
 	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
@@ -51,7 +57,8 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
-	apply_input(delta)
+	if active:
+		apply_input(delta)
 
 func apply_input(_delta: float) -> void:
 	# check free cam
@@ -81,3 +88,6 @@ func update_is_on_floor() -> void:
 	velocity = Vector2.ZERO
 	move_and_slide()
 	velocity = temp_velocity
+
+func set_active(value: bool) -> void:
+	active = value
