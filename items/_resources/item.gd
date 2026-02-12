@@ -9,7 +9,8 @@ enum ItemType {
 }
 
 # --- Variables --- #
-@export var item_id: int = 0
+var item_id: int = 0
+
 @export var item_name: String
 @export var texture: Texture2D
 
@@ -18,5 +19,6 @@ enum ItemType {
 @export var item_type: ItemType
 @export var max_stack: int = 99 #pretty sure this is gonna end up being extra
 # --- Functions --- #
+
 func consume() -> void:
 	pass

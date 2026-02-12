@@ -156,8 +156,12 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 		
 		var base_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
 		var apple_positions: Array[Vector2] = []
+		var apple_data: Array[Dictionary] = []
+		
 		var positions: Array[Vector2] = []
+		var spawn_data: Array[Dictionary] = []
 		positions.resize(curr_height - pool_id)
+		spawn_data.resize(curr_height - pool_id)
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
@@ -167,6 +171,11 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 				floori(positions[y].x),
 				floori(positions[y].y)
 			)
+			spawn_data[y] = {
+				&'item_id': 0,
+				&'quantity': rng.randi_range(1, 2)
+			}
+			
 			#consistent with seed
 			
 			if rng.randf() < APPLE_DROP_ODDS:
@@ -176,6 +185,10 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 					floori(apple_positions[-1].x),
 					floori(apple_positions[-1].y)
 				)
+				apple_data.append({
+					&'item_id': 1, #references apple item id
+					&'quantity': 1 #drops 1 apple
+				})
 				#rng.randi_range(0, 1) determines left or right side of the tree
 				#-(y + pool_id + 2)) determines what y value
 		
@@ -183,20 +196,14 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			# item drop
 			0,
 			positions,
-			{
-				&'item_id': 0,
-				&'quantity': randi_range(1, 2)
-			}
+			spawn_data
 		)
 		
 		EntityManager.create_entities(
 			# item drop
 			0, #points to item drop entity
 			apple_positions,
-			{
-				&'item_id': 1, #references apple item id
-				&'quantity': 1 #drops 1 apple
-			}
+			apple_data
 		)
 	
 	curr_height = pool_id

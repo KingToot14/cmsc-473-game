@@ -9,7 +9,7 @@ const NO_RESPONSE: Dictionary = {}
 
 var id := 0
 var registry_id := 0
-var data: Dictionary[StringName, Variant]
+var data: Dictionary
 var interested_players: Dictionary[int, bool] = {}
 var interest_count := 0
 
@@ -22,7 +22,7 @@ var tile_position: Vector2i
 func _ready() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 
-func initialize(new_id: int, reg_id: int, spawn_data: Dictionary[StringName, Variant]) -> void:
+func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
 	id = new_id
 	registry_id = reg_id
 	data = spawn_data

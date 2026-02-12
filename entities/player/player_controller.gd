@@ -29,7 +29,7 @@ var center_point: Vector2:
 
 var free_cam_mode := false
 var free_cam_pressed := false
-var my_inventory := inventory.new()
+var my_inventory := Inventory.new()
 
 var active := true
 

@@ -69,13 +69,17 @@ func standard_physics(delta: float) -> void:
 func chase_physics(delta: float) -> void:
 	var difference: Vector2 = target_player.center_point - global_position
 	var distance: float = difference.length_squared()
-		
+	
+	# don't collect if hidden
+	if not visible:
+		return
+	
 	# collect when close enough
 	if target_player == Globals.player and distance <= COLLECTION_RADIUS:
 		hide()
 		
 		# add to inventory
-		
+		target_player.my_inventory.add_item(item_id, quantity)
 		
 		EntityManager.entity_send_update.rpc_id(1, id, {
 			&'type': &'collect'
@@ -139,6 +143,8 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
 		return
 	
+	return
+	
 	# don't merge already merged items
 	if merged:
 		return
@@ -168,6 +174,8 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 	
 	match type:
 		&'merge-owner':
+			print(quantity, " | ", id, " | ", multiplayer.get_unique_id())
+			
 			quantity += update_data.get(&'quantity', 0)
 			data[&'quantity'] = quantity
 		&'merge-kill':
@@ -183,10 +191,11 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 				}
 			
 			# undo collection
-			if not data.get(&'success', true):
+			if not data.get(&'success', true) and target_player == Globals.player:
 				show()
 				
 				# restore inventory state
+				target_player.my_inventory.remove_item(item_id, quantity)
 				
 				return NO_RESPONSE
 			

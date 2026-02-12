@@ -9,4 +9,5 @@ item_name = "Apple"
 texture = ExtResource("2_y8ui4")
 tooltip = "delicious apple"
 item_type = 2
+max_stack = 9999
 metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
