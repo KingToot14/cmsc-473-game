@@ -42,7 +42,7 @@ func _on_connected_to_server() -> void:
 	print("[Wizbowo's Conquest] Client '%s' connected" % multiplayer.get_unique_id())
 	
 	# hide join ui
-	hide()
+	#hide()
 
 func _on_connection_failed() -> void:
 	print("[Wizbowo's Conquest] Client '%s' failed to connect" % multiplayer.get_unique_id())
@@ -111,6 +111,8 @@ func create_client() -> Error:
 	# update ui
 	$'connect_options'.hide()
 	$'joining_panel'.show()
+	
+	$'joining_panel/backing/title'.text = "Joining Server\n%s:%s" % [ip_address, port]
 	
 	# create client
 	return ServerManager.join_server(ip_address, port)

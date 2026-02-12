@@ -31,14 +31,13 @@ func _ready() -> void:
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
-	$'chunk_loader'.area_loaded.connect(set_active.bind(true), CONNECT_ONE_SHOT)
+	$'chunk_loader'.area_loaded.connect(done_initial_load, CONNECT_ONE_SHOT)
 	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
 	else:
 		# update position + control camera
 		position = spawn_point
-		$'camera'.enabled = true
 
 func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
@@ -89,5 +88,9 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
-func set_active(value: bool) -> void:
-	active = value
+func done_initial_load() -> void:
+	active = true
+	$'camera'.enabled = true
+	
+	# hide ui
+	get_tree().current_scene.get_node(^'join_ui').hide()

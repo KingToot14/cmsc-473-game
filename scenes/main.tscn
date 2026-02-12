@@ -68,7 +68,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 120.0
-offset_top = 123.0
+offset_top = 122.0
 offset_right = -120.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -257,18 +257,43 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 120.0
+offset_top = 122.0
+offset_right = -120.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="backing" type="ColorRect" parent="join_ui/joining_panel" unique_id=1872058897]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="backing" type="ColorRect" parent="join_ui/joining_panel" unique_id=378867860]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -42.0
+offset_right = 70.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.10980392, 0.14117648, 0.30980393, 1)
 
-[node name="text" type="RichTextLabel" parent="join_ui/joining_panel/backing" unique_id=1291339026]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="title" type="RichTextLabel" parent="join_ui/joining_panel/backing" unique_id=1210584413]
+self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "Joining Server
+127.0.0.1:7000"
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="world_generation" type="Node" parent="." unique_id=1221375703]
 script = ExtResource("2_0wfyh")
