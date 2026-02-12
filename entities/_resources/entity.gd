@@ -8,6 +8,8 @@ signal lost_all_interest()
 signal despawn()
 
 # --- Variables --- #
+const NO_RESPONSE: Dictionary = {}
+
 var id := 0
 var registry_id := 0
 var data: Dictionary[StringName, Variant]
@@ -71,9 +73,11 @@ func _process(delta: float) -> void:
 func setup_entity() -> void:
 	return
 
-func receive_update(update_data: Dictionary) -> void:
+func receive_update(update_data: Dictionary) -> Dictionary:
 	if update_data.get(&'kill'):
 		standard_death()
+	
+	return NO_RESPONSE
 
 #region Interest
 func add_interest(player_id: int) -> void:
@@ -122,6 +126,14 @@ func scan_interest() -> void:
 		interested_players[player_id] = true
 	
 	check_interest()
+
+func check_player(player_id: int) -> bool:
+	# check if player still exists
+	if player_id not in ServerManager.connected_players.keys():
+		remove_interest(player_id)
+		return false
+	
+	return true
 
 #endregion
 

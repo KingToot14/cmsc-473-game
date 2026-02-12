@@ -251,13 +251,23 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func entity_send_update(entity_id: int, data: Dictionary) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	var entity: Node2D = loaded_entities.get(entity_id)
 	
 	if not entity:
 		return
 	
+	# update server entity
+	entity.receive_update(data)
+	
 	# send to all interested players
 	for player in entity.interested_players.keys():
+		# make sure player still exists
+		if entity is Entity and not entity.check_player(player):
+			continue
+		
 		entity_receive_update.rpc_id(player, entity_id, data)
 
 @rpc('authority', 'call_remote', 'reliable')

@@ -3,6 +3,7 @@ extends Entity
 
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
+const COLLECTION_RADIUS := 4.0**2
 
 @export var gravity := 980.0
 @export var air_resistance := 100.0
@@ -20,8 +21,12 @@ var target_player: PlayerController
 
 # --- Functions --- #
 func _ready() -> void:
-	$'merge_range'.monitoring = false
-	$'merge_range'.area_entered.connect(_on_merge_area_entered)
+	#$'merge_range'.monitoring = false
+	
+	if multiplayer.is_server():
+		$'merge_range'.area_entered.connect(_on_merge_area_entered)
+	else:
+		$'collection_range'.area_entered.connect(_on_collect_area_entered)
 
 func _process(delta: float) -> void:
 	super(delta)
@@ -30,11 +35,22 @@ func _process(delta: float) -> void:
 		return
 	
 	# chase player
-	if target_player:
-		pass
-		
-		return
+	if target_player != null:
+		chase_physics(delta)
+	else:
+		standard_physics(delta)
 	
+	# update server for syncing
+	if multiplayer.is_server():
+		data[&'velocity'] = velocity
+	
+	move_and_slide()
+	
+	# attempt to merge with nearby items
+	if is_on_floor() and multiplayer.is_server():
+		$'merge_range'.monitoring = true
+
+func standard_physics(delta: float) -> void:
 	# air resistance
 	if velocity.x < 0:
 		velocity.x = minf(0.0, velocity.x + air_resistance * delta)
@@ -46,16 +62,23 @@ func _process(delta: float) -> void:
 		velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
 	else:
 		velocity.y = 0.0
+
+func chase_physics(delta: float) -> void:
+	var difference: Vector2 = target_player.center_point - global_position
+		
+	# collect when close enough
+	if target_player == Globals.player and difference.length_squared() <= COLLECTION_RADIUS:
+		hide()
+		
+		# add to inventory
+		
+		
+		EntityManager.entity_send_update(id, {
+			&'type': &'collect'
+		})
 	
-	# update server for synching
-	if multiplayer.is_server():
-		data[&'velocity'] = velocity
-	
-	move_and_slide()
-	
-	# attempt to merge with nearby items
-	if is_on_floor() and multiplayer.is_server():
-		$'merge_range'.monitoring = true
+	velocity += difference.normalized() * fly_speed * delta
+	velocity = velocity.limit_length(terminal_velocity)
 
 func setup_entity() -> void:
 	# load from data
@@ -92,12 +115,16 @@ func _on_collect_area_entered(area: Area2D) -> void:
 	if not area.is_in_group(&'item_collect'):
 		return
 	
-	var player: PlayerController = area.get_parent()
+	# don't switch targets while chasing
+	if target_player:
+		return
 	
-	# collect item
+	target_player = area.get_parent()
+	
+	# start chasing player
 	EntityManager.entity_send_update(id, {
-		&'type': &'collect',
-		&'player_id': player.owner_id
+		&'type': &'chase',
+		&'player_id': target_player.owner_id
 	})
 
 func _on_merge_area_entered(area: Area2D) -> void:
@@ -118,9 +145,6 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	if quantity + other_item.quantity > 9999:
 		return
 	
-	quantity += other_item.quantity
-	data[&'quantity'] = quantity
-	
 	EntityManager.entity_send_update(id, {
 		&'type': &'merge-owner',
 		&'quantity': other_item.quantity
@@ -128,12 +152,8 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	EntityManager.entity_send_update(other_item.id, {
 		&'type': &'merge-kill'
 	})
-	
-	# clear other item
-	other_item.merged = true
-	other_item.standard_death()
 
-func receive_update(update_data: Dictionary) -> void:
+func receive_update(update_data: Dictionary) -> Dictionary:
 	super(update_data)
 	
 	var type: StringName = update_data.get(&'type', &'none')
@@ -141,7 +161,29 @@ func receive_update(update_data: Dictionary) -> void:
 	match type:
 		&'merge-owner':
 			quantity += update_data.get(&'quantity', 0)
+			data[&'quantity'] = quantity
 		&'merge-kill':
+			merged = true
 			standard_death()
 		&'collect':
+			# verify collection
+			var distance: float = target_player.global_position.distance_squared_to(global_position)
+			if multiplayer.is_server() and distance > COLLECTION_RADIUS * 3.0:
+				# item too far out of range, reject collection
+				return {
+					&'success': false
+				}
+			
+			# undo collection
+			if not data.get(&'success', true):
+				show()
+				
+				# restore inventory state
+				
+				return NO_RESPONSE
+			
+			standard_death()
+		&'chase':
 			target_player = ServerManager.connected_players[update_data.get(&'player_id', 0)]
+	
+	return NO_RESPONSE

@@ -17,6 +17,9 @@ const INTERPOLATE_SPEED := 10.0
 			Globals.player = self
 
 @export var spawn_point: Vector2i
+var center_point: Vector2:
+	get():
+		return $'center'.global_position
 
 @export var move_speed := 20.0
 @export var jump_power := 180.0
