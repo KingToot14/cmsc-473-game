@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://bgb0dk7lc5p22"]
+
+[ext_resource type="Script" uid="uid://cj532dptk6urm" path="res://entities/dynamic_entities/0_item-drop/item_drop_entity.gd" id="1_nu8wb"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_x7v6d"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x7v6d"]
+size = Vector2(8, 8)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_x7v6d"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mgq5h"]
+radius = 8.0
+
+[node name="entity" type="CharacterBody2D" unique_id=551616400]
+collision_layer = 32
+collision_mask = 3
+script = ExtResource("1_nu8wb")
+gravity = null
+air_resistance = null
+terminal_velocity = 300.0
+process_on_client = true
+free_on_despawn = null
+despawn_time = null
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
+shape = SubResource("RectangleShape2D_x7v6d")
+
+[node name="collection_range" type="Area2D" parent="." unique_id=510789130]
+collision_layer = 32
+
+[node name="shape" type="CollisionShape2D" parent="collection_range" unique_id=1076774422]
+shape = SubResource("CircleShape2D_x7v6d")
+
+[node name="merge_range" type="Area2D" parent="." unique_id=826680157 groups=["item_merge"]]
+collision_layer = 32
+collision_mask = 32
+
+[node name="shape" type="CollisionShape2D" parent="merge_range" unique_id=1894185188]
+shape = SubResource("CircleShape2D_mgq5h")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=114185450]
+z_index = 100
+texture = ExtResource("2_x7v6d")
