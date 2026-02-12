@@ -152,14 +152,20 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		
-		var base_position: Vector2 = TileManager.world_to_tile(floori(position.x), floori(position.y))
+		var base_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
+		var apple_positions: Array[Vector2] = []
 		var positions: Array[Vector2] = []
 		positions.resize(curr_height - pool_id)
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
-			positions[y] = base_position + Vector2(rng.randi_range(0, 1), -(y + pool_id + 2))
+			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
 			positions[y] = TileManager.tile_to_world(positions[y].x, positions[y].y)
+			#consistent with seed
+			apple_positions.append(base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2)))
+			apple_positions[-1] = TileManager.tile_to_world(apple_positions[y].x, apple_positions[y].y)
+			#rng.randi_range(0, 1) determines left or right side of the tree
+			#-(y + pool_id + 2)) determines what y value
 		
 		EntityManager.create_entities(
 			# item drop
@@ -167,7 +173,17 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 			positions,
 			{
 				&'item_id': 0,
-				&'quantity': rng.randi_range(1, 2)
+				&'quantity': randi_range(1, 2)
+			}
+		)
+		
+		EntityManager.create_entities(
+			# item drop
+			0, #points to item drop entity
+			apple_positions,
+			{
+				&'item_id': 1, #references apple item id
+				&'quantity': 1 #drops 1 apple
 			}
 		)
 	

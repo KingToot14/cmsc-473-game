@@ -64,8 +64,10 @@ func setup_entity() -> void:
 		return
 	
 	# item info
-	var item_info: Item = Globals.get_item(item_id)
-	$'sprite'.texture = item_info.texture
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item:
+		var sprite_node = $sprite
+		sprite_node.texture = item.texture
 	
 	# don't run spawn logic if already spawned
 	if not data.get(&'spawned', true):

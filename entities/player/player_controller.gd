@@ -39,7 +39,7 @@ func _ready() -> void:
 	else:
 		# update position + control camera
 		position = spawn_point
-		$'camera'.enabled = true
+		#$'camera'.enabled = true
 #	$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _input(event: InputEvent) -> void:
