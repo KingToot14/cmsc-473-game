@@ -4,6 +4,9 @@ extends Entity
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
 const COLLECTION_RADIUS := 4.0**2
+const COLLECT_VERIFICATION := (3.0 * 8.0)**2.0
+const SNAP_RADIUS := 16.0**2
+const SNAP_STRENGTH := 2.0
 
 @export var gravity := 980.0
 @export var air_resistance := 100.0
@@ -65,19 +68,24 @@ func standard_physics(delta: float) -> void:
 
 func chase_physics(delta: float) -> void:
 	var difference: Vector2 = target_player.center_point - global_position
+	var distance: float = difference.length_squared()
 		
 	# collect when close enough
-	if target_player == Globals.player and difference.length_squared() <= COLLECTION_RADIUS:
+	if target_player == Globals.player and distance <= COLLECTION_RADIUS:
 		hide()
 		
 		# add to inventory
 		
 		
-		EntityManager.entity_send_update(id, {
+		EntityManager.entity_send_update.rpc_id(1, id, {
 			&'type': &'collect'
 		})
 	
-	velocity += difference.normalized() * fly_speed * delta
+	if distance <= SNAP_RADIUS:
+		velocity += difference.normalized() * fly_speed * delta * min(1.0, SNAP_RADIUS / distance) * SNAP_RADIUS
+	else:
+		velocity += difference.normalized() * fly_speed * delta
+	
 	velocity = velocity.limit_length(terminal_velocity)
 
 func setup_entity() -> void:
@@ -122,7 +130,7 @@ func _on_collect_area_entered(area: Area2D) -> void:
 	target_player = area.get_parent()
 	
 	# start chasing player
-	EntityManager.entity_send_update(id, {
+	EntityManager.entity_send_update.rpc_id(1, id, {
 		&'type': &'chase',
 		&'player_id': target_player.owner_id
 	})
@@ -167,8 +175,8 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			standard_death()
 		&'collect':
 			# verify collection
-			var distance: float = target_player.global_position.distance_squared_to(global_position)
-			if multiplayer.is_server() and distance > COLLECTION_RADIUS * 3.0:
+			var distance: float = target_player.center_point.distance_squared_to(global_position)
+			if multiplayer.is_server() and distance > COLLECTION_RADIUS * COLLECT_VERIFICATION:
 				# item too far out of range, reject collection
 				return {
 					&'success': false

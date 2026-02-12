@@ -260,7 +260,7 @@ func entity_send_update(entity_id: int, data: Dictionary) -> void:
 		return
 	
 	# update server entity
-	entity.receive_update(data)
+	data.merge(entity.receive_update(data), true)
 	
 	# send to all interested players
 	for player in entity.interested_players.keys():
