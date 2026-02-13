@@ -3,10 +3,13 @@ extends Entity
 
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
+
 const COLLECTION_RADIUS := 4.0**2
 const COLLECT_VERIFICATION := (3.0 * 8.0)**2.0
 const SNAP_RADIUS := 16.0**2
 const SNAP_STRENGTH := 2.0
+
+const MERGE_DELAY := 0.50
 
 @export var gravity := 980.0
 @export var air_resistance := 100.0
@@ -20,11 +23,15 @@ var quantity := 1
 var merged := false
 var spawned := false
 
+var stationary := false
+var merge_timer := 0.0
+
 var target_player: PlayerController
 
 # --- Functions --- #
 func _ready() -> void:
-	#$'merge_range'.monitoring = false
+	$'merge_range'.monitoring = false
+	#$'merge_range'.monitorable = false
 	
 	if multiplayer.is_server():
 		$'merge_range'.area_entered.connect(_on_merge_area_entered)
@@ -50,8 +57,23 @@ func _process(delta: float) -> void:
 	move_and_slide()
 	
 	# attempt to merge with nearby items
-	if is_on_floor() and multiplayer.is_server():
-		$'merge_range'.monitoring = true
+	if multiplayer.is_server():
+		if stationary and merge_timer > 0.0:
+			merge_timer -= delta
+			
+			# enable merging after a delay
+			if merge_timer <= 0.0:
+				merge_timer = -1.0
+				$'merge_range'.monitoring = true
+				#$'merge_range'.monitorable = true
+		
+		if is_on_floor() and not stationary:
+			stationary = true
+			merge_timer = MERGE_DELAY
+		elif not is_on_floor() and stationary:
+			stationary = false
+			$'merge_range'.monitoring = false
+			#$'merge_range'.monitorable = false
 
 func standard_physics(delta: float) -> void:
 	# air resistance
@@ -82,7 +104,8 @@ func chase_physics(delta: float) -> void:
 		target_player.my_inventory.add_item(item_id, quantity)
 		
 		EntityManager.entity_send_update.rpc_id(1, id, {
-			&'type': &'collect'
+			&'type': &'collect',
+			&'player_id': target_player.owner_id
 		})
 	
 	if distance <= SNAP_RADIUS:
@@ -143,22 +166,26 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
 		return
 	
-	return
-	
 	# don't merge already merged items
 	if merged:
 		return
 	
+	# get other item from collision
 	var other_item: ItemDropEntity = area.get_parent()
-	
-	# make sure item ids match
-	if item_id != other_item.item_id:
+	if not is_instance_valid(other_item) or other_item.merged:
 		return
 	
-	# make sure there's enough space
-	if quantity + other_item.quantity > 9999:
+	# prioritize older items
+	if id > other_item.id:
 		return
 	
+	# make sure items can stack
+	if (item_id != other_item.item_id) or (quantity + other_item.quantity > 9999):
+		return
+	
+	other_item.merged = true
+	
+	# send network updates
 	EntityManager.entity_send_update(id, {
 		&'type': &'merge-owner',
 		&'quantity': other_item.quantity
@@ -182,20 +209,35 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			merged = true
 			standard_death()
 		&'collect':
+			var player: PlayerController = ServerManager.connected_players[update_data.get(&'player_id', 0)]
+			if not player:
+				return NO_RESPONSE
+			
 			# verify collection
-			var distance: float = target_player.center_point.distance_squared_to(global_position)
-			if multiplayer.is_server() and distance > COLLECTION_RADIUS * COLLECT_VERIFICATION:
+			if multiplayer.is_server():
+				var distance: float = player.center_point.distance_squared_to(global_position)
+				# don't pick up merged items
+				if merged:
+					return {
+						&'success': false
+					}
+				# don't pick up collected items
+				if not visible:
+					return {
+						&'success': false
+					} 
 				# item too far out of range, reject collection
-				return {
-					&'success': false
-				}
+				if distance > COLLECTION_RADIUS * COLLECT_VERIFICATION:
+					return {
+						&'success': false
+					}
 			
 			# undo collection
-			if not data.get(&'success', true) and target_player == Globals.player:
+			if not data.get(&'success', true) and player == Globals.player:
 				show()
 				
 				# restore inventory state
-				target_player.my_inventory.remove_item(item_id, quantity)
+				player.my_inventory.remove_item(item_id, quantity)
 				
 				return NO_RESPONSE
 			
