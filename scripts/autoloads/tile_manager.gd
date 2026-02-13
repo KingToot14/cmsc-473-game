@@ -40,20 +40,20 @@ func tile_to_world(tile_x: int, tile_y: int, center := false) -> Vector2:
 	if center:
 		offset = 4.0
 	
-	return Vector2(tile_x * 8.0 + offset, tile_y * 8.0 + offset)
+	return Vector2(tile_x * TILE_SIZE + offset, tile_y * TILE_SIZE + offset)
 
 func world_to_tile(world_x: int, world_y: int) -> Vector2i:
 	@warning_ignore("integer_division")
 	return Vector2i(
-		clampi(world_x / 8, 0, Globals.world_size.x),
-		clampi(world_y / 8, 0, Globals.world_size.y)
+		clampi(world_x / TILE_SIZE, 0, Globals.world_size.x),
+		clampi(world_y / TILE_SIZE, 0, Globals.world_size.y)
 	)
 
 func world_to_chunk(world_x: int, world_y) -> Vector2i:
 	@warning_ignore("integer_division")
 	return Vector2i(
-		clampi(world_x / (8 * CHUNK_SIZE), 0, Globals.world_chunks.x),
-		clampi(world_y / (8 * CHUNK_SIZE), 0, Globals.world_chunks.y)
+		clampi(world_x / (TILE_SIZE * CHUNK_SIZE), 0, Globals.world_chunks.x),
+		clampi(world_y / (TILE_SIZE * CHUNK_SIZE), 0, Globals.world_chunks.y)
 	)
 
 #endregion

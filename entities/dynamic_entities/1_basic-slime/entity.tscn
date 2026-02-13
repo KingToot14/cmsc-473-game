@@ -12,6 +12,9 @@ size = Vector2(16, 16)
 [node name="entity" type="CharacterBody2D" unique_id=484265242]
 collision_layer = 8
 script = ExtResource("1_bsut5")
+jump_wait_base = 1.0
+jump_wait_variance = 2.0
+move_power_base = 150.0
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=774374524]

@@ -5,7 +5,7 @@ extends Entity
 const UPWARD_RANDOM_POWER := 200.0
 
 const COLLECTION_RADIUS := 4.0**2
-const COLLECT_VERIFICATION := (3.0 * 8.0)**2.0
+const COLLECT_VERIFICATION := (3.0 * TileManager.TILE_SIZE)**2.0
 const SNAP_RADIUS := 16.0**2
 const SNAP_STRENGTH := 2.0
 
@@ -71,9 +71,6 @@ func _physics_process(delta: float) -> void:
 			$'merge_range'.monitoring = false
 
 func standard_physics(delta: float) -> void:
-	if not multiplayer.is_server():
-		return
-	
 	# air resistance
 	if velocity.x < 0:
 		velocity.x = minf(0.0, velocity.x + air_resistance * delta)
@@ -87,9 +84,6 @@ func standard_physics(delta: float) -> void:
 		velocity.y = 0.0
 
 func chase_physics(delta: float) -> void:
-	if not multiplayer.is_server():
-		return
-	
 	var difference: Vector2 = target_player.center_point - global_position
 	var distance: float = difference.length_squared()
 	
@@ -202,8 +196,6 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 	
 	match type:
 		&'merge-owner':
-			print(quantity, " | ", id, " | ", multiplayer.get_unique_id())
-			
 			quantity += update_data.get(&'quantity', 0)
 			data[&'quantity'] = quantity
 		&'merge-kill':
