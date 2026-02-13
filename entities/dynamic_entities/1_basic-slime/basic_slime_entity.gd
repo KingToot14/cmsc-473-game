@@ -40,6 +40,7 @@ var rng: RandomNumberGenerator
 func _ready() -> void:
 	super()
 	
+	hp_pool[0].died.connect(_on_death)
 	hp_pool[0].received_damage.connect(standard_receive_damage)
 
 func _physics_process(delta: float) -> void:
@@ -111,6 +112,19 @@ func _input(event: InputEvent) -> void:
 		&'damage': 25,
 		&'player_id': multiplayer.get_unique_id()
 	})
+
+func _on_death(from_server: bool) -> void:
+	hide()
+	
+	# TODO: spawn slime item drops
+	if multiplayer.is_server():
+		EntityManager.create_entity(0, global_position - Vector2(0, 4), {
+			&'item_id': 1,
+			&'quantity': rng.randi_range(1, 3)
+		})
+	
+	if from_server:
+		standard_death()
 
 #endregion
 

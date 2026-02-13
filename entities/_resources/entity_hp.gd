@@ -34,6 +34,8 @@ func setup() -> void:
 func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)
 	
+	# play flash animation
+	
 	# deal damage
 	modify_health(-damage, false)
 	
