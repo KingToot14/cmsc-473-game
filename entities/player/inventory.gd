@@ -14,7 +14,6 @@ func _init():
 
 func add_item(item_id: int, amount: int) -> int:
 	var item: Item = ItemDatabase.get_item(item_id)
-	print(item.item_name, " | ", amount)
 	
 	if not item:
 		return amount

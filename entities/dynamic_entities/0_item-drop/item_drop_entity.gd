@@ -31,16 +31,13 @@ var target_player: PlayerController
 # --- Functions --- #
 func _ready() -> void:
 	$'merge_range'.monitoring = false
-	#$'merge_range'.monitorable = false
 	
 	if multiplayer.is_server():
 		$'merge_range'.area_entered.connect(_on_merge_area_entered)
 	else:
 		$'collection_range'.area_entered.connect(_on_collect_area_entered)
 
-func _process(delta: float) -> void:
-	super(delta)
-	
+func _physics_process(delta: float) -> void:
 	if interest_count == 0:
 		return
 	
@@ -65,7 +62,6 @@ func _process(delta: float) -> void:
 			if merge_timer <= 0.0:
 				merge_timer = -1.0
 				$'merge_range'.monitoring = true
-				#$'merge_range'.monitorable = true
 		
 		if is_on_floor() and not stationary:
 			stationary = true
@@ -73,9 +69,11 @@ func _process(delta: float) -> void:
 		elif not is_on_floor() and stationary:
 			stationary = false
 			$'merge_range'.monitoring = false
-			#$'merge_range'.monitorable = false
 
 func standard_physics(delta: float) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	# air resistance
 	if velocity.x < 0:
 		velocity.x = minf(0.0, velocity.x + air_resistance * delta)
@@ -89,6 +87,9 @@ func standard_physics(delta: float) -> void:
 		velocity.y = 0.0
 
 func chase_physics(delta: float) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	var difference: Vector2 = target_player.center_point - global_position
 	var distance: float = difference.length_squared()
 	

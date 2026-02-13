@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://3d3bltor36jx"]
+
+[ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_bsut5"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_fpuqc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fpuqc"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
+size = Vector2(16, 16)
+
+[node name="entity" type="CharacterBody2D" unique_id=484265242]
+collision_layer = 8
+script = ExtResource("1_bsut5")
+metadata/_custom_type_script = "uid://cqsofxynpllnt"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=774374524]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_fpuqc")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
+z_index = 100
+position = Vector2(0, -8)
+texture = ExtResource("2_fpuqc")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_l7c8k")
+debug_color = Color(0.7, 0, 0, 0.41960785)

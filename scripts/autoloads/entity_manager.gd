@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 # --- Variables --- #
 var curr_id := 0
@@ -16,6 +16,16 @@ func _ready() -> void:
 	# crawl files to add enemies to the list
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
 	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
+
+func _input(event: InputEvent) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var mouse_position := get_global_mouse_position()
+	
+	if event.is_action_pressed(&'test_input'):
+		# TEMPORARY: spawn green slime at mouse position
+		create_entity(1, mouse_position, {})
 
 func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
