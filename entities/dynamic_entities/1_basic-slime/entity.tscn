@@ -1,14 +1,53 @@
 [gd_scene format=3 uid="uid://3d3bltor36jx"]
 
 [ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_bsut5"]
-[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_fpuqc"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_l7c8k"]
+[ext_resource type="Texture2D" uid="uid://dbdpbjjq177bt" path="res://entities/dynamic_entities/1_basic-slime/green_slime.png" id="3_l7c8k"]
+
+[sub_resource type="Animation" id="Animation_l7c8k"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_en56l"]
+resource_name = "idle"
+length = 0.8
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.29999998, 0.39999998, 0.5, 0.59999996, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 2, 3, 4, 5, 6, 7, 8]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_515sv"]
+_data = {
+&"RESET": SubResource("Animation_l7c8k"),
+&"idle": SubResource("Animation_en56l")
+}
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fpuqc"]
-size = Vector2(16, 16)
+size = Vector2(12, 9)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
-size = Vector2(16, 16)
+size = Vector2(12, 9)
 
 [node name="entity" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
 collision_layer = 8
@@ -19,23 +58,28 @@ move_power_base = 150.0
 hp_pool = [NodePath("hp")]
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
 
+[node name="animator" type="AnimationPlayer" parent="." unique_id=1400854203]
+libraries/ = SubResource("AnimationLibrary_515sv")
+autoplay = &"idle"
+
 [node name="hp" type="Node" parent="." unique_id=1826484380 node_paths=PackedStringArray("entity")]
 script = ExtResource("2_l7c8k")
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=774374524]
-position = Vector2(0, -8)
+position = Vector2(0, -4.5)
 shape = SubResource("RectangleShape2D_fpuqc")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
 z_index = 100
 position = Vector2(0, -8)
-texture = ExtResource("2_fpuqc")
+texture = ExtResource("3_l7c8k")
+hframes = 9
 
 [node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
-position = Vector2(0, -8)
+position = Vector2(0, -4.5)
 shape = SubResource("RectangleShape2D_l7c8k")
 debug_color = Color(0.7, 0, 0, 0.41960785)
