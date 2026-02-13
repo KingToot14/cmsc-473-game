@@ -5,6 +5,11 @@ extends Entity
 const POSITION_REMAIN_RANGE := (2.0 * TileManager.TILE_SIZE)**2
 const POSITION_ADJUST_RANGE := (6.0 * TileManager.TILE_SIZE)**2
 
+const JUMP_POWER_TINY := 0.35
+const JUMP_POWER_SMALL := 0.50
+const JUMP_POWER_LARGE := 1.50
+const JUMP_MODIFIER_ODDS := 0.10
+
 @export_group("Jumps", "jump_")
 @export var jump_per_direction_base := 6
 @export var jump_per_direction_variance := 4
@@ -33,7 +38,9 @@ var rng: RandomNumberGenerator
 
 # --- Functions --- #
 func _ready() -> void:
-	pass
+	super()
+	
+	hp_pool[0].received_damage.connect(standard_receive_damage)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
@@ -49,6 +56,7 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		velocity.x = 0.0
 
+#region Physics
 func get_travel_direction() -> void:
 	if not multiplayer.is_server():
 		return
@@ -68,12 +76,19 @@ func try_jump(delta: float) -> void:
 		jump_timer -= delta
 		
 		if jump_timer <= 0:
-			jump_timer = jump_wait_base + floori(rng.randf() * jump_wait_variance)
+			jump_timer = jump_wait_base + rng.randf_range(0, jump_wait_variance)
 			jump_remaining -= 1
 			
 			# set velocity
 			velocity.x =  (move_power_base + rng.randf_range(0, move_power_variance)) * travel_direction
 			velocity.y = -(jump_power_base + rng.randf_range(0, jump_power_variance))
+			
+			# random chance to perform a small jump
+			if rng.randf() < JUMP_MODIFIER_ODDS:
+				velocity.y *= JUMP_POWER_SMALL
+			# random chacne to perform a large jump (if not a small jump)
+			elif rng.randf() < JUMP_MODIFIER_ODDS:
+				velocity.y *= JUMP_POWER_LARGE
 			
 			EntityManager.entity_send_update(id, {
 				&'type': &'jump-start',
@@ -81,10 +96,25 @@ func try_jump(delta: float) -> void:
 				&'position': global_position
 			})
 
-func chase_physics(_delta: float) -> void:
-	if not multiplayer.is_server():
-		return
+#endregion
 
+#region Damage
+func _input(event: InputEvent) -> void:
+	if event is not InputEventMouseButton or not event.is_pressed():
+		return
+	
+	if get_global_mouse_position().distance_to(global_position) > 20.0:
+		return
+	
+	# TEMPORARY: deal damage until actual combat system is implemented
+	hp_pool[0].take_damage({
+		&'damage': 25,
+		&'player_id': multiplayer.get_unique_id()
+	})
+
+#endregion
+
+#region Multiplayer
 func setup_entity() -> void:
 	rng = RandomNumberGenerator.new()
 	rng.seed = id
@@ -118,5 +148,13 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			
 			# update velocity
 			velocity = update_data.get(&'velocity', Vector2.ZERO)
+		&'knockback':
+			if multiplayer.is_server():
+				return NO_RESPONSE
+			
+			# apply knockback force
+			velocity += update_data.get(&'force', Vector2.ZERO)
 	
 	return NO_RESPONSE
+
+#endregion

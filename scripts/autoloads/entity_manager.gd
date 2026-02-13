@@ -236,6 +236,22 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	# apply damage
 	entity.hp_pool[pool_id].modify_health(-damage, true)
 	
+	# calculate knockback force
+	var player_obj: PlayerController = ServerManager.connected_players[snapshot[&'player_id']]
+	
+	
+	# receive knockback away from player
+	if entity is Entity:
+		var knockback_force := Vector2(1.0, 0.0)
+		if player_obj.center_point.x > entity.global_position.x:
+			knockback_force.x *= -1
+		
+		# apply slight upward force if level
+		if entity.is_on_floor():
+			knockback_force.y = -0.5
+		
+		snapshot[&'knockback'] = knockback_force.normalized()
+	
 	# store hp
 	if entity is TileEntity:
 		var entity_info: TileEntityInfo = tile_entities[entity.current_chunk][entity.id]
@@ -252,6 +268,9 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	if entity.hp_pool[pool_id].curr_hp <= 0:
 		snapshot[&'entity_dead'] = true
+	
+	# call receive signal on server copy
+	entity.hp_pool[pool_id].received_damage.emit(snapshot)
 	
 	# send to relavent players
 	for player in entity.interested_players:

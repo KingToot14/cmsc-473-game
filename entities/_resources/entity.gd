@@ -22,6 +22,8 @@ var current_chunk: Vector2i
 
 @export var hp_pool: Array[EntityHp]
 
+@export var knockback_power := 200.0
+
 @export_group("Despawning")
 @export var free_on_despawn := true
 @export var despawn_time := 300.0
@@ -141,6 +143,12 @@ func check_player(player_id: int) -> bool:
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	queue_free()
+
+func standard_receive_damage(snapshot: Dictionary) -> void:
+	# apply knockback
+	velocity += snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
+	
+	
 
 #endregion
 

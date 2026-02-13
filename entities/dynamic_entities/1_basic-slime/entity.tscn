@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_bsut5"]
 [ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_fpuqc"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_l7c8k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fpuqc"]
 size = Vector2(16, 16)
@@ -9,13 +10,19 @@ size = Vector2(16, 16)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
 size = Vector2(16, 16)
 
-[node name="entity" type="CharacterBody2D" unique_id=484265242]
+[node name="entity" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
 collision_layer = 8
 script = ExtResource("1_bsut5")
 jump_wait_base = 1.0
 jump_wait_variance = 2.0
 move_power_base = 150.0
+hp_pool = [NodePath("hp")]
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
+
+[node name="hp" type="Node" parent="." unique_id=1826484380 node_paths=PackedStringArray("entity")]
+script = ExtResource("2_l7c8k")
+entity = NodePath("..")
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=774374524]
 position = Vector2(0, -8)
