@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 # --- Variables --- #
 var curr_id := 0
@@ -16,6 +16,16 @@ func _ready() -> void:
 	# crawl files to add enemies to the list
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
 	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
+
+func _input(event: InputEvent) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var mouse_position := get_global_mouse_position()
+	
+	if event.is_action_pressed(&'test_input'):
+		# TEMPORARY: spawn green slime at mouse position
+		create_entity(1, mouse_position, {})
 
 func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
@@ -226,6 +236,22 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	# apply damage
 	entity.hp_pool[pool_id].modify_health(-damage, true)
 	
+	# calculate knockback force
+	var player_obj: PlayerController = ServerManager.connected_players[snapshot[&'player_id']]
+	
+	
+	# receive knockback away from player
+	if entity is Entity:
+		var knockback_force := Vector2(1.0, 0.0)
+		if player_obj.center_point.x > entity.global_position.x:
+			knockback_force.x *= -1
+		
+		# apply slight upward force if level
+		if entity.is_on_floor():
+			knockback_force.y = -0.5
+		
+		snapshot[&'knockback'] = knockback_force.normalized()
+	
 	# store hp
 	if entity is TileEntity:
 		var entity_info: TileEntityInfo = tile_entities[entity.current_chunk][entity.id]
@@ -242,6 +268,9 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	if entity.hp_pool[pool_id].curr_hp <= 0:
 		snapshot[&'entity_dead'] = true
+	
+	# call receive signal on server copy
+	entity.hp_pool[pool_id].received_damage.emit(snapshot)
 	
 	# send to relavent players
 	for player in entity.interested_players:

@@ -5,7 +5,7 @@ extends Entity
 const UPWARD_RANDOM_POWER := 200.0
 
 const COLLECTION_RADIUS := 4.0**2
-const COLLECT_VERIFICATION := (3.0 * 8.0)**2.0
+const COLLECT_VERIFICATION := (3.0 * TileManager.TILE_SIZE)**2.0
 const SNAP_RADIUS := 16.0**2
 const SNAP_STRENGTH := 2.0
 
@@ -31,16 +31,13 @@ var target_player: PlayerController
 # --- Functions --- #
 func _ready() -> void:
 	$'merge_range'.monitoring = false
-	#$'merge_range'.monitorable = false
 	
 	if multiplayer.is_server():
 		$'merge_range'.area_entered.connect(_on_merge_area_entered)
 	else:
 		$'collection_range'.area_entered.connect(_on_collect_area_entered)
 
-func _process(delta: float) -> void:
-	super(delta)
-	
+func _physics_process(delta: float) -> void:
 	if interest_count == 0:
 		return
 	
@@ -65,7 +62,6 @@ func _process(delta: float) -> void:
 			if merge_timer <= 0.0:
 				merge_timer = -1.0
 				$'merge_range'.monitoring = true
-				#$'merge_range'.monitorable = true
 		
 		if is_on_floor() and not stationary:
 			stationary = true
@@ -73,7 +69,6 @@ func _process(delta: float) -> void:
 		elif not is_on_floor() and stationary:
 			stationary = false
 			$'merge_range'.monitoring = false
-			#$'merge_range'.monitorable = false
 
 func standard_physics(delta: float) -> void:
 	# air resistance
@@ -201,8 +196,6 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 	
 	match type:
 		&'merge-owner':
-			print(quantity, " | ", id, " | ", multiplayer.get_unique_id())
-			
 			quantity += update_data.get(&'quantity', 0)
 			data[&'quantity'] = quantity
 		&'merge-kill':

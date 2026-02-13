@@ -2,7 +2,8 @@ class_name EntityHp
 extends Node
 
 # --- Signals --- #
-signal hp_modified()
+signal received_damage(snapshot: Dictionary)
+signal hp_modified(from_server: bool)
 signal died(from_server: bool)
 
 # --- Variables --- #
@@ -32,6 +33,8 @@ func setup() -> void:
 
 func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)
+	
+	# play flash animation
 	
 	# deal damage
 	modify_health(-damage, false)
@@ -65,10 +68,12 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 		modify_health(-diff, true)
 	else:
 		modify_health(-damage, true)
+	
+	received_damage.emit(snapshot)
 
 func modify_health(delta: int, from_server: bool) -> void:
 	curr_hp += delta
-	hp_modified.emit()
+	hp_modified.emit(from_server)
 	
 	if curr_hp <= 0:
 		# TODO: Add effects and prediction to this area
