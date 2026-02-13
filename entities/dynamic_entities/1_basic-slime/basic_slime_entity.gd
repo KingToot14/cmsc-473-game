@@ -41,7 +41,7 @@ func _ready() -> void:
 	super()
 	
 	hp_pool[0].died.connect(_on_death)
-	hp_pool[0].received_damage.connect(standard_receive_damage)
+	hp_pool[0].received_damage.connect(_on_receive_damage)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
@@ -112,6 +112,18 @@ func _input(event: InputEvent) -> void:
 		&'damage': 25,
 		&'player_id': multiplayer.get_unique_id()
 	})
+
+func _on_receive_damage(snapshot: Dictionary) -> void:
+	standard_receive_damage(snapshot)
+	
+	# set target if not already set
+	if multiplayer.is_server():
+		if not is_instance_valid(target_player):
+			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
+			snapshot[&'update_target'] = true
+	else:
+		if snapshot.get(&'update_target'):
+			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
 
 func _on_death(from_server: bool) -> void:
 	hide()
