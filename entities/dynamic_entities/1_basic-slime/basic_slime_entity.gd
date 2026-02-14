@@ -91,12 +91,24 @@ func try_jump(delta: float) -> void:
 			velocity.x =  (move_power_base + rng.randf_range(0, move_power_variance)) * travel_direction
 			velocity.y = -(jump_power_base + rng.randf_range(0, jump_power_variance))
 			
-			# random chance to perform a small jump
-			if rng.randf() < JUMP_MODIFIER_ODDS:
-				velocity.y *= JUMP_POWER_SMALL
-			# random chacne to perform a large jump (if not a small jump)
-			elif rng.randf() < JUMP_MODIFIER_ODDS:
-				velocity.y *= JUMP_POWER_LARGE
+			if is_instance_valid(target_player):
+				var distance = global_position.distance_squared_to(target_player.global_position)
+				
+				if distance < (4 * TileManager.TILE_SIZE)**2:
+					velocity.y *= JUMP_POWER_TINY
+				elif distance < (12 * TileManager.TILE_SIZE)**2:
+					velocity.y *= JUMP_POWER_SMALL
+				if distance > (20 * TileManager.TILE_SIZE)**2:
+					velocity.y *= JUMP_POWER_LARGE
+			else:
+				var roll: float = rng.randf()
+				
+				# random chance to perform a small jump
+				if roll < JUMP_MODIFIER_ODDS:
+					velocity.y *= JUMP_POWER_SMALL
+				# random chacne to perform a large jump (if not a small jump)
+				elif rng.randf() < JUMP_MODIFIER_ODDS * 2.0:
+					velocity.y *= JUMP_POWER_LARGE
 			
 			EntityManager.entity_send_update(id, {
 				&'type': &'jump-start',
