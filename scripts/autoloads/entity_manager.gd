@@ -224,7 +224,7 @@ func load_tile_entity(
 #region Entity Management
 @rpc('any_peer', 'call_remote', "reliable")
 func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
-	var entity: Node2D = loaded_entities[entity_id]
+	var entity: Node2D = loaded_entities.get(entity_id)
 	
 	if not (entity and len(entity.hp_pool) > 0):
 		return
@@ -238,7 +238,6 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	# calculate knockback force
 	var player_obj: PlayerController = ServerManager.connected_players[snapshot[&'player_id']]
-	
 	
 	# receive knockback away from player
 	if entity is Entity:

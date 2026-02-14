@@ -21,6 +21,7 @@ var current_chunk: Vector2i
 @export var process_on_client := false
 
 @export var hp_pool: Array[EntityHp]
+@export var flash_material: ShaderMaterial
 
 @export var knockback_power := 200.0
 
@@ -142,13 +143,28 @@ func check_player(player_id: int) -> bool:
 #region Life Cycle
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
-	queue_free()
+	
+	if not multiplayer.is_server() and has_node(^'animator') and $'animator'.has_animation(&'death'):
+		$'animator'.play(&'death')
+	else:
+		queue_free()
 
 func standard_receive_damage(snapshot: Dictionary) -> void:
-	# apply knockback
-	velocity += snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
+	# apply knockback (if not dead)
+	if not snapshot.get(&'entity_dead', false):
+		velocity += snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
 	
+	if not flash_material:
+		return
 	
+	flash_material.set_shader_parameter(&'intensity', 1.0)
+	
+	var flash_tween := create_tween()
+	
+	flash_tween.tween_method(func (x):
+		flash_material.set_shader_parameter(&'intensity', x),
+		1.0, 0.0, 0.15
+	)
 
 #endregion
 
