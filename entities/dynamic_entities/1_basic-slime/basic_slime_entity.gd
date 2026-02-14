@@ -88,31 +88,32 @@ func try_jump(delta: float) -> void:
 			jump_remaining -= 1
 			
 			# set velocity
-			velocity.x =  (move_power_base + rng.randf_range(0, move_power_variance)) * travel_direction
-			velocity.y = -(jump_power_base + rng.randf_range(0, jump_power_variance))
+			jump_velocity.x =  (move_power_base + rng.randf_range(0, move_power_variance)) * travel_direction
+			jump_velocity.y = -(jump_power_base + rng.randf_range(0, jump_power_variance))
 			
 			if is_instance_valid(target_player):
 				var distance = global_position.distance_squared_to(target_player.global_position)
 				
 				if distance < (4 * TileManager.TILE_SIZE)**2:
-					velocity.y *= JUMP_POWER_TINY
+					jump_velocity.y *= JUMP_POWER_TINY
 				elif distance < (12 * TileManager.TILE_SIZE)**2:
-					velocity.y *= JUMP_POWER_SMALL
+					jump_velocity.y *= JUMP_POWER_SMALL
 				if distance > (20 * TileManager.TILE_SIZE)**2:
-					velocity.y *= JUMP_POWER_LARGE
+					jump_velocity.y *= JUMP_POWER_LARGE
 			else:
 				var roll: float = rng.randf()
 				
 				# random chance to perform a small jump
 				if roll < JUMP_MODIFIER_ODDS:
-					velocity.y *= JUMP_POWER_SMALL
+					jump_velocity.y *= JUMP_POWER_SMALL
 				# random chacne to perform a large jump (if not a small jump)
 				elif rng.randf() < JUMP_MODIFIER_ODDS * 2.0:
-					velocity.y *= JUMP_POWER_LARGE
+					jump_velocity.y *= JUMP_POWER_LARGE
 			
+			$'animator'.play(&'jump')
 			EntityManager.entity_send_update(id, {
 				&'type': &'jump-start',
-				&'velocity': velocity,
+				&'velocity': jump_velocity,
 				&'position': global_position
 			})
 
@@ -149,7 +150,7 @@ func _on_receive_damage(snapshot: Dictionary) -> void:
 			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
 
 func _on_death(from_server: bool) -> void:
-	hide()
+	#hide()
 	
 	# TODO: spawn slime item drops
 	if multiplayer.is_server():
@@ -157,6 +158,8 @@ func _on_death(from_server: bool) -> void:
 			&'item_id': 1,
 			&'quantity': rng.randi_range(1, 3)
 		})
+	
+	print("Killing Entiti %s (%s | %s)" % [id, from_server, multiplayer.get_unique_id()])
 	
 	if from_server:
 		standard_death()

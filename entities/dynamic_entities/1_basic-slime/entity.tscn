@@ -2,7 +2,14 @@
 
 [ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_bsut5"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_l7c8k"]
+[ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="3_en56l"]
 [ext_resource type="Texture2D" uid="uid://dbdpbjjq177bt" path="res://entities/dynamic_entities/1_basic-slime/green_slime.png" id="3_l7c8k"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_515sv"]
+resource_local_to_scene = true
+shader = ExtResource("3_en56l")
+shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/intensity = 0.0
 
 [sub_resource type="Animation" id="Animation_l7c8k"]
 length = 0.001
@@ -17,6 +24,18 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sprite:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
 }
 
 [sub_resource type="Animation" id="Animation_mgvli"]
@@ -35,6 +54,48 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
 "values": [12, 13, 14, 15]
+}
+
+[sub_resource type="Animation" id="Animation_gchxs"]
+resource_name = "death"
+length = 0.2997
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.2664),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"queue_free"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sprite:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.066599995, 0.13319999, 0.1998),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [16, 17, 18, 19]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("sprite:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2664),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
 }
 
 [sub_resource type="Animation" id="Animation_en56l"]
@@ -107,6 +168,7 @@ tracks/0/keys = {
 _data = {
 &"RESET": SubResource("Animation_l7c8k"),
 &"airborne": SubResource("Animation_mgvli"),
+&"death": SubResource("Animation_gchxs"),
 &"idle": SubResource("Animation_en56l"),
 &"jump": SubResource("Animation_515sv"),
 &"land": SubResource("Animation_rjtam")
@@ -125,6 +187,7 @@ jump_wait_base = 1.0
 jump_wait_variance = 2.0
 move_power_base = 150.0
 hp_pool = [NodePath("hp")]
+flash_material = SubResource("ShaderMaterial_515sv")
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
 
 [node name="animator" type="AnimationPlayer" parent="." unique_id=1400854203]
@@ -142,10 +205,11 @@ shape = SubResource("RectangleShape2D_fpuqc")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
 z_index = 100
+material = SubResource("ShaderMaterial_515sv")
 position = Vector2(0, -7)
 texture = ExtResource("3_l7c8k")
 hframes = 8
-vframes = 2
+vframes = 3
 
 [node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
 
