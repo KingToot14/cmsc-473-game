@@ -2,7 +2,7 @@ class_name TreeEntity
 extends TileEntity
 
 # --- Variables --- #
-const APPLE_DROP_ODDS := 1.0
+const APPLE_DROP_ODDS := 0.10
 
 var branch_seed := 0
 

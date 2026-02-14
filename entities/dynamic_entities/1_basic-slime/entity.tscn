@@ -19,6 +19,24 @@ tracks/0/keys = {
 "values": [0]
 }
 
+[sub_resource type="Animation" id="Animation_mgvli"]
+resource_name = "airborne"
+length = 0.4
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [12, 13, 14, 15]
+}
+
 [sub_resource type="Animation" id="Animation_en56l"]
 resource_name = "idle"
 length = 0.8
@@ -31,23 +49,74 @@ tracks/0/path = NodePath("sprite:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.29999998, 0.39999998, 0.5, 0.59999996, 0.7),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.39999998, 0.49999997, 0.6, 0.7),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [1, 2, 3, 4, 5, 6, 7, 8]
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
+[sub_resource type="Animation" id="Animation_515sv"]
+resource_name = "jump"
+length = 0.5
+step = 0.05
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"apply_jump"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sprite:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [8, 9, 10, 11, 12]
+}
+
+[sub_resource type="Animation" id="Animation_rjtam"]
+resource_name = "land"
+length = 0.3
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [10, 9, 11]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_515sv"]
 _data = {
 &"RESET": SubResource("Animation_l7c8k"),
-&"idle": SubResource("Animation_en56l")
+&"airborne": SubResource("Animation_mgvli"),
+&"idle": SubResource("Animation_en56l"),
+&"jump": SubResource("Animation_515sv"),
+&"land": SubResource("Animation_rjtam")
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fpuqc"]
 size = Vector2(12, 9)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
-size = Vector2(12, 9)
+size = Vector2(14, 11)
 
 [node name="entity" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
 collision_layer = 8
@@ -73,9 +142,10 @@ shape = SubResource("RectangleShape2D_fpuqc")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
 z_index = 100
-position = Vector2(0, -8)
+position = Vector2(0, -7)
 texture = ExtResource("3_l7c8k")
-hframes = 9
+hframes = 8
+vframes = 2
 
 [node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
 

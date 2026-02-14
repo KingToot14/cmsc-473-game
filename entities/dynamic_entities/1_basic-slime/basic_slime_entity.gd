@@ -32,7 +32,8 @@ var target_player: PlayerController
 var travel_direction := -1
 var jump_remaining := 0
 var jump_timer := 0.0
-var landed := false
+var jump_velocity: Vector2
+var airborne := false
 
 var rng: RandomNumberGenerator
 
@@ -55,7 +56,13 @@ func _physics_process(delta: float) -> void:
 	
 	# snap to ground
 	if is_on_floor():
+		if airborne:
+			$'animator'.play(&'land')
+			$'animator'.advance(0.0)
+			$'animator'.queue(&'idle')
+		
 		velocity.x = 0.0
+		airborne = false
 
 #region Physics
 func get_travel_direction() -> void:
@@ -96,6 +103,10 @@ func try_jump(delta: float) -> void:
 				&'velocity': velocity,
 				&'position': global_position
 			})
+
+func apply_jump() -> void:
+	velocity = jump_velocity
+	airborne = true
 
 #endregion
 
@@ -172,8 +183,14 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			if distance > POSITION_REMAIN_RANGE:
 				global_position = global_position.lerp(position, 0.25)
 			
-			# update velocity
-			velocity = update_data.get(&'velocity', Vector2.ZERO)
+			# store jump velocity
+			jump_velocity = update_data.get(&'velocity', Vector2.ZERO)
+			#airborne = true
+			
+			# play jump animation
+			$'animator'.play(&'jump')
+			$'animator'.advance(0.0)
+			$'animator'.queue(&'airborne')
 		&'knockback':
 			if multiplayer.is_server():
 				return NO_RESPONSE
