@@ -4,6 +4,12 @@
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_l7c8k"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="3_en56l"]
 [ext_resource type="Texture2D" uid="uid://dbdpbjjq177bt" path="res://entities/dynamic_entities/1_basic-slime/green_slime.png" id="3_l7c8k"]
+[ext_resource type="Texture2D" uid="uid://duhbjh2ohxi57" path="res://entities/dynamic_entities/1_basic-slime/blue_slime.png" id="4_en56l"]
+[ext_resource type="Texture2D" uid="uid://c681n1t88ryou" path="res://entities/dynamic_entities/1_basic-slime/red_slime.png" id="4_rjtam"]
+[ext_resource type="Texture2D" uid="uid://upcysboa07d1" path="res://entities/dynamic_entities/1_basic-slime/purple_slime.png" id="5_gchxs"]
+[ext_resource type="Texture2D" uid="uid://ocu4t3t045of" path="res://entities/dynamic_entities/1_basic-slime/cloud_slime.png" id="6_gchxs"]
+[ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_b7qsa"]
+[ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_4484v"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_515sv"]
 resource_local_to_scene = true
@@ -175,10 +181,10 @@ _data = {
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fpuqc"]
-size = Vector2(12, 9)
+size = Vector2(14, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
-size = Vector2(14, 11)
+size = Vector2(14, 10)
 
 [node name="entity" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
 collision_layer = 8
@@ -186,6 +192,13 @@ script = ExtResource("1_bsut5")
 jump_wait_base = 1.0
 jump_wait_variance = 2.0
 move_power_base = 150.0
+variant_green_texture = ExtResource("3_l7c8k")
+variant_blue_texture = ExtResource("4_en56l")
+variant_red_texture = ExtResource("4_rjtam")
+variant_purple_texture = ExtResource("5_gchxs")
+variant_cloud_texture = ExtResource("6_gchxs")
+variant_stone_texture = ExtResource("7_b7qsa")
+variant_tunnel_texture = ExtResource("8_4484v")
 hp_pool = [NodePath("hp")]
 flash_material = SubResource("ShaderMaterial_515sv")
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
@@ -200,7 +213,7 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=774374524]
-position = Vector2(0, -4.5)
+position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_fpuqc")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
@@ -212,8 +225,8 @@ hframes = 8
 vframes = 3
 
 [node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
+position = Vector2(0, -5)
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
-position = Vector2(0, -4.5)
 shape = SubResource("RectangleShape2D_l7c8k")
 debug_color = Color(0.7, 0, 0, 0.41960785)

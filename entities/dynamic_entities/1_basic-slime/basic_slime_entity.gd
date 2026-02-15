@@ -27,6 +27,16 @@ const JUMP_MODIFIER_ODDS := 0.10
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
 
+@export_group("Variants", "variant_")
+
+@export var variant_green_texture: Texture2D
+@export var variant_blue_texture: Texture2D
+@export var variant_red_texture: Texture2D
+@export var variant_purple_texture: Texture2D
+@export var variant_cloud_texture: Texture2D
+@export var variant_stone_texture: Texture2D
+@export var variant_tunnel_texture: Texture2D
+
 var target_player: PlayerController
 
 var travel_direction := -1
@@ -50,8 +60,12 @@ func _physics_process(delta: float) -> void:
 		try_jump(delta)
 	
 	# gravity
+	if not is_on_floor():
+		velocity.x = jump_velocity.x
+	
 	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
 	
+	# movement
 	move_and_slide()
 	
 	# snap to ground
@@ -150,16 +164,12 @@ func _on_receive_damage(snapshot: Dictionary) -> void:
 			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
 
 func _on_death(from_server: bool) -> void:
-	#hide()
-	
 	# TODO: spawn slime item drops
 	if multiplayer.is_server():
 		EntityManager.create_entity(0, global_position - Vector2(0, 4), {
 			&'item_id': 1,
 			&'quantity': rng.randi_range(1, 3)
 		})
-	
-	print("Killing Entiti %s (%s | %s)" % [id, from_server, multiplayer.get_unique_id()])
 	
 	if from_server:
 		standard_death()
@@ -168,11 +178,68 @@ func _on_death(from_server: bool) -> void:
 
 #region Multiplayer
 func setup_entity() -> void:
+	var spawned: bool = data.get(&'spawned', true)
+	
 	rng = RandomNumberGenerator.new()
 	rng.seed = id
 	
+	# variants
+	match data.get(&'variant', &'green'):
+		&'green':
+			$'sprite'.texture = variant_green_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(96, spawned)		# only update hp to max if just spawned
+		&'blue':
+			$'sprite'.texture = variant_blue_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(138, spawned)		# only update hp to max if just spawned
+		&'red':
+			$'sprite'.texture = variant_red_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(224, spawned)		# only update hp to max if just spawned
+		&'purple':
+			$'sprite'.texture = variant_purple_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(296, spawned)		# only update hp to max if just spawned
+		&'cloud':
+			$'sprite'.texture = variant_cloud_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(158, spawned)		# only update hp to max if just spawned
+			
+			gravity *= 0.65
+			jump_power_base *= 1.10
+			jump_power_variance *= 1.10
+			move_power_base *= 1.10
+			move_power_variance *= 1.10
+		&'stone':
+			$'sprite'.texture = variant_stone_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(362, spawned)		# only update hp to max if just spawned
+			
+			gravity *= 1.50
+			jump_power_base *= 1.20
+			jump_power_variance *= 1.20
+			move_power_base *= 1.20
+			move_power_variance *= 1.20
+		&'tunnel':
+			$'sprite'.texture = variant_tunnel_texture
+			
+			# stats
+			hp_pool[0].set_max_hp(172, spawned)		# only update hp to max if just spawned
+			
+			jump_power_base *= 0.60
+			jump_power_variance *= 0.60
+			move_power_base *= 1.60
+			move_power_variance *= 1.60
+	
 	# spawn-only logic
-	if not data.get(&'spawned', true):
+	if not spawned:
 		return
 	
 	# set initial direction
