@@ -79,9 +79,12 @@ func modify_health(delta: int, from_server: bool) -> void:
 		# TODO: Add effects and prediction to this area
 		died.emit(from_server)
 
-func set_max_hp(hp: int) -> void:
+func set_max_hp(hp: int, heal_to_full := false) -> void:
 	max_hp = hp
-	curr_hp = hp
+	if heal_to_full:
+		curr_hp = hp
+	else:
+		curr_hp = min(curr_hp, max_hp)
 
 func get_hp_percent() -> float:
 	return 1.0 * curr_hp / max_hp

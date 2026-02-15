@@ -144,8 +144,11 @@ func check_player(player_id: int) -> bool:
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	
+	velocity = Vector2.ZERO
+	
 	if not multiplayer.is_server() and has_node(^'animator') and $'animator'.has_animation(&'death'):
 		$'animator'.play(&'death')
+		$'animator'.animation_finished.connect(func(_s): queue_free())
 	else:
 		queue_free()
 
