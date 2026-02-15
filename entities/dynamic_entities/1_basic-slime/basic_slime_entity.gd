@@ -60,8 +60,12 @@ func _physics_process(delta: float) -> void:
 		try_jump(delta)
 	
 	# gravity
+	if not is_on_floor():
+		velocity.x = jump_velocity.x
+	
 	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
 	
+	# movement
 	move_and_slide()
 	
 	# snap to ground
