@@ -57,7 +57,7 @@ func _ready() -> void:
 	else:
 		# update position
 		position = spawn_point
-#	$inventory_ui/inventory_container.setup_ui(my_inventory)
+		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
