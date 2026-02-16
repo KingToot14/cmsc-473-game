@@ -18,6 +18,7 @@ var interest_count := 0
 
 var current_chunk: Vector2i
 
+@export var counts_towards_spawn_cap := true
 @export var process_on_client := false
 
 @export var hp_pool: Array[EntityHp]
@@ -122,11 +123,14 @@ func scan_interest() -> void:
 		
 		# skip out of range players
 		if abs(diff.x) > load_range.x or abs(diff.y) > load_range.y:
-			interested_players.erase(player_id)
+			remove_interest(player_id)
+			player.remove_interest(id)
 			continue
 		
 		# set interested
-		interested_players[player_id] = true
+		add_interest(player_id)
+		if counts_towards_spawn_cap:
+			player.add_interest(id)
 	
 	check_interest()
 

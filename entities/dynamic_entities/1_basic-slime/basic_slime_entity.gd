@@ -263,7 +263,7 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 				global_position = pos
 			# slighly adjust to server position
 			if distance > POSITION_REMAIN_RANGE:
-				global_position = global_position.lerp(position, 0.25)
+				global_position = global_position.lerp(pos, 0.25)
 			
 			# store jump velocity
 			jump_velocity = update_data.get(&'velocity', Vector2.ZERO)
