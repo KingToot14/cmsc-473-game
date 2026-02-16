@@ -1,6 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://c4gjo7vh3bnh0"]
 
 [ext_resource type="FontFile" uid="uid://co0b8pqaps6ji" path="res://ui/fonts/chunky-pixel-10.ttf" id="1_1moc1"]
+[ext_resource type="FontFile" uid="uid://b4l4q6tg2bveb" path="res://ui/fonts/simple-pixel-7.ttf" id="2_eo3d3"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5fqn5"]
 
@@ -31,3 +32,6 @@ LineEdit/styles/normal = SubResource("StyleBoxEmpty_1moc1")
 LineEdit/styles/read_only = SubResource("StyleBoxEmpty_5lfg1")
 RichTextLabel/font_sizes/normal_font_size = 14
 RichTextLabel/fonts/normal_font = ExtResource("1_1moc1")
+SmallText/base_type = &"RichTextLabel"
+SmallText/font_sizes/normal_font_size = 7
+SmallText/fonts/normal_font = ExtResource("2_eo3d3")
