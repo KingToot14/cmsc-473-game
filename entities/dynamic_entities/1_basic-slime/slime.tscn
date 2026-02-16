@@ -1,19 +1,19 @@
 [gd_scene format=3 uid="uid://3d3bltor36jx"]
 
-[ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_bsut5"]
-[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="2_l7c8k"]
-[ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="3_en56l"]
-[ext_resource type="Texture2D" uid="uid://dbdpbjjq177bt" path="res://entities/dynamic_entities/1_basic-slime/green_slime.png" id="3_l7c8k"]
-[ext_resource type="Texture2D" uid="uid://duhbjh2ohxi57" path="res://entities/dynamic_entities/1_basic-slime/blue_slime.png" id="4_en56l"]
-[ext_resource type="Texture2D" uid="uid://c681n1t88ryou" path="res://entities/dynamic_entities/1_basic-slime/red_slime.png" id="4_rjtam"]
-[ext_resource type="Texture2D" uid="uid://upcysboa07d1" path="res://entities/dynamic_entities/1_basic-slime/purple_slime.png" id="5_gchxs"]
-[ext_resource type="Texture2D" uid="uid://ocu4t3t045of" path="res://entities/dynamic_entities/1_basic-slime/cloud_slime.png" id="6_gchxs"]
-[ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_b7qsa"]
-[ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_4484v"]
+[ext_resource type="Script" uid="uid://cqsofxynpllnt" path="res://entities/dynamic_entities/1_basic-slime/basic_slime_entity.gd" id="1_udgdv"]
+[ext_resource type="Texture2D" uid="uid://dbdpbjjq177bt" path="res://entities/dynamic_entities/1_basic-slime/green_slime.png" id="2_72hbc"]
+[ext_resource type="Texture2D" uid="uid://duhbjh2ohxi57" path="res://entities/dynamic_entities/1_basic-slime/blue_slime.png" id="3_odtd8"]
+[ext_resource type="Texture2D" uid="uid://c681n1t88ryou" path="res://entities/dynamic_entities/1_basic-slime/red_slime.png" id="4_jsemx"]
+[ext_resource type="Texture2D" uid="uid://upcysboa07d1" path="res://entities/dynamic_entities/1_basic-slime/purple_slime.png" id="5_7afba"]
+[ext_resource type="Texture2D" uid="uid://ocu4t3t045of" path="res://entities/dynamic_entities/1_basic-slime/cloud_slime.png" id="6_en8ih"]
+[ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_7td2d"]
+[ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_w88l4"]
+[ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="9_j8mhm"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="10_sgt0n"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_515sv"]
 resource_local_to_scene = true
-shader = ExtResource("3_en56l")
+shader = ExtResource("9_j8mhm")
 shader_parameter/flash_color = Color(1, 1, 1, 1)
 shader_parameter/intensity = 0.0
 
@@ -186,19 +186,19 @@ size = Vector2(14, 10)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
 size = Vector2(14, 10)
 
-[node name="entity" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
+[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
 collision_layer = 8
-script = ExtResource("1_bsut5")
+script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
 jump_wait_variance = 2.0
 move_power_base = 150.0
-variant_green_texture = ExtResource("3_l7c8k")
-variant_blue_texture = ExtResource("4_en56l")
-variant_red_texture = ExtResource("4_rjtam")
-variant_purple_texture = ExtResource("5_gchxs")
-variant_cloud_texture = ExtResource("6_gchxs")
-variant_stone_texture = ExtResource("7_b7qsa")
-variant_tunnel_texture = ExtResource("8_4484v")
+variant_green_texture = ExtResource("2_72hbc")
+variant_blue_texture = ExtResource("3_odtd8")
+variant_red_texture = ExtResource("4_jsemx")
+variant_purple_texture = ExtResource("5_7afba")
+variant_cloud_texture = ExtResource("6_en8ih")
+variant_stone_texture = ExtResource("7_7td2d")
+variant_tunnel_texture = ExtResource("8_w88l4")
 hp_pool = [NodePath("hp")]
 flash_material = SubResource("ShaderMaterial_515sv")
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
@@ -208,7 +208,7 @@ libraries/ = SubResource("AnimationLibrary_515sv")
 autoplay = &"idle"
 
 [node name="hp" type="Node" parent="." unique_id=1826484380 node_paths=PackedStringArray("entity")]
-script = ExtResource("2_l7c8k")
+script = ExtResource("10_sgt0n")
 entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
@@ -220,7 +220,7 @@ shape = SubResource("RectangleShape2D_fpuqc")
 z_index = 100
 material = SubResource("ShaderMaterial_515sv")
 position = Vector2(0, -7)
-texture = ExtResource("3_l7c8k")
+texture = ExtResource("2_72hbc")
 hframes = 8
 vframes = 3
 

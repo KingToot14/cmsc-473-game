@@ -3,8 +3,8 @@ extends Node2D
 # --- Variables --- #
 var curr_id := 0
 
-var enemy_registry: Dictionary[int, String] = {}
-var tile_entity_registry: Dictionary[int, String] = {}
+var enemy_registry: Dictionary[int, EntityInfo] = {}
+var tile_entity_registry: Dictionary[int, EntityInfo] = {}
 
 var tile_entities: Dictionary[Vector2i, Dictionary] = {}
 var dynamic_entities: Dictionary[Vector2i, Dictionary] = {}
@@ -17,27 +17,7 @@ func _ready() -> void:
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
 	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
 
-func _input(event: InputEvent) -> void:
-	if not multiplayer.is_server():
-		return
-	
-	var mouse_position := get_global_mouse_position()
-	
-	if event.is_action_pressed(&'test_input'):
-		var variant = &'green'
-		var roll = randf()
-		
-		if roll < 0.25:
-			variant = &'cloud'
-		elif roll < 0.50:
-			variant = &'tunnel'
-		
-		# TEMPORARY: spawn green slime at mouse position
-		create_entity(1, mouse_position, {
-			&'variant': variant
-		})
-
-func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
+func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
 	
 	for dir_name in entity_dir.get_directories():
@@ -50,12 +30,10 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void
 		var id := int(id_str)
 		var dir := DirAccess.open(root_dir.path_join(dir_name))
 		
-		if dir.file_exists('entity.tscn'):
-			registry[id] = root_dir.path_join(dir_name).path_join('entity.tscn')
-		elif dir.file_exists('entity.tscn.remap'):
-			registry[id] = root_dir.path_join(dir_name).path_join('entity.tscn').trim_suffix('.remap')
+		if dir.file_exists('info.tres') or dir.file_exists('info.tres.remap'):
+			registry[id] = load(root_dir.path_join(dir_name).path_join('info.tres'))
 		else:
-			printerr("[Wizbowo's Conquest] No file 'entity.tscn' found in directory %s" % dir_name)
+			printerr("[Wizbowo's Conquest] No file 'info.tres' found in directory %s" % dir_name)
 
 #region Entity Spawning
 func create_entity(
@@ -63,13 +41,13 @@ func create_entity(
 	) -> void:
 	
 	# setup new entity
-	var entity_path: String = enemy_registry.get(registry_id)
-	if not entity_path:
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
 		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
 		return
 	
 	# create new entity
-	var entity: Entity = load(entity_path).instantiate()
+	var entity: Entity = entity_scene.instantiate()
 	var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 	entity.position = position
 	if chunk not in dynamic_entities:
@@ -98,8 +76,8 @@ func create_entities(
 		registry_id: int, positions: Array[Vector2], spawn_data: Array[Dictionary]
 	) -> void:
 	
-	var entity_path: String = enemy_registry.get(registry_id)
-	if not entity_path:
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
 		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
 		return
 	
@@ -110,7 +88,7 @@ func create_entities(
 	for i in range(len(positions)):
 		var position: Vector2 = positions[i]
 		
-		var entity: Entity = load(entity_path).instantiate()
+		var entity: Entity = entity_scene.instantiate()
 		var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 		entity.position = position
 		if chunk not in dynamic_entities:
@@ -161,11 +139,11 @@ func load_entity(
 		return
 	
 	# setup new entity
-	var entity_path: String = enemy_registry.get(registry_id)
-	if not entity_path:
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
 		return
 	
-	var entity: Entity = load(entity_path).instantiate()
+	var entity: Entity = entity_scene.instantiate()
 	entity.add_interest(multiplayer.get_unique_id())
 	
 	entity.position = position
@@ -183,8 +161,8 @@ func load_entities(
 	) -> void:
 	
 	# setup new entity
-	var entity_path: String = enemy_registry.get(registry_id)
-	if not entity_path:
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
 		return
 	
 	for i in range(len(positions)):
@@ -195,7 +173,7 @@ func load_entities(
 		if loaded_entities.get(spawn_id):
 			continue
 		
-		var entity: Entity = load(entity_path).instantiate()
+		var entity: Entity = entity_scene.instantiate()
 		entity.add_interest(multiplayer.get_unique_id())
 		
 		entity.position = position
@@ -216,11 +194,11 @@ func load_tile_entity(
 		return
 	
 	# setup new entity
-	var entity_path: String = tile_entity_registry.get(registry_id)
-	if not entity_path:
+	var entity_scene: PackedScene = tile_entity_registry.get(registry_id).entity_scene
+	if not entity_scene:
 		return
 	
-	var entity: TileEntity = load(entity_path).instantiate()
+	var entity: TileEntity = entity_scene.instantiate()
 	entity.position = TileManager.tile_to_world(position.x, position.y)
 	entity.name = "entity_%s" % spawn_id
 	
@@ -330,8 +308,9 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		
 		# create entity server-side
 		if not entity_info.entity_id in loaded_entities:
+			var entity_scene: PackedScene = tile_entity_registry.get(entity_info.registry_id).entity_scene
 			@warning_ignore("confusable_local_declaration")
-			var entity: TileEntity = load(tile_entity_registry.get(entity_info.registry_id)).instantiate()
+			var entity: TileEntity = entity_scene.instantiate()
 			entity.position = TileManager.tile_to_world(
 				entity_info.anchor_point.x,
 				entity_info.anchor_point.y
@@ -422,6 +401,6 @@ class TileEntityInfo:
 		self.data = data
 	
 	func spawn() -> void:
-		current_instance = load(EntityManager.tile_entity_registry[entity_id]).instantiate()
+		current_instance = EntityManager.tile_entity_registry[entity_id].entity_scene.instantiate()
 
 #endregion

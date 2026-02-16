@@ -1,5 +1,8 @@
 extends Node
 
+# --- Signals --- #
+signal server_started()
+
 # --- Variables --- # 
 const DEFAULT_PORT = 7000
 
@@ -89,6 +92,8 @@ func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
 	multiplayer.multiplayer_peer = peer
 	
 	print("[Wizbowo's Conquest] Server started")
+	
+	server_started.emit()
 	
 	return Error.OK
 

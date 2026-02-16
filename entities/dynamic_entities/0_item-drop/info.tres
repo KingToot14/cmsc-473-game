@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EntityInfo" format=3 uid="uid://cwcvdo17u8y15"]
+
+[ext_resource type="PackedScene" uid="uid://bgb0dk7lc5p22" path="res://entities/dynamic_entities/0_item-drop/item_drop.tscn" id="1_gjedw"]
+[ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_teuwg"]
+
+[resource]
+script = ExtResource("1_teuwg")
+name = "Item Drop"
+entity_scene = ExtResource("1_gjedw")
+metadata/_custom_type_script = "uid://d3xw170ysevnd"

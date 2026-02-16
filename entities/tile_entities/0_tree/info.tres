@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EntityInfo" format=3 uid="uid://cn2lq0rtbxe81"]
+
+[ext_resource type="PackedScene" uid="uid://d7ko2kkdercy" path="res://entities/tile_entities/0_tree/tree.tscn" id="1_6oc8r"]
+[ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_8x3rs"]
+
+[resource]
+script = ExtResource("1_8x3rs")
+entity_scene = ExtResource("1_6oc8r")
+metadata/_custom_type_script = "uid://d3xw170ysevnd"
