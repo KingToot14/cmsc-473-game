@@ -1,4 +1,4 @@
-extends Node2D
+extends Node
 
 # --- Variables --- #
 var curr_id := 0
@@ -136,6 +136,11 @@ func load_entity(
 	
 	# don't re-instantiate existing entities
 	if loaded_entities.get(spawn_id):
+		var loaded_entity: Entity = loaded_entities[spawn_id]
+		loaded_entity.add_interest(multiplayer.get_unique_id())
+		
+		if Globals.player and loaded_entity.counts_towards_spawn_cap:
+			Globals.player.add_interest(spawn_id)
 		return
 	
 	# setup new entity
@@ -145,6 +150,8 @@ func load_entity(
 	
 	var entity: Entity = entity_scene.instantiate()
 	entity.add_interest(multiplayer.get_unique_id())
+	if Globals.player:
+		Globals.player.remove_interest(spawn_id)
 	
 	entity.position = position
 	entity.name = "entity_%s" % spawn_id
@@ -171,10 +178,17 @@ func load_entities(
 		
 		# don't re-instantiate existing entities
 		if loaded_entities.get(spawn_id):
-			continue
+			var loaded_entity: Entity = loaded_entities[spawn_id]
+			loaded_entity.add_interest(multiplayer.get_unique_id())
+			
+			if Globals.player and loaded_entity.counts_towards_spawn_cap:
+				Globals.player.add_interest(spawn_id)
+			return
 		
 		var entity: Entity = entity_scene.instantiate()
 		entity.add_interest(multiplayer.get_unique_id())
+		if Globals.player:
+			Globals.player.remove_interest(spawn_id)
 		
 		entity.position = position
 		entity.name = "entity_%s" % spawn_id
@@ -355,6 +369,8 @@ func unload_chunk(chunk: Vector2i, player_id: int) -> void:
 
 func erase_entity(entity: Node2D) -> void:
 	loaded_entities.erase(entity.id)
+	if Globals.player:
+		Globals.player.remove_interest(entity.id)
 	
 	if multiplayer.is_server() and entity is TileEntity:
 		var chunk: Dictionary = tile_entities.get(entity.current_chunk, {})

@@ -38,7 +38,12 @@ func attempt_spawn() -> void:
 	
 	# get current spawning player
 	var spawn_player_id: int = spawn_player_queue[spawn_player_index]
+	var spawn_player: PlayerController = ServerManager.connected_players[spawn_player_id]
+	
 	spawn_player_index = (spawn_player_index + 1) % current_player_count
+	
+	# check current cap
+	print(len(spawn_player.interested_entities))
 	
 	var bounding_boxes: Dictionary[int, Rect2i] = {}
 	
@@ -61,7 +66,6 @@ func attempt_spawn() -> void:
 		bounding_boxes[player_id] = Rect2i(start_chunk, size)
 	
 	# attempt to spawn entity
-	var spawn_player: PlayerController = ServerManager.connected_players[spawn_player_id]
 	var chunk: Vector2i = TileManager.world_to_chunk(
 		floori(spawn_player.center_point.x),
 		floori(spawn_player.center_point.y)

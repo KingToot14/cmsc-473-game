@@ -16,11 +16,13 @@ const INTERPOLATE_SPEED := 10.0
 		if multiplayer and multiplayer.get_unique_id() == id:
 			Globals.player = self
 
+# - Positioning
 @export var spawn_point: Vector2i
 var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+# - Movement
 @export var move_speed := 20.0
 @export var jump_power := 180.0
 
@@ -29,7 +31,12 @@ var center_point: Vector2:
 
 var free_cam_mode := false
 var free_cam_pressed := false
+
+# - Inventory
 var my_inventory := Inventory.new()
+
+# - Entity Interest
+var interested_entities: Dictionary[int, bool] = {}
 
 var active := true
 
@@ -107,5 +114,14 @@ func done_initial_load() -> void:
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
+
+#endregion
+
+#region Interest
+func add_interest(entity_id: int) -> void:
+	interested_entities[entity_id] = true
+
+func remove_interest(entity_id: int) -> void:
+	interested_entities.erase(entity_id)
 
 #endregion
