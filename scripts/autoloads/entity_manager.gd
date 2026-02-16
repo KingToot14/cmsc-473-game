@@ -17,26 +17,6 @@ func _ready() -> void:
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
 	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
 
-func _input(event: InputEvent) -> void:
-	if not multiplayer.is_server():
-		return
-	
-	var mouse_position := get_global_mouse_position()
-	
-	if event.is_action_pressed(&'test_input'):
-		var variant = &'green'
-		var roll = randf()
-		
-		if roll < 0.25:
-			variant = &'cloud'
-		elif roll < 0.50:
-			variant = &'tunnel'
-		
-		# TEMPORARY: spawn green slime at mouse position
-		create_entity(1, mouse_position, {
-			&'variant': variant
-		})
-
 func crawl_registry(root_dir: String, registry: Dictionary[int, String]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
 	
