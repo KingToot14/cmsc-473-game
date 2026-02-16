@@ -98,14 +98,30 @@ func attempt_spawn() -> void:
 	}
 	
 	# get world position
-	var spawn_chunk: Vector2i = valid_chunks.keys().pick_random()
-	
-	var tile_origin: Vector2i = TileManager.chunk_to_tile(spawn_chunk.x, spawn_chunk.y)
-	tile_origin.x += randi_range(0, 15)
-	tile_origin.y += randi_range(0, 15)
-	
-	# spawn entity from pool
-	var world_position: Vector2 = TileManager.tile_to_world(tile_origin.x, tile_origin.y)
-	EntityManager.create_entity(entity_id, world_position, spawn_data)
+	for i in range(10):
+		var spawn_chunk: Vector2i = valid_chunks.keys().pick_random()
+		var valid := false
+		
+		var tile_origin: Vector2i = TileManager.chunk_to_tile(spawn_chunk.x, spawn_chunk.y)
+		tile_origin.x += randi_range(0, 15)
+		
+		# scan downward for a valid position
+		for y in range(32):
+			if (TileManager.get_block(tile_origin.x, tile_origin.y + y + 1) == 0 or 
+				TileManager.get_block(tile_origin.x, tile_origin.y + y) != 0):
+				continue
+			
+			valid = true
+			tile_origin.y += y
+			break
+		
+		# retry if not valid
+		if not valid:
+			continue
+		
+		# spawn entity from pool
+		var world_position: Vector2 = TileManager.tile_to_world(tile_origin.x, tile_origin.y)
+		EntityManager.create_entity(entity_id, world_position, spawn_data)
+		return
 
 @warning_ignore_restore('confusable_local_declaration')
