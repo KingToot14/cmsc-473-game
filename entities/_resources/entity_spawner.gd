@@ -2,12 +2,17 @@ class_name EntitySpawner
 extends Node
 
 # --- Variables --- #
-@export var spawn_rate := 1.0
+const PLAYER_CAP := 20.0
+const GLOBAL_CAP := 150.0
+
+@export var spawn_rate := 2.0
 var spawn_timer := spawn_rate
 
 var current_player_count := 0
 var spawn_player_queue: Array[int] = []
 var spawn_player_index := 0
+
+var rng := RandomNumberGenerator.new()
 
 # --- Functions --- #
 func _ready() -> void:
@@ -42,11 +47,9 @@ func attempt_spawn() -> void:
 	
 	spawn_player_index = (spawn_player_index + 1) % current_player_count
 	
-	# check current cap
-	print(len(spawn_player.interested_entities))
-	
 	var bounding_boxes: Dictionary[int, Rect2i] = {}
 	
+	var total_entities := 0
 	for player_id in ServerManager.connected_players.keys():
 		var player: PlayerController = ServerManager.connected_players[player_id]
 		
@@ -64,6 +67,15 @@ func attempt_spawn() -> void:
 		size.y = min(size.y + start_chunk.y, Globals.world_chunks.y) - start_chunk.y
 		
 		bounding_boxes[player_id] = Rect2i(start_chunk, size)
+		
+		# update entity count
+		total_entities += len(player.interested_entities)
+	
+	# check current cap
+	var spawn_mod = max(len(spawn_player.interested_entities) / PLAYER_CAP, total_entities / GLOBAL_CAP)
+	
+	if rng.randf() >= (1.0 - spawn_mod * spawn_mod):
+		return
 	
 	# attempt to spawn entity
 	var chunk: Vector2i = TileManager.world_to_chunk(
@@ -100,11 +112,6 @@ func attempt_spawn() -> void:
 	var layer := SpawnRule.Layer.SURFACE
 	var time := SpawnRule.TimeState.DAY
 	
-	# structure: id => EntityInfo => Array[SpawnRule]
-	# what I need: SpawnRule => weight
-	# SpawnRule => id
-	# Array[SpawnRule] => possible
-	# Array[int] => possible weights
 	var spawn_rule_ids: Dictionary[SpawnRule, int] = {}
 	var possible_rules: Array[SpawnRule] = []
 	var possible_weights: Array[int] = []
