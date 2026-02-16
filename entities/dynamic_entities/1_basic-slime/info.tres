@@ -2,10 +2,86 @@
 
 [ext_resource type="PackedScene" uid="uid://3d3bltor36jx" path="res://entities/dynamic_entities/1_basic-slime/slime.tscn" id="1_46c7p"]
 [ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_wgk1e"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="3_nyiqh"]
+
+[sub_resource type="Resource" id="Resource_nyiqh"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 2
+spawn_times = 1
+spawn_weight = 70
+spawn_data = {
+&"variant": &"green"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_pcs1m"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 2
+spawn_times = 1
+spawn_data = {
+&"variant": &"blue"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_d7rnv"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 3
+spawn_times = 1
+spawn_weight = 5
+spawn_data = {
+&"variant": &"cloud"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_rspng"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 12
+spawn_times = 3
+spawn_weight = 70
+spawn_data = {
+&"variant": &"red"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_xb0so"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 12
+spawn_times = 3
+spawn_data = {
+&"variant": &"purple"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_wmwdw"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 1
+spawn_layers = 12
+spawn_times = 3
+spawn_weight = 5
+spawn_data = {
+&"variant": &"stone"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
+
+[sub_resource type="Resource" id="Resource_oyy7g"]
+script = ExtResource("3_nyiqh")
+spawn_biomes = 2
+spawn_layers = 2
+spawn_times = 1
+spawn_data = {
+&"variant": &"tunnel"
+}
+metadata/_custom_type_script = "uid://cs5x3hhsvjx3t"
 
 [resource]
 script = ExtResource("1_wgk1e")
 name = "Slime"
 description = "A simple slime that mindlessly jumps around. Gets aggressive towards anything that attacks it."
 entity_scene = ExtResource("1_46c7p")
+spawn_rules = Array[ExtResource("3_nyiqh")]([SubResource("Resource_nyiqh"), SubResource("Resource_pcs1m"), SubResource("Resource_d7rnv"), SubResource("Resource_rspng"), SubResource("Resource_xb0so"), SubResource("Resource_wmwdw"), SubResource("Resource_oyy7g")])
 metadata/_custom_type_script = "uid://d3xw170ysevnd"

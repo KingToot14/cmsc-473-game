@@ -7,4 +7,6 @@ extends Resource
 
 @export var entity_scene: PackedScene
 
+@export var spawn_rules: Array[SpawnRule] = []
+
 # --- Functions --- #

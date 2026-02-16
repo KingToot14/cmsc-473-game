@@ -92,10 +92,36 @@ func attempt_spawn() -> void:
 		return
 	
 	# get entity from pool
-	var entity_id := 1
-	var spawn_data: Dictionary = {
-		&'variant': &'green'
-	}
+	var biome := SpawnRule.Biome.FOREST
+	var layer := SpawnRule.Layer.SURFACE
+	var time := SpawnRule.TimeState.DAY
+	
+	# structure: id => EntityInfo => Array[SpawnRule]
+	# what I need: SpawnRule => weight
+	# SpawnRule => id
+	# Array[SpawnRule] => possible
+	# Array[int] => possible weights
+	var spawn_rule_ids: Dictionary[SpawnRule, int] = {}
+	var possible_rules: Array[SpawnRule] = []
+	var possible_weights: Array[int] = []
+	
+	# gather possible rules
+	for id in EntityManager.enemy_registry.keys():
+		for spawn_rule: SpawnRule in EntityManager.enemy_registry[id].spawn_rules:
+			if not spawn_rule.is_spawnable(biome, layer, time):
+				continue
+			
+			spawn_rule_ids[spawn_rule] = id
+			possible_rules.append(spawn_rule)
+			possible_weights.append(spawn_rule.spawn_weight)
+	
+	# select random from pool
+	if len(possible_rules) == 0:
+		return
+	
+	var spawn_rule: SpawnRule = possible_rules[RandomNumberGenerator.new().rand_weighted(possible_weights)]
+	var entity_id := spawn_rule_ids[spawn_rule]
+	var spawn_data: Dictionary = spawn_rule.spawn_data
 	
 	# get world position
 	for i in range(10):
