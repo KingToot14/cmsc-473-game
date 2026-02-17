@@ -164,10 +164,9 @@ func _on_receive_damage(snapshot: Dictionary) -> void:
 			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
 
 func _on_death(from_server: bool) -> void:
-	# TODO: spawn slime item drops
 	if multiplayer.is_server():
 		EntityManager.create_entity(0, global_position - Vector2(0, 4), {
-			&'item_id': 1,
+			&'item_id': 2,
 			&'quantity': rng.randi_range(1, 3)
 		})
 	
