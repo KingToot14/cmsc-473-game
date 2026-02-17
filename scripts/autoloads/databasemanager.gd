@@ -29,12 +29,12 @@ func save_player(player_id, position, health):
         INSERT OR REPLACE INTO player (id, health, pos_x, pos_y)
         VALUES (%d, %d, %f, %f, %f);
 	""" % [player_id, health, position.x, position.y, position.z])
-func save_inventory(player_id, inventory):
+func save_inv(player_id, _inv):
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
-	for item in inventory:
+	for item in _inv:
 		db.query("""
-            INSERT INTO inventory (player_id, item_name, quantity)
+            INSERT INTO _inv (player_id, item_name, quantity)
             VALUES (%d, '%s', %d);
 		""" % [player_id, item["name"], item["qty"]])
 func load_player(player_id):
@@ -48,8 +48,8 @@ func load_player(player_id):
 		}
 
 	return null
-func load_inventory(player_id):
-	db.query("SELECT * FROM inventory WHERE player_id = %d;" % player_id)
+func load_inv(player_id):
+	db.query("SELECT * FROM _inv WHERE player_id = %d;" % player_id)
 
 	var items = []
 	while db.next_row():

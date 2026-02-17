@@ -10,7 +10,7 @@
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="4_tbgi4"]
 [ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://blocks/_resources/walls.tres" id="5_tefeu"]
 [ext_resource type="Texture2D" uid="uid://vxvnv55mlw25" path="res://ui/main_menu/join_buttons.png" id="5_ya4ey"]
-[ext_resource type="Script" uid="uid://cfefioerjy2v6" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
+[ext_resource type="Script" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
@@ -364,7 +364,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection" unique_id=830542752]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
@@ -461,7 +460,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection2" unique_id=2071334184]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
@@ -558,7 +556,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection3" unique_id=1783865929]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
@@ -655,7 +652,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection4" unique_id=934680453]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
@@ -752,7 +748,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection5" unique_id=550152979]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
@@ -849,7 +844,6 @@ shortcut = null
 shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
-metadata/_custom_type_script = "uid://cfefioerjy2v6"
 
 [node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection6" unique_id=371021390]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
