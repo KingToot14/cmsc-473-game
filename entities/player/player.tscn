@@ -21,9 +21,8 @@ properties/1/replication_mode = 2
 [sub_resource type="CircleShape2D" id="CircleShape2D_bectd"]
 radius = 12.0
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qiwj3"]
-radius = 4.0
-height = 22.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bectd"]
+size = Vector2(10, 23)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617]
 z_index = 100
@@ -83,8 +82,8 @@ debug_color = Color(0, 0.7, 0, 0.15686275)
 position = Vector2(0, -11)
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1847529886]
-position = Vector2(0, -11)
-shape = SubResource("CapsuleShape2D_qiwj3")
+position = Vector2(0, -11.5)
+shape = SubResource("RectangleShape2D_bectd")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1227724529]
 position = Vector2(0, -12)

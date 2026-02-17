@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Item" format=3 uid="uid://qqgykxanut4j"]
+
+[ext_resource type="Script" uid="uid://cbpxcb7ird2qr" path="res://items/_resources/item.gd" id="1_ya3j7"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_i0omy"]
+
+[resource]
+script = ExtResource("1_ya3j7")
+item_name = "Dirt"
+texture = ExtResource("2_i0omy")
+tooltip = "A magically square dirt block"
+item_type = 1
+max_stack = 9999
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
