@@ -35,10 +35,24 @@ func _process(_delta: float) -> void:
 		
 		if multiplayer.is_server():
 			# server sends chunk updates
-			send_boundary(diff)
+			if diff.x != 0:
+				var boundary := diff
+				boundary.y = 0
+				send_boundary(boundary)
+			if diff.y != 0:
+				var boundary := diff
+				boundary.x = 0
+				send_boundary(boundary)
 		else:
 			# client autotiles
-			autotile_boundary(diff)
+			if diff.x != 0:
+				var boundary := diff
+				boundary.y = 0
+				autotile_boundary(boundary)
+			if diff.y != 0:
+				var boundary := diff
+				boundary.x = 0
+				autotile_boundary(boundary)
 
 func clear_boundary(boundary: Vector2i) -> void:
 	var start_chunk := current_chunk - LOAD_RANGE

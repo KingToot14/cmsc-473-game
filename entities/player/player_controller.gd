@@ -60,6 +60,11 @@ func _ready() -> void:
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&'test_input'):
+		var mouse_pos = get_global_mouse_position()
+		
+		print(TileManager.world_to_tile(mouse_pos.x, mouse_pos.y))
+	
 	if event.is_action_pressed(&"inventory_toggle"):
 		$inventory_ui.visible = !$inventory_ui.visible
 
@@ -99,6 +104,13 @@ func apply_input(delta: float) -> void:
 	velocity *= NetworkTime.physics_factor
 	move_and_slide()
 	velocity /= NetworkTime.physics_factor
+	
+	# keep inside world boundaries
+	global_position = global_position.clamp(Vector2(4, 4), TileManager.tile_to_world(
+			Globals.world_size.x,
+			Globals.world_size.y
+		) - Vector2(4, 4)
+	)
 
 func update_is_on_floor() -> void:
 	# force an update of is_on_floor after rollbacks occur
@@ -111,6 +123,8 @@ func update_is_on_floor() -> void:
 func done_initial_load() -> void:
 	active = true
 	$'camera'.enabled = true
+	$'camera'.limit_right  = (Globals.world_size.x) * TileManager.TILE_SIZE
+	$'camera'.limit_bottom = (Globals.world_size.y) * TileManager.TILE_SIZE
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()

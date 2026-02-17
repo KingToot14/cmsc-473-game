@@ -81,6 +81,14 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 	if update_data.get(&'kill'):
 		standard_death()
 	
+	match update_data.get(&'type', &'none'):
+		&'knockback':
+			if multiplayer.is_server():
+				return NO_RESPONSE
+			
+			# apply knockback force
+			velocity += update_data.get(&'force', Vector2.ZERO)
+	
 	return NO_RESPONSE
 
 #region Interest

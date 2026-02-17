@@ -135,6 +135,9 @@ func _on_player_connect(id: int) -> void:
 	
 	get_tree().current_scene.get_node(^'players').add_child(player)
 	
+	# send world size
+	set_world_params.rpc_id(id, Globals.world_size)
+	
 	# send data
 	await get_tree().process_frame
 	player.get_node(^'chunk_loader').send_whole_area()
@@ -148,5 +151,12 @@ func _on_player_disconnect(id: int) -> void:
 	
 	if multiplayer.is_server():
 		print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
+
+#endregion
+
+#region Setting Up World
+@rpc('authority', 'call_remote', 'reliable')
+func set_world_params(world_size: Vector2i) -> void:
+	Globals.world_size = world_size
 
 #endregion

@@ -23,6 +23,8 @@ var surface_low := 0
 var underground_high := 0
 var underground_low := 0
 
+var hill_positions: Array[Vector2i] = []
+
 # --- Functions --- #
 func set_seed(new_seed: Variant) -> void:
 	# get special seeds
