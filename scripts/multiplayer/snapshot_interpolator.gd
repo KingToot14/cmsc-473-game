@@ -45,7 +45,7 @@ func _physics_process(_delta: float) -> void:
 				interested_players = ServerManager.connected_players.keys()
 			
 			for player_id in interested_players:
-				send_snapshot.rpc_id(player_id, root.global_position, NetworkTime.tick)
+				send_snapshot.rpc_id(player_id, root.global_position, root.velocity, NetworkTime.tick)
 	else:
 		interpolate_snapshots()
 
@@ -77,16 +77,19 @@ func interpolate_snapshots() -> void:
 	), 0.0, 1.0)
 	
 	visual_root.global_position = snapshot_start['position'].lerp(snapshot_end['position'], progression)
+	visual_root.velocity = snapshot_start['velocity'].lerp(snapshot_end['velocity'], progression)
 
 @rpc('authority', 'call_remote', 'reliable')
-func send_snapshot(net_position: Vector2, tick: int) -> void:
+func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: int) -> void:
 	if not enabled:
 		return
 	
 	snapshots.append({
 		'position': net_position,
+		'velocity': net_velocity,
 		'tick': tick
 	})
 	
 	if update_root:
 		root.global_position = net_position
+		root.velocity = net_velocity

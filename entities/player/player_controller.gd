@@ -38,6 +38,9 @@ var my_inventory := Inventory.new()
 # - Entity Interest
 var interested_entities: Dictionary[int, bool] = {}
 
+# - Visuals
+var face_direction := 1
+
 var active := true
 
 # --- Functions --- #
@@ -67,6 +70,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed(&"inventory_toggle"):
 		$inventory_ui.visible = !$inventory_ui.visible
+
+func _process(_delta: float) -> void:
+	# update direction
+	if velocity.x != 0.0 and signf(velocity.x) != face_direction:
+		face_direction = -face_direction
+		$'sprite'.flip_h = not $'sprite'.flip_h
+	
+	# update animation
+	if abs(velocity.y) < 0.10:
+		if abs(velocity.x) < 0.10:
+			$'animator_lower'.play(&'idle')
+		else:
+			$'animator_lower'.play(&'walk')
+	else:
+		pass
 
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
