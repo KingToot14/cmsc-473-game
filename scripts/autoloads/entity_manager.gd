@@ -350,7 +350,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		)
 	
 	for entity_id in dynamic_entities.get(chunk, {}).keys():
-		if entity_id not in loaded_entities:
+		if not is_instance_valid(loaded_entities.get(entity_id)):
 			continue
 		
 		var entity: Entity = loaded_entities[entity_id]
