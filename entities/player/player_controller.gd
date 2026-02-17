@@ -38,6 +38,9 @@ var my_inventory := Inventory.new()
 # - Entity Interest
 var interested_entities: Dictionary[int, bool] = {}
 
+# - Visuals
+var face_direction := 1
+
 var active := true
 
 # --- Functions --- #
@@ -68,6 +71,33 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
 		$inventory_ui.visible = !$inventory_ui.visible
 
+#region Animation
+func _process(_delta: float) -> void:
+	# update direction
+	if velocity.x != 0.0 and signf(velocity.x) != face_direction:
+		face_direction = -face_direction
+		$'sprite'.flip_h = not $'sprite'.flip_h
+	
+	# update animation
+	update_is_on_floor()
+	if is_on_floor():
+		if abs(velocity.x) < 0.10:
+			set_lower_animation(&'idle')
+		else:
+			set_lower_animation(&'walk')
+	else:
+		if velocity.y < 0.0:
+			set_lower_animation(&'jump')
+		else:
+			set_lower_animation(&'fall')
+
+func set_lower_animation(animation: StringName) -> void:
+	if $'animator_lower'.current_animation != animation:
+		$'animator_lower'.play(animation)
+
+#endregion
+
+#region Physics
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
@@ -118,6 +148,8 @@ func update_is_on_floor() -> void:
 	velocity = Vector2.ZERO
 	move_and_slide()
 	velocity = temp_velocity
+
+#endregion
 
 #region Loading
 func done_initial_load() -> void:
