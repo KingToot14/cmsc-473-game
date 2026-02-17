@@ -120,7 +120,7 @@ func try_jump(delta: float) -> void:
 				# random chance to perform a small jump
 				if roll < JUMP_MODIFIER_ODDS:
 					jump_velocity.y *= JUMP_POWER_SMALL
-				# random chacne to perform a large jump (if not a small jump)
+				# random chance to perform a large jump (if not a small jump)
 				elif rng.randf() < JUMP_MODIFIER_ODDS * 2.0:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			
@@ -261,7 +261,7 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			# snap to position if too large
 			if distance > POSITION_ADJUST_RANGE:
 				global_position = pos
-			# slighly adjust to server position
+			# slightly adjust to server position
 			if distance > POSITION_REMAIN_RANGE:
 				global_position = global_position.lerp(pos, 0.25)
 			
@@ -273,12 +273,6 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			$'animator'.play(&'jump')
 			$'animator'.advance(0.0)
 			$'animator'.queue(&'airborne')
-		&'knockback':
-			if multiplayer.is_server():
-				return NO_RESPONSE
-			
-			# apply knockback force
-			velocity += update_data.get(&'force', Vector2.ZERO)
 	
 	return NO_RESPONSE
 
