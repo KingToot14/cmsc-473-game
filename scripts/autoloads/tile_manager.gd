@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 # --- Variables --- #
 const CHUNK_SIZE := 16
@@ -38,7 +38,7 @@ func tile_to_chunk(tile_x: int, tile_y: int) -> Vector2i:
 func tile_to_world(tile_x: int, tile_y: int, center := false) -> Vector2:
 	var offset := 0.0
 	if center:
-		offset = 4.0
+		offset = TILE_SIZE / 2.0
 	
 	return Vector2(tile_x * TILE_SIZE + offset, tile_y * TILE_SIZE + offset)
 
@@ -82,6 +82,18 @@ func get_block(x: int, y: int) -> int:
 	
 	# get block id (0 to 9)
 	return (tiles[x + y * world_width] >> 0) & MASK_TEN
+
+func get_visual_unsafe(x: int, y: int) -> int:
+	# get wall id (10 to 19)
+	return (tiles[x + y * world_width] >> 0) & MASK_TWENTY
+
+func get_visual(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get wall id (10 to 19)
+	return (tiles[x + y * world_width] >> 0) & MASK_TWENTY
 
 func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
 	# clear tile id
@@ -296,8 +308,50 @@ func place_block(x: int, y: int, block_id: int) -> bool:
 	if not is_block_placement_valid(x, y):
 		return true
 	
+	# query physics
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01001010
+	
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return true
+	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
+	Globals.world_map.update_tile(x, y)
+	
+	# sync to server
+	update_tile_state.rpc_id(1,
+		x, y, TileManager.tiles[x + y * world_width],
+		0,
+		multiplayer.get_unique_id()
+	)
+	
+	return true
+
+func place_wall(x: int, y: int, wall_id: int) -> bool:
+	# do not process if block exists
+	if TileManager.get_wall(x, y):
+		return false
+	
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# TODO: Check player's current item
+	
+	
+	# check neighboring tiles
+	if not is_wall_placement_valid(x, y):
+		return true
+	
+	# set tile to wall
+	TileManager.set_block_unsafe(x, y, wall_id)
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
@@ -326,6 +380,23 @@ func is_block_placement_valid(x: int, y: int) -> bool:
 	if TileManager.get_block(x, y + 1):
 		return true
 	if TileManager.get_block(x, y - 1):
+		return true
+	
+	return false
+
+func is_wall_placement_valid(x: int, y: int) -> bool:
+	# check self block
+	if TileManager.get_block_unsafe(x, y):
+		return true
+	
+	# check neighbors (blocks or walls)
+	if TileManager.get_visual(x + 1, y):
+		return true
+	if TileManager.get_visual(x - 1, y):
+		return true
+	if TileManager.get_visual(x, y + 1):
+		return true
+	if TileManager.get_visual(x, y - 1):
 		return true
 	
 	return false
