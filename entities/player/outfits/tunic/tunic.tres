@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="BaseOutfit" format=3 uid="uid://bgi204dfg2byy"]
+
+[ext_resource type="Script" uid="uid://b4wu1w2n05c65" path="res://entities/player/outfits/base_outfit.gd" id="1_1rxob"]
+[ext_resource type="Texture2D" uid="uid://dnjxg5xbow388" path="res://entities/player/outfits/tunic/arm_back.png" id="1_sbq6d"]
+[ext_resource type="Texture2D" uid="uid://dn4a6mu83tqeh" path="res://entities/player/outfits/tunic/arm_front.png" id="2_5dkqc"]
+[ext_resource type="Texture2D" uid="uid://cbcfwxgjpc87b" path="res://entities/player/outfits/tunic/body.png" id="3_kcq6j"]
+[ext_resource type="Texture2D" uid="uid://ld4sdi66yslt" path="res://entities/player/outfits/tunic/head.png" id="4_f6gld"]
+[ext_resource type="Texture2D" uid="uid://dbj6cv84ckgfa" path="res://entities/player/outfits/tunic/leg_back.png" id="5_l3jmp"]
+[ext_resource type="Texture2D" uid="uid://jtxnonld7gin" path="res://entities/player/outfits/tunic/leg_front.png" id="6_gy8ib"]
+
+[resource]
+script = ExtResource("1_1rxob")
+primary_colors = Array[Color]([Color(1, 0.110000014, 0.110000014, 1), Color(1, 0.555, 0.110000014, 1), Color(1, 1, 0.110000014, 1), Color(0.110000014, 1, 0.2583332, 1), Color(0.10980392, 0.49411765, 1, 1), Color(0.555, 0.110000014, 1, 1), Color(0.63, 0.35070005, 0.031500008, 1), Color(0.94, 0.94, 0.8836, 1)])
+secondary_colors = Array[Color]([Color(0.056699995, 0.3580199, 0.81, 1), Color(0.16969506, 0.056699995, 0.81, 1), Color(0.81, 0.743175, 0.5427, 1), Color(0.51, 0.296565, 0.035699997, 1)])
+detail_arm_back = ExtResource("1_sbq6d")
+detail_leg_back = ExtResource("5_l3jmp")
+detail_body = ExtResource("3_kcq6j")
+detail_leg_front = ExtResource("6_gy8ib")
+detail_head = ExtResource("4_f6gld")
+detail_arm_front = ExtResource("2_5dkqc")
+metadata/_custom_type_script = "uid://b4wu1w2n05c65"
