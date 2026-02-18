@@ -30,7 +30,7 @@ func _input(event: InputEvent) -> void:
 			return
 	if event.is_action_pressed(&'break_place'):
 		# consume items
-		
+		pass
 		
 		# check hovered hitbox
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
@@ -43,6 +43,13 @@ func _input(event: InputEvent) -> void:
 		# check walls
 		if TileManager.destroy_wall(tile_position.x, tile_position.y):
 			return
+	# TODO: this is temporary while we figure out how we should implement the place/break input
+	if event.is_action_pressed(&'place_block'):
+		# consume item
+		pass
+		
+		if TileManager.place_block(tile_position.x, tile_position.y, 3):
+			pass
 
 func _gather() -> void:
 	if not is_multiplayer_authority():

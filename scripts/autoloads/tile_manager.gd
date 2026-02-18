@@ -278,6 +278,58 @@ func destroy_wall(x: int, y: int) -> bool:
 	
 	return true
 
+func place_block(x: int, y: int, block_id: int) -> bool:
+	# do not process if block exists
+	if TileManager.get_block(x, y):
+		return false
+	
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# TODO: Check player's current item
+	
+	
+	# check neighboring tiles
+	if not is_block_placement_valid(x, y):
+		return true
+	
+	# set tile to block
+	TileManager.set_block_unsafe(x, y, block_id)
+	Globals.world_map.update_tile(x, y)
+	
+	# sync to server
+	update_tile_state.rpc_id(1,
+		x, y, TileManager.tiles[x + y * world_width],
+		0,
+		multiplayer.get_unique_id()
+	)
+	
+	return true
+
+func is_block_placement_valid(x: int, y: int) -> bool:
+	# check self block
+	if TileManager.get_block_unsafe(x, y):
+		return false
+	
+	# check self wall
+	if TileManager.get_wall_unsafe(x, y):
+		return true
+	
+	# check neighbors
+	if TileManager.get_block(x + 1, y):
+		return true
+	if TileManager.get_block(x - 1, y):
+		return true
+	if TileManager.get_block(x, y + 1):
+		return true
+	if TileManager.get_block(x, y - 1):
+		return true
+	
+	return false
+
 @rpc('any_peer', 'call_remote', 'reliable')
 func update_tile_state(x: int, y: int, tile: int, wepaon_id: int, player_id: int) -> void:
 	# check bounds
