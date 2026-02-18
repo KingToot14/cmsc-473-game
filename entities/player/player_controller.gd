@@ -76,12 +76,16 @@ func _process(_delta: float) -> void:
 	# update direction
 	if velocity.x != 0.0 and signf(velocity.x) != face_direction:
 		face_direction = -face_direction
-		$'arm_back'.flip_h = not $'arm_back'.flip_h
-		$'leg_back'.flip_h = not $'leg_back'.flip_h
-		$'body'.flip_h = not $'body'.flip_h
-		$'leg_front'.flip_h = not $'leg_front'.flip_h
-		$'head'.flip_h = not $'head'.flip_h
-		$'arm_front'.flip_h = not $'arm_front'.flip_h
+		
+		for child in $'outfit'.get_children():
+			child.flip_h = not child.flip_h
+		
+		#$'arm_back'.flip_h = not $'arm_back'.flip_h
+		#$'leg_back'.flip_h = not $'leg_back'.flip_h
+		#$'body'.flip_h = not $'body'.flip_h
+		#$'leg_front'.flip_h = not $'leg_front'.flip_h
+		#$'head'.flip_h = not $'head'.flip_h
+		#$'arm_front'.flip_h = not $'arm_front'.flip_h
 	
 	# update animation
 	update_is_on_floor()

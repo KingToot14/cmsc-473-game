@@ -14,7 +14,9 @@ func _ready() -> void:
 	
 	if OS.has_feature('dedicated_server') or args.get('server', false):
 		# disable ui for servers
-		get_tree().current_scene.get_node(^'join_ui').hide()
+		var ui = get_tree().current_scene.get_node_or_null(^'join_ui')
+		if ui:
+			ui.hide()
 		
 		# get seed
 		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
@@ -71,7 +73,9 @@ func _ready() -> void:
 		
 		start_server(port, max_connections)
 	else:
-		get_tree().current_scene.get_node(^'join_ui').show()
+		var ui = get_tree().current_scene.get_node_or_null(^'join_ui')
+		if ui:
+			ui.show()
 
 #region Server Connections
 func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
