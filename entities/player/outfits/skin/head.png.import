@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgn2q8pee2hwm"
-path="res://.godot/imported/leg_front.png-a3e1d0c4a2c6d0cee78ecea9597f9900.ctex"
+uid="uid://gxgy5dl8u6d2"
+path="res://.godot/imported/head.png-9dfa336dd32c3c9796cd29bdc9ac3289.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://entities/player/outfits/blank_detail/leg_front.png"
-dest_files=["res://.godot/imported/leg_front.png-a3e1d0c4a2c6d0cee78ecea9597f9900.ctex"]
+source_file="res://entities/player/outfits/skin/head.png"
+dest_files=["res://.godot/imported/head.png-9dfa336dd32c3c9796cd29bdc9ac3289.ctex"]
 
 [params]
 

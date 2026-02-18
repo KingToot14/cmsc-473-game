@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://db5rd46nelrfv"
-path="res://.godot/imported/leg_back.png-a3810cae421205d196bcc6100b3e989b.ctex"
+uid="uid://dbj6cv84ckgfa"
+path="res://.godot/imported/leg_back.png-ed8843b4c68886555d39bdb9f1eeb985.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://entities/player/outfits/blank/leg_back.png"
-dest_files=["res://.godot/imported/leg_back.png-a3810cae421205d196bcc6100b3e989b.ctex"]
+source_file="res://entities/player/outfits/tunic/leg_back.png"
+dest_files=["res://.godot/imported/leg_back.png-ed8843b4c68886555d39bdb9f1eeb985.ctex"]
 
 [params]
 
