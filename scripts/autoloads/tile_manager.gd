@@ -508,8 +508,22 @@ func send_destroy_block(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
-	
-	# set tile to air
+	var block_id = get_block(x, y) #should grab the block id 
+	if block_id == 1 or block_id == 2: #if the block is dirt or grass
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for tile 
+			EntityManager.create_entity(0, drop_position, { 
+				&'item_id': 3, 
+				&'quantity': 1, 
+				}) 
+				
+	if block_id == 3: #if the block is stone.
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for tile 
+			EntityManager.create_entity(0, drop_position, { 
+				&'item_id': 4, 
+				&'quantity': 1, 
+				})
 	TileManager.set_block_unsafe(x, y, 0)
 	Globals.server_map.update_tile(x, y)
 	
@@ -534,6 +548,14 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	var wall_id = get_wall(x,y)
+	if wall_id == 1: #if the wall is dirt wall
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for wall 
+			EntityManager.create_entity(0, drop_position, { 
+				&'item_id': 5, #drops a dirt wall
+				&'quantity': 1, 
+				}) 
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
