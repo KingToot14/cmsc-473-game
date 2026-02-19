@@ -548,6 +548,14 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	var wall_id = get_wall(x,y)
+	if wall_id == 1: #if the wall is dirt wall
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for wall 
+			EntityManager.create_entity(0, drop_position, { 
+				&'item_id': 5, #drops a dirt wall
+				&'quantity': 1, 
+				}) 
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
