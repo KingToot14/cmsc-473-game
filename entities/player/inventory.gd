@@ -57,7 +57,7 @@ func remove_item(item_id: int, count: int) -> void:
 				count = 0
 	
 	inventory_updated.emit()
-
+#Unique inventory stuff: compare owner_id from player controler with multiplayer.get_unique_id() also from player controler
 
 class ItemStack:
 	var item_id: int = -1
