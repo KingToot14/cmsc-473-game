@@ -29,6 +29,17 @@ var center_point: Vector2:
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
 
+@export_group("Combat")
+@export var hp: EntityHp
+@export var defense := 0
+
+@export var knockback_power := 200.0
+@export var knockback_timer := 0.50
+var knockback_time := 0.0
+var knockback_velocity: Vector2
+var processed_knockback := true
+@export var flash_material: ShaderMaterial
+
 var free_cam_mode := false
 var free_cam_pressed := false
 
@@ -144,7 +155,7 @@ func apply_input(delta: float) -> void:
 			pass
 	
 	# gravity
-	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	velocity.y = max(velocity.y + gravity * delta, -terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -155,9 +166,15 @@ func apply_input(delta: float) -> void:
 		free_cam_pressed = false
 	
 	# update velocity
-	velocity.x = $'input_sync'.input_direction.x * move_speed
-	if free_cam_mode:
-		velocity.y = $'input_sync'.input_direction.y * move_speed
+	if knockback_time <= 0.0:
+		velocity.x = $'input_sync'.input_direction.x * move_speed
+		if free_cam_mode:
+			velocity.y = $'input_sync'.input_direction.y * move_speed
+	else:
+		knockback_time = max(knockback_time - delta, 0.0)
+		if not processed_knockback:
+			velocity += knockback_velocity
+			processed_knockback = true
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor
@@ -177,6 +194,28 @@ func update_is_on_floor() -> void:
 	velocity = Vector2.ZERO
 	move_and_slide()
 	velocity = temp_velocity
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_damage_snapshot(snapshot: Dictionary) -> void:
+	# apply knockback (if not dead)
+	if not snapshot.get(&'entity_dead', false) or true:
+		knockback_velocity = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
+		knockback_time = knockback_timer
+		processed_knockback = false
+	
+	print(knockback_velocity)
+	
+	if not flash_material:
+		return
+	
+	flash_material.set_shader_parameter(&'intensity', 1.0)
+	
+	var flash_tween := create_tween()
+	
+	flash_tween.tween_method(func (x):
+		flash_material.set_shader_parameter(&'intensity', x),
+		1.0, 0.0, 0.15
+	)
 
 #endregion
 

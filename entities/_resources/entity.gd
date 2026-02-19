@@ -31,6 +31,10 @@ var current_chunk: Vector2i
 @export var despawn_time := 300.0
 var _despawn_timer := 0.0
 
+@export_group("Combat")
+@export var damage := 25
+@export var defense := 0
+
 # --- Functions --- #
 func _ready() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
