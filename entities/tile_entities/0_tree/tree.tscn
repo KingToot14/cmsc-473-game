@@ -9,6 +9,9 @@
 resource_local_to_scene = true
 size = Vector2(12, 112)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e22dk"]
+size = Vector2(14, 6)
+
 [node name="tree" type="Node2D" unique_id=2081166833]
 script = ExtResource("1_h6ae8")
 
@@ -29,3 +32,12 @@ entity = NodePath("..")
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1673221865]
 shape = SubResource("RectangleShape2D_ered6")
+
+[node name="block_reserver" type="StaticBody2D" parent="." unique_id=862447197]
+position = Vector2(8, 12)
+collision_layer = 64
+collision_mask = 0
+
+[node name="shape" type="CollisionShape2D" parent="block_reserver" unique_id=2077840007]
+shape = SubResource("RectangleShape2D_e22dk")
+debug_color = Color(0.7, 0, 0, 0.41960785)
