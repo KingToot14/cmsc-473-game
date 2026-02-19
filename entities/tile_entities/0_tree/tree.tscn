@@ -29,3 +29,5 @@ entity = NodePath("..")
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1673221865]
 shape = SubResource("RectangleShape2D_ered6")
+
+[node name="block_reserver" type="StaticBody2D" parent="." unique_id=862447197]
