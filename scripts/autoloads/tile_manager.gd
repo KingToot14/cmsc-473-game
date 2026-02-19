@@ -41,6 +41,9 @@ func _update_world_size(size: Vector2i) -> void:
 	world_width = size.x
 	world_height = size.y
 
+func _idx(x: int, y: int) -> int:
+	return x + y * world_width
+
 #region Positions
 ## Converts local chunk coordinates to global tile coordinates.
 ## [br][param chunk_x] and [param chunk_y] represent the chunk in the chunk grid,
@@ -93,7 +96,7 @@ func world_to_chunk(world_x: int, world_y) -> Vector2i:
 ## Use [method get_wall] if you do not know the bounds of [param x] and [param y]
 func get_wall_unsafe(x: int, y: int) -> int:
 	# get wall id (10 to 19)
-	return (tiles[x + y * world_width] >> 10) & MASK_TEN
+	return (tiles[_idx(x, y)] >> 10) & MASK_TEN
 
 ## Gets the wall at the given [param x] and [param y] position.
 func get_wall(x: int, y: int) -> int:
@@ -102,14 +105,14 @@ func get_wall(x: int, y: int) -> int:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * world_width] >> 10) & MASK_TEN
+	return (tiles[_idx(x, y)] >> 10) & MASK_TEN
 
 ## Gets the block at the given [param x] and [param y] position.
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method get_block] if you do not know the bounds of [param x] and [param y]
 func get_block_unsafe(x: int, y: int) -> int:
 	# get block id (0 to 9)
-	return (tiles[x + y * world_width] >> 0) & MASK_TEN
+	return (tiles[_idx(x, y)] >> 0) & MASK_TEN
 
 ## Gets the block at the given [param x] and [param y] position.
 func get_block(x: int, y: int) -> int:
@@ -118,7 +121,7 @@ func get_block(x: int, y: int) -> int:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[x + y * world_width] >> 0) & MASK_TEN
+	return (tiles[_idx(x, y)] >> 0) & MASK_TEN
 
 ## Gets the block and wall at the given [param x] and [param y] position.
 ## [br]This is returned in the bit-packed format, so this should only be used internally
@@ -126,7 +129,7 @@ func get_block(x: int, y: int) -> int:
 ## Use [method get_wall] if you do not know the bounds of [param x] and [param y]
 func get_visual_unsafe(x: int, y: int) -> int:
 	# get wall id (10 to 19)
-	return (tiles[x + y * world_width] >> 0) & MASK_TWENTY
+	return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
 
 ## Gets the block and wall at the given [param x] and [param y] position.
 ## [br]This is returned in the bit-packed format, so this should only be used internally
@@ -136,14 +139,14 @@ func get_visual(x: int, y: int) -> int:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[x + y * world_width] >> 0) & MASK_TWENTY
+	return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
 
 ## Sets the wall at the given [param x] and [param y] position to [param wall_id].
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method set_wall] if you do not know the bounds of [param x] and [param y]
 func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
 	# clear tile id
-	var idx = x + y * world_width
+	var idx = _idx(x, y)
 	tiles[idx] &= ~MASK_WALL
 	tiles[idx] |= (wall_id << 10)
 
@@ -154,7 +157,7 @@ func set_wall(x: int, y: int, wall_id: int) -> void:
 		return
 	
 	# clear tile id
-	var idx = x + y * world_width
+	var idx = _idx(x, y)
 	tiles[idx] &= ~MASK_WALL
 	tiles[idx] |= (wall_id << 10)
 
@@ -163,7 +166,7 @@ func set_wall(x: int, y: int, wall_id: int) -> void:
 ## Use [method set_block] if you do not know the bounds of [param x] and [param y]
 func set_block_unsafe(x: int, y: int, block_id: int) -> void:
 	# clear tile id
-	var idx = x + y * world_width
+	var idx = _idx(x, y)
 	tiles[idx] &= ~MASK_BLOCK
 	tiles[idx] |= (block_id << 0)
 
@@ -174,7 +177,7 @@ func set_block(x: int, y: int, block_id: int) -> void:
 		return
 	
 	# clear tile id
-	var idx = x + y * world_width
+	var idx = _idx(x, y)
 	tiles[idx] &= ~MASK_BLOCK
 	tiles[idx] |= (block_id << 0)
 
@@ -327,11 +330,7 @@ func destroy_block(x: int, y: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	update_tile_state.rpc_id(1,
-		x, y, TileManager.tiles[x + y * world_width],
-		0,
-		multiplayer.get_unique_id()
-	)
+	send_destroy_block.rpc_id(1, x, y)
 	
 	return true
 
@@ -345,7 +344,7 @@ func destroy_wall(x: int, y: int) -> bool:
 	if y < 0 or y >= world_height:
 		return true
 	
-	# do not process if no block exists
+	# do not process if no wall exists
 	if not TileManager.get_wall_unsafe(x, y):
 		return false
 	
@@ -359,11 +358,7 @@ func destroy_wall(x: int, y: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	update_tile_state.rpc_id(1,
-		x, y, TileManager.tiles[x + y * world_width],
-		0,
-		multiplayer.get_unique_id()
-	)
+	send_destroy_wall.rpc_id(1, x, y)
 	
 	return true
 
@@ -404,11 +399,7 @@ func place_block(x: int, y: int, block_id: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	update_tile_state.rpc_id(1,
-		x, y, TileManager.tiles[x + y * world_width],
-		0,
-		multiplayer.get_unique_id()
-	)
+	send_place_block.rpc_id(1, x, y, block_id)
 	
 	return true
 
@@ -438,11 +429,7 @@ func place_wall(x: int, y: int, wall_id: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	update_tile_state.rpc_id(1,
-		x, y, TileManager.tiles[x + y * world_width],
-		0,
-		multiplayer.get_unique_id()
-	)
+	send_place_wall.rpc_id(1, x, y, wall_id)
 	
 	return true
 
@@ -493,37 +480,144 @@ func is_wall_placement_valid(x: int, y: int) -> bool:
 	
 	return false
 
+## Attempts to destroy the block at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_destroy_block() -> void:
-	pass
-
-@rpc('any_peer', 'call_remote', 'reliable')
-func update_tile_state(x: int, y: int, tile: int, wepaon_id: int, player_id: int) -> void:
-	# check bounds
+func send_destroy_block(x: int, y: int) -> void:
+	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return
 	if y < 0 or y >= world_height:
 		return
 	
-	# TODO: Verify weapon id
+	# do not process if no block exists
+	if not TileManager.get_block_unsafe(x, y):
+		return
 	
-	# TODO: Consider adding interest system to players
+	# check for reserved tiles using physics query
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
 	
-	# update local copy
-	TileManager.tiles[x + y * world_width] = tile
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return
+	
+	# TODO: Check player's current tool and radius
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# set tile to air
+	TileManager.set_block_unsafe(x, y, 0)
 	Globals.server_map.update_tile(x, y)
 	
-	# sync with all clients
+	# sync to clients
 	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tile)
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
 
+## Attempts to destroy the wall at the given [param x] and [param y] position.
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_destroy_wall(x: int, y: int) -> void:
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if no wall exists
+	if not TileManager.get_wall_unsafe(x, y):
+		return
+	
+	# TODO: Check player's current tool
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# set tile to air
+	TileManager.set_wall_unsafe(x, y, 0)
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+
+## Attempts to place [param block_id] at the given [param x] and [param y] position.
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_place_block(x: int, y: int, block_id: int) -> void:
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if block exists
+	if TileManager.get_block_unsafe(x, y):
+		return
+	
+	# TODO: Check player's current item
+	
+	
+	# check neighboring tiles
+	if not is_block_placement_valid(x, y):
+		return
+	
+	# query physics
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01001010	# Collides with players, enemies, and tiles
+	
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return
+	
+	# set tile to block
+	TileManager.set_block_unsafe(x, y, block_id)
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+
+## Attempts to place [param wall_id] at the given [param x] and [param y] position.
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_place_wall(x: int, y: int, wall_id: int) -> void:
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if block exists
+	if TileManager.get_wall_unsafe(x, y):
+		return
+	
+	# TODO: Check player's current item
+	
+	
+	# check neighboring tiles
+	if not is_wall_placement_valid(x, y):
+		return
+	
+	# set tile to wall
+	TileManager.set_wall_unsafe(x, y, wall_id)
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+
+## Receives a tile update from the server. Used for various tile interactions
 @rpc('authority', 'call_remote', 'reliable')
 func receive_tile_state(x: int, y: int, tile: int) -> void:
 	# don't update unchanged tiles
-	if TileManager.tiles[x + y * world_width] == tile:
+	if TileManager.tiles[_idx(x, y)] == tile:
 		return
 	
-	TileManager.tiles[x + y * world_width] = tile
+	TileManager.tiles[_idx(x, y)] = tile
 	Globals.world_map.update_tile(x, y)
 
 #endregion
