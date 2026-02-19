@@ -689,7 +689,7 @@ target = NodePath("../arm_front_outfit")
 
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
 
-[node name="inventory_container" type="Control" parent="inventory_ui" unique_id=1033219010]
+[node name="inventory_container" type="Control" parent="inventory_ui" unique_id=2048304985]
 layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
@@ -702,14 +702,61 @@ grow_vertical = 0
 script = ExtResource("8_bectd")
 slot_scene = ExtResource("9_bectd")
 
-[node name="inventory_grid" type="GridContainer" parent="inventory_ui/inventory_container" unique_id=2144958426]
+[node name="inventory_grid" type="HFlowContainer" parent="inventory_ui/inventory_container" unique_id=1654172708]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+reverse_fill = true
+
+[node name="inventory_slot" parent="inventory_ui/inventory_container/inventory_grid" unique_id=529144210 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="hotbar_container" type="Control" parent="inventory_ui" unique_id=289309973]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = -21.0
+offset_right = 3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="hotbar_grid" type="GridContainer" parent="inventory_ui/hotbar_container" unique_id=1533956513]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/h_separation = 2
 columns = 10
 
-[node name="inventory_slot" parent="inventory_ui/inventory_container/inventory_grid" unique_id=529144210 instance=ExtResource("9_bectd")]
+[node name="inventory_slot" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=93855827 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot2" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=2067015457 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot3" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1989770391 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot4" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=734411667 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot5" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=357200605 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot6" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1905494740 instance=ExtResource("9_bectd")]
+layout_mode = 2
+
+[node name="inventory_slot7" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=617604539 instance=ExtResource("9_bectd")]
 layout_mode = 2

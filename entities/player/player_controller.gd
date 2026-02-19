@@ -60,16 +60,35 @@ func _ready() -> void:
 	else:
 		# update position
 		position = spawn_point
+		
+		# Ensure the sibling hotbar is visible
+		$inventory_ui/hotbar_container.show()
+		
+		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&'test_input'):
-		var mouse_pos = get_global_mouse_position()
-		
-		print(TileManager.world_to_tile(mouse_pos.x, mouse_pos.y))
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed(&'test_input'):
+		return
 	
+	var mouse_pos := get_local_mouse_position() + global_position
+	var tile_pos := TileManager.world_to_tile(floori(mouse_pos.x), floori(mouse_pos.y))
+	
+	var this_pos := TileManager.world_to_tile(floori(global_position.x), floori(global_position.y))
+	
+	print(mouse_pos, " | ", tile_pos, " | ", global_position, " | ", this_pos)
+	print(TileManager.get_block(tile_pos.x, tile_pos.y))
+
+func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
-		$inventory_ui.visible = !$inventory_ui.visible
+		var container = $inventory_ui/inventory_container
+		container.visible = !container.visible
+		
+		# Mouse logic
+		if container.visible:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 #region Animation
 func _process(_delta: float) -> void:
@@ -79,13 +98,6 @@ func _process(_delta: float) -> void:
 		
 		for child in $'outfit'.get_children():
 			child.flip_h = not child.flip_h
-		
-		#$'arm_back'.flip_h = not $'arm_back'.flip_h
-		#$'leg_back'.flip_h = not $'leg_back'.flip_h
-		#$'body'.flip_h = not $'body'.flip_h
-		#$'leg_front'.flip_h = not $'leg_front'.flip_h
-		#$'head'.flip_h = not $'head'.flip_h
-		#$'arm_front'.flip_h = not $'arm_front'.flip_h
 	
 	# update animation
 	update_is_on_floor()
