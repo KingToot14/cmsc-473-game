@@ -254,6 +254,50 @@ func destroy_wall(x: int, y: int) -> bool:
 	if not TileManager.get_wall(x, y):
 		return false
 	
+<<<<<<< Updated upstream
+=======
+	# check for reserved tiles using physics query
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
+	
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return
+	
+	# TODO: Check player's current tool and radius
+	
+	
+	# TODO: Deal gradual damage rather than instantly destroying
+	var block_id = get_block(x, y) #should grab the block id print(block_id) 
+	if block_id == 1 or block_id == 2: #checks if grass or dirt
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for the tile 
+			EntityManager.create_entity(0, drop_position, { 
+					&'item_id': 3, 
+					&'quantity': 1, #should drop 1 dirt
+					}) 
+	if block_id == 3: #checks if stone
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for tile 
+			EntityManager.create_entity(0, drop_position, { 
+					&'item_id': 4, 
+					&'quantity': 1, #should drop 1 stone
+					}) 	
+	# set tile to air
+	TileManager.set_block_unsafe(x, y, 0)
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+
+## Attempts to destroy the wall at the given [param x] and [param y] position.
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_destroy_wall(x: int, y: int) -> void:
+>>>>>>> Stashed changes
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return true
