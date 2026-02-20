@@ -10,6 +10,8 @@
 [ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_w88l4"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="9_j8mhm"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="10_sgt0n"]
+[ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/entity_damage_source.gd" id="11_72hbc"]
+[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/entity_hitbox.gd" id="11_odtd8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_515sv"]
 resource_local_to_scene = true
@@ -224,9 +226,28 @@ texture = ExtResource("2_72hbc")
 hframes = 8
 vframes = 3
 
-[node name="hitbox" type="Area2D" parent="." unique_id=2088035860]
+[node name="hitbox" type="Area2D" parent="." unique_id=2088035860 node_paths=PackedStringArray("entity")]
 position = Vector2(0, -5)
+collision_layer = 8
+collision_mask = 38
+script = ExtResource("11_odtd8")
+entity = NodePath("..")
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
+visible = false
+shape = SubResource("RectangleShape2D_l7c8k")
+debug_color = Color(0.7, 0, 0, 0.41960785)
+
+[node name="damage_source" type="Area2D" parent="." unique_id=1402672631 node_paths=PackedStringArray("entity")]
+position = Vector2(0, -5)
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("11_72hbc")
+entity = NodePath("..")
+source_type = 0
+metadata/_custom_type_script = "uid://4bwchbw40ctn"
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=1528058351]
+visible = false
 shape = SubResource("RectangleShape2D_l7c8k")
 debug_color = Color(0.7, 0, 0, 0.41960785)

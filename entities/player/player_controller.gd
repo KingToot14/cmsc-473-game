@@ -23,11 +23,22 @@ var center_point: Vector2:
 		return $'center'.global_position
 
 # - Movement
-@export var move_speed := 20.0
-@export var jump_power := 180.0
+@export var move_max_speed := 120.0
+@export var move_acceleration := 100.0
+@export var move_slowdown := 180.0
+@export var jump_power := 350.0
 
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
+
+@export_group("Combat")
+@export var hp: EntityHp
+@export var defense := 0
+
+@export var knockback_power := 200.0
+var knockback_force: Vector2
+var pending_knockback: Vector2
+@export var flash_material: ShaderMaterial
 
 var free_cam_mode := false
 var free_cam_pressed := false
@@ -132,6 +143,12 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
+	# update knockback (rollback-friendly)
+	if pending_knockback != Vector2.ZERO:
+		knockback_force = pending_knockback
+		pending_knockback = Vector2.ZERO
+	
+	# apply input if active
 	if active:
 		apply_input(delta)
 
@@ -144,7 +161,7 @@ func apply_input(delta: float) -> void:
 			pass
 	
 	# gravity
-	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	velocity.y = max(velocity.y + gravity * delta, -terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -154,10 +171,46 @@ func apply_input(delta: float) -> void:
 	else:
 		free_cam_pressed = false
 	
-	# update velocity
-	velocity.x = $'input_sync'.input_direction.x * move_speed
+	# move right
+	if $'input_sync'.input_direction.x > 0.0:
+		# turn around quicker
+		if velocity.x < -move_slowdown:
+			velocity.x += move_slowdown * delta
+		# apply movement if not at max speed
+		if velocity.x < move_max_speed:
+			velocity.x += move_acceleration * delta
+	# move left
+	elif $'input_sync'.input_direction.x < 0.0:
+		# turn around quicker
+		if velocity.x > move_slowdown:
+			velocity.x += move_slowdown * delta
+		# apply movement if not at max speed
+		if velocity.x > -move_max_speed:
+			velocity.x -= move_acceleration * delta
+	# slow down
+	else:
+		# reduce friction in air
+		var air_modifier := 0.5
+		if is_on_floor():
+			air_modifier = 1.0
+		
+		# apply friction
+		if velocity.x > move_slowdown:
+			velocity.x -= move_slowdown * delta * air_modifier
+		elif velocity.x < -move_slowdown:
+			velocity.x += move_slowdown * delta * air_modifier
+		else:
+			velocity.x = 0.0
+	
 	if free_cam_mode:
-		velocity.y = $'input_sync'.input_direction.y * move_speed
+		velocity.y = $'input_sync'.input_direction.y * move_max_speed
+	
+	# apply knockback
+	velocity += knockback_force
+	knockback_force = knockback_force.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
+	
+	# clamp velocity
+	velocity.x = clamp(velocity.x, -move_max_speed, move_max_speed)
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor
@@ -177,6 +230,24 @@ func update_is_on_floor() -> void:
 	velocity = Vector2.ZERO
 	move_and_slide()
 	velocity = temp_velocity
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_damage_snapshot(snapshot: Dictionary) -> void:
+	# apply knockback (if not dead)
+	if not snapshot.get(&'entity_dead', false) or true:
+		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
+	
+	if not flash_material:
+		return
+	
+	flash_material.set_shader_parameter(&'intensity', 1.0)
+	
+	var flash_tween := create_tween()
+	
+	flash_tween.tween_method(func (x):
+		flash_material.set_shader_parameter(&'intensity', x),
+		1.0, 0.0, 0.15
+	)
 
 #endregion
 

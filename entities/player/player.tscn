@@ -7,8 +7,10 @@
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://c01fup0uojudj" path="res://entities/player/outfits/outfit_loader.gd" id="7_gx6sm"]
+[ext_resource type="Script" uid="uid://cou8r46bfe8oe" path="res://entities/player/player_hp.gd" id="7_mtric"]
 [ext_resource type="Texture2D" uid="uid://boi7elqyuhfq1" path="res://entities/player/outfits/skin/arm_back.png" id="8_3wlsy"]
 [ext_resource type="Script" uid="uid://cc2pcdii6gntf" path="res://entities/player/inventory_ui.gd" id="8_bectd"]
+[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/entity_hitbox.gd" id="8_mtric"]
 [ext_resource type="Texture2D" uid="uid://br2xx5gvli5ai" path="res://entities/player/outfits/skin/leg_back.png" id="9_b2kln"]
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="9_bectd"]
 [ext_resource type="Resource" uid="uid://bgi204dfg2byy" path="res://entities/player/outfits/tunic/tunic.tres" id="9_we0b7"]
@@ -477,13 +479,15 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
-[node name="player" type="CharacterBody2D" unique_id=1210066617]
+[node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 100
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_abrql")
-move_speed = 120.0
-jump_power = 350.0
+move_acceleration = 180.0
+move_slowdown = 240.0
+hp = NodePath("player_hp")
+knockback_power = 80.0
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
 libraries/ = SubResource("AnimationLibrary_yqrof")
@@ -501,7 +505,7 @@ player = NodePath("..")
 [node name="rollback_sync" type="Node" parent="." unique_id=1492802588 node_paths=PackedStringArray("root")]
 script = ExtResource("3_bls4j")
 root = NodePath("..")
-state_properties = Array[String]([":global_transform", ":velocity"])
+state_properties = Array[String]([":global_transform", ":velocity", ":knockback_force"])
 input_properties = Array[String](["input_sync:input_direction", "input_sync:input_jump", "input_sync:input_free_cam"])
 
 [node name="tick_interpolator" type="Node" parent="." unique_id=219849010 node_paths=PackedStringArray("root")]
@@ -521,6 +525,11 @@ metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 script = ExtResource("6_qiwj3")
 player = NodePath("..")
 metadata/_custom_type_script = "uid://br2yvj337a0vt"
+
+[node name="player_hp" type="Node" parent="." unique_id=355614311 node_paths=PackedStringArray("player")]
+script = ExtResource("7_mtric")
+player = NodePath("..")
+metadata/_custom_type_script = "uid://cou8r46bfe8oe"
 
 [node name="camera" type="Camera2D" parent="." unique_id=608371352]
 position = Vector2(0, -11)
@@ -542,6 +551,17 @@ debug_color = Color(0, 0.7, 0, 0.15686275)
 position = Vector2(0, -11)
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1847529886]
+visible = false
+position = Vector2(0, -11.5)
+shape = SubResource("RectangleShape2D_bectd")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=75597499 node_paths=PackedStringArray("player")]
+collision_layer = 2
+collision_mask = 24
+script = ExtResource("8_mtric")
+player = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1636322667]
 visible = false
 position = Vector2(0, -11.5)
 shape = SubResource("RectangleShape2D_bectd")
