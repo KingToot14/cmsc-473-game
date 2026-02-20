@@ -484,10 +484,9 @@ z_index = 100
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_abrql")
-move_speed = 120.0
-jump_power = 350.0
+move_acceleration = 140.0
 hp = NodePath("player_hp")
-knockback_timer = 0.15
+knockback_power = 100.0
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
 libraries/ = SubResource("AnimationLibrary_yqrof")
@@ -505,7 +504,7 @@ player = NodePath("..")
 [node name="rollback_sync" type="Node" parent="." unique_id=1492802588 node_paths=PackedStringArray("root")]
 script = ExtResource("3_bls4j")
 root = NodePath("..")
-state_properties = Array[String]([":global_transform", ":velocity"])
+state_properties = Array[String]([":global_transform", ":velocity", ":knockback_force"])
 input_properties = Array[String](["input_sync:input_direction", "input_sync:input_jump", "input_sync:input_free_cam"])
 
 [node name="tick_interpolator" type="Node" parent="." unique_id=219849010 node_paths=PackedStringArray("root")]

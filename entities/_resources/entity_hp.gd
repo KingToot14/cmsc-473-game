@@ -68,7 +68,7 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	var player_id: int = snapshot.get(&'player_id', 0)
 	var seq_id: int = snapshot.get(&'sequence_id', 0)
 	
-	if player_id == multiplayer.get_unique_id():
+	if not multiplayer.is_server() and player_id == multiplayer.get_unique_id():
 		var prev_snapshot: Dictionary = snapshots.get(seq_id, {})
 		
 		if prev_snapshot.is_empty():

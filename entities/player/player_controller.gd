@@ -23,8 +23,10 @@ var center_point: Vector2:
 		return $'center'.global_position
 
 # - Movement
-@export var move_speed := 20.0
-@export var jump_power := 180.0
+@export var move_max_speed := 120.0
+@export var move_acceleration := 100.0
+@export var move_slowdown := 180.0
+@export var jump_power := 350.0
 
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
@@ -34,10 +36,8 @@ var center_point: Vector2:
 @export var defense := 0
 
 @export var knockback_power := 200.0
-@export var knockback_timer := 0.50
-var knockback_time := 0.0
-var knockback_velocity: Vector2
-var processed_knockback := true
+var knockback_force: Vector2
+var pending_knockback: Vector2
 @export var flash_material: ShaderMaterial
 
 var free_cam_mode := false
@@ -143,6 +143,11 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
+	# apply knockback
+	if pending_knockback != Vector2.ZERO:
+		knockback_force = pending_knockback
+		pending_knockback = Vector2.ZERO
+	
 	if active:
 		apply_input(delta)
 
@@ -166,15 +171,17 @@ func apply_input(delta: float) -> void:
 		free_cam_pressed = false
 	
 	# update velocity
-	if knockback_time <= 0.0:
-		velocity.x = $'input_sync'.input_direction.x * move_speed
-		if free_cam_mode:
-			velocity.y = $'input_sync'.input_direction.y * move_speed
-	else:
-		knockback_time = max(knockback_time - delta, 0.0)
-		if not processed_knockback:
-			velocity += knockback_velocity
-			processed_knockback = true
+	if $'input_sync'.input_direction.x > 0.0 and velocity.x < move_max_speed:
+		velocity.x += move_acceleration * delta
+	elif $'input_sync'.input_direction.x < 0.0 and velocity.x > -move_max_speed:
+		velocity.x -= move_acceleration * delta
+	
+	if free_cam_mode:
+		velocity.y = $'input_sync'.input_direction.y * move_max_speed
+	
+	# check for knockback
+	velocity += knockback_force
+	knockback_force = knockback_force.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor
@@ -199,11 +206,8 @@ func update_is_on_floor() -> void:
 func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	# apply knockback (if not dead)
 	if not snapshot.get(&'entity_dead', false) or true:
-		knockback_velocity = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-		knockback_time = knockback_timer
-		processed_knockback = false
-	
-	print(knockback_velocity)
+		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
+		print(knockback_force)
 	
 	if not flash_material:
 		return
