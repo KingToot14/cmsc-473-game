@@ -143,11 +143,12 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
-	# apply knockback
+	# update knockback (rollback-friendly)
 	if pending_knockback != Vector2.ZERO:
 		knockback_force = pending_knockback
 		pending_knockback = Vector2.ZERO
 	
+	# apply input if active
 	if active:
 		apply_input(delta)
 
@@ -170,18 +171,46 @@ func apply_input(delta: float) -> void:
 	else:
 		free_cam_pressed = false
 	
-	# update velocity
-	if $'input_sync'.input_direction.x > 0.0 and velocity.x < move_max_speed:
-		velocity.x += move_acceleration * delta
-	elif $'input_sync'.input_direction.x < 0.0 and velocity.x > -move_max_speed:
-		velocity.x -= move_acceleration * delta
+	# move right
+	if $'input_sync'.input_direction.x > 0.0:
+		# turn around quicker
+		if velocity.x < -move_slowdown:
+			velocity.x += move_slowdown * delta
+		# apply movement if not at max speed
+		if velocity.x < move_max_speed:
+			velocity.x += move_acceleration * delta
+	# move left
+	elif $'input_sync'.input_direction.x < 0.0:
+		# turn around quicker
+		if velocity.x > move_slowdown:
+			velocity.x += move_slowdown * delta
+		# apply movement if not at max speed
+		if velocity.x > -move_max_speed:
+			velocity.x -= move_acceleration * delta
+	# slow down
+	else:
+		# reduce friction in air
+		var air_modifier := 0.5
+		if is_on_floor():
+			air_modifier = 1.0
+		
+		# apply friction
+		if velocity.x > move_slowdown:
+			velocity.x -= move_slowdown * delta * air_modifier
+		elif velocity.x < -move_slowdown:
+			velocity.x += move_slowdown * delta * air_modifier
+		else:
+			velocity.x = 0.0
 	
 	if free_cam_mode:
 		velocity.y = $'input_sync'.input_direction.y * move_max_speed
 	
-	# check for knockback
+	# apply knockback
 	velocity += knockback_force
 	knockback_force = knockback_force.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
+	
+	# clamp velocity
+	velocity.x = clamp(velocity.x, -move_max_speed, move_max_speed)
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor
@@ -207,7 +236,6 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	# apply knockback (if not dead)
 	if not snapshot.get(&'entity_dead', false) or true:
 		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-		print(knockback_force)
 	
 	if not flash_material:
 		return

@@ -484,9 +484,10 @@ z_index = 100
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_abrql")
-move_acceleration = 140.0
+move_acceleration = 180.0
+move_slowdown = 240.0
 hp = NodePath("player_hp")
-knockback_power = 100.0
+knockback_power = 80.0
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
 libraries/ = SubResource("AnimationLibrary_yqrof")
