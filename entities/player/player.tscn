@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
 [ext_resource type="Shader" uid="uid://cuqmsufylkilr" path="res://entities/player/outfits/outfit_color_swap.gdshader" id="14_221hk"]
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="21_eyb6c"]
 
 [sub_resource type="Animation" id="Animation_afbqv"]
 length = 0.001
@@ -780,3 +781,7 @@ layout_mode = 2
 
 [node name="inventory_slot7" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=617604539 instance=ExtResource("9_bectd")]
 layout_mode = 2
+
+[node name="test_damage_source" type="Area2D" parent="." unique_id=928784222]
+script = ExtResource("21_eyb6c")
+metadata/_custom_type_script = "uid://dxggq75lo7l8i"

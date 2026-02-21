@@ -31,6 +31,11 @@ func get_damage() -> int:
 func get_source_id() -> int:
 	return hash(global_position.x + global_position.y)
 
+## Returns the knockback direction given the [param target] that this damage
+## source has interacted with.
+func get_knockback(target: Node2D) -> Vector2:
+	return Vector2(target.global_position.x - global_position.x, 0.0).normalized()
+
 func _on_area_entered(area: Area2D) -> void:
 	if area is not EntityHitbox:
 		return
@@ -44,4 +49,4 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	
 	# deal damage to entity
-	hitbox.deal_damage(get_damage(), get_source_id(), source_type)
+	hitbox.deal_damage(get_damage(), get_source_id(), source_type, get_knockback(area))
