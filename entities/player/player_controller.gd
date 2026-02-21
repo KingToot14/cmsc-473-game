@@ -31,13 +31,16 @@ var center_point: Vector2:
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
 
+@export var knockback_power := 200.0
+var base_velocity: Vector2
+var knockback_velocity: Vector2
+var pending_knockback: Vector2
+
+# - Combat
 @export_group("Combat")
 @export var hp: EntityHp
 @export var defense := 0
 
-@export var knockback_power := 200.0
-var knockback_force: Vector2
-var pending_knockback: Vector2
 @export var flash_material: ShaderMaterial
 
 var free_cam_mode := false
@@ -145,7 +148,8 @@ func set_free_cam_mode(mode: bool) -> void:
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	# update knockback (rollback-friendly)
 	if pending_knockback != Vector2.ZERO:
-		knockback_force = pending_knockback
+		knockback_velocity = pending_knockback
+		base_velocity = Vector2.ZERO
 		pending_knockback = Vector2.ZERO
 	
 	# apply input if active
@@ -161,7 +165,7 @@ func apply_input(delta: float) -> void:
 			pass
 	
 	# gravity
-	velocity.y = max(velocity.y + gravity * delta, -terminal_velocity)
+	base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -174,19 +178,19 @@ func apply_input(delta: float) -> void:
 	# move right
 	if $'input_sync'.input_direction.x > 0.0:
 		# turn around quicker
-		if velocity.x < -move_slowdown:
-			velocity.x += move_slowdown * delta
+		if base_velocity.x < -move_slowdown * delta:
+			base_velocity.x += move_slowdown * delta
 		# apply movement if not at max speed
-		if velocity.x < move_max_speed:
-			velocity.x += move_acceleration * delta
+		if base_velocity.x < move_max_speed:
+			base_velocity.x += move_acceleration * delta
 	# move left
 	elif $'input_sync'.input_direction.x < 0.0:
 		# turn around quicker
-		if velocity.x > move_slowdown:
-			velocity.x += move_slowdown * delta
+		if base_velocity.x > move_slowdown * delta:
+			base_velocity.x -= move_slowdown * delta
 		# apply movement if not at max speed
-		if velocity.x > -move_max_speed:
-			velocity.x -= move_acceleration * delta
+		if base_velocity.x > -move_max_speed:
+			base_velocity.x -= move_acceleration * delta
 	# slow down
 	else:
 		# reduce friction in air
@@ -195,22 +199,26 @@ func apply_input(delta: float) -> void:
 			air_modifier = 1.0
 		
 		# apply friction
-		if velocity.x > move_slowdown:
-			velocity.x -= move_slowdown * delta * air_modifier
-		elif velocity.x < -move_slowdown:
-			velocity.x += move_slowdown * delta * air_modifier
+		if base_velocity.x > move_slowdown * delta * air_modifier:
+			base_velocity.x -= move_slowdown * delta * air_modifier
+		elif base_velocity.x < -move_slowdown * delta * air_modifier:
+			base_velocity.x += move_slowdown * delta * air_modifier
 		else:
-			velocity.x = 0.0
+			base_velocity.x = 0.0
 	
 	if free_cam_mode:
-		velocity.y = $'input_sync'.input_direction.y * move_max_speed
-	
-	# apply knockback
-	velocity += knockback_force
-	knockback_force = knockback_force.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
+		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed
 	
 	# clamp velocity
 	velocity.x = clamp(velocity.x, -move_max_speed, move_max_speed)
+	
+	# apply knockback
+	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
+	if not is_on_floor():
+		knockback_velocity.y = 0.0
+	
+	# combine velocity
+	velocity = base_velocity + knockback_velocity
 	
 	# move adjusted to netfox's physics
 	velocity *= NetworkTime.physics_factor
