@@ -4,6 +4,8 @@ extends CharacterBody2D
 # --- Variables --- #
 const INTERPOLATE_SPEED := 10.0
 
+## Identifies the main client that this player belongs to. This is set to
+## [method MultiplayerAPI.get_unique_id] when initialized by the server.
 @export var owner_id := 1:
 	set(id):
 		# make sure only the client updates the movement
@@ -17,42 +19,63 @@ const INTERPOLATE_SPEED := 10.0
 			Globals.player = self
 
 # - Positioning
+## The current spawn point of the player. This defaults to [member Globals.world_spawn]
 @export var spawn_point: Vector2i
+## Points to a marker representing the center of the player entity
 var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
 # - Movement
+## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
+## How quickly the player accelerates in [code]pixels/second[/code]
 @export var move_acceleration := 100.0
+## How quickly the player slows down in [code]pixels/second[/code].
+## [br]Used when no input is being held and when turning around
 @export var move_slowdown := 180.0
+## How high the player jumps when they perform a jump. Sets [member base_velocity.y]
 @export var jump_power := 350.0
 
+## How quickly the player accelerates towards the ground in [code]pixels/second[/cdoe]
 @export var gravity := 980.0
+## The maximum vertical velocity the player can be going when affected by [member gravity]
 @export var terminal_velocity := 380.0
 
+## How strong incoming knockback is applied. Represents the player's "weight"
 @export var knockback_power := 200.0
+## The base velocity derived from movement (left/right movement, jumping, etc.)
 var base_velocity: Vector2
+## Velocity derived from incoming attakcs that deal knockback damage
 var knockback_velocity: Vector2
+## Velocity that is waiting to be applied in the [method _rollback_tick] in order
+## to maintain functionality when using NetFox
 var pending_knockback: Vector2
 
 # - Combat
 @export_group("Combat")
-@export var hp: EntityHp
+## The [class PlayerHp] component used for this player
+@export var hp: PlayerHp
+## How much defense the player has. Defense linearly reduces incoming damage
+## (to a minimum of 1 damage per attack)
 @export var defense := 0
 
-@export var flash_material: ShaderMaterial
-
+## Whether or not free-cam mode is active (This will eventually be removed)
 var free_cam_mode := false
+## Whether or not the free-cam mode was previously pressed (prevents chaotically
+## swapping free-cam modes)
 var free_cam_pressed := false
 
 # - Inventory
+## The player's inventory
 var my_inventory := Inventory.new()
 
 # - Entity Interest
+## Entities that are "interested" in this player (within the player's load range)
 var interested_entities: Dictionary[int, bool] = {}
 
 # - Visuals
+## Which way the player is currenly facing ([code]-1[/code] for left, [code]1[/code] for right)
 var face_direction := 1
 
 var active := true
@@ -130,10 +153,12 @@ func _process(_delta: float) -> void:
 			set_lower_animation(&'fall')
 			set_upper_animation(&'fall')
 
+## Sets the lower-body animation (animates the front and back legs)
 func set_lower_animation(animation: StringName) -> void:
 	if $'animator_lower'.current_animation != animation:
 		$'animator_lower'.play(animation)
 
+## Sets the upper-body animation (animates the torso, head, and arms)
 func set_upper_animation(animation: StringName) -> void:
 	if $'animator_upper'.current_animation != animation:
 		$'animator_upper'.play(animation)
@@ -141,10 +166,12 @@ func set_upper_animation(animation: StringName) -> void:
 #endregion
 
 #region Physics
+## Enables/Disables free-cam mode
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
 
+## Run a rollback-friendly tick
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	# update knockback (rollback-friendly)
 	if pending_knockback != Vector2.ZERO:
@@ -156,6 +183,7 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 	if active:
 		apply_input(delta)
 
+## Gather input from the [class InputSynchronizer] node at [code]$'input_sync'[/code]
 func apply_input(delta: float) -> void:
 	# fixes a NetFox bug with is_on_floor()
 	update_is_on_floor()
@@ -232,6 +260,8 @@ func apply_input(delta: float) -> void:
 		) - Vector2(4, 4)
 	)
 
+## Force an [method is_on_floor] update since NetFox can have some issues when running
+## rollbacks and detecting the floor.
 func update_is_on_floor() -> void:
 	# force an update of is_on_floor after rollbacks occur
 	var temp_velocity := velocity
@@ -239,27 +269,18 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
+## Handles an incomming damage snapshot
 @rpc('authority', 'call_remote', 'reliable')
 func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	# apply knockback (if not dead)
 	if not snapshot.get(&'entity_dead', false) or true:
 		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-	
-	if not flash_material:
-		return
-	
-	flash_material.set_shader_parameter(&'intensity', 1.0)
-	
-	var flash_tween := create_tween()
-	
-	flash_tween.tween_method(func (x):
-		flash_material.set_shader_parameter(&'intensity', x),
-		1.0, 0.0, 0.15
-	)
 
 #endregion
 
 #region Loading
+## The [class ChunkLoader] has loaded and autotiled the initial region of tiles.
+## [br]Enables input, the camera, and sets the camera bounds
 func done_initial_load() -> void:
 	active = true
 	$'camera'.enabled = true
