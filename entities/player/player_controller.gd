@@ -149,6 +149,8 @@ func _process(_delta: float) -> void:
 		
 		if changed:
 			for child in $'outfit'.get_children():
+				if child is not Sprite2D:
+					continue  
 				child.flip_h = face_direction == -1
 	
 	# update animation

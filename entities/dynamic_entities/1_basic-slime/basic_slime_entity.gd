@@ -156,7 +156,7 @@ func _on_receive_damage(snapshot: Dictionary) -> void:
 	
 	# set jump velocity to opposite of damage
 	var knockback: Vector2 = snapshot.get(&'knockback', Vector2.ZERO)
-	if knockback.x != 0.0 and sign(knockback.x) != sign(jump_velocity.x):
+	if knockback.x != 0.0 and not is_on_floor() and sign(knockback.x) != sign(jump_velocity.x):
 		jump_velocity.x *= -1
 	
 	# set target if not already set

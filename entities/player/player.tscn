@@ -76,7 +76,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("weapon_holder:rotation")
+tracks/4/path = NodePath("outfit/tool_holder:rotation")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -88,7 +88,7 @@ tracks/4/keys = {
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("weapon_holder:process_mode")
+tracks/5/path = NodePath("outfit/tool_holder:process_mode")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
@@ -100,7 +100,7 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("weapon_holder:visible")
+tracks/6/path = NodePath("outfit/tool_holder:visible")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
@@ -108,6 +108,18 @@ tracks/6/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("outfit/tool_holder:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-8, -17)]
 }
 
 [sub_resource type="Animation" id="Animation_gx6sm"]
@@ -279,19 +291,19 @@ step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("weapon_holder:rotation")
-tracks/0/interp = 1
+tracks/0/path = NodePath("outfit/tool_holder:rotation")
+tracks/0/interp = 0
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.8),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [-0.8726646259971648, -3.6651914291880923]
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [-0.5235987755982988, -1.0471975511965976, -1.5707964, -2.0943951023931953, -2.6179938779914944, -3.141592653589793, -3.6651914291880923, -4.1887902047863905]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("weapon_holder:process_mode")
+tracks/1/path = NodePath("outfit/tool_holder:process_mode")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -303,7 +315,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("weapon_holder:visible")
+tracks/2/path = NodePath("outfit/tool_holder:visible")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -311,6 +323,66 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("outfit/arm_back_outfit:frame")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("outfit/body_outfit:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("outfit/head_outfit:frame")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("outfit/arm_front_outfit:frame")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("outfit/tool_holder:position")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2(8, -17), Vector2(4, -19), Vector2(1, -20), Vector2(-3, -19), Vector2(-5, -14), Vector2(-5, -11), Vector2(-5, -7), Vector2(-2, -5)]
 }
 
 [sub_resource type="Animation" id="Animation_221hk"]
@@ -320,19 +392,19 @@ step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("weapon_holder:rotation")
-tracks/0/interp = 1
+tracks/0/path = NodePath("outfit/tool_holder:rotation")
+tracks/0/interp = 0
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.8),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [-2.2689280275926285, 0.5235987755982988]
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [-2.6179938779914944, -2.0943951023931953, -1.5707963, -1.0471975511965976, -0.5235987755982988, 0.0, 0.5235987755982988, 1.0471975511965976]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("weapon_holder:process_mode")
+tracks/1/path = NodePath("outfit/tool_holder:process_mode")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -344,7 +416,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("weapon_holder:visible")
+tracks/2/path = NodePath("outfit/tool_holder:visible")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -352,6 +424,66 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("outfit/arm_back_outfit:frame")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("outfit/body_outfit:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("outfit/head_outfit:frame")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("outfit/arm_front_outfit:frame")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [32, 33, 34, 35, 36, 37, 38, 39]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("outfit/tool_holder:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2(-8, -17), Vector2(-3.9999995, -18.999998), Vector2(-1, -20), Vector2(3, -19), Vector2(5.000001, -14), Vector2(5, -11), Vector2(5.0000005, -7.000001), Vector2(2.0000005, -5)]
 }
 
 [sub_resource type="Animation" id="Animation_b2kln"]
@@ -602,7 +734,7 @@ shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_221hk"]
-size = Vector2(8, 8)
+size = Vector2(24, 8)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 100
@@ -693,7 +825,6 @@ position = Vector2(0, -11.5)
 shape = SubResource("RectangleShape2D_bectd")
 
 [node name="outfit" type="Node2D" parent="." unique_id=868490802]
-y_sort_enabled = true
 script = ExtResource("7_gx6sm")
 skin_material = SubResource("ShaderMaterial_3wlsy")
 outfit_material = SubResource("ShaderMaterial_ghoj8")
@@ -706,20 +837,21 @@ material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("8_3wlsy")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_back_outfit")
 
 [node name="arm_back_outfit" type="Sprite2D" parent="outfit" unique_id=1227724529]
 position = Vector2(0, -12)
+texture = ExtResource("8_3wlsy")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="arm_back_detail" type="Sprite2D" parent="outfit" unique_id=396328366 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_back_outfit")
 
@@ -728,20 +860,21 @@ material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("9_b2kln")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_back_outfit")
 
 [node name="leg_back_outfit" type="Sprite2D" parent="outfit" unique_id=2113736697]
 position = Vector2(0, -12)
+texture = ExtResource("9_b2kln")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="leg_back_detail" type="Sprite2D" parent="outfit" unique_id=372908624 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_back_outfit")
 
@@ -750,20 +883,21 @@ material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("10_we0b7")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../body_outfit")
 
 [node name="body_outfit" type="Sprite2D" parent="outfit" unique_id=1619323355]
 position = Vector2(0, -12)
+texture = ExtResource("10_we0b7")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="body_detail" type="Sprite2D" parent="outfit" unique_id=1193895573 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../body_outfit")
 
@@ -772,20 +906,21 @@ material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("11_mtric")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_front_outfit")
 
 [node name="leg_front_outfit" type="Sprite2D" parent="outfit" unique_id=1137205921]
 position = Vector2(0, -12)
+texture = ExtResource("11_mtric")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="leg_front_detail" type="Sprite2D" parent="outfit" unique_id=244243050 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_front_outfit")
 
@@ -794,42 +929,66 @@ material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("12_eyb6c")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../head_outfit")
 
 [node name="head_outfit" type="Sprite2D" parent="outfit" unique_id=1029710566]
 position = Vector2(0, -12)
+texture = ExtResource("12_eyb6c")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="head_detail" type="Sprite2D" parent="outfit" unique_id=88793196 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../head_outfit")
+
+[node name="tool_holder" type="Node2D" parent="outfit" unique_id=638420095]
+process_mode = 4
+visible = false
+position = Vector2(-8, -17)
+
+[node name="test_damage_source" type="Area2D" parent="outfit/tool_holder" unique_id=928784222]
+collision_layer = 2
+collision_mask = 24
+script = ExtResource("21_eyb6c")
+source_type = 1
+is_enemy = false
+metadata/_custom_type_script = "uid://dxggq75lo7l8i"
+
+[node name="shape" type="CollisionShape2D" parent="outfit/tool_holder/test_damage_source" unique_id=229835229]
+position = Vector2(8, 0)
+shape = SubResource("RectangleShape2D_221hk")
+
+[node name="sprite" type="Sprite2D" parent="outfit/tool_holder/test_damage_source" unique_id=1345213619]
+position = Vector2(8, -6.039832e-07)
+scale = Vector2(3, 1)
+texture = ExtResource("22_221hk")
 
 [node name="arm_front_skin" type="Sprite2D" parent="outfit" unique_id=1081366245 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
 texture = ExtResource("13_221hk")
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
 
 [node name="arm_front_outfit" type="Sprite2D" parent="outfit" unique_id=1541007936]
 position = Vector2(0, -12)
+texture = ExtResource("13_221hk")
 hframes = 8
-vframes = 4
+vframes = 5
 
 [node name="arm_front_detail" type="Sprite2D" parent="outfit" unique_id=325483749 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
 position = Vector2(0, -12)
 hframes = 8
-vframes = 4
+vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
 
@@ -906,23 +1065,3 @@ layout_mode = 2
 
 [node name="inventory_slot7" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=617604539 instance=ExtResource("9_bectd")]
 layout_mode = 2
-
-[node name="weapon_holder" type="Node2D" parent="." unique_id=638420095]
-process_mode = 4
-visible = false
-position = Vector2(0, -11)
-
-[node name="test_damage_source" type="Area2D" parent="weapon_holder" unique_id=928784222]
-position = Vector2(16, -1)
-collision_layer = 2
-collision_mask = 24
-script = ExtResource("21_eyb6c")
-source_type = 1
-is_enemy = false
-metadata/_custom_type_script = "uid://dxggq75lo7l8i"
-
-[node name="shape" type="CollisionShape2D" parent="weapon_holder/test_damage_source" unique_id=229835229]
-shape = SubResource("RectangleShape2D_221hk")
-
-[node name="sprite" type="Sprite2D" parent="weapon_holder/test_damage_source" unique_id=1345213619]
-texture = ExtResource("22_221hk")
