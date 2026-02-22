@@ -60,6 +60,16 @@ var pending_knockback: Vector2
 ## (to a minimum of 1 damage per attack)
 @export var defense := 0
 
+# - Animation
+const ANIMATION_PRIORITY: Dictionary[StringName, int] = {
+	&'idle': 1,
+	&'walk': 1,
+	&'jump': 1,
+	&'fall': 1,
+	&'swing_left': 2,
+	&'swing_right': 2
+}
+
 ## Whether or not free-cam mode is active (This will eventually be removed)
 var free_cam_mode := false
 ## Whether or not the free-cam mode was previously pressed (prevents chaotically
@@ -108,13 +118,10 @@ func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed(&'test_input'):
 		return
 	
-	var mouse_pos := get_local_mouse_position() + global_position
-	var tile_pos := TileManager.world_to_tile(floori(mouse_pos.x), floori(mouse_pos.y))
-	
-	var this_pos := TileManager.world_to_tile(floori(global_position.x), floori(global_position.y))
-	
-	print(mouse_pos, " | ", tile_pos, " | ", global_position, " | ", this_pos)
-	print(TileManager.get_block(tile_pos.x, tile_pos.y))
+	if face_direction == 1:
+		set_upper_animation(&'swing_right')
+	else:
+		set_upper_animation(&'swing_left')
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
@@ -130,11 +137,19 @@ func _unhandled_input(event: InputEvent) -> void:
 #region Animation
 func _process(_delta: float) -> void:
 	# update direction
-	if velocity.x != 0.0 and signf(velocity.x) != face_direction:
-		face_direction = -face_direction
+	if velocity.x != 0.0 and can_turn():
+		var changed := false
 		
-		for child in $'outfit'.get_children():
-			child.flip_h = not child.flip_h
+		if face_direction == -1 and velocity.x > 0.0:
+			face_direction = 1
+			changed = true
+		if face_direction == 1  and velocity.x < 0.0:
+			face_direction = -1
+			changed = true
+		
+		if changed:
+			for child in $'outfit'.get_children():
+				child.flip_h = face_direction == -1
 	
 	# update animation
 	update_is_on_floor()
@@ -155,13 +170,31 @@ func _process(_delta: float) -> void:
 
 ## Sets the lower-body animation (animates the front and back legs)
 func set_lower_animation(animation: StringName) -> void:
+	var curr_priority: int = ANIMATION_PRIORITY.get($'animator_lower'.current_animation, 0)
+	var new_priority: int = ANIMATION_PRIORITY.get(animation, 0)
+	
+	if new_priority < curr_priority:
+		return
+	
 	if $'animator_lower'.current_animation != animation:
 		$'animator_lower'.play(animation)
 
 ## Sets the upper-body animation (animates the torso, head, and arms)
 func set_upper_animation(animation: StringName) -> void:
+	var curr_priority: int = ANIMATION_PRIORITY.get($'animator_upper'.current_animation, 0)
+	var new_priority: int = ANIMATION_PRIORITY.get(animation, 0)
+	
+	if new_priority < curr_priority:
+		return
+	
 	if $'animator_upper'.current_animation != animation:
 		$'animator_upper'.play(animation)
+
+func can_turn() -> bool:
+	return (
+		$'animator_upper'.current_animation != &'swing_right' and
+		$'animator_upper'.current_animation != &'swing_left'
+	)
 
 #endregion
 
