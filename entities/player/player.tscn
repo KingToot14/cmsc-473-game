@@ -22,6 +22,8 @@
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
 [ext_resource type="Texture2D" uid="uid://baeiogwx1b6ft" path="res://items/6_wooden_sword/weapon_sprite.png" id="19_221hk"]
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="21_eyb6c"]
+[ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
+[ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
 
 [sub_resource type="Animation" id="Animation_afbqv"]
 length = 0.001
@@ -298,7 +300,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [-0.2617993877991494, -0.7853981633974483, -1.3089969389957472, -1.8325957145940461, -2.356194490192345, -2.8797932657906435, -3.4033920413889427, -3.9269908169872414]
+"values": [-0.2617993877991494, -0.7853981633974483, -1.3089969389957472, -1.832595714594046, -2.356194490192345, -2.8797932657906435, -3.4033920413889427, -3.9269908169872414]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -1045,23 +1047,71 @@ grow_vertical = 2
 theme_override_constants/h_separation = 2
 columns = 10
 
-[node name="inventory_slot" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=93855827 instance=ExtResource("9_bectd")]
+[node name="inventory_slot" type="Control" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=93855827]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+script = ExtResource("23_t1t22")
+
+[node name="backing" type="NinePatchRect" parent="inventory_ui/hotbar_container/hotbar_grid/inventory_slot" unique_id=244000415]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -9.0
+offset_right = 9.0
+offset_bottom = 9.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(9, 9)
+texture = ExtResource("24_50fht")
+region_rect = Rect2(0, 0, 8, 8)
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+
+[node name="item" type="TextureRect" parent="inventory_ui/hotbar_container/hotbar_grid/inventory_slot" unique_id=135320033]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="count_label" type="RichTextLabel" parent="inventory_ui/hotbar_container/hotbar_grid/inventory_slot" unique_id=386675914]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 14.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"SmallText"
+theme_override_constants/outline_size = 4
+text = "9999"
+scroll_active = false
+autowrap_mode = 0
+horizontal_alignment = 2
+
+[node name="inventory_slot2" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1945203295 instance=ExtResource("9_bectd")]
 layout_mode = 2
 
-[node name="inventory_slot2" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=2067015457 instance=ExtResource("9_bectd")]
+[node name="inventory_slot3" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1498148498 instance=ExtResource("9_bectd")]
 layout_mode = 2
 
-[node name="inventory_slot3" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1989770391 instance=ExtResource("9_bectd")]
+[node name="inventory_slot4" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=2032797748 instance=ExtResource("9_bectd")]
 layout_mode = 2
 
-[node name="inventory_slot4" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=734411667 instance=ExtResource("9_bectd")]
-layout_mode = 2
-
-[node name="inventory_slot5" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=357200605 instance=ExtResource("9_bectd")]
-layout_mode = 2
-
-[node name="inventory_slot6" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1905494740 instance=ExtResource("9_bectd")]
-layout_mode = 2
-
-[node name="inventory_slot7" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=617604539 instance=ExtResource("9_bectd")]
+[node name="inventory_slot5" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1272530478 instance=ExtResource("9_bectd")]
 layout_mode = 2

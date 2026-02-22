@@ -104,6 +104,9 @@ func _ready() -> void:
 	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
+		
+		# disable inventory ui
+		$'inventory_ui'.queue_free()
 	else:
 		# update position
 		position = spawn_point

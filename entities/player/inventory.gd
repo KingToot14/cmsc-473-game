@@ -6,6 +6,7 @@ signal inventory_updated
 
 # --- Variables --- #
 var items: Array[ItemStack] = []
+var hotbar_slot := 0
 
 # --- Functions --- #
 func _init():
