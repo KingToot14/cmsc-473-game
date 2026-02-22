@@ -40,6 +40,9 @@ func _on_area_entered(area: Area2D) -> void:
 	if area is not EntityHitbox:
 		return
 	
+	if multiplayer.is_server():
+		return
+	
 	var hitbox: EntityHitbox = area
 	
 	# don't process on incorrect types

@@ -21,6 +21,7 @@
 [ext_resource type="Shader" uid="uid://cuqmsufylkilr" path="res://entities/player/outfits/outfit_color_swap.gdshader" id="14_221hk"]
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="21_eyb6c"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="22_221hk"]
 
 [sub_resource type="Animation" id="Animation_afbqv"]
 length = 0.001
@@ -480,6 +481,9 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_221hk"]
+size = Vector2(8, 8)
+
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 100
 y_sort_enabled = true
@@ -557,6 +561,7 @@ position = Vector2(0, -11.5)
 shape = SubResource("RectangleShape2D_bectd")
 
 [node name="hitbox" type="Area2D" parent="." unique_id=75597499 node_paths=PackedStringArray("player")]
+position = Vector2(-1, 0)
 collision_layer = 2
 collision_mask = 24
 script = ExtResource("8_mtric")
@@ -783,5 +788,16 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="test_damage_source" type="Area2D" parent="." unique_id=928784222]
+position = Vector2(16, -12)
+collision_layer = 2
+collision_mask = 24
 script = ExtResource("21_eyb6c")
+source_type = 1
+is_enemy = false
 metadata/_custom_type_script = "uid://dxggq75lo7l8i"
+
+[node name="shape" type="CollisionShape2D" parent="test_damage_source" unique_id=229835229]
+shape = SubResource("RectangleShape2D_221hk")
+
+[node name="sprite" type="Sprite2D" parent="test_damage_source" unique_id=1345213619]
+texture = ExtResource("22_221hk")
