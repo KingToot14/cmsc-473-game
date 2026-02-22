@@ -226,6 +226,9 @@ func load_tile_entity(
 #region Entity Management
 @rpc('any_peer', 'call_remote', "reliable")
 func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
+	if not is_instance_valid(loaded_entities.get(entity_id)):
+		return
+	
 	var entity: Node2D = loaded_entities.get(entity_id)
 	
 	if not (entity and len(entity.hp_pool) > 0):
