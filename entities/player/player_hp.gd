@@ -22,19 +22,11 @@ func send_damage_snapshot() -> void:
 	var source_type: DamageSource.DamageSourceType = \
 		snapshot.get(&'source_type', DamageSource.DamageSourceType.WORLD)
 	
-	var knockback_force := Vector2(1.0, 0.0)
-	if source_type == DamageSource.DamageSourceType.ENTITY:
-		var attacker: Node2D = EntityManager.loaded_entities.get(source_id)
-		
-		if is_instance_valid(attacker):
-			if attacker.global_position.x > player.global_position.x:
-				knockback_force.x *= -1
-		
-			# apply slight upward force if leveld
-			if player.is_on_floor():
-				knockback_force.y = -0.5
-		
-			snapshot[&'knockback'] = knockback_force.normalized()
+	
+	if player.is_on_floor():
+		snapshot[&'knockback'].y = 0.5
+	
+	snapshot[&'knockback'] = snapshot[&'knockback'].normalized()
 	
 	# update local client
 	#player.hp.receive_damage_snapshot(snapshot)

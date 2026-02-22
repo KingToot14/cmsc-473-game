@@ -100,3 +100,6 @@ func set_max_hp(hp: int, heal_to_full := false) -> void:
 
 func get_hp_percent() -> float:
 	return 1.0 * curr_hp / max_hp
+
+func is_dead() -> bool:
+	return curr_hp <= 0

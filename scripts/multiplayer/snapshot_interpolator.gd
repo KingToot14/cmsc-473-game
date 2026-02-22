@@ -23,7 +23,8 @@ var owner_id := 0:
 			set_physics_process(false)
 		owner_id = id
 		
-var snapshots := []
+var snapshots: Array[Dictionary] = []
+var queued_actions: Array[Dictionary] = []
 var enabled := false
 
 # --- Functions --- #
@@ -93,3 +94,16 @@ func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: int) -> v
 	if update_root:
 		root.global_position = net_position
 		root.velocity = net_velocity
+
+func queue_action(action_info: Dictionary) -> void:
+	if not enabled:
+		return
+	
+	action_info[&'player_id'] = multiplayer.get_unique_id()
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_action(action_info: Dictionary) -> void:
+	if multiplayer.is_server():
+		return
+	
+	#TODO: send relevant action data (item id, interaction type, mouse pos, server tick)
