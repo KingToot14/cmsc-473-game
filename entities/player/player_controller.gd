@@ -111,8 +111,12 @@ func _ready() -> void:
 		# update position
 		position = spawn_point
 		
+		# setup inventory
+		my_inventory.load_inventory()
+		
 		# Ensure the sibling hotbar is visible
 		$inventory_ui/hotbar_container.show()
+		$inventory_ui/inventory_container.hide()
 		
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)

@@ -33,7 +33,7 @@ func set_selected(value: bool) -> void:
 		$'backing'.region_rect.position.x = 8.0
 		
 		# update player's hotbar slot
-		
+		Globals.player.my_inventory.hotbar_slot = get_index()
 		
 		# update other hotbar slots
 		for slot: InventorySlot in get_tree().get_nodes_in_group(&'hotbar_slot'):
