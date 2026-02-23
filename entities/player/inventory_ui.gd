@@ -47,6 +47,7 @@ func setup_ui(player_inventory: Inventory):
 		# First 10 go to hotbar, rest to main inventory
 		if i < HOTBAR_SIZE:
 			hotbar_grid.add_child(new_slot)
+			new_slot.is_hotbar = true
 		else:
 			main_grid.add_child(new_slot)
 			

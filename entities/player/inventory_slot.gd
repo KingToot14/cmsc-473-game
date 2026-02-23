@@ -24,6 +24,14 @@ func update_slot(stack: Inventory.ItemStack):
 		count_label.text = str(stack.count) if stack.count > 1 else ""
 
 func set_selected(value: bool) -> void:
+	# only hotbar slots can be selected
+	if not is_hotbar:
+		return
+	
+	# only switch hotbars when items are not in use
+	if not Globals.player.can_act():
+		return
+	
 	if value:
 		# update panel size
 		$'backing'.offset_left   = -10
