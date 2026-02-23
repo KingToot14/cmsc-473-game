@@ -7,6 +7,8 @@ extends Control
 
 var current_item: Inventory.ItemStack
 
+var is_hotbar := false
+
 # --- Functions --- #
 func update_slot(stack: Inventory.ItemStack):
 	current_item = stack

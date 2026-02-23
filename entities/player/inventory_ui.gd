@@ -15,6 +15,7 @@ const HOTBAR_SIZE = 10
 
 # --- Functions --- #
 func _input(event: InputEvent) -> void:
+	# check for hotbar inputs
 	for i in range(len(HOTBAR_INPUTS)):
 		if event.is_action_pressed(HOTBAR_INPUTS[i]):
 			# set i'th hotbar slot to be selected
@@ -22,6 +23,18 @@ func _input(event: InputEvent) -> void:
 			
 			# consume input
 			get_viewport().set_input_as_handled()
+	
+	# check for scroll-wheel
+	if event is InputEventMouseButton:
+		var hotbar_slot := Globals.player.my_inventory.hotbar_slot
+		
+		# adjust current hotbar slot based on scroll wheel direction
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			hotbar_slot = posmod(hotbar_slot + 1, HOTBAR_SIZE)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			hotbar_slot = posmod(hotbar_slot - 1, HOTBAR_SIZE)
+		
+		hotbar_grid.get_child(hotbar_slot).set_selected(true)
 
 func setup_ui(player_inventory: Inventory):
 	for child in main_grid.get_children() + hotbar_grid.get_children():
