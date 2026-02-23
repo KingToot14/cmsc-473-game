@@ -9,6 +9,8 @@ enum ItemType {
 }
 
 # --- Variables --- #
+## The internal item id for this item. This is overwritten at runtime
+@export var item_id: int
 ## The item's name that appears in the tooltip UI
 @export var item_name: String
 ## The item's texture that appears in the inventory
