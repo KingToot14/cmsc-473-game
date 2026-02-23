@@ -89,7 +89,14 @@ var interested_entities: Dictionary[int, bool] = {}
 
 # - Visuals
 ## Which way the player is currenly facing ([code]-1[/code] for left, [code]1[/code] for right)
-var face_direction := 1
+var face_direction := 1:
+	set(_dir):
+		face_direction = _dir
+		
+		for child in $'outfit'.get_children():
+			if child is not Sprite2D:
+				continue  
+			child.flip_h = face_direction == -1
 
 var active := true
 
@@ -156,12 +163,6 @@ func _process(_delta: float) -> void:
 		if face_direction == 1  and velocity.x < 0.0:
 			face_direction = -1
 			changed = true
-		
-		if changed:
-			for child in $'outfit'.get_children():
-				if child is not Sprite2D:
-					continue  
-				child.flip_h = face_direction == -1
 	
 	# update animation
 	update_is_on_floor()
@@ -213,10 +214,13 @@ func can_turn() -> bool:
 func can_act() -> bool:
 	return can_turn()
 
-func do_swing(swing_speed := 1.0) -> void:
+func do_swing(swing_speed := 1.0, direction := 0) -> void:
+	if direction != 0:
+		face_direction = direction
+	
 	if face_direction == 1:
 		set_upper_animation(&'swing_right', swing_speed)
-	else:
+	elif face_direction == -1:
 		set_upper_animation(&'swing_left', swing_speed)
 
 #endregion

@@ -33,7 +33,7 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 	var item_object = preload('uid://bj6hggjsgnf3c').instantiate()
 	item_object.get_node(^'sprite').texture = texture
 	
-	do_swing(player, item_object)
+	do_swing(player, mouse_position, item_object)
 	
 	# attempt to place block
 	match tile_type:
