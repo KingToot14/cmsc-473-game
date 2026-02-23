@@ -22,6 +22,7 @@ func add_item(item_id: int, amount: int) -> int:
 	if not item:
 		return amount
 	
+	# attempt to add to existing stacks
 	for stack in items:
 		if not stack.is_empty() and stack.item_id == item_id:
 			var space = item.max_stack - stack.count
@@ -31,7 +32,8 @@ func add_item(item_id: int, amount: int) -> int:
 			if amount <= 0: 
 				inventory_updated.emit()
 				return 0
-
+	
+	# add to first empty stack
 	for stack in items:
 		if stack.is_empty():
 			stack.item_id = item_id
@@ -50,10 +52,12 @@ func remove_item(item_id: int, count: int) -> void:
 	for stack in items:
 		if count <= 0:
 			break
+		
 		# If this stack contains the item, remove as much as we can
 		if not stack.is_empty() and stack.item_id == item_id:
 			var diff = stack.count - count
 			stack.count = max(stack.count - count, 0)
+			
 			if diff <= 0:
 				stack.item_id = -1
 				count = abs(diff)
@@ -67,14 +71,9 @@ func load_inventory() -> void:
 	# TODO: fetch inventory from database
 	
 	# if database entry not available, setup standard inventory
-	items[0].item_id = 6	# wooden sword
-	items[0].count = 1
-	
-	items[1].item_id = 3	# dirt block
-	items[1].count = 30
-	
-	items[2].item_id = 4	# stone block
-	items[2].count = 10
+	add_item(6, 1)		# wooden sword
+	add_item(3, 30)		# dirt blocks
+	add_item(4, 10)		# stone blocks
 
 #endregion
 

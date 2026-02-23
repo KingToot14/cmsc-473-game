@@ -138,19 +138,6 @@ func apply_jump() -> void:
 #endregion
 
 #region Damage
-func _input(event: InputEvent) -> void:
-	if event is not InputEventMouseButton or not event.is_pressed():
-		return
-	
-	if get_global_mouse_position().distance_to(global_position) > 20.0:
-		return
-	
-	# TEMPORARY: deal damage until actual combat system is implemented
-	hp_pool[0].take_damage({
-		&'damage': 25,
-		&'player_id': multiplayer.get_unique_id()
-	})
-
 func _on_receive_damage(snapshot: Dictionary) -> void:
 	standard_receive_damage(snapshot)
 	
