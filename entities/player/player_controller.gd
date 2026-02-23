@@ -26,6 +26,9 @@ var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+## The max distance between which players can interact with entities and blocks
+@export var base_range := 10.0
+
 # - Movement
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0

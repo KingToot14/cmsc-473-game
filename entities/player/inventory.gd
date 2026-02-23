@@ -69,6 +69,9 @@ func load_inventory() -> void:
 	# if database entry not available, setup standard inventory
 	items[0].item_id = 6	# wooden sword
 	items[0].count = 1
+	
+	items[1].item_id = 3	# dirt block
+	items[1].count = 10
 
 #endregion
 

@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="Item" format=3 uid="uid://ykjdv1llpidw"]
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://ykjdv1llpidw"]
 
-[ext_resource type="Script" uid="uid://cbpxcb7ird2qr" path="res://items/_resources/item.gd" id="1_ixnxn"]
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_l55qh"]
 [ext_resource type="Texture2D" uid="uid://1mcff2snpsvy" path="res://blocks/3_stone/icons.png" id="2_l55qh"]
 
 [resource]
-script = ExtResource("1_ixnxn")
+script = ExtResource("1_l55qh")
+tile_id = 3
 item_name = "Stone"
 texture = ExtResource("2_l55qh")
 tooltip = "A piece of stone. May or may not break your bones."
