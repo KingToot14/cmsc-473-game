@@ -29,15 +29,19 @@ func _input(event: InputEvent) -> void:
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(tile_position):
 			return
 	if event.is_action_pressed(&'break_place'):
-		var item_stack: Inventory.ItemStack = player.my_inventory.get_selected_item()
+		# check if player can act
+		if not player.can_act():
+			return
 		
+		# check if hotbar item is empty
+		var item_stack: Inventory.ItemStack = player.my_inventory.get_selected_item()
 		if item_stack.is_empty():
 			return
 		
+		# check if item exists
 		var item: Item = ItemDatabase.get_item(item_stack.item_id)
-		
 		if item:
-			item.handle_interact_mouse(mouse_position)
+			item.handle_interact_mouse(player, mouse_position)
 		
 		# consume items
 		

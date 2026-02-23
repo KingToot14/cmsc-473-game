@@ -71,7 +71,10 @@ func load_inventory() -> void:
 	items[0].count = 1
 	
 	items[1].item_id = 3	# dirt block
-	items[1].count = 10
+	items[1].count = 30
+	
+	items[2].item_id = 4	# stone block
+	items[2].count = 10
 
 #endregion
 

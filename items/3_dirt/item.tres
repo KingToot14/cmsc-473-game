@@ -6,9 +6,9 @@
 [resource]
 script = ExtResource("1_i0omy")
 tile_id = 2
+use_speed = 0.25
 item_name = "Dirt"
 texture = ExtResource("2_i0omy")
 tooltip = "A magically square dirt block"
 item_type = 1
-max_stack = 9999
 metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

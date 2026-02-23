@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_l55qh")
 tile_id = 3
+use_speed = 0.25
 item_name = "Stone"
 texture = ExtResource("2_l55qh")
 tooltip = "A piece of stone. May or may not break your bones."
-max_stack = 9999
 metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
