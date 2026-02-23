@@ -26,6 +26,9 @@ var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+## The max distance between which players can interact with entities and blocks
+@export var base_range := 10.0
+
 # - Movement
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
@@ -86,7 +89,14 @@ var interested_entities: Dictionary[int, bool] = {}
 
 # - Visuals
 ## Which way the player is currenly facing ([code]-1[/code] for left, [code]1[/code] for right)
-var face_direction := 1
+var face_direction := 1:
+	set(_dir):
+		face_direction = _dir
+		
+		for child in $'outfit'.get_children():
+			if child is not Sprite2D:
+				continue  
+			child.flip_h = face_direction == -1
 
 var active := true
 
@@ -104,24 +114,31 @@ func _ready() -> void:
 	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
+		
+		# disable inventory ui
+		$'inventory_ui'.queue_free()
 	else:
 		# update position
 		position = spawn_point
 		
+		# setup inventory
+		my_inventory.load_inventory()
+		
 		# Ensure the sibling hotbar is visible
 		$inventory_ui/hotbar_container.show()
+		$inventory_ui/inventory_container.hide()
 		
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&'test_input'):
-		return
-	
-	if face_direction == 1:
-		set_upper_animation(&'swing_right')
-	else:
-		set_upper_animation(&'swing_left')
+#func _input(event: InputEvent) -> void:
+	#if not event.is_action_pressed(&'test_input'):
+		#return
+	#
+	#if face_direction == 1:
+		#set_upper_animation(&'swing_right')
+	#else:
+		#set_upper_animation(&'swing_left')
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
@@ -146,12 +163,6 @@ func _process(_delta: float) -> void:
 		if face_direction == 1  and velocity.x < 0.0:
 			face_direction = -1
 			changed = true
-		
-		if changed:
-			for child in $'outfit'.get_children():
-				if child is not Sprite2D:
-					continue  
-				child.flip_h = face_direction == -1
 	
 	# update animation
 	update_is_on_floor()
@@ -171,7 +182,7 @@ func _process(_delta: float) -> void:
 			set_upper_animation(&'fall')
 
 ## Sets the lower-body animation (animates the front and back legs)
-func set_lower_animation(animation: StringName) -> void:
+func set_lower_animation(animation: StringName, play_speed := 1.0) -> void:
 	var curr_priority: int = ANIMATION_PRIORITY.get($'animator_lower'.current_animation, 0)
 	var new_priority: int = ANIMATION_PRIORITY.get(animation, 0)
 	
@@ -179,10 +190,11 @@ func set_lower_animation(animation: StringName) -> void:
 		return
 	
 	if $'animator_lower'.current_animation != animation:
+		$'animator_lower'.speed_scale = play_speed
 		$'animator_lower'.play(animation)
 
 ## Sets the upper-body animation (animates the torso, head, and arms)
-func set_upper_animation(animation: StringName) -> void:
+func set_upper_animation(animation: StringName, play_speed := 1.0) -> void:
 	var curr_priority: int = ANIMATION_PRIORITY.get($'animator_upper'.current_animation, 0)
 	var new_priority: int = ANIMATION_PRIORITY.get(animation, 0)
 	
@@ -190,6 +202,7 @@ func set_upper_animation(animation: StringName) -> void:
 		return
 	
 	if $'animator_upper'.current_animation != animation:
+		$'animator_upper'.speed_scale = play_speed
 		$'animator_upper'.play(animation)
 
 func can_turn() -> bool:
@@ -197,6 +210,18 @@ func can_turn() -> bool:
 		$'animator_upper'.current_animation != &'swing_right' and
 		$'animator_upper'.current_animation != &'swing_left'
 	)
+
+func can_act() -> bool:
+	return can_turn()
+
+func do_swing(swing_speed := 1.0, direction := 0) -> void:
+	if direction != 0:
+		face_direction = direction
+	
+	if face_direction == 1:
+		set_upper_animation(&'swing_right', swing_speed)
+	elif face_direction == -1:
+		set_upper_animation(&'swing_left', swing_speed)
 
 #endregion
 
