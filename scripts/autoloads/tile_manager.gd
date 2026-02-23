@@ -407,7 +407,7 @@ func place_block(x: int, y: int, item_id: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	send_place_block.rpc_id(1, x, y, block_id)
+	send_place_block.rpc_id(1, x, y, item_id)
 	
 	return true
 
@@ -444,7 +444,7 @@ func place_wall(x: int, y: int, item_id: int) -> bool:
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	send_place_wall.rpc_id(1, x, y, wall_id)
+	send_place_wall.rpc_id(1, x, y, item_id)
 	
 	return true
 
@@ -582,7 +582,7 @@ func send_destroy_wall(x: int, y: int) -> void:
 
 ## Attempts to place [param block_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_block(x: int, y: int, block_id: int) -> void:
+func send_place_block(x: int, y: int, item_id: int) -> void:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return
@@ -593,8 +593,20 @@ func send_place_block(x: int, y: int, block_id: int) -> void:
 	if TileManager.get_block_unsafe(x, y):
 		return
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return
 	
+	var block_id: int = item.tile_id
+	
+	# check player's inventory
+	if not is_instance_valid(ServerManager.connected_players[multiplayer.get_remote_sender_id()]):
+		return
+	
+	var remote_player := ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	if not remote_player.my_inventory.has_item(item_id):
+		return
 	
 	# check neighboring tiles
 	if not is_block_placement_valid(x, y):
@@ -621,7 +633,7 @@ func send_place_block(x: int, y: int, block_id: int) -> void:
 
 ## Attempts to place [param wall_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_wall(x: int, y: int, wall_id: int) -> void:
+func send_place_wall(x: int, y: int, item_id: int) -> void:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return
@@ -632,8 +644,20 @@ func send_place_wall(x: int, y: int, wall_id: int) -> void:
 	if TileManager.get_wall_unsafe(x, y):
 		return
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return
 	
+	var wall_id: int = item.tile_id
+	
+	# check player's inventory
+	if not is_instance_valid(ServerManager.connected_players[multiplayer.get_remote_sender_id()]):
+		return
+	
+	var remote_player := ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	if not remote_player.my_inventory.has_item(item_id):
+		return
 	
 	# check neighboring tiles
 	if not is_wall_placement_valid(x, y):
