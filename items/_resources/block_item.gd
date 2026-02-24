@@ -24,13 +24,13 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 		return
 	
 	# get tile range
-	var tile_position: Vector2i = TileManager.world_to_tile(
+	var tile_position: Vector2i = TileManager.world_to_tile(  
 		floori(mouse_position.x),
 		floori(mouse_position.y)
 	)
 	
 	# create swing object
-	var item_object = preload('uid://bj6hggjsgnf3c').instantiate()
+	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
 	item_object.get_node(^'sprite').texture = texture
 	
 	do_swing(player, mouse_position, item_object)
@@ -38,8 +38,16 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 	# attempt to place block
 	match tile_type:
 		TileType.BLOCK:
-			TileManager.place_block(tile_position.x, tile_position.y, tile_id)
+			if TileManager.place_block(tile_position.x, tile_position.y, item_id):
+				# decrement item TODO: check held item first
+				var hotbar_slot: int = player.my_inventory.hotbar_slot
+				
+				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
 		TileType.WALL:
-			TileManager.place_wall(tile_position.x, tile_position.y, tile_id)
+			if TileManager.place_wall(tile_position.x, tile_position.y, item_id):
+				# decrement item TODO: check held item first
+				var hotbar_slot: int = player.my_inventory.hotbar_slot
+				
+				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
 		TileType.TILE:
 			print("TILE ENTITIES NOT IMPLEMENTED YET")

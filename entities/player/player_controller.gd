@@ -112,6 +112,9 @@ func _ready() -> void:
 	active = false
 	$'chunk_loader'.area_loaded.connect(done_initial_load, CONNECT_ONE_SHOT)
 	
+	if multiplayer.is_server():
+		my_inventory.load_inventory()
+	
 	if owner_id != multiplayer.get_unique_id():
 		$'snapshot_interpolator'.enabled = true
 		

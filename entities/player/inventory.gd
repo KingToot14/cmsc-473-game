@@ -12,8 +12,8 @@ var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
 # --- Functions --- #
 func _init():
-	for i in range(INVENTORY_SLOTS): #20 empty inventory slots
-		items.append(ItemStack.new(-1, 0)) #list of items stored in items array
+	for i in range(INVENTORY_SLOTS): # 50 empty inventory slots
+		items.append(ItemStack.new(-1, 0)) # list of items stored in items array
 
 #region Inventory Management
 func add_item(item_id: int, amount: int) -> int:
@@ -122,7 +122,29 @@ func interact_with_slot(index: int) -> void:
 		held_item.item_id = temp_id
 		held_item.count = temp_count
 		print('Scenario 4')
+	
 	# Update the UI
+	inventory_updated.emit()
+
+func remove_item_at(item_id: int, count: int, slot: int) -> void:
+	var item: Item = ItemDatabase.get_item(item_id)
+	
+	if not item:
+		return
+	
+	var stack := items[slot]
+	
+	# If this stack contains the item, remove as much as we can
+	if not stack.is_empty() and stack.item_id == item_id:
+		var diff = stack.count - count
+		stack.count = max(stack.count - count, 0)
+		
+		if diff <= 0:
+			stack.item_id = -1
+			count = abs(diff)
+		else:
+			count = 0
+	
 	inventory_updated.emit()
 
 func load_inventory() -> void:
@@ -141,6 +163,19 @@ func get_selected_item() -> ItemStack:
 	
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]
+
+func has_item(item_id: int, count := 1) -> bool:
+	for stack in items:
+		# If this stack contains the item, remove as much as we can
+		if not stack.is_empty() and stack.item_id == item_id:
+			var diff = stack.count - count
+			
+			if diff < 0:
+				count = abs(diff)
+			else:
+				return true
+	
+	return false
 
 #endregion
 

@@ -21,6 +21,7 @@ func load_items() -> void:
 		
 		if FileAccess.file_exists(item_path):
 			items[id] = load(item_path)
+			items[id].item_id = id
 
 func get_item(id: int) -> Item:
 	return items.get(id, null)

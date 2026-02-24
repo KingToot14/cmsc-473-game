@@ -362,26 +362,34 @@ func destroy_wall(x: int, y: int) -> bool:
 	
 	return true
 
-## Attempts to place [param block_id] at the given [param x] and [param y] position.
-## [br][br]Returns [code]true[/code] if the space is empty. Returns [code]false[/code]
-## if a block already exists at [param x] and [param y].
-func place_block(x: int, y: int, block_id: int) -> bool:
+## Attempts to place the [member BlockItem.block_id] stored in [param item_id]
+## at the given [param x] and [param y] position.
+## [br][br]Returns [code]true[/code] if the placement was successful.
+func place_block(x: int, y: int, item_id: int) -> bool:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
-		return true
+		return false
 	if y < 0 or y >= world_height:
-		return true
+		return false
 	
 	# do not process if block exists
 	if TileManager.get_block_unsafe(x, y):
 		return false
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return false
 	
+	var block_id: int = item.tile_id
+	
+	# check player's inventory
+	if not Globals.player.my_inventory.has_item(item_id):
+		return false
 	
 	# check neighboring tiles
 	if not is_block_placement_valid(x, y):
-		return true
+		return false
 	
 	# query physics
 	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
@@ -392,44 +400,51 @@ func place_block(x: int, y: int, block_id: int) -> bool:
 	query.collision_mask = 0b01001010	# Collides with players, enemies, and tiles
 	
 	if not direct_space.intersect_shape(query, 1).is_empty():
-		return true
+		return false
 	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	send_place_block.rpc_id(1, x, y, block_id)
+	send_place_block.rpc_id(1, x, y, item_id)
 	
 	return true
 
 ## Attempts to place [param wall_id] at the given [param x] and [param y] position.
-## [br][br]Returns [code]true[/code] if the space is empty. Returns [code]false[/code]
-## if a wall already exists at [param x] and [param y].
-func place_wall(x: int, y: int, wall_id: int) -> bool:
+## [br][br]Returns [code]true[/code] if the placement was successful.
+func place_wall(x: int, y: int, item_id: int) -> bool:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
-		return true
+		return false
 	if y < 0 or y >= world_height:
-		return true
+		return false
 	
 	# do not process if block exists
 	if TileManager.get_wall_unsafe(x, y):
 		return false
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return false
 	
+	var wall_id: int = item.tile_id
+	
+	# check player's inventory
+	if not Globals.player.my_inventory.has_item(item_id):
+		return false
 	
 	# check neighboring tiles
 	if not is_wall_placement_valid(x, y):
-		return true
+		return false
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
 	Globals.world_map.update_tile(x, y)
 	
 	# sync to server
-	send_place_wall.rpc_id(1, x, y, wall_id)
+	send_place_wall.rpc_id(1, x, y, item_id)
 	
 	return true
 
@@ -567,7 +582,7 @@ func send_destroy_wall(x: int, y: int) -> void:
 
 ## Attempts to place [param block_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_block(x: int, y: int, block_id: int) -> void:
+func send_place_block(x: int, y: int, item_id: int) -> void:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return
@@ -578,8 +593,20 @@ func send_place_block(x: int, y: int, block_id: int) -> void:
 	if TileManager.get_block_unsafe(x, y):
 		return
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return
 	
+	var block_id: int = item.tile_id
+	
+	# check player's inventory
+	if not is_instance_valid(ServerManager.connected_players[multiplayer.get_remote_sender_id()]):
+		return
+	
+	var remote_player := ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	if not remote_player.my_inventory.has_item(item_id):
+		return
 	
 	# check neighboring tiles
 	if not is_block_placement_valid(x, y):
@@ -606,7 +633,7 @@ func send_place_block(x: int, y: int, block_id: int) -> void:
 
 ## Attempts to place [param wall_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_wall(x: int, y: int, wall_id: int) -> void:
+func send_place_wall(x: int, y: int, item_id: int) -> void:
 	# check bounds (consume interaction)
 	if x < 0 or x >= world_width:
 		return
@@ -617,8 +644,20 @@ func send_place_wall(x: int, y: int, wall_id: int) -> void:
 	if TileManager.get_wall_unsafe(x, y):
 		return
 	
-	# TODO: Check player's current item
+	# make sure item is a BlockItem
+	var item: Item = ItemDatabase.get_item(item_id)
+	if item is not BlockItem:
+		return
 	
+	var wall_id: int = item.tile_id
+	
+	# check player's inventory
+	if not is_instance_valid(ServerManager.connected_players[multiplayer.get_remote_sender_id()]):
+		return
+	
+	var remote_player := ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	if not remote_player.my_inventory.has_item(item_id):
+		return
 	
 	# check neighboring tiles
 	if not is_wall_placement_valid(x, y):
