@@ -1,12 +1,11 @@
 [gd_resource type="Resource" script_class="Item" format=3 uid="uid://g5t51xtnp1br"]
 
 [ext_resource type="Script" uid="uid://cbpxcb7ird2qr" path="res://items/_resources/item.gd" id="1_hg0bi"]
-[ext_resource type="Texture2D" uid="uid://4770kopocmlh" path="res://items/1_apple/item.png" id="2_vjsao"]
+[ext_resource type="Texture2D" uid="uid://ddgw3vxy4spdr" path="res://items/2_item_slime/item.png" id="2_vjsao"]
 
 [resource]
 script = ExtResource("1_hg0bi")
 item_name = "Slime"
 texture = ExtResource("2_vjsao")
 tooltip = "A piece of gooey slime."
-max_stack = 9999
 metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

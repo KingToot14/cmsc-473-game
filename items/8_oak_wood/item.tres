@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://cxw0272pb5sat"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_d1gjg"]
+[ext_resource type="Texture2D" uid="uid://cgsaual0w6j83" path="res://blocks/5_oak_wood/icon.png" id="2_d1gjg"]
+
+[resource]
+script = ExtResource("1_d1gjg")
+tile_id = 5
+use_speed = 0.25
+item_name = "Oak Wood"
+texture = ExtResource("2_d1gjg")
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
