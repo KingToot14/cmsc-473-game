@@ -60,3 +60,17 @@ func set_selected(value: bool) -> void:
 		
 		# update panel style
 		$'backing'.region_rect.position.x = 0.0
+		
+func _gui_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"secondary_interact"):
+		var inventory = Globals.player.my_inventory
+		
+		# Calculate the correct index in the inventory array.
+		var true_index = get_index()
+		if not is_hotbar:
+			# Because the main inventory slots are in a separate GridContainer, their get_index() starts back at 0. We need to offset them by the hotbar size!
+			true_index += 10 
+			
+		inventory.interact_with_slot(true_index)
+		# Tell Godot we handled this input so it doesn't click through the UI
+		get_viewport().set_input_as_handled()

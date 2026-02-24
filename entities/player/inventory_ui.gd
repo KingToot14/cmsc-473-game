@@ -40,11 +40,11 @@ func setup_ui(player_inventory: Inventory):
 	for child in main_grid.get_children() + hotbar_grid.get_children():
 		child.free()
 	
-	# Create visual slots
+	#create visual slots
 	for i in range(player_inventory.items.size()):
 		var new_slot = slot_scene.instantiate()
 		
-		# First 10 go to hotbar, rest to main inventory
+		#first 10 go to hotbar, rest to main inventory
 		if i < HOTBAR_SIZE:
 			hotbar_grid.add_child(new_slot)
 			new_slot.is_hotbar = true

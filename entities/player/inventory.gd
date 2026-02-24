@@ -8,6 +8,7 @@ signal inventory_updated
 const INVENTORY_SLOTS := 50
 
 var items: Array[ItemStack] = []
+=======
 var hotbar_slot := 0
 
 # --- Functions --- #
@@ -79,8 +80,9 @@ func load_inventory() -> void:
 
 #region Selected Item
 func get_selected_item() -> ItemStack:
-	# TODO: Check item held by mouse
-	
+	# Check item held by mouse
+	if held_item and not held_item.is_empty():
+		return held_item
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]
 
