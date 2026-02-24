@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://vxvnv55mlw25" path="res://ui/main_menu/join_buttons.png" id="5_ya4ey"]
 [ext_resource type="Script" uid="uid://cfefioerjy2v6" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
-[ext_resource type="Script" path="res://entities/_resources/entity_spawner.gd" id="8_trceg"]
+[ext_resource type="Script" uid="uid://bvupsvk0k73i7" path="res://entities/_resources/entity_spawner.gd" id="8_trceg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
