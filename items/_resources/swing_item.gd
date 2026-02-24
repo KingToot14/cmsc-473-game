@@ -19,6 +19,14 @@ const BASE_SWING_SPEED := 0.8
 func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
 	do_swing(player, mouse_position)
 
+func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# create dummy object
+	var object: Node2D = default_swing_object.instantiate()
+	if object is ItemToolObject:
+		object.set_to_simulate()
+	
+	do_swing(player, mouse_position, object)
+
 ## Plays the swing animation on the current player
 func do_swing(player: PlayerController, mouse_position: Vector2, swing_object: Node2D = null) -> void:
 	var object: Node2D

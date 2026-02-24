@@ -24,13 +24,13 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 		return
 	
 	# get tile range
-	var tile_position: Vector2i = TileManager.world_to_tile(
+	var tile_position: Vector2i = TileManager.world_to_tile(  
 		floori(mouse_position.x),
 		floori(mouse_position.y)
 	)
 	
 	# create swing object
-	var item_object = preload('uid://bj6hggjsgnf3c').instantiate()
+	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
 	item_object.get_node(^'sprite').texture = texture
 	
 	do_swing(player, mouse_position, item_object)
