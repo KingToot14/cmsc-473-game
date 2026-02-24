@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://nxikvjr2q4g3" path="res://ui/main_menu/background_small.png" id="3_ya4ey"]
 [ext_resource type="Texture2D" uid="uid://dl63lmonxwici" path="res://ui/fill_panel.png" id="4_choun"]
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="4_tbgi4"]
-[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://blocks/_resources/walls.tres" id="5_tefeu"]
+[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="5_tefeu"]
 [ext_resource type="Texture2D" uid="uid://vxvnv55mlw25" path="res://ui/main_menu/join_buttons.png" id="5_ya4ey"]
 [ext_resource type="Script" uid="uid://cfefioerjy2v6" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]

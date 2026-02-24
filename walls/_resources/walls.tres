@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" format=3 uid="uid://jxy2b8joa4cm"]
 
-[ext_resource type="Texture2D" uid="uid://bv7bcdmc2rp3d" path="res://blocks/2_dirt/wall.png" id="1_2mgvo"]
+[ext_resource type="Texture2D" uid="uid://bv7bcdmc2rp3d" path="res://walls/1_dirt_wall/wall.png" id="1_2mgvo"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jac8l"]
 resource_name = "dirt"
