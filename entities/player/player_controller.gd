@@ -144,12 +144,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
 		var container = $inventory_ui/inventory_container
 		container.visible = !container.visible
-		
-		# Mouse logic
-		if container.visible:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 #region Animation
 func _process(_delta: float) -> void:
