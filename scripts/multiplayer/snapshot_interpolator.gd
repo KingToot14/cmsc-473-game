@@ -24,7 +24,7 @@ var owner_id := 0:
 		owner_id = id
 		
 var snapshots: Array[Dictionary] = []
-var queued_actions: Array[Dictionary] = []
+var queued_actions: Dictionary = {}
 var enabled := false
 
 # --- Functions --- #
@@ -55,12 +55,33 @@ func interpolate_snapshots() -> void:
 	if not enabled or is_multiplayer_authority():
 		return
 	
+	# delayed tick
+	var buffered_tick := NetworkTime.tick - BUFFER_SIZE
+	
+	# check for actions
+	var actions: Array = queued_actions.keys()
+	actions.sort()
+	
+	for tick in actions:
+		if buffered_tick >= tick:
+			var action = queued_actions[tick]
+			var item_id = action[&'item_id']
+			var action_type = action[&'action_type']
+			
+			# apply action
+			match action_type:
+				&'interact_mouse':
+					var item := ItemDatabase.get_item(item_id)
+					
+					item.simulate_interact_mouse(root, action[&'mouse_position'])
+			
+			# remove action from queue
+			queued_actions.erase(tick)
+			break
+	
 	# only interpolate with multiple snapshots
 	if len(snapshots) < 2:
 		return
-	
-	# delayed tick
-	var buffered_tick := NetworkTime.tick - BUFFER_SIZE
 	
 	# prune old snapshots
 	while len(snapshots) > 2:
@@ -70,6 +91,7 @@ func interpolate_snapshots() -> void:
 		else:
 			break
 	
+	# interpolate position and velocity to match server
 	var snapshot_start = snapshots[0]
 	var snapshot_end = snapshots[1]
 	var progression = clampf((
@@ -95,15 +117,17 @@ func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: int) -> v
 		root.global_position = net_position
 		root.velocity = net_velocity
 
+@rpc('any_peer', 'call_remote', 'reliable')
 func queue_action(action_info: Dictionary) -> void:
-	if not enabled:
+	if not multiplayer.is_server():
 		return
 	
-	action_info[&'player_id'] = multiplayer.get_unique_id()
+	send_action.rpc(action_info)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_action(action_info: Dictionary) -> void:
 	if multiplayer.is_server():
 		return
 	
-	#TODO: send relevant action data (item id, interaction type, mouse pos, server tick)
+	# add to queued actions
+	queued_actions[action_info[&'tick']] = action_info

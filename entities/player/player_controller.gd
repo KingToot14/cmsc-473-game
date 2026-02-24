@@ -30,6 +30,9 @@ var center_point: Vector2:
 @export var base_range := 10.0
 
 # - Movement
+@onready var input_sync: InputSynchronizer = $'input_sync'
+@onready var snapshot_interpolator: SnapshotInterpolator = $'snapshot_interpolator'
+
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
 ## How quickly the player accelerates in [code]pixels/second[/code]
