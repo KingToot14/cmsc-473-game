@@ -226,6 +226,9 @@ func load_tile_entity(
 #region Entity Management
 @rpc('any_peer', 'call_remote', "reliable")
 func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
+	if not is_instance_valid(loaded_entities.get(entity_id)):
+		return
+	
 	var entity: Node2D = loaded_entities.get(entity_id)
 	
 	if not (entity and len(entity.hp_pool) > 0):
@@ -237,21 +240,6 @@ func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
 	
 	# apply damage
 	entity.hp_pool[pool_id].modify_health(-damage, true)
-	
-	# calculate knockback force
-	var player_obj: PlayerController = ServerManager.connected_players[snapshot[&'player_id']]
-	
-	# receive knockback away from player
-	if entity is Entity:
-		var knockback_force := Vector2(1.0, 0.0)
-		if player_obj.center_point.x > entity.global_position.x:
-			knockback_force.x *= -1
-		
-		# apply slight upward force if level
-		if entity.is_on_floor():
-			knockback_force.y = -0.5
-		
-		snapshot[&'knockback'] = knockback_force.normalized()
 	
 	# store hp
 	if entity is TileEntity:

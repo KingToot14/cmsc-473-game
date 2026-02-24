@@ -2,14 +2,20 @@ class_name EntityHp
 extends Node
 
 # --- Signals --- #
+## Emitted when this node receives a damage snapshot
 signal received_damage(snapshot: Dictionary)
+## Emitted when this node has it's hp value modified
 signal hp_modified(from_server: bool)
+## Emitted when this node's hp has been reduced to 0
 signal died(from_server: bool)
 
 # --- Variables --- #
+## The entity this node is tied to
 @export var entity: Node2D
+## The index of this node in the [member entity.hp_pool]
 @export var pool_id := 0
 
+## The max health of this node
 @export var max_hp := 100
 var curr_hp := 0
 
@@ -31,6 +37,9 @@ func setup() -> void:
 	if curr_hp <= 0:
 		died.emit(true)
 
+## Called from external damage sources. [param dmg_info] is a dictionary containing at least:
+## [br] - [code]&'damage'[/code]: The base damage to deal. This is modified by [member entity.defense]
+## [br] - [code]&'player_id'[/code]: The local player's unique id. Used for damage reconciliation
 func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)
 	
@@ -47,6 +56,9 @@ func take_damage(dmg_info: Dictionary) -> void:
 	
 	sequence_id += 1
 	
+	send_damage_snapshot()
+
+func send_damage_snapshot() -> void:
 	# send data to server
 	EntityManager.entity_take_damage.rpc_id(1, entity.id, snapshots[sequence_id - 1])
 
@@ -56,7 +68,7 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 	var player_id: int = snapshot.get(&'player_id', 0)
 	var seq_id: int = snapshot.get(&'sequence_id', 0)
 	
-	if player_id == multiplayer.get_unique_id():
+	if not multiplayer.is_server() and player_id == multiplayer.get_unique_id():
 		var prev_snapshot: Dictionary = snapshots.get(seq_id, {})
 		
 		if prev_snapshot.is_empty():
@@ -88,3 +100,6 @@ func set_max_hp(hp: int, heal_to_full := false) -> void:
 
 func get_hp_percent() -> float:
 	return 1.0 * curr_hp / max_hp
+
+func is_dead() -> bool:
+	return curr_hp <= 0

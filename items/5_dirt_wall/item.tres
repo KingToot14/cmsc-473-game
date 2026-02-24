@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bohebryg4pda"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_kmprw"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_kmprw"]
+
+[resource]
+script = ExtResource("1_kmprw")
+tile_type = 1
+tile_id = 1
+item_name = "Dirt Wall"
+texture = ExtResource("2_kmprw")
+tooltip = "A very dirty wall. You should probably clean it."
+item_type = 1
+max_stack = 9999
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

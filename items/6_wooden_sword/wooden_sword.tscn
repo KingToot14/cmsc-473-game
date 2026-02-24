@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://b865cn5jbl3q0"]
+
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="1_8agoj"]
+[ext_resource type="Texture2D" uid="uid://baeiogwx1b6ft" path="res://items/6_wooden_sword/weapon_sprite.png" id="2_in154"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_221hk"]
+size = Vector2(19, 6)
+
+[node name="wooden_sword" type="Area2D" unique_id=677168293]
+collision_layer = 2
+collision_mask = 24
+script = ExtResource("1_8agoj")
+source_type = 1
+is_enemy = false
+metadata/_custom_type_script = "uid://dxggq75lo7l8i"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=623042369]
+position = Vector2(10.5, -3.5762787e-07)
+shape = SubResource("RectangleShape2D_221hk")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=248731820]
+position = Vector2(8, -6.039832e-07)
+rotation = 0.7853982
+texture = ExtResource("2_in154")

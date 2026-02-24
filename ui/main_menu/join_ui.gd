@@ -41,8 +41,6 @@ func _ready() -> void:
 	
 	# load previous connections
 	load_previous_connections()
-	
-	visibility_changed.connect(func(): print_stack())
 
 func _process(_delta: float) -> void:
 	title_texture.rotation_degrees = sin(Time.get_ticks_msec() / title_rotate_msecs) * title_rotate_range

@@ -1,11 +1,18 @@
+class_name InventorySlot
 extends Control
 
 # --- Variables --- #
 @onready var icon = $'item'
 @onready var count_label = $'count_label'
 
+var current_item: Inventory.ItemStack
+
+var is_hotbar := false
+
 # --- Functions --- #
 func update_slot(stack: Inventory.ItemStack):
+	current_item = stack
+	
 	if stack.is_empty():
 		icon.texture = null
 		count_label.text = ""
@@ -15,8 +22,6 @@ func update_slot(stack: Inventory.ItemStack):
 		icon.texture = item.texture
 		# Only show numbers if there is more than 1 item
 		count_label.text = str(stack.count) if stack.count > 1 else ""
-<<<<<<< Updated upstream
-=======
 
 func set_selected(value: bool) -> void:
 	# only hotbar slots can be selected
@@ -69,4 +74,3 @@ func _gui_input(event: InputEvent) -> void:
 		inventory.interact_with_slot(true_index)
 		# Tell Godot we handled this input so it doesn't click through the UI
 		get_viewport().set_input_as_handled()
->>>>>>> Stashed changes

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="1_huu8b"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="2_nktrt"]
 
-[node name="inventory_slot" type="Control" unique_id=93855827]
+[node name="inventory_slot" type="Control" unique_id=93855827 groups=["hotbar_slot"]]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 3
 anchors_preset = 0

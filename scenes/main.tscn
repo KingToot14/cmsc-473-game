@@ -29,7 +29,6 @@ region = Rect2(0, 32, 88, 16)
 [node name="main" type="Node2D" unique_id=1976494311]
 
 [node name="join_ui" type="CanvasLayer" parent="." unique_id=185611908]
-layer = 50
 script = ExtResource("1_o5qli")
 disabled_button = SubResource("AtlasTexture_eb6dy")
 normal_button = SubResource("AtlasTexture_ya4ey")
