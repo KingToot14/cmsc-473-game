@@ -17,6 +17,15 @@ const BASE_SWING_SPEED := 0.8
 
 # --- Functions --- #
 func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# send action to client
+	player.snapshot_interpolator.queue_action.rpc_id(1, {
+		&'tick': NetworkTime.tick,
+		&'item_id': item_id,
+		&'action_type': &'interact_mouse',
+		&'mouse_position': mouse_position
+	})
+	
+	# do animation
 	do_swing(player, mouse_position)
 
 func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
@@ -25,6 +34,7 @@ func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) 
 	if object is ItemToolObject:
 		object.set_to_simulate()
 	
+	# do animation
 	do_swing(player, mouse_position, object)
 
 ## Plays the swing animation on the current player

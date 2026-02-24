@@ -23,6 +23,14 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 	if not is_point_in_range(player, mouse_position):
 		return
 	
+	# send action to client
+	player.snapshot_interpolator.queue_action.rpc_id(1, {
+		&'tick': NetworkTime.tick,
+		&'item_id': item_id,
+		&'action_type': &'interact_mouse',
+		&'mouse_position': mouse_position
+	})
+	
 	# get tile range
 	var tile_position: Vector2i = TileManager.world_to_tile(  
 		floori(mouse_position.x),
@@ -51,3 +59,10 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
 		TileType.TILE:
 			print("TILE ENTITIES NOT IMPLEMENTED YET")
+
+func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# create swing object
+	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
+	item_object.get_node(^'sprite').texture = texture
+	
+	do_swing(player, mouse_position, item_object)

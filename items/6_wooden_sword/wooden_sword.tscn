@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b865cn5jbl3q0"]
 
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="1_8agoj"]
-[ext_resource type="Script" path="res://items/_resources/item_tool_object.gd" id="1_in154"]
+[ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_in154"]
 [ext_resource type="Texture2D" uid="uid://baeiogwx1b6ft" path="res://items/6_wooden_sword/weapon_sprite.png" id="2_in154"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_221hk"]
