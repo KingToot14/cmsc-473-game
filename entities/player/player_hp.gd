@@ -18,18 +18,11 @@ func send_damage_snapshot() -> void:
 	
 	# calculate knockback
 	var snapshot: Dictionary = snapshots[sequence_id - 1]
-	var source_id: int = snapshot.get(&'source_id', 0)
-	var source_type: DamageSource.DamageSourceType = \
-		snapshot.get(&'source_type', DamageSource.DamageSourceType.WORLD)
-	
-	
 	if player.is_on_floor():
 		snapshot[&'knockback'].y = 0.5
 	
 	snapshot[&'knockback'] = snapshot[&'knockback'].normalized()
 	
-	# update local client
-	#player.hp.receive_damage_snapshot(snapshot)
 	
 	update_player_hp.rpc_id(1, snapshot)
 
