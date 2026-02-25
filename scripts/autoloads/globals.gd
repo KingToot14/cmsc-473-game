@@ -29,6 +29,7 @@ var hovered_hitbox: TileEntityHitbox
 
 # - Player
 var player: PlayerController
+var music: MusicManager
 
 # - Items
 var item_registry: Dictionary[int, String] = {}

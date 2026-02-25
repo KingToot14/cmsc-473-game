@@ -1,0 +1,25 @@
+[gd_resource type="AudioStreamInteractive" format=3 uid="uid://ltqj1clnsf4v"]
+
+[ext_resource type="AudioStream" uid="uid://bjga54ic27cyx" path="res://music/menus/title.ogg" id="1_mx5f5"]
+[ext_resource type="AudioStream" uid="uid://c4nnwnnkh42cp" path="res://music/forest/forest_day_1.ogg" id="2_nyelv"]
+[ext_resource type="AudioStream" uid="uid://dm4vjmnpnhrup" path="res://music/forest/forest_day_2.ogg" id="3_qwonx"]
+[ext_resource type="AudioStream" uid="uid://cc8njp2f3jypt" path="res://music/winter/winter_day_1.ogg" id="4_c42op"]
+[ext_resource type="AudioStream" uid="uid://chtl36vn5bmf6" path="res://music/winter/winter_day_2.ogg" id="5_0lotu"]
+
+[resource]
+clip_count = 5
+clip_0/name = &"Title"
+clip_0/stream = ExtResource("1_mx5f5")
+clip_0/auto_advance = 0
+clip_1/name = &"Forest Day 1"
+clip_1/stream = ExtResource("2_nyelv")
+clip_1/auto_advance = 0
+clip_2/name = &"Forest Day 2"
+clip_2/stream = ExtResource("3_qwonx")
+clip_2/auto_advance = 0
+clip_3/name = &"Winter Day 1"
+clip_3/stream = ExtResource("4_c42op")
+clip_3/auto_advance = 0
+clip_4/name = &"Winter Day 2"
+clip_4/stream = ExtResource("5_0lotu")
+clip_4/auto_advance = 0

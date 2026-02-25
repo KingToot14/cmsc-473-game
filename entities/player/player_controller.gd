@@ -43,6 +43,8 @@ var center_point: Vector2:
 ## How high the player jumps when they perform a jump. Sets [member base_velocity.y]
 @export var jump_power := 350.0
 
+var is_grounded := false
+
 ## How quickly the player accelerates towards the ground in [code]pixels/second[/cdoe]
 @export var gravity := 980.0
 ## The maximum vertical velocity the player can be going when affected by [member gravity]
@@ -137,15 +139,6 @@ func _ready() -> void:
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
-#func _input(event: InputEvent) -> void:
-	#if not event.is_action_pressed(&'test_input'):
-		#return
-	#
-	#if face_direction == 1:
-		#set_upper_animation(&'swing_right')
-	#else:
-		#set_upper_animation(&'swing_left')
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"inventory_toggle"):
 		var container = $inventory_ui/inventory_container
@@ -167,6 +160,11 @@ func _process(_delta: float) -> void:
 	# update animation
 	update_is_on_floor()
 	if is_on_floor():
+		if not is_grounded:
+			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
+			
+			is_grounded = true
+		
 		if abs(velocity.x) < 0.10:
 			set_lower_animation(&'idle')
 			set_upper_animation(&'idle')
@@ -174,6 +172,11 @@ func _process(_delta: float) -> void:
 			set_lower_animation(&'walk')
 			set_upper_animation(&'walk')
 	else:
+		if is_grounded:
+			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
+			
+			is_grounded = false
+		
 		if velocity.y < 0.0:
 			set_lower_animation(&'jump')
 			set_upper_animation(&'jump')
@@ -349,6 +352,9 @@ func done_initial_load() -> void:
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
+	
+	# swtich track to music TODO: Move this to a a function in biome manager when implemented
+	Globals.music.play_track(MusicManager.Area.FOREST_DAY, 1)
 
 #endregion
 
