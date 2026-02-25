@@ -55,10 +55,10 @@ folder_colors={
 "res://blocks/": "orange",
 "res://entities/": "red",
 "res://items/": "green",
+"res://music/": "purple",
 "res://recipes/": "teal",
 "res://scenes/": "yellow",
 "res://scripts/": "blue",
-"res://sound/": "purple",
 "res://ui/": "pink",
 "res://walls/": "orange"
 }
