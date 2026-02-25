@@ -32,6 +32,7 @@ region = Rect2(0, 32, 88, 16)
 
 [node name="music_manager" type="AudioStreamPlayer" parent="." unique_id=280225988]
 stream = ExtResource("1_jkv2x")
+bus = &"Music"
 script = ExtResource("2_jbj1t")
 metadata/_custom_type_script = "uid://dv38b28j7qbqj"
 
