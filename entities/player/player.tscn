@@ -751,6 +751,7 @@ hp = NodePath("player_hp")
 [node name="audio_player" type="AudioStreamPlayer2D" parent="." unique_id=218862357]
 stream = SubResource("AudioStreamPolyphonic_t1t22")
 autoplay = true
+max_distance = 1408.0
 max_polyphony = 4
 bus = &"Entities"
 script = ExtResource("2_ghoj8")

@@ -9,15 +9,20 @@
 [ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_7td2d"]
 [ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_w88l4"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="9_j8mhm"]
+[ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="10_jsemx"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="10_sgt0n"]
+[ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="11_7afba"]
 [ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/entity_damage_source.gd" id="11_72hbc"]
 [ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/entity_hitbox.gd" id="11_odtd8"]
+[ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="12_en8ih"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_515sv"]
 resource_local_to_scene = true
 shader = ExtResource("9_j8mhm")
 shader_parameter/flash_color = Color(1, 1, 1, 1)
 shader_parameter/intensity = 0.0
+
+[sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_en8ih"]
 
 [sub_resource type="Animation" id="Animation_l7c8k"]
 length = 0.001
@@ -154,6 +159,20 @@ tracks/1/keys = {
 "update": 1,
 "values": [8, 9, 10, 11, 12]
 }
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("sfx")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.1),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [&"jump"],
+"method": &"play_sfx"
+}]
+}
 
 [sub_resource type="Animation" id="Animation_rjtam"]
 resource_name = "land"
@@ -170,6 +189,20 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
 "values": [10, 9, 11]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sfx")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [&"land"],
+"method": &"play_sfx"
+}]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_515sv"]
@@ -204,6 +237,19 @@ variant_tunnel_texture = ExtResource("8_w88l4")
 hp_pool = [NodePath("hp")]
 flash_material = SubResource("ShaderMaterial_515sv")
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
+
+[node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=562441316]
+stream = SubResource("AudioStreamPolyphonic_en8ih")
+autoplay = true
+max_distance = 704.0
+attenuation = 3.0
+max_polyphony = 2
+script = ExtResource("10_jsemx")
+sound_effects = Dictionary[StringName, AudioStream]({
+&"jump": ExtResource("11_7afba"),
+&"land": ExtResource("12_en8ih")
+})
+metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
 
 [node name="animator" type="AnimationPlayer" parent="." unique_id=1400854203]
 libraries/ = SubResource("AnimationLibrary_515sv")
