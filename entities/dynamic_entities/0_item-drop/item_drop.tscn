@@ -20,6 +20,7 @@ gravity = 700.0
 terminal_velocity = 300.0
 counts_towards_spawn_cap = false
 process_on_client = true
+despawn_time = 300.0
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
 shape = SubResource("RectangleShape2D_x7v6d")

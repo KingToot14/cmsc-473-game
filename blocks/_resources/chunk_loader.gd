@@ -175,12 +175,12 @@ func send_region(start_chunk: Vector2i, end_chunk: Vector2i, autotile := false) 
 	if len(data) == 0:
 		return
 	
-	# update server tilemap
+	# update server tilemap (allow buffer to keep entities in the world)
 	Globals.server_map.load_tiles(
-		start_chunk.x * TileManager.CHUNK_SIZE,
-		start_chunk.y * TileManager.CHUNK_SIZE,
-		width * TileManager.CHUNK_SIZE,
-		height * TileManager.CHUNK_SIZE
+		(start_chunk.x - 1) * TileManager.CHUNK_SIZE,
+		(start_chunk.y - 1) * TileManager.CHUNK_SIZE,
+		(width + 2) * TileManager.CHUNK_SIZE,
+		(height + 2) * TileManager.CHUNK_SIZE
 	)
 	
 	# send tile data
