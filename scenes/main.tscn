@@ -36,6 +36,7 @@ script = ExtResource("2_jbj1t")
 metadata/_custom_type_script = "uid://dv38b28j7qbqj"
 
 [node name="join_ui" type="CanvasLayer" parent="." unique_id=185611908]
+layer = 10
 script = ExtResource("1_o5qli")
 disabled_button = SubResource("AtlasTexture_eb6dy")
 normal_button = SubResource("AtlasTexture_ya4ey")

@@ -45,6 +45,8 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 
 # --- Functions --- #
 func _ready() -> void:
+	Globals.music = self
+	
 	# setup cross-fade transition
 	stream.add_transition(
 		AudioStreamInteractive.CLIP_ANY, AudioStreamInteractive.CLIP_ANY,
@@ -65,4 +67,11 @@ func _ready() -> void:
 ## Plays a music track that plays in the given [param area]. Defaults to a random
 ## selection from the available options, but can be specified using [param variant]
 func play_track(area: Area, variant := -1) -> void:
+	if multiplayer.is_server():
+		return
+	
+	if variant == -1:
+		variant = randi_range(0, len(AREA_TRACKS[area]))
+	
+	# fade to new track
 	get_stream_playback().switch_to_clip(AREA_TRACKS[area][variant])

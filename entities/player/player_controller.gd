@@ -349,6 +349,9 @@ func done_initial_load() -> void:
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
+	
+	# swtich track to music TODO: Move this to a a function in biome manager when implemented
+	Globals.music.play_track(MusicManager.Area.FOREST_DAY, 1)
 
 #endregion
 
