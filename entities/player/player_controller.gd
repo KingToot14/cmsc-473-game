@@ -103,6 +103,8 @@ var face_direction := 1:
 				continue  
 			child.flip_h = face_direction == -1
 
+@onready var sfx: EntitySfxManager = $'sfx'
+
 var active := true
 
 # --- Functions --- #
@@ -165,7 +167,8 @@ func _process(_delta: float) -> void:
 	update_is_on_floor()
 	if is_on_floor():
 		if not is_grounded:
-			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
+			# play land sfx
+			sfx.play_sfx(&'land')
 			
 			is_grounded = true
 		
@@ -177,8 +180,6 @@ func _process(_delta: float) -> void:
 			set_upper_animation(&'walk')
 	else:
 		if is_grounded:
-			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
-			
 			is_grounded = false
 		
 		if velocity.y < 0.0:
@@ -256,6 +257,7 @@ func apply_input(delta: float) -> void:
 	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
+			sfx.play_sfx(&'jump')
 			velocity.y = -jump_power
 			pass
 	

@@ -141,10 +141,13 @@ func apply_jump() -> void:
 func _on_receive_damage(snapshot: Dictionary) -> void:
 	standard_receive_damage(snapshot)
 	
+	# play damage sfx
+	$'sfx'.play_sfx(&'hit')
+	
 	# set jump velocity to opposite of damage
 	var knockback: Vector2 = snapshot.get(&'knockback', Vector2.ZERO)
 	if knockback.x != 0.0 and not is_on_floor() and sign(knockback.x) != sign(jump_velocity.x):
-		jump_velocity.x *= -1
+		jump_velocity.x = sign(knockback.x)
 	
 	# set target if not already set
 	if multiplayer.is_server():
