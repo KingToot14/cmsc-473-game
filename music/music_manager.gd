@@ -67,7 +67,7 @@ func _ready() -> void:
 ## Plays a music track that plays in the given [param area]. Defaults to a random
 ## selection from the available options, but can be specified using [param variant]
 func play_track(area: Area, variant := -1) -> void:
-	if multiplayer.is_server():
+	if multiplayer.is_server() or not is_instance_valid(get_stream_playback() ):
 		return
 	
 	if variant == -1:

@@ -1,15 +1,16 @@
 [gd_resource type="Resource" script_class="SwingItem" format=3 uid="uid://ddy7horgmykm7"]
 
-[ext_resource type="PackedScene" uid="uid://b865cn5jbl3q0" path="res://items/6_wooden_sword/wooden_sword.tscn" id="1_g7yx6"]
+[ext_resource type="PackedScene" uid="uid://cbl55ji2g7o1d" path="res://items/9_wooden_hammer/wooden_hammer.tscn" id="1_g7yx6"]
 [ext_resource type="Script" uid="uid://36ykp7c03y8e" path="res://items/_resources/swing_item.gd" id="2_s00vk"]
-[ext_resource type="Texture2D" uid="uid://3s43ng6hg0t4" path="res://items/6_wooden_sword/icon.png" id="3_eudw1"]
+[ext_resource type="Texture2D" uid="uid://c07h7v5t1jaul" path="res://items/9_wooden_hammer/icon.png" id="3_s00vk"]
 
 [resource]
 script = ExtResource("2_s00vk")
 force_towards_mouse = true
+use_speed = 0.6
 default_swing_object = ExtResource("1_g7yx6")
 item_id = 9
 item_name = "Wooden Hammer"
-texture = ExtResource("3_eudw1")
+texture = ExtResource("3_s00vk")
 tooltip = "Probably the sadest hammer you will ever see."
 max_stack = 1
