@@ -17,7 +17,56 @@ const BASE_SWING_SPEED := 0.8
 
 # --- Functions --- #
 func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# send action to client
+	player.snapshot_interpolator.queue_action.rpc_id(1, {
+		&'tick': NetworkTime.tick,
+		&'item_id': item_id,
+		&'action_type': &'interact_mouse',
+		&'mouse_position': mouse_position
+	})
+	
+	# do animation
 	do_swing(player, mouse_position)
+	var selected: Inventory.ItemStack = player.my_inventory.get_selected_item()
+	if selected.item_id == 7:
+		# checks the range
+		if not is_point_in_range(player, mouse_position):
+			return
+
+		#grabs the tile position
+		var tile_position: Vector2i = TileManager.world_to_tile(
+			floori(mouse_position.x),
+			floori(mouse_position.y)
+		)
+
+		#sends the destroy block function.
+		if not TileManager.destroy_block(tile_position.x, tile_position.y):
+			return
+
+	elif selected.item_id == 9:
+		# checks the range
+		if not is_point_in_range(player, mouse_position):
+			return
+
+		#grabs the tile position
+		var tile_position: Vector2i = TileManager.world_to_tile(
+			floori(mouse_position.x),
+			floori(mouse_position.y)
+		)
+
+		#sends the destroy block function.
+		if not TileManager.destroy_wall(tile_position.x, tile_position.y):
+			return
+	
+
+func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# create dummy object
+	var object: Node2D = default_swing_object.instantiate()
+	if object is ItemToolObject:
+		object.set_to_simulate()
+	
+	# do animation
+	do_swing(player, mouse_position, object)
 
 ## Plays the swing animation on the current player
 func do_swing(player: PlayerController, mouse_position: Vector2, swing_object: Node2D = null) -> void:

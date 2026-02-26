@@ -12,8 +12,8 @@ var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
 # --- Functions --- #
 func _init():
-	for i in range(INVENTORY_SLOTS): #50 empty inventory slots
-		items.append(ItemStack.new(-1, 0)) #list of items stored in items array
+	for i in range(INVENTORY_SLOTS): # 50 empty inventory slots
+		items.append(ItemStack.new(-1, 0)) # list of items stored in items array
 
 #region Inventory Management
 func add_item(item_id: int, amount: int) -> int:
@@ -121,17 +121,39 @@ func interact_with_slot(index: int) -> void:
 	# Update the UI
 	inventory_updated.emit()
 
+func remove_item_at(item_id: int, count: int, slot: int) -> void:
+	var item: Item = ItemDatabase.get_item(item_id)
+	
+	if not item:
+		return
+	
+	var stack := items[slot]
+	
+	# If this stack contains the item, remove as much as we can
+	if not stack.is_empty() and stack.item_id == item_id:
+		var diff = stack.count - count
+		stack.count = max(stack.count - count, 0)
+		
+		if diff <= 0:
+			stack.item_id = -1
+			count = abs(diff)
+		else:
+			count = 0
+	
+	inventory_updated.emit()
+
 func load_inventory() -> void:
 	# TODO: fetch inventory from database
 	
 	# if database entry not available, setup standard inventory
 	add_item(6, 1)		# wooden sword
+	add_item(7, 1) 		#wooden pickaxe
+	add_item(9, 1)		#wooden hammer
 	add_item(3, 30)		# dirt blocks
 	add_item(4, 10)		# stone blocks
-	
-	
-	
-	add_item(0, 30)		#wood
+	add_item(0, 30)		# wood logs
+	add_item(8, 20)		# wood blocks
+
 
 #endregion
 
@@ -141,6 +163,19 @@ func get_selected_item() -> ItemStack:
 	
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]
+
+func has_item(item_id: int, count := 1) -> bool:
+	for stack in items:
+		# If this stack contains the item, remove as much as we can
+		if not stack.is_empty() and stack.item_id == item_id:
+			var diff = stack.count - count
+			
+			if diff < 0:
+				count = abs(diff)
+			else:
+				return true
+	
+	return false
 
 #endregion
 

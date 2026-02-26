@@ -28,7 +28,7 @@ var current_chunk: Vector2i
 
 @export_group("Despawning")
 @export var free_on_despawn := true
-@export var despawn_time := 300.0
+@export var despawn_time := 15.0
 var _despawn_timer := 0.0
 
 @export_group("Combat")
@@ -92,6 +92,14 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			
 			# apply knockback force
 			velocity += update_data.get(&'force', Vector2.ZERO)
+		&'pause':
+			#paused = true
+			process_mode = Node.PROCESS_MODE_DISABLED
+			global_position = update_data.get(&'position')
+		&'resume':
+			#paused = false
+			process_mode = Node.PROCESS_MODE_INHERIT
+			global_position = update_data.get(&'position')
 	
 	return NO_RESPONSE
 
@@ -119,11 +127,18 @@ func check_interest() -> void:
 	if interest_count == 0:
 		lost_all_interest.emit()
 		_despawn_timer = despawn_time
-	
-	# update interpolator
-	var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
-	if interpolator:
-		interpolator.interested_players = interested_players.keys()
+		
+		# send signal to client entities
+		EntityManager.entity_send_update(id, {
+			&'type': &'pause',
+			&'position': global_position
+		})
+	else:
+		# send signal to client entities
+		EntityManager.entity_send_update(id, {
+			&'type': &'resume',
+			&'position': global_position
+		})
 
 func scan_interest() -> void:
 	var load_range := ChunkLoader.LOAD_RANGE

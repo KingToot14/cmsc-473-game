@@ -136,7 +136,7 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 				blocks.set_cell(
 					Vector2i(start_x + x, start_y + y),
 					TileManager.get_block_unsafe(start_x + x, start_y + y),
-					CONNECTION_MAP.get(variations[index])
+					CONNECTION_MAP.get(variations[index]) + Vector2i(0, randi_range(0, 1) * 4)
 				)
 			
 			# set walls

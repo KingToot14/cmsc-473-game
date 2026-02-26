@@ -22,9 +22,23 @@ var curr_hp := 0
 var sequence_id := 0
 var snapshots: Dictionary[int, Dictionary] = {}
 
+## How long before this hp can take damage from each different damage source
+@export var invincibility_time := 0.50
+
+var invincibility_timers: Dictionary[DamageSource.DamageSourceType, float] = {}
+
 # --- Functions --- #
 func _ready() -> void:
 	curr_hp = max_hp
+
+func _process(delta: float) -> void:
+	# update invincibility timers
+	for source_type in invincibility_timers.keys():
+		if invincibility_timers[source_type] > 0.0:
+			invincibility_timers[source_type] -= delta
+			
+			if invincibility_timers[source_type] <= 0.0:
+				invincibility_timers[source_type] = 0.0
 
 func setup() -> void:
 	var hp_pools: Dictionary = entity.data.get(&'hp', {})
@@ -42,8 +56,16 @@ func setup() -> void:
 ## [br] - [code]&'player_id'[/code]: The local player's unique id. Used for damage reconciliation
 func take_damage(dmg_info: Dictionary) -> void:
 	var damage: int = dmg_info.get(&'damage', 0)
+	var source_type: DamageSource.DamageSourceType = dmg_info.get(
+		&'source_type', DamageSource.DamageSourceType.WORLD
+	)
 	
-	# play flash animation
+	# check invincibility
+	if invincibility_timers.get(source_type, 0.0) > 0.0:
+		return
+	
+	# add invincibility
+	invincibility_timers[source_type] = invincibility_time
 	
 	# deal damage
 	modify_health(-damage, false)

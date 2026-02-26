@@ -9,6 +9,8 @@ enum ItemType {
 }
 
 # --- Variables --- #
+## The internal item id for this item. This is overwritten at runtime
+@export var item_id: int
 ## The item's name that appears in the tooltip UI
 @export var item_name: String
 ## The item's texture that appears in the inventory
@@ -32,6 +34,18 @@ func handle_interact_mouse(_player: PlayerController, _mouse_position: Vector2) 
 ## Called from [class InputSynchronizer] when the player presses the interact
 ## key on an item in the inventory
 func handle_interact_key(_player: PlayerController, ) -> void:
+	pass
+
+## Called from [class InputSynchronizer] when the player clicks on the screen
+## with the mouse. Does not happen when clicking inside the inventory.
+## [br][br]Does not interact with the world, this function should be purely visual
+func simulate_interact_mouse(_player: PlayerController, _mouse_position: Vector2) -> void:
+	pass
+
+## Called from [class InputSynchronizer] when the player presses the interact
+## key on an item in the inventory.
+## [br][br]Does not interact with the world, this function should be purely visual
+func simulate_interact_key(_player: PlayerController, ) -> void:
 	pass
 
 #endregion
