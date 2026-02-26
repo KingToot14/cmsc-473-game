@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Recipe" format=3 uid="uid://bypmfu6lfj78v"]
+
+[ext_resource type="Script" uid="uid://b3c7ex2vgl4bc" path="res://entities/player/recipe.gd" id="1_326iu"]
+
+[resource]
+script = ExtResource("1_326iu")
+result_item_id = 6
+ingredients = {
+0: 10
+}
+metadata/_custom_type_script = "uid://b3c7ex2vgl4bc"

@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
 [ext_resource type="Shader" uid="uid://cuqmsufylkilr" path="res://entities/player/outfits/outfit_color_swap.gdshader" id="14_221hk"]
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
+[ext_resource type="PackedScene" uid="uid://ctyqglpej7nkw" path="res://entities/player/crafting_button.tscn" id="23_ghoj8"]
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
 
@@ -986,6 +987,7 @@ offset_bottom = -3.0
 grow_vertical = 0
 script = ExtResource("8_bectd")
 slot_scene = ExtResource("9_bectd")
+crafting_button_scene = ExtResource("23_ghoj8")
 
 [node name="inventory_grid" type="HFlowContainer" parent="inventory_ui/inventory_container" unique_id=1654172708]
 layout_mode = 1
@@ -1093,3 +1095,20 @@ layout_mode = 2
 
 [node name="inventory_slot5" parent="inventory_ui/hotbar_container/hotbar_grid" unique_id=1272530478 instance=ExtResource("9_bectd")]
 layout_mode = 2
+
+[node name="crafting_container" type="ScrollContainer" parent="inventory_ui" unique_id=757538499]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -47.0
+offset_top = -40.0
+offset_right = -7.0
+grow_horizontal = 0
+grow_vertical = 0
+horizontal_scroll_mode = 0
+
+[node name="crafting_buttons" type="GridContainer" parent="inventory_ui/crafting_container" unique_id=2117356799]
+layout_mode = 2
+columns = 5

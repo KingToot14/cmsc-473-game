@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://ctyqglpej7nkw"]
+
+[ext_resource type="Script" uid="uid://xdjj0qsxdi2n" path="res://entities/player/crafting_button.gd" id="1_5j5g8"]
+[ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="2_s46wt"]
+
+[node name="CraftingButton" type="Button" unique_id=962517664]
+custom_minimum_size = Vector2(100, 30)
+script = ExtResource("1_5j5g8")
+
+[node name="h_box_container" type="HBoxContainer" parent="." unique_id=1545097859]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="result_slot" parent="h_box_container" unique_id=93855827 instance=ExtResource("2_s46wt")]
+layout_mode = 2
+is_display_only = true
