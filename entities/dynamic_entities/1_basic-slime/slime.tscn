@@ -262,6 +262,7 @@ metadata/_custom_type_script = "uid://cqsofxynpllnt"
 
 [node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=562441316]
 stream = SubResource("AudioStreamPolyphonic_en8ih")
+volume_db = -3.0
 autoplay = true
 max_distance = 832.0
 attenuation = 3.0

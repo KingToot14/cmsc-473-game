@@ -103,6 +103,8 @@ var face_direction := 1:
 				continue  
 			child.flip_h = face_direction == -1
 
+@onready var sfx: EntitySfxManager = $'sfx'
+
 var active := true
 
 # --- Functions --- #

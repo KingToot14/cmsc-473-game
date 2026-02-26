@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="SwingItem" format=3 uid="uid://b6qh6bsn3o7x"]
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://b6qh6bsn3o7x"]
 
-[ext_resource type="Script" uid="uid://36ykp7c03y8e" path="res://items/_resources/swing_item.gd" id="1_1aemr"]
 [ext_resource type="PackedScene" uid="uid://b865cn5jbl3q0" path="res://items/6_wooden_sword/wooden_sword.tscn" id="1_jju7i"]
 [ext_resource type="Texture2D" uid="uid://3s43ng6hg0t4" path="res://items/6_wooden_sword/icon.png" id="2_1aemr"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_jju7i"]
 
 [resource]
-script = ExtResource("1_1aemr")
+script = ExtResource("2_jju7i")
 force_towards_mouse = true
 use_speed = 0.5
 default_swing_object = ExtResource("1_jju7i")

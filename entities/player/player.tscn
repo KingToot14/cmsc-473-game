@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="2_ghoj8"]
 [ext_resource type="Script" uid="uid://bq3fpsk3a0egi" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
 [ext_resource type="Script" uid="uid://blr4gmivynuus" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
+[ext_resource type="AudioStream" uid="uid://oka0lpblr483" path="res://items/_swords/sword_woosh.wav" id="3_t1t22"]
 [ext_resource type="Script" uid="uid://vfummajngrt2" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
@@ -748,9 +749,13 @@ hp = NodePath("player_hp")
 
 [node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=335326042]
 stream = SubResource("AudioStreamPolyphonic_ghoj8")
+autoplay = true
 max_polyphony = 4
 bus = &"Entities"
 script = ExtResource("2_ghoj8")
+sound_effects = Dictionary[StringName, AudioStream]({
+&"whoosh": ExtResource("3_t1t22")
+})
 metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
