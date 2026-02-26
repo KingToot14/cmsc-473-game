@@ -5,6 +5,7 @@
 
 [node name="CraftingButton" type="Button" unique_id=962517664]
 custom_minimum_size = Vector2(100, 30)
+focus_mode = 0
 script = ExtResource("1_5j5g8")
 
 [node name="h_box_container" type="HBoxContainer" parent="." unique_id=1545097859]
