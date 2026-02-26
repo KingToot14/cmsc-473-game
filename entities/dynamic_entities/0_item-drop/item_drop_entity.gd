@@ -102,6 +102,8 @@ func chase_physics(delta: float) -> void:
 			&'type': &'collect',
 			&'player_id': target_player.owner_id
 		})
+		
+		Globals.player.sfx.play_sfx(&'collect', 6.0)
 	
 	if distance <= SNAP_RADIUS:
 		velocity += difference.normalized() * fly_speed * delta * min(1.0, SNAP_RADIUS / distance) * SNAP_RADIUS

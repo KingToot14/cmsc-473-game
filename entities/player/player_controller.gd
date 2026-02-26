@@ -164,6 +164,7 @@ func _process(_delta: float) -> void:
 	if is_on_floor():
 		if not is_grounded:
 			# play land sfx
+			sfx.play_sfx(&'land')
 			
 			is_grounded = true
 		
@@ -252,6 +253,7 @@ func apply_input(delta: float) -> void:
 	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
+			sfx.play_sfx(&'jump')
 			velocity.y = -jump_power
 			pass
 	

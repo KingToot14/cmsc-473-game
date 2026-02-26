@@ -3,9 +3,12 @@
 [ext_resource type="Script" uid="uid://qyyemd8s1jod" path="res://entities/player/player_controller.gd" id="1_abrql"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="2_ghoj8"]
 [ext_resource type="Script" uid="uid://bq3fpsk3a0egi" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
+[ext_resource type="AudioStream" uid="uid://b3p7vb1vw51mr" path="res://entities/player/sfx/jump.wav" id="3_50fht"]
 [ext_resource type="Script" uid="uid://blr4gmivynuus" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
 [ext_resource type="AudioStream" uid="uid://oka0lpblr483" path="res://items/_swords/sword_woosh.wav" id="3_t1t22"]
 [ext_resource type="Script" uid="uid://vfummajngrt2" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
+[ext_resource type="AudioStream" uid="uid://chqf0lie1pt03" path="res://entities/player/sfx/collect.tres" id="4_qpopc"]
+[ext_resource type="AudioStream" uid="uid://bgqyalg6p8rno" path="res://entities/player/sfx/land.wav" id="4_wuv6x"]
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://c01fup0uojudj" path="res://entities/player/outfits/outfit_loader.gd" id="7_gx6sm"]
@@ -754,6 +757,9 @@ max_polyphony = 4
 bus = &"Entities"
 script = ExtResource("2_ghoj8")
 sound_effects = Dictionary[StringName, AudioStream]({
+&"collect": ExtResource("4_qpopc"),
+&"jump": ExtResource("3_50fht"),
+&"land": ExtResource("4_wuv6x"),
 &"whoosh": ExtResource("3_t1t22")
 })
 metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
