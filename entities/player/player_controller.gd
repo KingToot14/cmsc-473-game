@@ -143,13 +143,16 @@ func _ready() -> void:
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if owner_id != multiplayer.get_unique_id():
+		return
+	
 	if event.is_action_pressed(&"inventory_toggle"):
 		var inv_container = $inventory_ui/inventory_container
 		inv_container.visible = !inv_container.visible
 	#if event.is_action_pressed(&"crafting_toggle"):
 		var craft_container = $inventory_ui/crafting_container
 		craft_container.visible = !craft_container.visible
-
+	
 #region Animation
 func _process(_delta: float) -> void:
 	# update direction
