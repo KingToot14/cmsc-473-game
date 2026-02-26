@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://cuplg84yd21bp"]
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_0e3fc"]
-[ext_resource type="Script" path="res://entities/_resources/damage_source.gd" id="1_8gs75"]
-[ext_resource type="Texture2D" uid="uid://baeiogwx1b6ft" path="res://items/6_wooden_sword/weapon_sprite.png" id="3_6ml85"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="1_8gs75"]
+[ext_resource type="Texture2D" uid="uid://ccdxfihy0r8cq" path="res://items/7_wooden_pickaxe/pickaxe.png" id="3_6ml85"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
-size = Vector2(25, 10)
+size = Vector2(10, 16)
 
 [node name="wooden_pickaxe" type="Node2D" unique_id=123055615]
 script = ExtResource("1_0e3fc")
@@ -16,10 +16,10 @@ script = ExtResource("1_8gs75")
 damage = 10
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
-position = Vector2(4.5, 0)
+position = Vector2(14, 0)
 shape = SubResource("RectangleShape2D_w0180")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
-position = Vector2(4, 0)
+position = Vector2(8, 0)
 rotation = 0.7853982
 texture = ExtResource("3_6ml85")
