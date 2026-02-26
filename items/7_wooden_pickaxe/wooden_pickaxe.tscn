@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cuplg84yd21bp"]
+
+[ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_0e3fc"]
+[ext_resource type="Script" path="res://entities/_resources/damage_source.gd" id="1_8gs75"]
+[ext_resource type="Texture2D" uid="uid://baeiogwx1b6ft" path="res://items/6_wooden_sword/weapon_sprite.png" id="3_6ml85"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
+size = Vector2(25, 10)
+
+[node name="wooden_pickaxe" type="Node2D" unique_id=123055615]
+script = ExtResource("1_0e3fc")
+metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
+
+[node name="damage_source" type="Area2D" parent="." unique_id=791205798]
+script = ExtResource("1_8gs75")
+damage = 10
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
+position = Vector2(4.5, 0)
+shape = SubResource("RectangleShape2D_w0180")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
+position = Vector2(4, 0)
+rotation = 0.7853982
+texture = ExtResource("3_6ml85")

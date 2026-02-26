@@ -27,6 +27,37 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 	
 	# do animation
 	do_swing(player, mouse_position)
+	var selected: Inventory.ItemStack = player.my_inventory.get_selected_item()
+	if selected.item_id == 7:
+		# checks the range
+		if not is_point_in_range(player, mouse_position):
+			return
+
+		#grabs the tile position
+		var tile_position: Vector2i = TileManager.world_to_tile(
+			floori(mouse_position.x),
+			floori(mouse_position.y)
+		)
+
+		#sends the destroy block function.
+		if not TileManager.destroy_block(tile_position.x, tile_position.y):
+			return
+
+	elif selected.item_id == 9:
+		# checks the range
+		if not is_point_in_range(player, mouse_position):
+			return
+
+		#grabs the tile position
+		var tile_position: Vector2i = TileManager.world_to_tile(
+			floori(mouse_position.x),
+			floori(mouse_position.y)
+		)
+
+		#sends the destroy block function.
+		if not TileManager.destroy_wall(tile_position.x, tile_position.y):
+			return
+	
 
 func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
 	# create dummy object
