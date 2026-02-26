@@ -161,7 +161,7 @@ func _process(_delta: float) -> void:
 	update_is_on_floor()
 	if is_on_floor():
 		if not is_grounded:
-			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
+			# play land sfx
 			
 			is_grounded = true
 		
@@ -173,8 +173,6 @@ func _process(_delta: float) -> void:
 			set_upper_animation(&'walk')
 	else:
 		if is_grounded:
-			$'audio_player'.play_sfx(PlayerSfxManager.SFX.LAND)
-			
 			is_grounded = false
 		
 		if velocity.y < 0.0:

@@ -81,6 +81,13 @@ func take_damage(dmg_info: Dictionary) -> void:
 	send_damage_snapshot()
 
 func send_damage_snapshot() -> void:
+	# add vertical knockback
+	var snapshot: Dictionary = snapshots[sequence_id - 1]
+	if entity.is_on_floor():
+		snapshot[&'knockback'].y = -0.5
+	
+	snapshot[&'knockback'] = snapshot[&'knockback'].normalized()
+	
 	# send data to server
 	EntityManager.entity_take_damage.rpc_id(1, entity.id, snapshots[sequence_id - 1])
 

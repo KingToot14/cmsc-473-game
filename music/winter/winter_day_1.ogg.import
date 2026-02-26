@@ -12,8 +12,8 @@ dest_files=["res://.godot/imported/winter_day_1.ogg-f4014fdea5c559a538a10d51f407
 
 [params]
 
-loop=false
-loop_offset=0
-bpm=0
+loop=true
+loop_offset=0.0
+bpm=0.0
 beat_count=0
 bar_beats=4

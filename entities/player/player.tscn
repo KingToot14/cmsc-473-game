@@ -1,12 +1,10 @@
 [gd_scene format=3 uid="uid://do1dgabbmwjjn"]
 
 [ext_resource type="Script" uid="uid://qyyemd8s1jod" path="res://entities/player/player_controller.gd" id="1_abrql"]
-[ext_resource type="Script" uid="uid://bqqlgvodhkfqw" path="res://entities/player/sfx/player_sfx_manager.gd" id="2_ghoj8"]
+[ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="2_ghoj8"]
 [ext_resource type="Script" uid="uid://bq3fpsk3a0egi" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
-[ext_resource type="AudioStream" uid="uid://d0bpep80tptip" path="res://entities/player/sfx/jump.wav" id="3_50fht"]
 [ext_resource type="Script" uid="uid://blr4gmivynuus" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
 [ext_resource type="Script" uid="uid://vfummajngrt2" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
-[ext_resource type="AudioStream" uid="uid://b8bx1036cfxgh" path="res://entities/player/sfx/land.wav" id="4_wuv6x"]
 [ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://c01fup0uojudj" path="res://entities/player/outfits/outfit_loader.gd" id="7_gx6sm"]
@@ -26,7 +24,7 @@
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
 
-[sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_t1t22"]
+[sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
 [sub_resource type="Animation" id="Animation_afbqv"]
 length = 0.001
@@ -748,15 +746,12 @@ move_slowdown = 600.0
 knockback_power = 160.0
 hp = NodePath("player_hp")
 
-[node name="audio_player" type="AudioStreamPlayer2D" parent="." unique_id=218862357]
-stream = SubResource("AudioStreamPolyphonic_t1t22")
-autoplay = true
-max_distance = 1408.0
+[node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=335326042]
+stream = SubResource("AudioStreamPolyphonic_ghoj8")
 max_polyphony = 4
 bus = &"Entities"
 script = ExtResource("2_ghoj8")
-jump_sound = ExtResource("3_50fht")
-land_sound = ExtResource("4_wuv6x")
+metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
 libraries/ = SubResource("AnimationLibrary_yqrof")

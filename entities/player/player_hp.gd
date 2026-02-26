@@ -19,7 +19,7 @@ func send_damage_snapshot() -> void:
 	# calculate knockback
 	var snapshot: Dictionary = snapshots[sequence_id - 1]
 	if player.is_on_floor():
-		snapshot[&'knockback'].y = 0.5
+		snapshot[&'knockback'].y = -0.5
 	
 	snapshot[&'knockback'] = snapshot[&'knockback'].normalized()
 	
