@@ -5,11 +5,23 @@ extends Control
 @onready var icon = $'item'
 @onready var count_label = $'count_label'
 
+@export var is_display_only := false
+
 var current_item: Inventory.ItemStack
 
 var is_hotbar := false
 
 # --- Functions --- #
+func _ready() -> void:
+	# If this is a crafting slot, make sure it (and its children) ignore the mouse
+	# so the click passes through to the CraftingButton underneath!
+	if is_display_only:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		$'backing'.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		$'item'.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		$'count_label'.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
 func update_slot(stack: Inventory.ItemStack):
 	current_item = stack
 	
@@ -62,15 +74,20 @@ func set_selected(value: bool) -> void:
 		$'backing'.region_rect.position.x = 0.0
 
 func _gui_input(event: InputEvent) -> void:
-	# Check for our custom input map action instead of hardcoding the mouse button
+	#Stop right here if it's just a visual slot
+	if is_display_only:
+		return
 	if event.is_action_pressed(&"inventory_item_transfer"):
+		# If inventory not open, stop here
+		var inventory_container = Globals.player.get_node("inventory_ui/inventory_container")
+		if not inventory_container.visible:
+			return 
+		
 		var inventory = Globals.player.my_inventory
-		print('right click pressed')
 		# Calculate the correct index in the inventory array.
 		var true_index = get_index()
 		if not is_hotbar:
-			# Because the main inventory slots are in a separate GridContainer, 
-			# their get_index() starts back at 0. We need to offset them by the hotbar size!
+			# Because the main inventory slots are in a separate GridContainer, their get_index() starts back at 0. We need to offset them by the hotbar size!
 			true_index += 10 
 			
 		inventory.interact_with_slot(true_index)
