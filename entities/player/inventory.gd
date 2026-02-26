@@ -152,8 +152,10 @@ func load_inventory() -> void:
 	
 	# if database entry not available, setup standard inventory
 	add_item(6, 1)		# wooden sword
+	add_item(7, 1) 		#wooden pickaxe
 	add_item(3, 30)		# dirt blocks
 	add_item(4, 10)		# stone blocks
+
 
 #endregion
 
