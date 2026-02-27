@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://cfefioerjy2v6" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://bvupsvk0k73i7" path="res://entities/_resources/entity_spawner.gd" id="8_trceg"]
+[ext_resource type="Script" uid="uid://cgxox2tiapsj2" path="res://scripts/multiplayer/entity_synchronizer.gd" id="10_jbj1t"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
@@ -935,6 +936,10 @@ metadata/_custom_type_script = "uid://bv73vyepe1qva"
 [node name="player_spawner" type="MultiplayerSpawner" parent="." unique_id=121496976]
 _spawnable_scenes = PackedStringArray("uid://do1dgabbmwjjn")
 spawn_path = NodePath("../players")
+
+[node name="entity_synchronizer" type="Node" parent="." unique_id=1597427544]
+script = ExtResource("10_jbj1t")
+metadata/_custom_type_script = "uid://cgxox2tiapsj2"
 
 [node name="entity_spawner" type="Node" parent="." unique_id=584931145]
 script = ExtResource("8_trceg")

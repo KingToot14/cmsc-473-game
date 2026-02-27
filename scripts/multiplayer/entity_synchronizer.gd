@@ -1,0 +1,73 @@
+class_name EntitySynchronizer
+extends Node
+
+# --- Variables --- #
+const SNAPSHOT_RATE := 20.0
+const PHYSICS_TICKS := 30.0
+const SNAPSHOT_INTERVAL := floori(PHYSICS_TICKS / SNAPSHOT_RATE)
+
+# --- Functions --- #
+func _ready() -> void:
+	set_process(false)
+	ServerManager.server_started.connect(func (): set_process(true))
+
+func _process(delta: float) -> void:
+	if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
+		send_snapshots()
+
+func send_snapshots() -> void:
+	# snapshot snapshots
+	var bundles: Dictionary[int, PackedByteArray] = {}
+	
+	for player_id: int in ServerManager.connected_players:
+		if not is_instance_valid(ServerManager.connected_players[player_id]):
+			continue
+		
+		bundles[player_id] = PackedByteArray()
+	
+	# gather bundles for all loaded entities
+	for entity_id: int in EntityManager.loaded_entities:
+		if EntityManager.loaded_entities[entity_id] is not Entity:
+			continue
+		
+		var entity: Entity = EntityManager.loaded_entities[entity_id]
+		
+		for player_id: int in entity.interested_players:
+			if not is_instance_valid(ServerManager.connected_players[player_id]):
+				continue
+			
+			# add data to bundle
+			bundles[player_id].append_array(PackedByteArray())
+	
+	# send bundles
+	for player_id: int in ServerManager.connected_players:
+		if not is_instance_valid(ServerManager.connected_players[player_id]):
+			continue
+		
+		# build bundle
+		var entity_data: PackedByteArray = bundles[player_id]
+		
+		var bundle := PackedByteArray()
+		# Header: uint32 (4) tick, uint16 (2) entity_count
+		bundle.resize(4 + 2)
+		
+		# add header
+		bundle.encode_u32(0, NetworkTime.tick)
+		bundle.encode_u16(4, len(entity_data))
+		
+		# add snapshots
+		bundle.append_array(entity_data)
+		
+		receive_snapshots.rpc_id(player_id, bundle)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_snapshots(snapshots: PackedByteArray) -> void:
+	var offset := 0
+	
+	# parse header
+	var server_tick: int = snapshots.decode_u32(offset)
+	var entity_count: int = snapshots.decode_u16(offset)
+	
+	# parse entity data
+	for i in range(entity_count):
+		pass

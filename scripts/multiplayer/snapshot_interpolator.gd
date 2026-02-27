@@ -4,7 +4,7 @@ extends Node
 # --- Variables --- #
 const SNAPSHOT_RATE := 20.0
 const PHYSICS_TICKS := 30.0
-const SNAPSHOT_INTERVAL := roundi(PHYSICS_TICKS / SNAPSHOT_RATE)
+const SNAPSHOT_INTERVAL := floori(PHYSICS_TICKS / SNAPSHOT_RATE)
 const BUFFER_SEC := 0.10
 const BUFFER_SIZE := PHYSICS_TICKS * BUFFER_SEC
 
