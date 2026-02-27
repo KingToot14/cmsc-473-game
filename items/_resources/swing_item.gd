@@ -38,9 +38,13 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 			floori(mouse_position.x),
 			floori(mouse_position.y)
 		)
-
+		
+		# attempt to interact with tile entity
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
+			return
+		
 		#sends the destroy block function.
-		if not TileManager.destroy_block(tile_position.x, tile_position.y):
+		if TileManager.destroy_block(tile_position.x, tile_position.y):
 			return
 
 	elif selected.item_id == 9:
@@ -55,7 +59,7 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 		)
 
 		#sends the destroy block function.
-		if not TileManager.destroy_wall(tile_position.x, tile_position.y):
+		if TileManager.destroy_wall(tile_position.x, tile_position.y):
 			return
 	
 

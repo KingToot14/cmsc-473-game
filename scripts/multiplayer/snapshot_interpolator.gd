@@ -5,7 +5,7 @@ extends Node
 const SNAPSHOT_RATE := 20.0
 const PHYSICS_TICKS := 30.0
 const SNAPSHOT_INTERVAL := floori(PHYSICS_TICKS / SNAPSHOT_RATE)
-const BUFFER_SEC := 0.10
+const BUFFER_SEC := 0.15
 const BUFFER_SIZE := PHYSICS_TICKS * BUFFER_SEC
 
 @export var root: Node2D
@@ -34,21 +34,21 @@ func _ready() -> void:
 	if auto_start:
 		enabled = true
 
-func _physics_process(_delta: float) -> void:
+func _process(_delta: float) -> void:
 	# only run on server
 	if not enabled:
 		return
 	
-	if is_multiplayer_authority():
-		if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
-			# send snapshot
-			if update_all:
-				interested_players = ServerManager.connected_players.keys()
-			
-			for player_id in interested_players:
-				send_snapshot.rpc_id(player_id, root.global_position, root.velocity, NetworkTime.tick)
-	else:
-		interpolate_snapshots()
+	#if is_multiplayer_authority():
+		#if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
+			## send snapshot
+			#if update_all:
+				#interested_players = ServerManager.connected_players.keys()
+			#
+			#for player_id in interested_players:
+				#send_snapshot.rpc_id(player_id, root.global_position, root.velocity, NetworkTime.tick)
+	#else:
+	interpolate_snapshots()
 
 func interpolate_snapshots() -> void:
 	# only run on clients
@@ -56,7 +56,7 @@ func interpolate_snapshots() -> void:
 		return
 	
 	# delayed tick
-	var buffered_tick := NetworkTime.tick - BUFFER_SIZE
+	var buffered_tick := NetworkTime.time - BUFFER_SEC
 	
 	# check for actions
 	var actions: Array = queued_actions.keys()
@@ -95,15 +95,15 @@ func interpolate_snapshots() -> void:
 	var snapshot_start = snapshots[0]
 	var snapshot_end = snapshots[1]
 	var progression = clampf((
-		(buffered_tick - snapshot_start['tick']) /
-		(snapshot_end['tick'] - snapshot_start['tick'])
-	), 0.0, 1.0)
+		float(buffered_tick - snapshot_start['tick']) /
+		float(snapshot_end['tick'] - snapshot_start['tick'])
+	), -0.0, 1.0)
 	
 	visual_root.global_position = snapshot_start['position'].lerp(snapshot_end['position'], progression)
-	visual_root.velocity = snapshot_start['velocity'].lerp(snapshot_end['velocity'], progression)
+	#visual_root.velocity = snapshot_start['velocity'].lerp(snapshot_end['velocity'], progression)
 
 @rpc('authority', 'call_remote', 'reliable')
-func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: int) -> void:
+func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: float) -> void:
 	if not enabled:
 		return
 	

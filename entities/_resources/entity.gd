@@ -10,6 +10,8 @@ signal despawn()
 # --- Variables --- #
 const NO_RESPONSE: Dictionary = {}
 
+@onready var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
+
 var id := 0
 var registry_id := 0
 var data: Dictionary
@@ -287,24 +289,29 @@ func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
 	
 	return offset
 
-func deserialize(buffer: PackedByteArray, offset: int) -> int:
-	offset = deserialize_base(buffer, offset)
-	offset = deserialize_extra(buffer, offset)
+func deserialize(buffer: PackedByteArray, offset: int, server_tick: float) -> int:
+	offset = deserialize_base(buffer, offset, server_tick)
+	offset = deserialize_extra(buffer, offset, server_tick)
 	
 	return offset
 
-func deserialize_base(buffer: PackedByteArray, offset: int) -> int:
+func deserialize_base(buffer: PackedByteArray, offset: int, server_tick: float) -> int:
 	# entity position TODO: change to snapshot interpolation
-	global_position.x = buffer.decode_float(offset)
+	var net_position: Vector2
+	net_position.x = buffer.decode_float(offset)
 	offset += 4
-	global_position.y = buffer.decode_float(offset)
+	net_position.y = buffer.decode_float(offset)
 	offset += 4
 	
 	# entity velocity TODO: change to snapshot interpolation
-	velocity.x = buffer.decode_float(offset)
+	var net_velocity: Vector2
+	net_velocity.x = buffer.decode_float(offset)
 	offset += 4
-	velocity.y = buffer.decode_float(offset)
+	net_velocity.y = buffer.decode_float(offset)
 	offset += 4
+	
+	# update snapshot interpolator
+	interpolator.send_snapshot(net_position, net_velocity, server_tick)
 	
 	# entity hp
 	if len(hp_pool) > 0:
@@ -321,7 +328,7 @@ func deserialize_base(buffer: PackedByteArray, offset: int) -> int:
 	
 	return offset
 
-func deserialize_extra(buffer: PackedByteArray, offset: int) -> int:
+func deserialize_extra(buffer: PackedByteArray, offset: int, _server_tick: float) -> int:
 	# extra size
 	buffer.decode_u16(offset)
 	offset += 2

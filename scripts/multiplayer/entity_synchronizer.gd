@@ -4,7 +4,9 @@ extends Node
 # --- Variables --- #
 const SNAPSHOT_RATE := 20.0
 const PHYSICS_TICKS := 30.0
-const SNAPSHOT_INTERVAL := floori(PHYSICS_TICKS / SNAPSHOT_RATE)
+const SNAPSHOT_INTERVAL := 1.0 / SNAPSHOT_RATE
+
+var snapshot_timer := 0.0
 
 # --- Functions --- #
 func _ready() -> void:
@@ -12,7 +14,9 @@ func _ready() -> void:
 	ServerManager.server_started.connect(func (): set_process(true))
 
 func _process(delta: float) -> void:
-	if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
+	snapshot_timer -= delta
+	if snapshot_timer <= 0.0:
+		snapshot_timer += SNAPSHOT_INTERVAL
 		send_snapshots()
 
 func send_snapshots() -> void:
@@ -62,7 +66,7 @@ func send_snapshots() -> void:
 		bundle.resize(4 + 2)
 		
 		# add header
-		bundle.encode_u32(0, NetworkTime.tick)
+		bundle.encode_float(0, NetworkTime.time)
 		bundle.encode_u16(4, bundle_counts[player_id])
 		
 		# add snapshots
@@ -75,7 +79,7 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 	var offset := 0
 	
 	# parse header
-	var server_tick: int = snapshots.decode_u32(offset)
+	var server_tick: float = snapshots.decode_float(offset)
 	offset += 4
 	var entity_count: int = snapshots.decode_u16(offset)
 	offset += 2
@@ -91,4 +95,4 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 		
 		var entity: Entity = EntityManager.loaded_entities.get(entity_id)
 		
-		offset = entity.deserialize(snapshots, offset)
+		offset = entity.deserialize(snapshots, offset, server_tick)

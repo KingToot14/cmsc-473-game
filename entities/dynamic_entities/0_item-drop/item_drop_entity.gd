@@ -30,6 +30,8 @@ var target_player: PlayerController
 
 # --- Functions --- #
 func _ready() -> void:
+	super()
+	
 	$'merge_range'.monitoring = false
 	
 	if multiplayer.is_server():
@@ -63,7 +65,7 @@ func _physics_process(delta: float) -> void:
 	
 	if is_on_floor() and not stationary:
 		stationary = true
-		merge_timer = MERGE_DELAY
+		$'merge_range'.monitoring = true
 	elif not is_on_floor() and stationary:
 		stationary = false
 		$'merge_range'.monitoring = false

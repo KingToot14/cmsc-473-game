@@ -127,11 +127,11 @@ func try_jump(delta: float) -> void:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			
 			$'animator'.play(&'jump')
-			EntityManager.entity_send_update(id, {
-				&'type': &'jump-start',
-				&'velocity': jump_velocity,
-				&'position': global_position
-			})
+			#EntityManager.entity_send_update(id, {
+				#&'type': &'jump-start',
+				#&'velocity': jump_velocity,
+				#&'position': global_position
+			#})
 
 func apply_jump() -> void:
 	velocity = jump_velocity

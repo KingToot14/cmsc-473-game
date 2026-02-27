@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_7td2d"]
 [ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_w88l4"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="9_j8mhm"]
+[ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="10_j1jji"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="10_jsemx"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="10_sgt0n"]
 [ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="11_7afba"]
@@ -259,6 +260,14 @@ hp_pool = [NodePath("hp")]
 flash_material = SubResource("ShaderMaterial_515sv")
 knockback_power = 400.0
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
+
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1815321406 node_paths=PackedStringArray("root", "visual_root")]
+script = ExtResource("10_j1jji")
+root = NodePath("..")
+visual_root = NodePath("..")
+update_root = false
+update_all = true
+metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 
 [node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=562441316]
 stream = SubResource("AudioStreamPolyphonic_en8ih")
