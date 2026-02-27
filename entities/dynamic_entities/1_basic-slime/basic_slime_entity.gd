@@ -58,6 +58,8 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
 		get_travel_direction()
 		try_jump(delta)
+	else:
+		return
 	
 	# gravity
 	if not is_on_floor():
@@ -139,6 +141,8 @@ func apply_jump() -> void:
 
 #region Damage
 func _on_receive_damage(snapshot: Dictionary) -> void:
+	return
+	
 	standard_receive_damage(snapshot)
 	
 	# play damage sfx
@@ -243,6 +247,8 @@ func setup_entity() -> void:
 
 func receive_update(update_data: Dictionary) -> Dictionary:
 	super(update_data)
+	
+	return NO_RESPONSE
 	
 	match update_data.get(&'type', &'none'):
 		&'jump-start':

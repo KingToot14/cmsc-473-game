@@ -41,6 +41,9 @@ func _physics_process(delta: float) -> void:
 	if interest_count == 0:
 		return
 	
+	if not multiplayer.is_server():
+		return
+	
 	# chase player
 	if target_player != null:
 		chase_physics(delta)

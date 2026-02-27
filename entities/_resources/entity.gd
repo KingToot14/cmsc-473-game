@@ -242,15 +242,50 @@ func serialize_base(buffer: PackedByteArray, offset: int) -> int:
 	offset += 4
 	
 	# entity hp
-	buffer.encode_u32(offset, max(hp_pool[0].curr_hp, 0))
+	if len(hp_pool) > 0:
+		buffer.encode_u32(offset, max(hp_pool[0].curr_hp, 0))
 	offset += 4
 	
 	return offset
 
 func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
 	# uint16 (2) extra size in bytes, variable (*) any extra data this entity needs
-	buffer.resize(2 + 0)
+	buffer.resize(len(buffer) + 2 + 0)
 	buffer.encode_u16(offset, 0)
+	offset += 2
+	
+	return offset
+
+func deserialize(buffer: PackedByteArray, offset: int) -> int:
+	offset = deserialize_base(buffer, offset)
+	offset = deserialize_extra(buffer, offset)
+	
+	return offset
+
+func deserialize_base(buffer: PackedByteArray, offset: int) -> int:
+	# entity position TODO: change to snapshot interpolation
+	global_position.x = buffer.decode_float(offset)
+	offset += 4
+	global_position.y = buffer.decode_float(offset)
+	offset += 4
+	
+	# entity velocity TODO: change to snapshot interpolation
+	velocity.x = buffer.decode_float(offset)
+	offset += 4
+	velocity.y = buffer.decode_float(offset)
+	offset += 4
+	
+	# entity hp
+	if len(hp_pool) > 0:
+		hp_pool[0].curr_hp = buffer.decode_u32(offset)
+	offset += 4
+	
+	return offset
+
+func deserialize_extra(buffer: PackedByteArray, offset: int) -> int:
+	# extra size
+	buffer.decode_u16(offset)
+	offset += 2
 	
 	return offset
 
