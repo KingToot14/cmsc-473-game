@@ -34,14 +34,10 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		$'merge_range'.area_entered.connect(_on_merge_area_entered)
-	else:
 		$'collection_range'.area_entered.connect(_on_collect_area_entered)
 
 func _physics_process(delta: float) -> void:
 	if interest_count == 0:
-		return
-	
-	if not multiplayer.is_server():
 		return
 	
 	# chase player
@@ -57,21 +53,20 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 	# attempt to merge with nearby items
-	if multiplayer.is_server():
-		if stationary and merge_timer > 0.0:
-			merge_timer -= delta
-			
-			# enable merging after a delay
-			if merge_timer <= 0.0:
-				merge_timer = -1.0
-				$'merge_range'.monitoring = true
+	if stationary and merge_timer > 0.0:
+		merge_timer -= delta
 		
-		if is_on_floor() and not stationary:
-			stationary = true
-			merge_timer = MERGE_DELAY
-		elif not is_on_floor() and stationary:
-			stationary = false
-			$'merge_range'.monitoring = false
+		# enable merging after a delay
+		if merge_timer <= 0.0:
+			merge_timer = -1.0
+			$'merge_range'.monitoring = true
+	
+	if is_on_floor() and not stationary:
+		stationary = true
+		merge_timer = MERGE_DELAY
+	elif not is_on_floor() and stationary:
+		stationary = false
+		$'merge_range'.monitoring = false
 
 func standard_physics(delta: float) -> void:
 	# air resistance
@@ -95,18 +90,18 @@ func chase_physics(delta: float) -> void:
 		return
 	
 	# collect when close enough
-	if target_player == Globals.player and distance <= COLLECTION_RADIUS:
-		hide()
+	if distance <= COLLECTION_RADIUS:
+		kill()
 		
 		# add to inventory
 		target_player.my_inventory.add_item(item_id, quantity)
 		
-		EntityManager.entity_send_update.rpc_id(1, id, {
-			&'type': &'collect',
-			&'player_id': target_player.owner_id
-		})
+		#EntityManager.entity_send_update.rpc_id(1, id, {
+			#&'type': &'collect',
+			#&'player_id': target_player.owner_id
+		#})
 		
-		Globals.player.sfx.play_sfx(&'collect', 6.0)
+		#Globals.player.sfx.play_sfx(&'collect', 6.0)
 	
 	if distance <= SNAP_RADIUS:
 		velocity += difference.normalized() * fly_speed * delta * min(1.0, SNAP_RADIUS / distance) * SNAP_RADIUS
@@ -154,13 +149,13 @@ func _on_collect_area_entered(area: Area2D) -> void:
 	if target_player:
 		return
 	
+	# start chasing player
 	target_player = area.get_parent()
 	
-	# start chasing player
-	EntityManager.entity_send_update.rpc_id(1, id, {
-		&'type': &'chase',
-		&'player_id': target_player.owner_id
-	})
+	#EntityManager.entity_send_update.rpc_id(1, id, {
+		#&'type': &'chase',
+		#&'player_id': target_player.owner_id
+	#})
 
 func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
@@ -183,16 +178,20 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	if (item_id != other_item.item_id) or (quantity + other_item.quantity > 9999):
 		return
 	
+	quantity += other_item.quantity
+	
 	other_item.merged = true
+	other_item.quantity = 0
+	other_item.kill()
 	
 	# send network updates
-	EntityManager.entity_send_update(id, {
-		&'type': &'merge-owner',
-		&'quantity': other_item.quantity
-	})
-	EntityManager.entity_send_update(other_item.id, {
-		&'type': &'merge-kill'
-	})
+	#EntityManager.entity_send_update(id, {
+		#&'type': &'merge-owner',
+		#&'quantity': other_item.quantity
+	#})
+	#EntityManager.entity_send_update(other_item.id, {
+		#&'type': &'merge-kill'
+	#})
 
 func receive_update(update_data: Dictionary) -> Dictionary:
 	super(update_data)

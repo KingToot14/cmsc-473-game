@@ -31,6 +31,9 @@ var current_chunk: Vector2i
 @export var despawn_time := 15.0
 var _despawn_timer := 0.0
 
+var is_dead := false
+var should_free := false
+
 @export_group("Combat")
 @export var damage := 25
 @export var defense := 0
@@ -41,8 +44,9 @@ func _ready() -> void:
 	
 	_despawn_timer = despawn_time
 	
-	if not process_on_client and not multiplayer.is_server():
+	if not (process_on_client or multiplayer.is_server()):
 		set_process(false)
+		set_physics_process(false)
 
 func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
 	id = new_id
@@ -172,6 +176,20 @@ func check_player(player_id: int) -> bool:
 #endregion
 
 #region Life Cycle
+func kill() -> void:
+	if is_dead:
+		return
+	
+	is_dead = true
+	
+	do_death()
+
+func do_death() -> void:
+	if multiplayer.is_server():
+		should_free = true
+	else:
+		queue_free()
+
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	
@@ -222,8 +240,8 @@ func serialize() -> PackedByteArray:
 	return buffer
 
 func serialize_base(buffer: PackedByteArray, offset: int) -> int:
-	# uint32 (4) + 2 float32 (2 * 8) + 2 float32 (2 * 8) + uint32 (4)
-	buffer.resize(4 + 2 * 4 + 2 * 4 + 4)
+	# uint32 (4) + 2 float32 (2 * 8) + 2 float32 (2 * 8) + uint32 (4) + uint8 (1)
+	buffer.resize(4 + 2 * 4 + 2 * 4 + 4 + 1)
 	
 	# entity id
 	buffer.encode_u32(offset, id)
@@ -245,6 +263,19 @@ func serialize_base(buffer: PackedByteArray, offset: int) -> int:
 	if len(hp_pool) > 0:
 		buffer.encode_u32(offset, max(hp_pool[0].curr_hp, 0))
 	offset += 4
+	
+	# flags
+	var flags = 0b00000000
+	
+	# entity is dead
+	if is_dead:
+		flags |= 1 << 0
+		
+		if should_free:
+			queue_free()
+	
+	buffer.encode_u8(offset, flags)
+	offset += 1
 	
 	return offset
 
@@ -279,6 +310,14 @@ func deserialize_base(buffer: PackedByteArray, offset: int) -> int:
 	if len(hp_pool) > 0:
 		hp_pool[0].curr_hp = buffer.decode_u32(offset)
 	offset += 4
+	
+	# flags
+	var flags := buffer.decode_u8(offset)
+	offset += 1
+	
+	# entity is dead
+	if flags & (1 << 0):
+		kill()
 	
 	return offset
 

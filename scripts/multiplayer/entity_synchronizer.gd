@@ -29,10 +29,13 @@ func send_snapshots() -> void:
 	
 	# gather bundles for all loaded entities
 	for entity_id: int in EntityManager.loaded_entities:
+		if not (EntityManager.loaded_entities.get(entity_id)):
+			continue
 		if EntityManager.loaded_entities[entity_id] is not Entity:
 			continue
 		
 		var entity: Entity = EntityManager.loaded_entities[entity_id]
+		
 		var entity_data := entity.serialize()
 		
 		for player_id: int in entity.interested_players:

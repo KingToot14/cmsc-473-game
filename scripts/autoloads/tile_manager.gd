@@ -530,7 +530,7 @@ func send_destroy_block(x: int, y: int) -> void:
 			EntityManager.create_entity(0, drop_position, { 
 				&'item_id': 3, 
 				&'quantity': 1, 
-				}) 
+				})
 				
 	if block_id == 3: #if the block is stone.
 		if multiplayer.is_server(): 
