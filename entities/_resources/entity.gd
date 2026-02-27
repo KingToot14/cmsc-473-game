@@ -210,3 +210,48 @@ func break_place(_tile_position: Vector2i) -> bool:
 	return true
 
 #endregion
+
+#region Serialization
+func serialize() -> PackedByteArray:
+	var buffer := PackedByteArray()
+	var offset := 0
+	
+	offset = serialize_base(buffer, offset)
+	offset = serialize_extra(buffer, offset)
+	
+	return buffer
+
+func serialize_base(buffer: PackedByteArray, offset: int) -> int:
+	# uint32 (4) + 2 float32 (2 * 8) + 2 float32 (2 * 8) + uint32 (4)
+	buffer.resize(4 + 2 * 4 + 2 * 4 + 4)
+	
+	# entity id
+	buffer.encode_u32(offset, id)
+	offset += 4
+	
+	# entity position
+	buffer.encode_float(offset, global_position.x)
+	offset += 4
+	buffer.encode_float(offset, global_position.y)
+	offset += 4
+	
+	# entity velocity
+	buffer.encode_float(offset, velocity.x)
+	offset += 4
+	buffer.encode_float(offset, velocity.y)
+	offset += 4
+	
+	# entity hp
+	buffer.encode_u32(offset, max(hp_pool[0].curr_hp, 0))
+	offset += 4
+	
+	return offset
+
+func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
+	# uint16 (2) extra size in bytes, variable (*) any extra data this entity needs
+	buffer.resize(2 + 0)
+	buffer.encode_u16(offset, 0)
+	
+	return offset
+
+#endregion

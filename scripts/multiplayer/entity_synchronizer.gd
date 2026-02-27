@@ -31,13 +31,14 @@ func send_snapshots() -> void:
 			continue
 		
 		var entity: Entity = EntityManager.loaded_entities[entity_id]
+		var entity_data := entity.serialize()
 		
 		for player_id: int in entity.interested_players:
 			if not is_instance_valid(ServerManager.connected_players[player_id]):
 				continue
 			
 			# add data to bundle
-			bundles[player_id].append_array(PackedByteArray())
+			bundles[player_id].append_array(entity_data)
 	
 	# send bundles
 	for player_id: int in ServerManager.connected_players:
@@ -67,6 +68,8 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 	# parse header
 	var server_tick: int = snapshots.decode_u32(offset)
 	var entity_count: int = snapshots.decode_u16(offset)
+	
+	print(len(snapshots))
 	
 	# parse entity data
 	for i in range(entity_count):
