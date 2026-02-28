@@ -25,6 +25,7 @@ despawn_time = 300.0
 [node name="snapshot_interpolator" type="Node" parent="." unique_id=389070548 node_paths=PackedStringArray("root")]
 script = ExtResource("2_glocw")
 root = NodePath("..")
+hide_on_start = true
 metadata/_custom_type_script = "uid://bsbf482xfcwg4"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]

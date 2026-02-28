@@ -6,6 +6,7 @@ const BUFFER_TIME := 0.15
 
 @export var root: CharacterBody2D
 @export var auto_start := true
+@export var hide_on_start := false
 
 var owner_id := 0:
 	set(id):
@@ -24,6 +25,9 @@ func _ready() -> void:
 	
 	if auto_start:
 		enabled = true
+	
+	if hide_on_start and not multiplayer.is_server():
+		root.hide()
 
 func _process(_delta: float) -> void:
 	if not enabled:
@@ -56,10 +60,20 @@ func interpolate_snapshots() -> void:
 	if len(snapshots) < 2:
 		return
 	
+	# don't interpolate if snapshots don't contain time
+	#if snapshots[0][&'time'] > buffered_time:
+		#return
+	## update visibility
+	
+	if hide_on_start and snapshots[0][&'time'] <= buffered_time and not root.visible:
+		print(snapshots)
+		hide_on_start = false
+		root.show()
+	
 	# prune old snapshots
 	while len(snapshots) > 2:
 		# if the second oldest snapshot still contains the buffered time, remove the oldest snapshot
-		if snapshots[1]['time'] <= buffered_time:
+		if snapshots[1][&'time'] <= buffered_time:
 			snapshots.remove_at(0)
 		else:
 			break
