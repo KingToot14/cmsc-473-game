@@ -18,8 +18,14 @@ func _process(delta: float) -> void:
 	if not enabled:
 		return
 	
-	snapshot_timer -= delta
+	if multiplayer.is_server():
+		snapshot_timer -= delta
+		try_send_snapshots()
 	
+	# check for other snapshots
+	super(delta)
+
+func try_send_snapshots() -> void:
 	# auto add snapshots
 	if snapshot_timer <= 0.0:
 		snapshot_timer += SNAPSHOT_INTERVAL
@@ -29,9 +35,6 @@ func _process(delta: float) -> void:
 			&'position': root.global_position,
 			&'velocity': root.velocity
 		})
-	
-	# check for other snapshots
-	super(delta)
 
 func apply_snapshot(start: Dictionary, end: Dictionary, progression: float) -> void:
 	root.global_position = start['position'].lerp(end['position'], progression)

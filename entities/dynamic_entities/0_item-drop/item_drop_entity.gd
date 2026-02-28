@@ -5,7 +5,6 @@ extends Entity
 const UPWARD_RANDOM_POWER := 200.0
 
 const COLLECTION_RADIUS := 4.0**2
-const COLLECT_VERIFICATION := (3.0 * TileManager.TILE_SIZE)**2.0
 const SNAP_RADIUS := 16.0**2
 const SNAP_STRENGTH := 2.0
 
@@ -55,7 +54,9 @@ func _process(delta: float) -> void:
 		if absorb_timer <= 0.0:
 			global_position = target_player.center_point
 			queue_free()
-			target_player.sfx.play_sfx(&'collect', 6.0)
+			
+			if target_player == Globals.player:
+				target_player.sfx.play_sfx(&'collect', 6.0)
 
 func _physics_process(delta: float) -> void:
 	if interest_count == 0:
@@ -167,11 +168,6 @@ func _on_collect_area_entered(area: Area2D) -> void:
 	
 	# start chasing player
 	target_player = area.get_parent()
-	
-	#EntityManager.entity_send_update.rpc_id(1, id, {
-		#&'type': &'chase',
-		#&'player_id': target_player.owner_id
-	#})
 
 func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
@@ -200,66 +196,6 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	other_item.quantity = 0
 	other_item.kill()
 	other_item.send_kill()
-	
-	# send network updates
-	#EntityManager.entity_send_update(id, {
-		#&'type': &'merge-owner',
-		#&'quantity': other_item.quantity
-	#})
-	#EntityManager.entity_send_update(other_item.id, {
-		#&'type': &'merge-kill'
-	#})
-
-func receive_update(update_data: Dictionary) -> Dictionary:
-	super(update_data)
-	
-	var type: StringName = update_data.get(&'type', &'none')
-	
-	match type:
-		&'merge-owner':
-			quantity += update_data.get(&'quantity', 0)
-			data[&'quantity'] = quantity
-		&'merge-kill':
-			merged = true
-			standard_death()
-		&'collect':
-			var player: PlayerController = ServerManager.connected_players[update_data.get(&'player_id', 0)]
-			if not player:
-				return NO_RESPONSE
-			
-			# verify collection
-			if multiplayer.is_server():
-				var distance: float = player.center_point.distance_squared_to(global_position)
-				# don't pick up merged items
-				if merged:
-					return {
-						&'success': false
-					}
-				# don't pick up collected items
-				if not visible:
-					return {
-						&'success': false
-					} 
-				# item too far out of range, reject collection
-				if distance > COLLECTION_RADIUS * COLLECT_VERIFICATION:
-					return {
-						&'success': false
-					}
-			
-			# undo collection
-			if not data.get(&'success', true) and player == Globals.player:
-				show()
-				
-				# restore inventory state
-				player.my_inventory.remove_item(item_id, quantity)
-				
-				return NO_RESPONSE
-			
-			standard_death()
-		&'chase':
-			target_player = ServerManager.connected_players[update_data.get(&'player_id', 0)]
-	
-	return NO_RESPONSE
 
 #region Serialization
 func serialize_extra(buffer: PackedByteArray, offset: int) -> int:

@@ -26,7 +26,6 @@ func _ready() -> void:
 		enabled = true
 
 func _process(_delta: float) -> void:
-	# only run on server
 	if not enabled:
 		return
 	
@@ -47,17 +46,8 @@ func interpolate_snapshots() -> void:
 	for time in actions:
 		if buffered_time >= time:
 			perform_action(queued_actions[time])
-			#var item_id = action[&'item_id']
-			#var action_type = action[&'action_type']
-			#
-			## apply action
-			#match action_type:
-				#&'interact_mouse':
-					#var item := ItemDatabase.get_item(item_id)
-					#
-					#item.simulate_interact_mouse(root, action[&'mouse_position'])
-			#
-			## remove action from queue
+			
+			# remove action from queue
 			queued_actions.erase(time)
 			
 			break
