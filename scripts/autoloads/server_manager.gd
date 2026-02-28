@@ -164,3 +164,13 @@ func set_world_params(world_size: Vector2i) -> void:
 	Globals.world_size = world_size
 
 #endregion
+
+#region Player Management
+func get_player(player_id: int) -> PlayerController:
+	if not is_instance_valid(connected_players.get(player_id)):
+		connected_players.erase(player_id)
+		return null
+	
+	return connected_players[player_id]
+
+#endregion

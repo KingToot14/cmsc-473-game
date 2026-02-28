@@ -10,6 +10,8 @@ signal despawn()
 # --- Variables --- #
 const NO_RESPONSE: Dictionary = {}
 
+const KILL_ACTION := 0
+
 @onready var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
 
 var id := 0
@@ -178,6 +180,17 @@ func check_player(player_id: int) -> bool:
 #endregion
 
 #region Life Cycle
+func send_kill() -> void:
+	var buffer := PackedByteArray()
+	var offset := 0
+	buffer.resize(2)
+	
+	# action id
+	buffer.encode_u16(offset, KILL_ACTION)
+	offset += 2
+	
+	interpolator.queue_action(NetworkTime.time, buffer)
+
 func kill() -> void:
 	if is_dead:
 		return
@@ -229,6 +242,16 @@ func interact_with(_tile_position: Vector2i) -> bool:
 func break_place(_tile_position: Vector2i) -> bool:
 	return true
 
+func handle_action(action_info: PackedByteArray) -> void:
+	var offset := 0
+	
+	var action_id := action_info.decode_u16(offset)
+	offset += 2
+	
+	match action_id:
+		KILL_ACTION:
+			kill()
+
 #endregion
 
 #region Serialization
@@ -242,8 +265,8 @@ func serialize() -> PackedByteArray:
 	return buffer
 
 func serialize_base(buffer: PackedByteArray, offset: int) -> int:
-	# uint32 (4) + 2 float32 (2 * 8) + 2 float32 (2 * 8) + uint32 (4) + uint8 (1)
-	buffer.resize(4 + 2 * 4 + 2 * 4 + 4 + 1)
+	# uint32 (4) + 2 float32 (2 * 4) + 2 float32 (2 * 4) + uint32 (4) + uint8 (1)
+	buffer.resize(4 + (2 * 4) + (2 * 4) + 4 + 1)
 	
 	# entity id
 	buffer.encode_u32(offset, id)
@@ -281,12 +304,7 @@ func serialize_base(buffer: PackedByteArray, offset: int) -> int:
 	
 	return offset
 
-func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
-	# uint16 (2) extra size in bytes, variable (*) any extra data this entity needs
-	buffer.resize(len(buffer) + 2 + 0)
-	buffer.encode_u16(offset, 0)
-	offset += 2
-	
+func serialize_extra(_buffer: PackedByteArray, offset: int) -> int:
 	return offset
 
 func deserialize(buffer: PackedByteArray, offset: int, server_time: float) -> int:
@@ -296,14 +314,14 @@ func deserialize(buffer: PackedByteArray, offset: int, server_time: float) -> in
 	return offset
 
 func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) -> int:
-	# entity position TODO: change to snapshot interpolation
+	# entity position
 	var net_position: Vector2
 	net_position.x = buffer.decode_float(offset)
 	offset += 4
 	net_position.y = buffer.decode_float(offset)
 	offset += 4
 	
-	# entity velocity TODO: change to snapshot interpolation
+	# entity velocity
 	velocity.x = buffer.decode_float(offset)
 	offset += 4
 	velocity.y = buffer.decode_float(offset)
@@ -313,7 +331,6 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) 
 	interpolator.send_snapshot(server_time, {
 		&'position': net_position
 	})
-	#interpolator.send_snapshot(net_position, net_velocity, server_time)
 	
 	# entity hp
 	if len(hp_pool) > 0:
@@ -325,16 +342,12 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) 
 	offset += 1
 	
 	# entity is dead
-	if flags & (1 << 0):
-		kill()
+	#if flags & (1 << 0):
+		#kill()
 	
 	return offset
 
-func deserialize_extra(buffer: PackedByteArray, offset: int, _server_time: float) -> int:
-	# extra size
-	buffer.decode_u16(offset)
-	offset += 2
-	
+func deserialize_extra(_buffer: PackedByteArray, offset: int, _server_time: float) -> int:
 	return offset
 
 #endregion
