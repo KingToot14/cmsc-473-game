@@ -62,7 +62,7 @@ func send_snapshots() -> void:
 		var entity_data: PackedByteArray = bundles[player_id]
 		
 		var bundle := PackedByteArray()
-		# Header: uint32 (4) tick, uint16 (2) entity_count
+		# Header: uint32 (4) time, uint16 (2) entity_count
 		bundle.resize(4 + 2)
 		
 		# add header
@@ -79,7 +79,7 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 	var offset := 0
 	
 	# parse header
-	var server_tick: float = snapshots.decode_float(offset)
+	var server_time: float = snapshots.decode_float(offset)
 	offset += 4
 	var entity_count: int = snapshots.decode_u16(offset)
 	offset += 2
@@ -95,4 +95,4 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 		
 		var entity: Entity = EntityManager.loaded_entities.get(entity_id)
 		
-		offset = entity.deserialize(snapshots, offset, server_tick)
+		offset = entity.deserialize(snapshots, offset, server_time)

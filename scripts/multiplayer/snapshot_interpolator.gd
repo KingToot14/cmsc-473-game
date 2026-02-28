@@ -2,19 +2,10 @@ class_name SnapshotInterpolator
 extends Node
 
 # --- Variables --- #
-const SNAPSHOT_RATE := 20.0
-const PHYSICS_TICKS := 30.0
-const SNAPSHOT_INTERVAL := floori(PHYSICS_TICKS / SNAPSHOT_RATE)
-const BUFFER_SEC := 0.15
-const BUFFER_SIZE := PHYSICS_TICKS * BUFFER_SEC
+const BUFFER_TIME := 0.15
 
-@export var root: Node2D
-@export var visual_root: Node2D
-@export var update_root := true
+@export var root: CharacterBody2D
 @export var auto_start := true
-
-@export var update_all := false
-var interested_players: Array[int] = []
 
 var owner_id := 0:
 	set(id):
@@ -39,15 +30,6 @@ func _process(_delta: float) -> void:
 	if not enabled:
 		return
 	
-	#if is_multiplayer_authority():
-		#if NetworkTime.tick % SNAPSHOT_INTERVAL == 0:
-			## send snapshot
-			#if update_all:
-				#interested_players = ServerManager.connected_players.keys()
-			#
-			#for player_id in interested_players:
-				#send_snapshot.rpc_id(player_id, root.global_position, root.velocity, NetworkTime.tick)
-	#else:
 	interpolate_snapshots()
 
 func interpolate_snapshots() -> void:
@@ -55,28 +37,29 @@ func interpolate_snapshots() -> void:
 	if not enabled or is_multiplayer_authority():
 		return
 	
-	# delayed tick
-	var buffered_tick := NetworkTime.time - BUFFER_SEC
+	# delayed time
+	var buffered_time := NetworkTime.time - BUFFER_TIME
 	
 	# check for actions
 	var actions: Array = queued_actions.keys()
 	actions.sort()
 	
-	for tick in actions:
-		if buffered_tick >= tick:
-			var action = queued_actions[tick]
-			var item_id = action[&'item_id']
-			var action_type = action[&'action_type']
+	for time in actions:
+		if buffered_time >= time:
+			perform_action(queued_actions[time])
+			#var item_id = action[&'item_id']
+			#var action_type = action[&'action_type']
+			#
+			## apply action
+			#match action_type:
+				#&'interact_mouse':
+					#var item := ItemDatabase.get_item(item_id)
+					#
+					#item.simulate_interact_mouse(root, action[&'mouse_position'])
+			#
+			## remove action from queue
+			queued_actions.erase(time)
 			
-			# apply action
-			match action_type:
-				&'interact_mouse':
-					var item := ItemDatabase.get_item(item_id)
-					
-					item.simulate_interact_mouse(root, action[&'mouse_position'])
-			
-			# remove action from queue
-			queued_actions.erase(tick)
 			break
 	
 	# only interpolate with multiple snapshots
@@ -85,8 +68,8 @@ func interpolate_snapshots() -> void:
 	
 	# prune old snapshots
 	while len(snapshots) > 2:
-		# if the second oldest snapshot still contains the buffered tick, remove the oldest snapshot
-		if snapshots[1]['tick'] <= buffered_tick:
+		# if the second oldest snapshot still contains the buffered time, remove the oldest snapshot
+		if snapshots[1]['time'] <= buffered_time:
 			snapshots.remove_at(0)
 		else:
 			break
@@ -95,39 +78,51 @@ func interpolate_snapshots() -> void:
 	var snapshot_start = snapshots[0]
 	var snapshot_end = snapshots[1]
 	var progression = clampf((
-		float(buffered_tick - snapshot_start['tick']) /
-		float(snapshot_end['tick'] - snapshot_start['tick'])
+		float(buffered_time - snapshot_start['time']) /
+		float(snapshot_end['time'] - snapshot_start['time'])
 	), -0.0, 1.0)
 	
-	visual_root.global_position = snapshot_start['position'].lerp(snapshot_end['position'], progression)
-	#visual_root.velocity = snapshot_start['velocity'].lerp(snapshot_end['velocity'], progression)
+	apply_snapshot(snapshot_start, snapshot_end, progression)
+
+#region Applying Snapshots
+func apply_snapshot(start: Dictionary, end: Dictionary, progression: float) -> void:
+	root.global_position = start['position'].lerp(end['position'], progression)
+
+func perform_action(_action_info: PackedByteArray) -> void:
+	return
+
+#endregion
+
+#region Networking
+@rpc('any_peer', 'call_remote', 'reliable')
+func queue_snapshot(time: float, snapshot: Dictionary) -> void:
+	if not (enabled and multiplayer.is_server()):
+		return
+	
+	send_snapshot.rpc(time, snapshot)
 
 @rpc('authority', 'call_remote', 'reliable')
-func send_snapshot(net_position: Vector2, net_velocity: Vector2, tick: float) -> void:
-	if not enabled:
+func send_snapshot(time: float, snapshot: Dictionary) -> void:
+	if not enabled or multiplayer.is_server():
 		return
 	
-	snapshots.append({
-		'position': net_position,
-		'velocity': net_velocity,
-		'tick': tick
-	})
+	snapshot[&'time'] = time
 	
-	if update_root:
-		root.global_position = net_position
-		root.velocity = net_velocity
+	snapshots.append(snapshot)
 
 @rpc('any_peer', 'call_remote', 'reliable')
-func queue_action(action_info: Dictionary) -> void:
-	if not multiplayer.is_server():
+func queue_action(time: float, action_info: PackedByteArray) -> void:
+	if not (enabled and multiplayer.is_server()):
 		return
 	
-	send_action.rpc(action_info)
+	send_action.rpc(time, action_info)
 
-@rpc('any_peer', 'call_remote', 'reliable')
-func send_action(action_info: Dictionary) -> void:
-	if multiplayer.is_server():
+@rpc('authority', 'call_remote', 'reliable')
+func send_action(time: float, action_info: PackedByteArray) -> void:
+	if not enabled or multiplayer.is_server():
 		return
 	
 	# add to queued actions
-	queued_actions[action_info[&'tick']] = action_info
+	queued_actions[time] = action_info
+
+#endregion

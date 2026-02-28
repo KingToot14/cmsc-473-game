@@ -289,13 +289,13 @@ func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
 	
 	return offset
 
-func deserialize(buffer: PackedByteArray, offset: int, server_tick: float) -> int:
-	offset = deserialize_base(buffer, offset, server_tick)
-	offset = deserialize_extra(buffer, offset, server_tick)
+func deserialize(buffer: PackedByteArray, offset: int, server_time: float) -> int:
+	offset = deserialize_base(buffer, offset, server_time)
+	offset = deserialize_extra(buffer, offset, server_time)
 	
 	return offset
 
-func deserialize_base(buffer: PackedByteArray, offset: int, server_tick: float) -> int:
+func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) -> int:
 	# entity position TODO: change to snapshot interpolation
 	var net_position: Vector2
 	net_position.x = buffer.decode_float(offset)
@@ -304,14 +304,16 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_tick: float) 
 	offset += 4
 	
 	# entity velocity TODO: change to snapshot interpolation
-	var net_velocity: Vector2
-	net_velocity.x = buffer.decode_float(offset)
+	velocity.x = buffer.decode_float(offset)
 	offset += 4
-	net_velocity.y = buffer.decode_float(offset)
+	velocity.y = buffer.decode_float(offset)
 	offset += 4
 	
 	# update snapshot interpolator
-	interpolator.send_snapshot(net_position, net_velocity, server_tick)
+	interpolator.send_snapshot(server_time, {
+		&'position': net_position
+	})
+	#interpolator.send_snapshot(net_position, net_velocity, server_time)
 	
 	# entity hp
 	if len(hp_pool) > 0:
@@ -328,7 +330,7 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_tick: float) 
 	
 	return offset
 
-func deserialize_extra(buffer: PackedByteArray, offset: int, _server_tick: float) -> int:
+func deserialize_extra(buffer: PackedByteArray, offset: int, _server_time: float) -> int:
 	# extra size
 	buffer.decode_u16(offset)
 	offset += 2

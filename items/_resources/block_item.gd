@@ -24,12 +24,7 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 		return
 	
 	# send action to client
-	player.snapshot_interpolator.queue_action.rpc_id(1, {
-		&'tick': NetworkTime.tick,
-		&'item_id': item_id,
-		&'action_type': &'interact_mouse',
-		&'mouse_position': mouse_position
-	})
+	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 	
 	# get tile range
 	var tile_position: Vector2i = TileManager.world_to_tile(  

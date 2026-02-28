@@ -31,7 +31,7 @@ var center_point: Vector2:
 
 # - Movement
 @onready var input_sync: InputSynchronizer = $'input_sync'
-@onready var snapshot_interpolator: SnapshotInterpolator = $'snapshot_interpolator'
+@onready var interpolator: PlayerInterpolator = $'snapshot_interpolator'
 
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
@@ -113,7 +113,7 @@ func _ready() -> void:
 	
 	$'rollback_sync'.process_settings()
 	
-	$'snapshot_interpolator'.owner_id = owner_id
+	interpolator.owner_id = owner_id
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
@@ -123,7 +123,7 @@ func _ready() -> void:
 		my_inventory.load_inventory()
 	
 	if owner_id != multiplayer.get_unique_id():
-		$'snapshot_interpolator'.enabled = true
+		interpolator.enabled = true
 		
 		# disable inventory ui
 		$'inventory_ui'.queue_free()

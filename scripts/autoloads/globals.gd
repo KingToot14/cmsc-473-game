@@ -4,6 +4,8 @@ extends Node
 signal world_size_changed(size: Vector2i)
 
 # --- Variables --- #
+const SERVER_ID := 1
+
 var world_size := Vector2i(4200, 1200):
 	set(_size):
 		world_chunks = Vector2i(

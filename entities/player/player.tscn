@@ -9,7 +9,6 @@
 [ext_resource type="Script" uid="uid://vfummajngrt2" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
 [ext_resource type="AudioStream" uid="uid://chqf0lie1pt03" path="res://entities/player/sfx/collect.tres" id="4_qpopc"]
 [ext_resource type="AudioStream" uid="uid://bgqyalg6p8rno" path="res://entities/player/sfx/land.wav" id="4_wuv6x"]
-[ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://c01fup0uojudj" path="res://entities/player/outfits/outfit_loader.gd" id="7_gx6sm"]
 [ext_resource type="Script" uid="uid://cou8r46bfe8oe" path="res://entities/player/player_hp.gd" id="7_mtric"]
@@ -20,6 +19,7 @@
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="9_bectd"]
 [ext_resource type="Resource" uid="uid://bgi204dfg2byy" path="res://entities/player/outfits/tunic/tunic.tres" id="9_we0b7"]
 [ext_resource type="Texture2D" uid="uid://dxuheeoln4iv7" path="res://entities/player/outfits/skin/body.png" id="10_we0b7"]
+[ext_resource type="Script" uid="uid://dkigbjc1wamka" path="res://scripts/multiplayer/player_interpolator.gd" id="10_wq0jh"]
 [ext_resource type="Texture2D" uid="uid://ctq70pq6oilko" path="res://entities/player/outfits/skin/leg_front.png" id="11_mtric"]
 [ext_resource type="Texture2D" uid="uid://gxgy5dl8u6d2" path="res://entities/player/outfits/skin/head.png" id="12_eyb6c"]
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
@@ -789,13 +789,11 @@ script = ExtResource("4_8fjmc")
 root = NodePath("..")
 properties = Array[String]([":global_transform"])
 
-[node name="snapshot_interpolator" type="Node" parent="." unique_id=1391114518 node_paths=PackedStringArray("root", "visual_root")]
-script = ExtResource("5_qiwj3")
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1149663231 node_paths=PackedStringArray("root")]
+script = ExtResource("10_wq0jh")
 root = NodePath("..")
-visual_root = NodePath("..")
-update_root = false
 auto_start = false
-metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
+metadata/_custom_type_script = "uid://dkigbjc1wamka"
 
 [node name="chunk_loader" type="Node" parent="." unique_id=51122964 node_paths=PackedStringArray("player")]
 script = ExtResource("6_qiwj3")

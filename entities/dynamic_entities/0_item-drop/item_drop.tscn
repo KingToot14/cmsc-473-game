@@ -22,12 +22,9 @@ terminal_velocity = 300.0
 counts_towards_spawn_cap = false
 despawn_time = 300.0
 
-[node name="snapshot_interpolator" type="Node" parent="." unique_id=1278073606 node_paths=PackedStringArray("root", "visual_root")]
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1278073606 node_paths=PackedStringArray("root")]
 script = ExtResource("2_glocw")
 root = NodePath("..")
-visual_root = NodePath("..")
-update_root = false
-update_all = true
 metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=79864488]
