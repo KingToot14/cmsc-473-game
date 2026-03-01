@@ -183,15 +183,13 @@ func check_player(player_id: int) -> bool:
 
 #region Life Cycle
 func send_kill() -> void:
-	var buffer := PackedByteArray()
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
 	buffer.resize(2)
 	
 	# action id
-	buffer.encode_u16(offset, KILL_ACTION)
-	offset += 2
+	buffer.put_u16(KILL_ACTION)
 	
-	interpolator.queue_action(NetworkTime.time, buffer)
+	interpolator.queue_action(NetworkTime.time, buffer.data_array)
 
 func kill() -> void:
 	if is_dead:
@@ -258,38 +256,40 @@ func handle_action(action_info: PackedByteArray) -> void:
 
 #region Serialization
 func serialize() -> PackedByteArray:
-	var buffer := PackedByteArray()
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
 	
-	offset = serialize_base(buffer, offset)
-	offset = serialize_extra(buffer, offset)
+	# reserve space for size
+	buffer.put_u16(0)
 	
-	return buffer
+	serialize_base(buffer)
+	serialize_extra(buffer)
+	
+	# prepend size
+	buffer.seek(0)
+	buffer.put_u16(len(buffer.data_array))
+	
+	return buffer.data_array
 
-func serialize_base(buffer: PackedByteArray, offset: int) -> int:
+func serialize_base(buffer: StreamPeerBuffer) -> void:
 	# uint32 (4) + 2 float32 (2 * 4) + 2 float32 (2 * 4) + uint32 (4) + uint8 (1)
 	buffer.resize(4 + (2 * 4) + (2 * 4) + 4 + 1)
 	
 	# entity id
-	buffer.encode_u32(offset, id)
-	offset += 4
+	buffer.put_u32(id)
 	
-	# entity position
-	buffer.encode_float(offset, global_position.x)
-	offset += 4
-	buffer.encode_float(offset, global_position.y)
-	offset += 4
+	# position
+	buffer.put_float(global_position.x)
+	buffer.put_float(global_position.y)
 	
-	# entity velocity
-	buffer.encode_float(offset, velocity.x)
-	offset += 4
-	buffer.encode_float(offset, velocity.y)
-	offset += 4
+	# velocity
+	buffer.put_float(velocity.x)
+	buffer.put_float(velocity.y)
 	
 	# entity hp
 	if len(hp_pool) > 0:
-		buffer.encode_u32(offset, max(hp_pool[0].curr_hp, 0))
-	offset += 4
+		buffer.put_u32(max(hp_pool[0].curr_hp, 0))
+	else:
+		buffer.put_u32(0)
 	
 	# flags
 	var flags = 0b00000000
@@ -301,33 +301,25 @@ func serialize_base(buffer: PackedByteArray, offset: int) -> int:
 		if should_free:
 			queue_free()
 	
-	buffer.encode_u8(offset, flags)
-	offset += 1
-	
-	return offset
+	buffer.put_u8(flags)
 
-func serialize_extra(_buffer: PackedByteArray, offset: int) -> int:
-	return offset
+@warning_ignore("unused_parameter")
+func serialize_extra(buffer: StreamPeerBuffer) -> void:
+	return
 
-func deserialize(buffer: PackedByteArray, offset: int, server_time: float) -> int:
-	offset = deserialize_base(buffer, offset, server_time)
-	offset = deserialize_extra(buffer, offset, server_time)
-	
-	return offset
+func deserialize(buffer: StreamPeerBuffer, server_time: float) -> void:
+	deserialize_base(buffer, server_time)
+	deserialize_extra(buffer, server_time)
 
-func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) -> int:
+func deserialize_base(buffer: StreamPeerBuffer, server_time: float) -> void:
 	# entity position
 	var net_position: Vector2
-	net_position.x = buffer.decode_float(offset)
-	offset += 4
-	net_position.y = buffer.decode_float(offset)
-	offset += 4
+	net_position.x = buffer.get_float()
+	net_position.y = buffer.get_float()
 	
 	# entity velocity
-	velocity.x = buffer.decode_float(offset)
-	offset += 4
-	velocity.y = buffer.decode_float(offset)
-	offset += 4
+	velocity.x = buffer.get_float()
+	velocity.y = buffer.get_float()
 	
 	# update snapshot interpolator
 	if is_equal_approx(server_time, -1.0):
@@ -339,36 +331,30 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) 
 	
 	# entity hp
 	if len(hp_pool) > 0:
-		hp_pool[0].curr_hp = buffer.decode_u32(offset)
-	offset += 4
+		hp_pool[0].curr_hp = buffer.get_u32()
 	
 	# flags
-	var flags := buffer.decode_u8(offset)
-	offset += 1
+	var flags := buffer.get_u8()
 	
 	# entity is dead
 	#if flags & (1 << 0):
 		#kill()
-	
-	return offset
 
-func deserialize_extra(_buffer: PackedByteArray, offset: int, _server_time: float) -> int:
-	return offset
+@warning_ignore("unused_parameter")
+func deserialize_extra(buffer: StreamPeerBuffer, server_time: float) -> void:
+	return
 
 func serialize_spawn_data() -> PackedByteArray:
-	var buffer := PackedByteArray()
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
 	
 	# serialize base info
-	offset = serialize_base(buffer, offset)
+	serialize_base(buffer)
 	
-	return buffer
+	return buffer.data_array
 
-func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	# deserialize base info
-	offset = deserialize_base(buffer, offset, -1.0)
-	
-	return offset
+	deserialize_base(buffer, -1.0)
 
 #endregion
 

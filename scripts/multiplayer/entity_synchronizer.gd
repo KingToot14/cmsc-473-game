@@ -2,8 +2,7 @@ class_name EntitySynchronizer
 extends Node
 
 # --- Variables --- #
-const SNAPSHOT_RATE := 20.0
-const PHYSICS_TICKS := 30.0
+const SNAPSHOT_RATE := 30.0
 const SNAPSHOT_INTERVAL := 1.0 / SNAPSHOT_RATE
 
 var snapshot_timer := 0.0
@@ -76,23 +75,32 @@ func send_snapshots() -> void:
 
 @rpc('authority', 'call_remote', 'reliable')
 func receive_snapshots(snapshots: PackedByteArray) -> void:
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = snapshots
 	
 	# parse header
-	var server_time: float = snapshots.decode_float(offset)
-	offset += 4
-	var entity_count: int = snapshots.decode_u16(offset)
-	offset += 2
+	var server_time := buffer.get_float()
+	var entity_count := buffer.get_u16()
 	
 	# parse entity data
 	for i in range(entity_count):
-		# parse entity id
-		var entity_id := snapshots.decode_u32(offset) 
-		offset += 4
+		# packet size
+		var packet_size := buffer.get_u16()
+		
+		# entity id
+		var entity_id := buffer.get_u32() 
+		
+		# extract packet
+		var cursor := buffer.get_position()
+		var packet := buffer.data_array.slice(cursor, cursor + packet_size - 6)
+		
+		buffer.seek(cursor + packet_size - 6)
 		
 		if not is_instance_valid(EntityManager.loaded_entities.get(entity_id)):
 			continue
 		
 		var entity: Entity = EntityManager.loaded_entities.get(entity_id)
+		var packet_stream := StreamPeerBuffer.new()
+		packet_stream.data_array = packet
 		
-		offset = entity.deserialize(snapshots, offset, server_time)
+		entity.deserialize(packet_stream, server_time)

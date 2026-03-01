@@ -137,37 +137,6 @@ func load_item(spawn_behavior := SpawnBehavior.NONE) -> void:
 		SpawnBehavior.UPWARD_RANDOM:
 			velocity = Vector2(randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
 
-func setup_entity() -> void:
-	# load from data
-	item_id  = data.get(&'item_id', -1)
-	quantity = data.get(&'quantity', 1)
-	merged   = data.get(&'merged', false)
-	velocity = data.get(&'velocity', Vector2.ZERO)
-	
-	var rng := RandomNumberGenerator.new()
-	rng.seed = id
-	
-	var spawn_type: StringName = data.get(&'spawn_type', &'upward_random')
-	
-	if item_id == -1:
-		standard_death()
-		return
-	
-	# item info
-	var item: Item = ItemDatabase.get_item(item_id)
-	if item:
-		var sprite_node = $sprite
-		sprite_node.texture = item.texture
-	
-	# don't run spawn logic if already spawned
-	if not data.get(&'spawned', true):
-		return
-	
-	# spawn behavior
-	match spawn_type:
-		&'upward_random':
-			velocity = Vector2(rng.randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
-
 func do_death() -> void:
 	if multiplayer.is_server():
 		should_free = true
@@ -218,58 +187,51 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	other_item.send_kill()
 
 #region Serialization
-func serialize_extra(buffer: PackedByteArray, offset: int) -> int:
+func serialize_extra(buffer: StreamPeerBuffer) -> void:
 	# uint32 (target)
-	buffer.resize(len(buffer) + 4)
+	buffer.resize(len(buffer.data_array) + 4)
 	
 	# target player id
 	if target_player:
-		buffer.encode_u32(offset, target_player.owner_id)
+		buffer.put_u32(target_player.owner_id)
 	else:
-		buffer.encode_u32(offset, 0)
-	offset += 4
-	
-	return offset
+		buffer.put_u32(0)
 
-func deserialize_extra(buffer: PackedByteArray, offset: int, _server_time: float) -> int:
+func deserialize_extra(buffer: StreamPeerBuffer, _server_time: float) -> void:
 	# target player id
-	var player_id := buffer.decode_u32(offset)
-	offset += 4
+	var player_id := buffer.get_u32()
 	
 	if player_id == 0:
 		target_player = null
 	else:
 		target_player = ServerManager.get_player(player_id)
-	
-	return offset
 
 func serialize_spawn_data() -> PackedByteArray:
-	var buffer := super()
-	var offset := len(buffer)
-	buffer.resize(len(buffer) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = super()
+	
+	var cursor := len(buffer.data_array)
+	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	buffer.seek(cursor)
 	
 	# target player id
 	if target_player:
-		buffer.encode_u32(offset, target_player.owner_id)
+		buffer.put_u32(target_player.owner_id)
 	else:
-		buffer.encode_u32(offset, 0)
-	offset += 4
+		buffer.put_u32(0)
 	
 	# item id
-	buffer.encode_u16(offset, item_id)
-	offset += 2
+	buffer.put_u16(item_id)
 	
-	return buffer
+	return buffer.data_array
 
-func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
-	id = buffer.decode_u32(offset)
-	offset += 4
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
 	
-	offset = super(buffer, offset)
+	super(buffer)
 	
 	# target player id
-	var player_id := buffer.decode_u32(offset)
-	offset += 4
+	var player_id := buffer.get_u32()
 	
 	if player_id == 0:
 		target_player = null
@@ -277,12 +239,9 @@ func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
 		target_player = ServerManager.get_player(player_id)
 	
 	# item id
-	item_id = buffer.decode_u16(offset)
-	offset += 2
+	item_id = buffer.get_u16()
 	
 	load_item()
-	
-	return offset
 
 #endregion
 

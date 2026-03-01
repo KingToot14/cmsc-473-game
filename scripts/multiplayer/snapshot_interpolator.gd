@@ -5,7 +5,7 @@ extends Node
 ## How long the interpolator takes to apply received snapshots in seconds.
 ## [br][br]Assuming we update 20 times per second, this should be at least 0.10
 ## in order to have at least 2 snapshots to interpolate between.
-const BUFFER_TIME := 0.125
+const BUFFER_TIME := 0.050
 
 ## The entity that this node interpolates. By default, we only update
 ## [member Node2D.global_position].

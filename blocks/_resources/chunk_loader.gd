@@ -235,9 +235,11 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 		)
 	
 	# load entities
-	for x in range(width):
-		for y in range(height):
-			EntityManager.load_chunk.rpc_id(1, Vector2i(start_x + x, start_y + y), player.owner_id)
+	EntityManager.load_region.rpc_id(
+		Globals.SERVER_ID,
+		Vector2i(start_x, start_y), width, height,
+		player.owner_id
+	)
 	
 	# this probably isn't a perfect solution, but should allow the server to load entities
 	await get_tree().create_timer(2.0).timeout

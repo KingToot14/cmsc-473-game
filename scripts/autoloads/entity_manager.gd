@@ -73,7 +73,11 @@ func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArra
 		return
 	
 	var entity: Entity = entity_scene.instantiate()
-	entity.deserialize_spawn_data(spawn_data, 0)
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = spawn_data
+	entity.deserialize_spawn_data(buffer)
+	
 	entity.id = spawn_id
 	entity.name = "entity_%s" % spawn_id
 	loaded_entities[spawn_id] = entity
@@ -348,6 +352,12 @@ func entity_receive_update(entity_id: int, data: Dictionary) -> void:
 
 #region Interest Management
 @rpc('any_peer', 'call_remote', 'reliable')
+func load_region(start: Vector2i, width: int, height: int, player_id: int) -> void:
+	for x in range(width):
+		for y in range(height):
+			load_chunk(Vector2i(start.x + x, start.y + y), player_id)
+
+@rpc('any_peer', 'call_remote', 'reliable')
 func load_chunk(chunk: Vector2i, player_id: int) -> void:
 	for entity_id in tile_entities.get(chunk, {}).keys():
 		var entity_info: TileEntityInfo = tile_entities[chunk][entity_id]
@@ -371,7 +381,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		# mark player as interested
 		if not is_instance_valid(loaded_entities[entity_info.entity_id]):
 			loaded_entities.erase(entity_info.entity_id)
-			return
+			continue
 		
 		var entity: TileEntity = loaded_entities[entity_info.entity_id]
 		entity.add_interest(player_id)

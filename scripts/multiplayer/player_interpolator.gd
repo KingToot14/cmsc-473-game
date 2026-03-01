@@ -9,7 +9,7 @@ enum ActionType {
 
 # --- Variables --- #
 ## How many times per second this interpolator should take player snapshots
-const SNAPSHOT_RATE := 20.0
+const SNAPSHOT_RATE := 30.0
 ## How often this interpolator should send a snapshot (in seconds)
 const SNAPSHOT_INTERVAL := 1.0 / SNAPSHOT_RATE
 
@@ -48,20 +48,18 @@ func apply_snapshot(start: Dictionary, end: Dictionary, progression: float) -> v
 	root.velocity = start['velocity'].lerp(end['velocity'], progression)
 
 func perform_action(action_info: PackedByteArray) -> void:
-	var offset := 0
-	var action_id: ActionType = action_info.decode_u16(offset) as ActionType
-	offset += 2
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	var action_id: ActionType = buffer.get_u16() as ActionType
 	
 	match action_id:
 		ActionType.MOUSE_PRESS:
-			var item_id := action_info.decode_u32(offset)
-			offset += 4
+			var item_id := buffer.get_u32()
 			
 			var mouse_position: Vector2
-			mouse_position.x = action_info.decode_float(offset)
-			offset += 4
-			mouse_position.y = action_info.decode_float(offset)
-			offset += 4
+			mouse_position.x = buffer.get_float()
+			mouse_position.y = buffer.get_float()
 			
 			var item := ItemDatabase.get_item(item_id)
 			
@@ -71,23 +69,18 @@ func perform_action(action_info: PackedByteArray) -> void:
 ## [br][br]Sends an action to replicate a mouse press input on the given [param item_id]
 ## at [param mouse_position].
 func queue_mouse_press(time: float, item_id: int, mouse_position: Vector2) -> void:
-	var buffer := PackedByteArray()
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
 	buffer.resize(2 + 4 + (2 * 4))	# uint16 + uint32 + vector2
 	
 	# action id
-	buffer.encode_u16(offset, ActionType.MOUSE_PRESS)
-	offset += 2
+	buffer.put_u16(ActionType.MOUSE_PRESS)
 	
 	# item id
-	buffer.encode_u32(offset, item_id)
-	offset += 4
+	buffer.put_u32(item_id)
 	
 	# mouse_position
-	buffer.encode_float(offset, mouse_position.x)
-	offset += 4
-	buffer.encode_float(offset, mouse_position.y)
-	offset += 4
+	buffer.put_float(mouse_position.x)
+	buffer.put_float(mouse_position.y)
 	
 	# queue action
-	queue_action.rpc_id(Globals.SERVER_ID, time, buffer)
+	queue_action.rpc_id(Globals.SERVER_ID, time, buffer.data_array)
