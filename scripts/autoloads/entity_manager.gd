@@ -388,13 +388,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		var entity: Entity = loaded_entities[entity_id]
 		entity.add_interest(player_id)
 		
-		load_entity.rpc_id(
-			player_id,
-			entity.registry_id, entity.position,
-			# do not run spawn logic when syncing existing entities
-			entity.data.merged({&'spawned': false}, true),
-			entity.id
-		)
+		load_entity_new.rpc_id(player_id, entity_id, entity.registry_id, entity.serialize_spawn_data())
 
 func unload_chunk(chunk: Vector2i, player_id: int) -> void:
 	print("Loaded chunk %s from player '%s'" % [chunk, player_id])

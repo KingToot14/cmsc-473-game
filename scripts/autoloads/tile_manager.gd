@@ -527,18 +527,13 @@ func send_destroy_block(x: int, y: int) -> void:
 	if block_id == 1 or block_id == 2: #if the block is dirt or grass
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			EntityManager.create_entity(0, drop_position, { 
-				&'item_id': 3, 
-				&'quantity': 1, 
-				})
+			ItemDropEntity.spawn(drop_position, 3, 1)
 				
 	if block_id == 3: #if the block is stone.
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			EntityManager.create_entity(0, drop_position, { 
-				&'item_id': 4, 
-				&'quantity': 1, 
-				})
+			ItemDropEntity.spawn(drop_position, 4, 1)
+	
 	TileManager.set_block_unsafe(x, y, 0)
 	Globals.server_map.update_tile(x, y)
 	

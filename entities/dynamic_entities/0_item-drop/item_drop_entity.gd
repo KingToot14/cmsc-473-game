@@ -245,8 +245,8 @@ func deserialize_extra(buffer: PackedByteArray, offset: int, _server_time: float
 
 func serialize_spawn_data() -> PackedByteArray:
 	var buffer := super()
+	var offset := len(buffer)
 	buffer.resize(len(buffer) + 4 + 2)	# base + uint32 (4) + uint16 (2)
-	var offset := 0
 	
 	# target player id
 	if target_player:
@@ -262,6 +262,9 @@ func serialize_spawn_data() -> PackedByteArray:
 	return buffer
 
 func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
+	id = buffer.decode_u32(offset)
+	offset += 4
+	
 	offset = super(buffer, offset)
 	
 	# target player id
