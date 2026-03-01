@@ -36,6 +36,50 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> 
 			printerr("[Wizbowo's Conquest] No file 'info.tres' found in directory %s" % dir_name)
 
 #region Entity Spawning
+func add_entity(registry_id: int, entity: Entity) -> void:
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	entity.scan_interest()
+	
+	# don't process entities that don't have interested players
+	if entity.interest_count == 0:
+		entity.queue_free()
+		return
+	
+	# set entity id
+	entity.id = curr_id
+	entity.name = "entity_%s" % curr_id
+	loaded_entities[curr_id] = entity
+	curr_id += 1
+	
+	# anchor to chunk
+	entity.calculate_chunk()
+	
+	if entity.current_chunk not in dynamic_entities:
+		dynamic_entities[entity.current_chunk] = {}
+	dynamic_entities[entity.current_chunk][curr_id] = true
+	
+	# send to interested players
+	var spawn_data := entity.serialize_spawn_data()
+	
+	for player_id in entity.interested_players:
+		load_entity_new.rpc_id(player_id, entity.id, registry_id, spawn_data)
+
+@rpc('authority', 'call_remote', 'reliable')
+func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
+	# create new entity instance
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
+		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
+		return
+	
+	var entity: Entity = entity_scene.instantiate()
+	entity.deserialize_spawn_data(spawn_data, 0)
+	entity.id = spawn_id
+	entity.name = "entity_%s" % spawn_id
+	loaded_entities[spawn_id] = entity
+	
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
+
 func create_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary
 	) -> void:

@@ -87,7 +87,7 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 	# parse entity data
 	for i in range(entity_count):
 		# parse entity id
-		var entity_id := snapshots.decode_u32(offset)
+		var entity_id := snapshots.decode_u32(offset) 
 		offset += 4
 		
 		if not is_instance_valid(EntityManager.loaded_entities.get(entity_id)):

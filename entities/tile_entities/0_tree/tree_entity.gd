@@ -176,6 +176,8 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 				&'quantity': rng.randi_range(1, 2)
 			}
 			
+			ItemDropEntity.spawn(positions[y], 0, rng.randi_range(1, 2))
+			
 			#consistent with seed
 			
 			if rng.randf() < APPLE_DROP_ODDS:
@@ -192,19 +194,20 @@ func _on_death(from_server: bool, pool_id: int) -> void:
 				#rng.randi_range(0, 1) determines left or right side of the tree
 				#-(y + pool_id + 2)) determines what y value
 		
-		EntityManager.create_entities(
-			# item drop
-			0,
-			positions,
-			spawn_data
-		)
 		
-		EntityManager.create_entities(
-			# item drop
-			0, #points to item drop entity
-			apple_positions,
-			apple_data
-		)
+		#EntityManager.create_entities(
+			## item drop
+			#0,
+			#positions,
+			#spawn_data
+		#)
+		#
+		#EntityManager.create_entities(
+			## item drop
+			#0, #points to item drop entity
+			#apple_positions,
+			#apple_data
+		#)
 	
 	curr_height = pool_id
 	

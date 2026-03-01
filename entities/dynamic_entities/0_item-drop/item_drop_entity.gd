@@ -1,6 +1,12 @@
 class_name ItemDropEntity
 extends Entity
 
+# --- Enums --- #
+enum SpawnBehavior {
+	NONE,
+	UPWARD_RANDOM
+}
+
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
 
@@ -117,6 +123,20 @@ func chase_physics(delta: float) -> void:
 	
 	velocity = velocity.limit_length(terminal_velocity)
 
+func load_item(spawn_behavior := SpawnBehavior.NONE) -> void:
+	# load item texture
+	var item := ItemDatabase.get_item(item_id)
+	
+	if item:
+		$'sprite'.texture = item.texture
+	
+	# set spawn behavior
+	match spawn_behavior:
+		SpawnBehavior.NONE:
+			pass
+		SpawnBehavior.UPWARD_RANDOM:
+			velocity = Vector2(randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
+
 func setup_entity() -> void:
 	# load from data
 	item_id  = data.get(&'item_id', -1)
@@ -222,5 +242,68 @@ func deserialize_extra(buffer: PackedByteArray, offset: int, _server_time: float
 		target_player = ServerManager.get_player(player_id)
 	
 	return offset
+
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := super()
+	buffer.resize(len(buffer) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	var offset := 0
+	
+	# target player id
+	if target_player:
+		buffer.encode_u32(offset, target_player.owner_id)
+	else:
+		buffer.encode_u32(offset, 0)
+	offset += 4
+	
+	# item id
+	buffer.encode_u16(offset, item_id)
+	offset += 2
+	
+	return buffer
+
+func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
+	offset = super(buffer, offset)
+	
+	# target player id
+	var player_id := buffer.decode_u32(offset)
+	offset += 4
+	
+	if player_id == 0:
+		target_player = null
+	else:
+		target_player = ServerManager.get_player(player_id)
+	
+	# item id
+	item_id = buffer.decode_u16(offset)
+	offset += 2
+	
+	load_item()
+	
+	return offset
+
+#endregion
+
+#region Spawning
+@warning_ignore("shadowed_variable")
+static func spawn(
+		pos: Vector2, item_id: int, quantity: int, spawn_behavior := SpawnBehavior.UPWARD_RANDOM
+	) -> void:
+	
+	# create new item drop entity
+	var entity_scene: PackedScene = EntityManager.enemy_registry.get(0).entity_scene
+	if not entity_scene:
+		return
+	
+	var entity: ItemDropEntity = entity_scene.instantiate()
+	entity.global_position = pos
+	
+	entity.item_id = item_id
+	entity.quantity = quantity
+	
+	# start entity logic
+	entity.load_item(spawn_behavior)
+	
+	# sync to players
+	EntityManager.add_entity(0, entity)
 
 #endregion

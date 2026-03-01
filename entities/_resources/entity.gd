@@ -44,7 +44,7 @@ var should_free := false
 
 # --- Functions --- #
 func _ready() -> void:
-	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	calculate_chunk()
 	
 	_despawn_timer = despawn_time
 	
@@ -57,12 +57,15 @@ func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
 	registry_id = reg_id
 	data = spawn_data
 	
-	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	calculate_chunk()
 	
 	setup_entity()
 	
 	for hp in hp_pool:
 		hp.setup()
+
+func calculate_chunk() -> void:
+	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 
 func _process(delta: float) -> void:
 	# check despawn
@@ -78,12 +81,11 @@ func _process(delta: float) -> void:
 		return
 	
 	# check chunk boundaries
-	var new_chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	var prev_chunk: Vector2i = current_chunk
+	calculate_chunk()
 	
-	if new_chunk != current_chunk:
-		EntityManager.move_dynamic_entity(id, current_chunk, new_chunk)
-		
-		current_chunk = new_chunk
+	if prev_chunk != current_chunk:
+		EntityManager.move_dynamic_entity(id, prev_chunk, current_chunk)
 		scan_interest()
 
 func setup_entity() -> void:
@@ -328,9 +330,12 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) 
 	offset += 4
 	
 	# update snapshot interpolator
-	interpolator.send_snapshot(server_time, {
-		&'position': net_position
-	})
+	if is_equal_approx(server_time, -1.0):
+		global_position = position
+	else:
+		interpolator.send_snapshot(server_time, {
+			&'position': net_position
+		})
 	
 	# entity hp
 	if len(hp_pool) > 0:
@@ -349,5 +354,26 @@ func deserialize_base(buffer: PackedByteArray, offset: int, server_time: float) 
 
 func deserialize_extra(_buffer: PackedByteArray, offset: int, _server_time: float) -> int:
 	return offset
+
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := PackedByteArray()
+	var offset := 0
+	
+	# serialize base info
+	offset = serialize_base(buffer, offset)
+	
+	return buffer
+
+func deserialize_spawn_data(buffer: PackedByteArray, offset: int) -> int:
+	# deserialize base info
+	offset = deserialize_base(buffer, offset, -1.0)
+	
+	return offset
+
+#endregion
+
+#region Spawning
+static func spawn_from_rule(rule: SpawnRule) -> void:
+	pass
 
 #endregion

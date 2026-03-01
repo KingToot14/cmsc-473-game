@@ -23,6 +23,8 @@ func _process(delta: float) -> void:
 	if len(ServerManager.connected_players.keys()) == 0:
 		return
 	
+	return
+	
 	# decrement timer
 	spawn_timer -= delta
 	
