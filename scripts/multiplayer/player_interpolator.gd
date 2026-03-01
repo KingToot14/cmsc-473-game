@@ -2,15 +2,19 @@ class_name PlayerInterpolator
 extends SnapshotInterpolator
 
 # --- Enums --- #
+## The type of player interaction to queue. Used for action serialization
 enum ActionType {
 	MOUSE_PRESS
 }
 
 # --- Variables --- #
+## How many times per second this interpolator should take player snapshots
 const SNAPSHOT_RATE := 20.0
-const PHYSICS_TICKS := 30.0
+## How often this interpolator should send a snapshot (in seconds)
 const SNAPSHOT_INTERVAL := 1.0 / SNAPSHOT_RATE
 
+## A timer to store the current time of the snapshot system. Should not be set
+## externally.
 var snapshot_timer := 0.0
 
 # --- Functions --- #
@@ -25,6 +29,9 @@ func _process(delta: float) -> void:
 	# check for other snapshots
 	super(delta)
 
+## Sends a snapshot to other interpolators if [member snapshot_timer] is less
+## than or equal to 0.0. This methods sends a snapshot with the [member root]'s
+## [member Node2D.global_position] and [member CharacterBody2D.velocity]
 func try_send_snapshots() -> void:
 	# auto add snapshots
 	if snapshot_timer <= 0.0:
@@ -60,6 +67,9 @@ func perform_action(action_info: PackedByteArray) -> void:
 			
 			item.simulate_interact_mouse(root, mouse_position)
 
+## Queues a mouse press interaction into the action queue (see [method queue_action]).
+## [br][br]Sends an action to replicate a mouse press input on the given [param item_id]
+## at [param mouse_position].
 func queue_mouse_press(time: float, item_id: int, mouse_position: Vector2) -> void:
 	var buffer := PackedByteArray()
 	var offset := 0
