@@ -213,6 +213,7 @@ func serialize_spawn_data() -> PackedByteArray:
 	var buffer := StreamPeerBuffer.new()
 	buffer.data_array = super()
 	
+	# snap to end of current buffer
 	var cursor := len(buffer.data_array)
 	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
 	buffer.seek(cursor)
@@ -231,6 +232,7 @@ func serialize_spawn_data() -> PackedByteArray:
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	id = buffer.get_u32()
 	
+	# process base snapshot
 	super(buffer)
 	
 	# target player id
@@ -258,8 +260,6 @@ static func spawn(
 	var entity_scene: PackedScene = EntityManager.enemy_registry.get(0).entity_scene
 	if not entity_scene:
 		return
-	
-	print_stack()
 	
 	var entity: ItemDropEntity = entity_scene.instantiate()
 	entity.global_position = pos

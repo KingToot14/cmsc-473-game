@@ -133,8 +133,6 @@ func attempt_spawn() -> void:
 		return
 	
 	var spawn_rule: SpawnRule = possible_rules[RandomNumberGenerator.new().rand_weighted(possible_weights)]
-	var entity_id := spawn_rule_ids[spawn_rule]
-	var spawn_data: Dictionary = spawn_rule.spawn_data
 	
 	# get world position
 	for i in range(10):
@@ -162,9 +160,6 @@ func attempt_spawn() -> void:
 		var world_position: Vector2 = TileManager.tile_to_world(tile_origin.x, tile_origin.y)
 		
 		spawn_rule.do_spawn(world_position)
-		#spawn_rule.entity_script.spawn_from_rule(spawn_rule)
-		
-		#EntityManager.create_entity(entity_id, world_position, spawn_data)
 		return
 
 @warning_ignore_restore('confusable_local_declaration')

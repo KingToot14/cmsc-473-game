@@ -10,7 +10,7 @@ script = ExtResource("4_pcs1m")
 spawn_biomes = 1
 spawn_layers = 2
 spawn_times = 1
-spawn_weight = 70
+spawn_weight = 60
 metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
 
 [sub_resource type="Resource" id="Resource_pcs1m"]
@@ -18,6 +18,8 @@ script = ExtResource("4_pcs1m")
 variant = 1
 spawn_biomes = 1
 spawn_layers = 2
+spawn_times = 1
+spawn_weight = 35
 metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
 
 [sub_resource type="Resource" id="Resource_rspng"]
@@ -25,7 +27,44 @@ script = ExtResource("4_pcs1m")
 variant = 4
 spawn_biomes = 1
 spawn_layers = 2
+spawn_times = 1
 spawn_weight = 5
+metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
+
+[sub_resource type="Resource" id="Resource_xb0so"]
+script = ExtResource("4_pcs1m")
+variant = 2
+spawn_biomes = 1
+spawn_layers = 4
+spawn_times = 3
+spawn_weight = 60
+metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
+
+[sub_resource type="Resource" id="Resource_wmwdw"]
+script = ExtResource("4_pcs1m")
+variant = 3
+spawn_biomes = 1
+spawn_layers = 4
+spawn_times = 3
+spawn_weight = 35
+metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
+
+[sub_resource type="Resource" id="Resource_oyy7g"]
+script = ExtResource("4_pcs1m")
+variant = 5
+spawn_biomes = 1
+spawn_layers = 4
+spawn_times = 3
+spawn_weight = 5
+metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
+
+[sub_resource type="Resource" id="Resource_g4jm4"]
+script = ExtResource("4_pcs1m")
+variant = 6
+spawn_biomes = 2
+spawn_layers = 2
+spawn_times = 1
+spawn_weight = 35
 metadata/_custom_type_script = "uid://bl2hoe2fd1g78"
 
 [resource]
@@ -33,5 +72,5 @@ script = ExtResource("1_wgk1e")
 name = "Slime"
 description = "A simple slime that mindlessly jumps around. Gets aggressive towards anything that attacks it."
 entity_scene = ExtResource("1_46c7p")
-spawn_rules = Array[ExtResource("3_nyiqh")]([SubResource("Resource_d7rnv"), SubResource("Resource_pcs1m"), SubResource("Resource_rspng")])
+spawn_rules = Array[ExtResource("3_nyiqh")]([SubResource("Resource_d7rnv"), SubResource("Resource_pcs1m"), SubResource("Resource_rspng"), SubResource("Resource_xb0so"), SubResource("Resource_wmwdw"), SubResource("Resource_oyy7g"), SubResource("Resource_g4jm4")])
 metadata/_custom_type_script = "uid://d3xw170ysevnd"

@@ -284,36 +284,33 @@ func handle_action(action_info: PackedByteArray) -> void:
 			$'animator'.advance(0.0)
 			$'animator'.queue(&'airborne')
 
-func receive_update(update_data: Dictionary) -> Dictionary:
-	super(update_data)
+#endregion
+
+#region Sereialization
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = super()
 	
-	return NO_RESPONSE
+	# snap to end of current buffer
+	var cursor := len(buffer.data_array)
+	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	buffer.seek(cursor)
 	
-	match update_data.get(&'type', &'none'):
-		&'jump-start':
-			if multiplayer.is_server():
-				return NO_RESPONSE
-			
-			var pos: Vector2 = update_data.get(&'position', global_position)
-			var distance: float = pos.distance_squared_to(global_position)
-			
-			# snap to position if too large
-			if distance > POSITION_ADJUST_RANGE:
-				global_position = pos
-			# slightly adjust to server position
-			if distance > POSITION_REMAIN_RANGE:
-				global_position = global_position.lerp(pos, 0.25)
-			
-			# store jump velocity
-			jump_velocity = update_data.get(&'velocity', Vector2.ZERO)
-			#airborne = true
-			
-			# play jump animation
-			$'animator'.play(&'jump')
-			$'animator'.advance(0.0)
-			$'animator'.queue(&'airborne')
+	# variant
+	buffer.put_u16(variant)
 	
-	return NO_RESPONSE
+	return buffer.data_array
+
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
+	
+	# process base snapshot
+	super(buffer)
+	
+	# variant
+	variant = buffer.get_u16() as SlimeVariant
+	
+	setup_variant()
 
 #endregion
 
