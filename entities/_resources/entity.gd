@@ -161,6 +161,10 @@ func kill() -> void:
 	
 	is_dead = true
 	
+	# remove entity on client
+	if not multiplayer.is_server():
+		EntityManager.erase_entity(self)
+	
 	do_death()
 
 func do_death() -> void:
@@ -257,6 +261,7 @@ func serialize_base(buffer: StreamPeerBuffer) -> void:
 	
 	if is_dead and should_free:
 		send_kill()
+		EntityManager.erase_entity(self)
 		queue_free()
 
 @warning_ignore("unused_parameter")
