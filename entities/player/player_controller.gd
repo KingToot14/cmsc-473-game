@@ -341,13 +341,6 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
-## Handles an incomming damage snapshot
-@rpc('authority', 'call_remote', 'reliable')
-func receive_damage_snapshot(snapshot: Dictionary) -> void:
-	# apply knockback (if not dead)
-	if not snapshot.get(&'entity_dead', false) or true:
-		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-
 #endregion
 
 #region Loading

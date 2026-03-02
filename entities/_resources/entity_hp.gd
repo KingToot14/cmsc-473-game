@@ -3,9 +3,11 @@ extends Node
 
 # --- Signals --- #
 ## Emitted when this node receives a damage snapshot
-signal received_damage(snapshot: Dictionary)
+signal received_damage(
+	damage: int, source_type: DamageSource.DamageSourceType, knockback: Vector2, player_id: int
+)
 ## Emitted when this node has it's hp value modified
-signal hp_modified()
+signal hp_modified(delta: int)
 ## Emitted when this node's hp has been reduced to 0
 signal died()
 
@@ -110,45 +112,16 @@ func receive_damage(damage_info: PackedByteArray) -> void:
 	# deal damage
 	modify_health(-damage)
 	apply_knockback(knockback)
+	
+	# server-side response to damage
+	received_damage.emit(damage, source_type, knockback, multiplayer.get_remote_sender_id())
 
 func apply_knockback(knockback: Vector2) -> void:
 	entity.velocity += knockback * entity.knockback_power
 
-func send_damage_snapshot() -> void:
-	# add vertical knockback
-	var snapshot: Dictionary = snapshots[sequence_id - 1]
-	#if entity.is_on_floor():
-		#snapshot[&'knockback'].y = -0.5
-	#
-	#snapshot[&'knockback'] = snapshot[&'knockback'].normalized()
-	
-	# send data to server
-	EntityManager.entity_take_damage.rpc_id(1, entity.id, snapshots[sequence_id - 1])
-
-@rpc('authority', 'call_remote', 'reliable')
-func receive_damage_snapshot(snapshot: Dictionary) -> void:
-	var damage: int = snapshot.get(&'damage', 0)
-	var player_id: int = snapshot.get(&'player_id', 0)
-	var seq_id: int = snapshot.get(&'sequence_id', 0)
-	
-	if not multiplayer.is_server() and player_id == multiplayer.get_unique_id():
-		var prev_snapshot: Dictionary = snapshots.get(seq_id, {})
-		
-		if prev_snapshot.is_empty():
-			return
-		
-		# calculate difference in health
-		var diff = snapshot.get(&'damage', 0) - prev_snapshot.get(&'damage', 0)
-		
-		modify_health(-diff)
-	else:
-		modify_health(-damage)
-	
-	received_damage.emit(snapshot)
-
 func modify_health(delta: int) -> void:
 	curr_hp += delta
-	hp_modified.emit()
+	hp_modified.emit(delta)
 	
 	if curr_hp <= 0 and multiplayer.is_server():
 		died.emit()

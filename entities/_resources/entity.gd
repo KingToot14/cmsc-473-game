@@ -11,6 +11,8 @@ signal despawn()
 const NO_RESPONSE: Dictionary = {}
 
 const KILL_ACTION := 0
+const PAUSE_ACTION := 1
+const RESUME_ACTION := 2
 
 @onready var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
 
@@ -91,28 +93,6 @@ func _process(delta: float) -> void:
 func setup_entity() -> void:
 	return
 
-func receive_update(update_data: Dictionary) -> Dictionary:
-	if update_data.get(&'kill'):
-		standard_death()
-	
-	match update_data.get(&'type', &'none'):
-		&'knockback':
-			if multiplayer.is_server():
-				return NO_RESPONSE
-			
-			# apply knockback force
-			velocity += update_data.get(&'force', Vector2.ZERO)
-		&'pause':
-			#paused = true
-			process_mode = Node.PROCESS_MODE_DISABLED
-			global_position = update_data.get(&'position')
-		&'resume':
-			#paused = false
-			process_mode = Node.PROCESS_MODE_INHERIT
-			global_position = update_data.get(&'position')
-	
-	return NO_RESPONSE
-
 #region Interest
 func add_interest(player_id: int) -> void:
 	interested_players[player_id] = true
@@ -139,16 +119,9 @@ func check_interest() -> void:
 		_despawn_timer = despawn_time
 		
 		# send signal to client entities
-		EntityManager.entity_send_update(id, {
-			&'type': &'pause',
-			&'position': global_position
-		})
+		send_action_basic(PAUSE_ACTION)
 	else:
-		# send signal to client entities
-		EntityManager.entity_send_update(id, {
-			&'type': &'resume',
-			&'position': global_position
-		})
+		send_action_basic(RESUME_ACTION)
 
 func scan_interest() -> void:
 	var load_range := ChunkLoader.LOAD_RANGE
@@ -219,11 +192,7 @@ func standard_death() -> void:
 	else:
 		queue_free()
 
-func standard_receive_damage(snapshot: Dictionary) -> void:
-	# apply knockback (if not dead)
-	if not snapshot.get(&'entity_dead', false):
-		velocity += snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-	
+func do_flash() -> void:
 	if not flash_material:
 		return
 	
@@ -254,6 +223,10 @@ func handle_action(action_info: PackedByteArray) -> void:
 	match action_id:
 		KILL_ACTION:
 			kill()
+		PAUSE_ACTION:
+			process_mode = Node.PROCESS_MODE_DISABLED
+		RESUME_ACTION:
+			process_mode = Node.PROCESS_MODE_INHERIT
 
 #endregion
 

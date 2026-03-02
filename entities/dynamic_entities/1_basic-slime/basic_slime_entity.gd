@@ -65,6 +65,7 @@ func _ready() -> void:
 	set_physics_process(true)
 	
 	hp_pool[0].died.connect(_on_death)
+	hp_pool[0].hp_modified.connect(_on_hp_modified)
 	hp_pool[0].received_damage.connect(_on_receive_damage)
 
 func _physics_process(delta: float) -> void:
@@ -148,27 +149,18 @@ func client_apply_jump() -> void:
 #endregion
 
 #region Damage
-func _on_receive_damage(snapshot: Dictionary) -> void:
-	return
-	
-	standard_receive_damage(snapshot)
-	
-	# play damage sfx
-	$'sfx'.play_sfx(&'hit')
+func _on_receive_damage(
+		_damage: int, _source_type: DamageSource.DamageSourceType, knockback: Vector2, player_id: int
+	) -> void:
 	
 	# set jump velocity to opposite of damage
-	var knockback: Vector2 = snapshot.get(&'knockback', Vector2.ZERO)
 	if knockback.x != 0.0 and not is_on_floor() and sign(knockback.x) != sign(jump_velocity.x):
 		jump_velocity.x = sign(knockback.x)
 	
 	# set target if not already set
 	if multiplayer.is_server():
 		if not is_instance_valid(target_player):
-			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
-			snapshot[&'update_target'] = true
-	else:
-		if snapshot.get(&'update_target'):
-			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
+			target_player = ServerManager.connected_players.get(player_id)
 
 func do_death() -> void:
 	if multiplayer.is_server():
@@ -182,6 +174,14 @@ func do_death() -> void:
 func _on_death() -> void:
 	kill()
 	send_kill()
+
+func _on_hp_modified(delta: int) -> void:
+	if delta >= 0:
+		return
+	
+	# play damage effects
+	do_flash()
+	$'sfx'.play_sfx(&'hit')
 
 #endregion
 

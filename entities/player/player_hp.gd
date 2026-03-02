@@ -6,11 +6,6 @@ extends EntityHp
 @export var player: PlayerController
 
 # --- Functions --- #
-func _ready() -> void:
-	super()
-	
-	received_damage.connect(player.receive_damage_snapshot)
-
 func apply_knockback(knockback: Vector2) -> void:
 	player.pending_knockback = knockback * player.knockback_power
 
