@@ -9,6 +9,7 @@ enum SlimeVariant {
 
 # --- Variables --- #
 const JUMP_ACTION := 16
+const LAND_ACTION := 17
 
 const POSITION_REMAIN_RANGE := (2.0 * TileManager.TILE_SIZE)**2
 const POSITION_ADJUST_RANGE := (6.0 * TileManager.TILE_SIZE)**2
@@ -82,20 +83,11 @@ func _physics_process(delta: float) -> void:
 		
 		# snap to floor
 		if is_on_floor():
-			airborne = false
-			velocity.x = 0.0
-	else:
-		#velocity = Vector2.ZERO
-		move_and_slide()
-		
-		# play land animation
-		if is_on_floor():
-			if airborne and not hp_pool[0].is_dead():
-				$'animator'.play(&'land')
-				$'animator'.advance(0.0)
-				$'animator'.queue(&'idle')
+			if airborne:
+				send_action_basic(LAND_ACTION)
 			
 			airborne = false
+			velocity.x = 0.0
 
 #region Physics
 func get_travel_direction() -> void:
@@ -144,7 +136,7 @@ func try_jump(delta: float) -> void:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			
 			$'animator'.play(&'jump')
-			send_jump()
+			send_action_basic(JUMP_ACTION)
 
 func apply_jump() -> void:
 	velocity = jump_velocity
@@ -152,15 +144,6 @@ func apply_jump() -> void:
 
 func client_apply_jump() -> void:
 	airborne = true
-
-func send_jump() -> void:
-	var buffer := StreamPeerBuffer.new()
-	buffer.resize(2)
-	
-	# action id
-	buffer.put_u16(JUMP_ACTION)
-	
-	interpolator.queue_action(NetworkTime.time, buffer.data_array)
 
 #endregion
 
@@ -194,17 +177,11 @@ func do_death() -> void:
 		# spawn item
 		ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
 	else:
-		queue_free()
+		$'animator'.play(&'death')
 
-func _on_death(from_server: bool) -> void:
-	if multiplayer.is_server():
-		EntityManager.create_entity(0, global_position - Vector2(0, 4), {
-			&'item_id': 2,
-			&'quantity': randi_range(1, 3)
-		})
-	
-	if from_server:
-		standard_death()
+func _on_death() -> void:
+	kill()
+	send_kill()
 
 #endregion
 
@@ -278,11 +255,19 @@ func handle_action(action_info: PackedByteArray) -> void:
 	
 	var action_id := buffer.get_u16()
 	
+	# don't process if dead (just playing death animatino)
+	if is_dead:
+		return
+	
 	match action_id:
 		JUMP_ACTION:
 			$'animator'.play(&'jump')
 			$'animator'.advance(0.0)
 			$'animator'.queue(&'airborne')
+		LAND_ACTION:
+			$'animator'.play(&'land')
+			$'animator'.advance(0.0)
+			$'animator'.queue(&'idle')
 
 #endregion
 

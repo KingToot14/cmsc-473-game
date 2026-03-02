@@ -182,14 +182,17 @@ func check_player(player_id: int) -> bool:
 #endregion
 
 #region Life Cycle
-func send_kill() -> void:
+func send_action_basic(action_id: int) -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.resize(2)
 	
 	# action id
-	buffer.put_u16(KILL_ACTION)
+	buffer.put_u16(action_id)
 	
 	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+
+func send_kill() -> void:
+	send_action_basic(KILL_ACTION)
 
 func kill() -> void:
 	if is_dead:
@@ -332,6 +335,8 @@ func deserialize_base(buffer: StreamPeerBuffer, server_time: float) -> void:
 	# entity hp
 	if len(hp_pool) > 0:
 		hp_pool[0].curr_hp = buffer.get_u32()
+	else:
+		buffer.get_u32()
 	
 	# flags
 	var flags := buffer.get_u8()

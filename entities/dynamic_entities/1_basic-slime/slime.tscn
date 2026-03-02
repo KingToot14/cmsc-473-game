@@ -313,6 +313,7 @@ collision_layer = 8
 collision_mask = 38
 script = ExtResource("11_odtd8")
 entity = NodePath("..")
+pool_id = null
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
 visible = false

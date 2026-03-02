@@ -30,8 +30,8 @@ func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
 	setup_entity()
 	tile_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
 	
-	for hp in hp_pool:
-		hp.setup()
+	#for hp in hp_pool:
+		#hp.setup()
 
 func setup_entity() -> void:
 	return

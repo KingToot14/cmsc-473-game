@@ -35,19 +35,19 @@ func setup_entity() -> void:
 	curr_height = height
 	hp_pool.resize(height)
 	
-	for i in range(height):
-		var hp := EntityHp.new()
-		hp.name = "HP_%s" % i
-		hp.pool_id = i
-		
-		hp.entity = self
-		hp.set_max_hp(100)
-		
-		hp_pool[i] = hp
-		hp_pool[i].died.connect(_on_death.bind(i))
-		
-		add_child(hp)
-		hp_pool[i].setup()
+	#for i in range(height):
+		#var hp := EntityHp.new()
+		#hp.name = "HP_%s" % i
+		#hp.pool_id = i
+		#
+		#hp.entity = self
+		#hp.set_max_hp(100)
+		#
+		#hp_pool[i] = hp
+		#hp_pool[i].died.connect(_on_death.bind(i))
+		#
+		#add_child(hp)
+		#hp_pool[i].setup()
 	
 	var last_branch_l := 0
 	var last_branch_r := 0
@@ -119,10 +119,10 @@ func damage_layer(layer_id: int, damage: int) -> void:
 	var hp := hp_pool[layer_id]
 	
 	# deal damage to pool
-	hp.take_damage({
-		&'damage': damage,
-		&'player_id': multiplayer.get_unique_id()
-	})
+	#hp.take_damage({
+		#&'damage': damage,
+		#&'player_id': multiplayer.get_unique_id()
+	#})
 	
 	# update sprite
 	var threshold := hp.get_hp_percent()

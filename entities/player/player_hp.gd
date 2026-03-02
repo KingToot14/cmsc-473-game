@@ -11,6 +11,9 @@ func _ready() -> void:
 	
 	received_damage.connect(player.receive_damage_snapshot)
 
+func apply_knockback(knockback: Vector2) -> void:
+	player.pending_knockback = knockback * player.knockback_power
+
 func send_damage_snapshot() -> void:
 	# send data to server
 	if multiplayer.is_server():
@@ -35,7 +38,7 @@ func update_player_hp(snapshot: Dictionary) -> void:
 	var damage: int = snapshot.get(&'damage', 0)
 	
 	# apply damage
-	player.hp.modify_health(-damage, true)
+	player.hp.modify_health(-damage)
 	
 	# TODO: Store hp in database
 	pass

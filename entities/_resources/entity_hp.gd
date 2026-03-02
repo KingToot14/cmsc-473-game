@@ -5,13 +5,13 @@ extends Node
 ## Emitted when this node receives a damage snapshot
 signal received_damage(snapshot: Dictionary)
 ## Emitted when this node has it's hp value modified
-signal hp_modified(from_server: bool)
+signal hp_modified()
 ## Emitted when this node's hp has been reduced to 0
-signal died(from_server: bool)
+signal died()
 
 # --- Variables --- #
 ## The entity this node is tied to
-@export var entity: Node2D
+@export var entity: Entity
 ## The index of this node in the [member entity.hp_pool]
 @export var pool_id := 0
 
@@ -54,11 +54,9 @@ func setup() -> void:
 ## Called from external damage sources. [param dmg_info] is a dictionary containing at least:
 ## [br] - [code]&'damage'[/code]: The base damage to deal. This is modified by [member entity.defense]
 ## [br] - [code]&'player_id'[/code]: The local player's unique id. Used for damage reconciliation
-func take_damage(dmg_info: Dictionary) -> void:
-	var damage: int = dmg_info.get(&'damage', 0)
-	var source_type: DamageSource.DamageSourceType = dmg_info.get(
-		&'source_type', DamageSource.DamageSourceType.WORLD
-	)
+func take_damage(
+		damage: int, source_type: DamageSource.DamageSourceType, knockback := Vector2.ZERO
+	) -> void:
 	
 	# check invincibility
 	if invincibility_timers.get(source_type, 0.0) > 0.0:
@@ -68,17 +66,53 @@ func take_damage(dmg_info: Dictionary) -> void:
 	invincibility_timers[source_type] = invincibility_time
 	
 	# deal damage
-	modify_health(-damage, false)
+	modify_health(-damage)
 	
-	# build attack snapshot
-	snapshots[sequence_id] = dmg_info.merged({
-		&'sequence_id': sequence_id,
-		&'pool_id': pool_id
-	})
+	# send damage to server
+	send_damage(damage, source_type, knockback)
+
+func send_damage(
+		damage: int, source_type: DamageSource.DamageSourceType, knockback := Vector2.ZERO
+	) -> void:
 	
-	sequence_id += 1
+	# uint32 (4) + uint16 (2) + 2 floats (2 * 4)
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 2 + (2 * 4))
 	
-	send_damage_snapshot()
+	# damage info
+	buffer.put_u32(damage)
+	buffer.put_u16(source_type)
+	
+	# knockback
+	buffer.put_float(knockback.x)
+	buffer.put_float(knockback.y)
+	
+	receive_damage.rpc_id(Globals.SERVER_ID, buffer.data_array)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func receive_damage(damage_info: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = damage_info
+	
+	# damage info
+	var damage := buffer.get_u32()
+	var source_type := buffer.get_u16() as DamageSource.DamageSourceType
+	
+	# knockback
+	var knockback := Vector2.ZERO
+	knockback.x = buffer.get_float()
+	knockback.y = buffer.get_float()
+	
+	# TODO: Maybe verify attack. This is going be be pretty complicated and idk if it's worth it
+	# it'd be nice to have if we get extra time somewhere down the line.
+	# We would need to send a lot more information per interaction (weapon id, entity id, position, etc.)
+	
+	# deal damage
+	modify_health(-damage)
+	apply_knockback(knockback)
+
+func apply_knockback(knockback: Vector2) -> void:
+	entity.velocity += knockback * entity.knockback_power
 
 func send_damage_snapshot() -> void:
 	# add vertical knockback
@@ -106,19 +140,18 @@ func receive_damage_snapshot(snapshot: Dictionary) -> void:
 		# calculate difference in health
 		var diff = snapshot.get(&'damage', 0) - prev_snapshot.get(&'damage', 0)
 		
-		modify_health(-diff, true)
+		modify_health(-diff)
 	else:
-		modify_health(-damage, true)
+		modify_health(-damage)
 	
 	received_damage.emit(snapshot)
 
-func modify_health(delta: int, from_server: bool) -> void:
+func modify_health(delta: int) -> void:
 	curr_hp += delta
-	hp_modified.emit(from_server)
+	hp_modified.emit()
 	
-	if curr_hp <= 0:
-		# TODO: Add effects and prediction to this area
-		died.emit(from_server)
+	if curr_hp <= 0 and multiplayer.is_server():
+		died.emit()
 
 func set_max_hp(hp: int, heal_to_full := false) -> void:
 	max_hp = hp
