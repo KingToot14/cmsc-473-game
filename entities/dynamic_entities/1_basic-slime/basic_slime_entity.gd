@@ -8,6 +8,8 @@ enum SlimeVariant {
 }
 
 # --- Variables --- #
+const JUMP_ACTION := 16
+
 const POSITION_REMAIN_RANGE := (2.0 * TileManager.TILE_SIZE)**2
 const POSITION_ADJUST_RANGE := (6.0 * TileManager.TILE_SIZE)**2
 
@@ -58,6 +60,9 @@ var rng: RandomNumberGenerator
 func _ready() -> void:
 	super()
 	
+	# enable physics process for client animations
+	set_physics_process(true)
+	
 	hp_pool[0].died.connect(_on_death)
 	hp_pool[0].received_damage.connect(_on_receive_damage)
 
@@ -65,27 +70,32 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
 		get_travel_direction()
 		try_jump(delta)
-	else:
-		return
-	
-	# gravity
-	if not is_on_floor():
-		velocity.x = jump_velocity.x
-	
-	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
-	
-	# movement
-	move_and_slide()
-	
-	# snap to ground
-	if is_on_floor():
-		if airborne and not hp_pool[0].is_dead():
-			$'animator'.play(&'land')
-			$'animator'.advance(0.0)
-			$'animator'.queue(&'idle')
 		
-		velocity.x = 0.0
-		airborne = false
+		# gravity
+		if not is_on_floor():
+			velocity.x = jump_velocity.x
+		
+		velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+		
+		# movement
+		move_and_slide()
+		
+		# snap to floor
+		if is_on_floor():
+			airborne = false
+			velocity.x = 0.0
+	else:
+		#velocity = Vector2.ZERO
+		move_and_slide()
+		
+		# play land animation
+		if is_on_floor():
+			if airborne and not hp_pool[0].is_dead():
+				$'animator'.play(&'land')
+				$'animator'.advance(0.0)
+				$'animator'.queue(&'idle')
+			
+			airborne = false
 
 #region Physics
 func get_travel_direction() -> void:
@@ -134,15 +144,23 @@ func try_jump(delta: float) -> void:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			
 			$'animator'.play(&'jump')
-			#EntityManager.entity_send_update(id, {
-				#&'type': &'jump-start',
-				#&'velocity': jump_velocity,
-				#&'position': global_position
-			#})
+			send_jump()
 
 func apply_jump() -> void:
 	velocity = jump_velocity
+	#airborne = true
+
+func client_apply_jump() -> void:
 	airborne = true
+
+func send_jump() -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(2)
+	
+	# action id
+	buffer.put_u16(JUMP_ACTION)
+	
+	interpolator.queue_action(NetworkTime.time, buffer.data_array)
 
 #endregion
 
@@ -251,6 +269,20 @@ func setup_variant() -> void:
 	travel_direction = 1 if randf() < 0.50 else -1
 	jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
 	jump_timer = jump_wait_base + randf_range(0, jump_wait_variance)
+
+func handle_action(action_info: PackedByteArray) -> void:
+	super(action_info)
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	var action_id := buffer.get_u16()
+	
+	match action_id:
+		JUMP_ACTION:
+			$'animator'.play(&'jump')
+			$'animator'.advance(0.0)
+			$'animator'.queue(&'airborne')
 
 func receive_update(update_data: Dictionary) -> Dictionary:
 	super(update_data)

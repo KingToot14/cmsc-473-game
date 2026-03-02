@@ -243,10 +243,10 @@ func break_place(_tile_position: Vector2i) -> bool:
 	return true
 
 func handle_action(action_info: PackedByteArray) -> void:
-	var offset := 0
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
 	
-	var action_id := action_info.decode_u16(offset)
-	offset += 2
+	var action_id := buffer.get_u16()
 	
 	match action_id:
 		KILL_ACTION:
