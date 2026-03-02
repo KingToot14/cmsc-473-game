@@ -110,8 +110,8 @@ func chase_physics(delta: float) -> void:
 	
 	# collect when close enough
 	if distance <= COLLECTION_RADIUS:
+		#send_kill()
 		kill()
-		send_kill()
 		
 		# add to inventory
 		target_player.my_inventory.add_item(item_id, quantity)
@@ -184,8 +184,8 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	
 	other_item.merged = true
 	other_item.quantity = 0
-	other_item.kill()
 	other_item.send_kill()
+	other_item.kill()
 
 #endregion
 

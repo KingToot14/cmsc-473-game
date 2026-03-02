@@ -246,7 +246,7 @@ size = Vector2(14, 10)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
 size = Vector2(14, 10)
 
-[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
+[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp")]
 collision_layer = 8
 script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
@@ -259,7 +259,7 @@ variant_purple_texture = ExtResource("5_7afba")
 variant_cloud_texture = ExtResource("6_en8ih")
 variant_stone_texture = ExtResource("7_7td2d")
 variant_tunnel_texture = ExtResource("8_w88l4")
-hp_pool = [NodePath("hp")]
+hp = NodePath("hp")
 flash_material = SubResource("ShaderMaterial_515sv")
 knockback_power = 400.0
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
@@ -313,7 +313,6 @@ collision_layer = 8
 collision_mask = 38
 script = ExtResource("11_odtd8")
 entity = NodePath("..")
-pool_id = null
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=872246849]
 visible = false

@@ -835,7 +835,6 @@ collision_layer = 2
 collision_mask = 24
 script = ExtResource("8_mtric")
 player = NodePath("..")
-pool_id = null
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1636322667]
 visible = false

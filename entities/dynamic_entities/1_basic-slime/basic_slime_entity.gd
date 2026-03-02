@@ -11,9 +11,6 @@ enum SlimeVariant {
 const JUMP_ACTION := 16
 const LAND_ACTION := 17
 
-const POSITION_REMAIN_RANGE := (2.0 * TileManager.TILE_SIZE)**2
-const POSITION_ADJUST_RANGE := (6.0 * TileManager.TILE_SIZE)**2
-
 const JUMP_POWER_TINY := 0.35
 const JUMP_POWER_SMALL := 0.50
 const JUMP_POWER_LARGE := 1.50
@@ -64,9 +61,9 @@ func _ready() -> void:
 	# enable physics process for client animations
 	set_physics_process(true)
 	
-	hp_pool[0].died.connect(_on_death)
-	hp_pool[0].hp_modified.connect(_on_hp_modified)
-	hp_pool[0].received_damage.connect(_on_receive_damage)
+	hp.died.connect(_on_death)
+	hp.hp_modified.connect(_on_hp_modified)
+	hp.received_damage.connect(_on_receive_damage)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
@@ -172,8 +169,11 @@ func do_death() -> void:
 		$'animator'.play(&'death')
 
 func _on_death() -> void:
+	if is_dead:
+		return
+	
+	#send_kill()
 	kill()
-	send_kill()
 
 func _on_hp_modified(delta: int) -> void:
 	if delta >= 0:
@@ -193,27 +193,27 @@ func setup_variant() -> void:
 			$'sprite'.texture = variant_green_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(96, true)
+			hp.set_max_hp(96, true)
 		SlimeVariant.BLUE:
 			$'sprite'.texture = variant_blue_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(138, true)
+			hp.set_max_hp(138, true)
 		SlimeVariant.RED:
 			$'sprite'.texture = variant_red_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(224, true)
+			hp.set_max_hp(224, true)
 		SlimeVariant.PURPLE:
 			$'sprite'.texture = variant_purple_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(296, true)
+			hp.set_max_hp(296, true)
 		SlimeVariant.CLOUD:
 			$'sprite'.texture = variant_cloud_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(158, true)
+			hp.set_max_hp(158, true)
 			
 			gravity *= 0.65
 			jump_power_base *= 1.10
@@ -224,7 +224,7 @@ func setup_variant() -> void:
 			$'sprite'.texture = variant_stone_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(362, true)
+			hp.set_max_hp(362, true)
 			
 			gravity *= 1.50
 			jump_power_base *= 1.20
@@ -235,7 +235,7 @@ func setup_variant() -> void:
 			$'sprite'.texture = variant_tunnel_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(172, true)
+			hp.set_max_hp(172, true)
 			
 			jump_power_base *= 0.60
 			jump_power_variance *= 0.60
@@ -278,7 +278,7 @@ func serialize_spawn_data() -> PackedByteArray:
 	
 	# snap to end of current buffer
 	var cursor := len(buffer.data_array)
-	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	buffer.resize(len(buffer.data_array) + 2)	# base + uint16 (2)
 	buffer.seek(cursor)
 	
 	# variant

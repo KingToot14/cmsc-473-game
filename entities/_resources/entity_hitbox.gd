@@ -15,7 +15,7 @@ func deal_damage(
 	) -> void:
 	if entity:
 		# deal damage
-		entity.hp_pool[0].take_damage(damage, source_type, knockback)
+		entity.hp.take_damage(damage, source_type, knockback)
 	if player:
 		# deal damage
 		player.hp.take_damage(damage, source_type, knockback)

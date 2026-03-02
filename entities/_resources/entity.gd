@@ -27,7 +27,7 @@ var current_chunk: Vector2i
 @export var counts_towards_spawn_cap := true
 @export var process_on_client := false
 
-@export var hp_pool: Array[EntityHp]
+@export var hp: EntityHp
 @export var flash_material: ShaderMaterial
 
 @export var knockback_power := 200.0
@@ -53,18 +53,6 @@ func _ready() -> void:
 	if not (process_on_client or multiplayer.is_server()):
 		set_process(false)
 		set_physics_process(false)
-
-func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
-	id = new_id
-	registry_id = reg_id
-	data = spawn_data
-	
-	calculate_chunk()
-	
-	setup_entity()
-	
-	for hp in hp_pool:
-		hp.setup()
 
 func calculate_chunk() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
@@ -248,7 +236,7 @@ func serialize() -> PackedByteArray:
 
 func serialize_base(buffer: StreamPeerBuffer) -> void:
 	# uint32 (4) + 2 float32 (2 * 4) + 2 float32 (2 * 4) + uint32 (4) + uint8 (1)
-	buffer.resize(len(buffer.data_array) + 4 + (2 * 4) + (2 * 4) + 4 + 1)
+	buffer.resize(len(buffer.data_array) + 4 + (2 * 4) + (2 * 4) + 4)
 	
 	# entity id
 	buffer.put_u32(id)
@@ -262,22 +250,14 @@ func serialize_base(buffer: StreamPeerBuffer) -> void:
 	buffer.put_float(velocity.y)
 	
 	# entity hp
-	if len(hp_pool) > 0:
-		buffer.put_u32(max(hp_pool[0].curr_hp, 0))
+	if hp:
+		buffer.put_u32(hp.curr_hp)
 	else:
 		buffer.put_u32(0)
 	
-	# flags
-	var flags = 0b00000000
-	
-	# entity is dead
-	if is_dead:
-		flags |= 1 << 0
-		
-		if should_free:
-			queue_free()
-	
-	buffer.put_u8(flags)
+	if is_dead and should_free:
+		send_kill()
+		queue_free()
 
 @warning_ignore("unused_parameter")
 func serialize_extra(buffer: StreamPeerBuffer) -> void:
@@ -306,17 +286,10 @@ func deserialize_base(buffer: StreamPeerBuffer, server_time: float) -> void:
 		})
 	
 	# entity hp
-	if len(hp_pool) > 0:
-		hp_pool[0].curr_hp = buffer.get_u32()
+	if hp:
+		hp.curr_hp = buffer.get_u32()
 	else:
 		buffer.get_u32()
-	
-	# flags
-	var flags := buffer.get_u8()
-	
-	# entity is dead
-	#if flags & (1 << 0):
-		#kill()
 
 @warning_ignore("unused_parameter")
 func deserialize_extra(buffer: StreamPeerBuffer, server_time: float) -> void:

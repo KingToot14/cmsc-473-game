@@ -14,15 +14,10 @@ signal died()
 # --- Variables --- #
 ## The entity this node is tied to
 @export var entity: Entity
-## The index of this node in the [member entity.hp_pool]
-@export var pool_id := 0
 
 ## The max health of this node
 @export var max_hp := 100
 var curr_hp := 0
-
-var sequence_id := 0
-var snapshots: Dictionary[int, Dictionary] = {}
 
 ## How long before this hp can take damage from each different damage source
 @export var invincibility_time := 0.50
@@ -41,17 +36,6 @@ func _process(delta: float) -> void:
 			
 			if invincibility_timers[source_type] <= 0.0:
 				invincibility_timers[source_type] = 0.0
-
-func setup() -> void:
-	var hp_pools: Dictionary = entity.data.get(&'hp', {})
-	
-	if hp_pools.is_empty() or pool_id not in hp_pools:
-		return
-	
-	curr_hp = hp_pools[pool_id]
-	
-	if curr_hp <= 0:
-		died.emit(true)
 
 ## Called from external damage sources. [param dmg_info] is a dictionary containing at least:
 ## [br] - [code]&'damage'[/code]: The base damage to deal. This is modified by [member entity.defense]
