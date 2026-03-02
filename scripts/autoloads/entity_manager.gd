@@ -47,8 +47,9 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 	
 	# set entity id
 	entity.id = curr_id
+	entity.registry_id = registry_id
 	entity.name = "entity_%s" % curr_id
-	loaded_entities[curr_id] = entity
+	loaded_entities[entity.id] = entity
 	curr_id += 1
 	
 	# anchor to chunk
@@ -56,7 +57,7 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 	
 	if entity.current_chunk not in dynamic_entities:
 		dynamic_entities[entity.current_chunk] = {}
-	dynamic_entities[entity.current_chunk][curr_id] = true
+	dynamic_entities[entity.current_chunk][entity.id] = true
 	
 	# send to interested players
 	var spawn_data := entity.serialize_spawn_data()
@@ -66,6 +67,10 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
+	if spawn_id in loaded_entities:
+		loaded_entities[spawn_id].add_interest(multiplayer.get_unique_id())
+		return
+	
 	# create new entity instance
 	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
 	if not entity_scene:

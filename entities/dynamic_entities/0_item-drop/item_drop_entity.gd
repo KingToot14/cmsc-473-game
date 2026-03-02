@@ -147,6 +147,7 @@ func do_death() -> void:
 		else:
 			queue_free()
 
+#region Area Handling
 func _on_collect_area_entered(area: Area2D) -> void:
 	if not area.is_in_group(&'item_collect'):
 		return
@@ -185,6 +186,8 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	other_item.quantity = 0
 	other_item.kill()
 	other_item.send_kill()
+
+#endregion
 
 #region Serialization
 func serialize_extra(buffer: StreamPeerBuffer) -> void:
@@ -255,6 +258,8 @@ static func spawn(
 	var entity_scene: PackedScene = EntityManager.enemy_registry.get(0).entity_scene
 	if not entity_scene:
 		return
+	
+	print_stack()
 	
 	var entity: ItemDropEntity = entity_scene.instantiate()
 	entity.global_position = pos

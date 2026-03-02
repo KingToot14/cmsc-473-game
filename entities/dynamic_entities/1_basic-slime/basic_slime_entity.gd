@@ -1,6 +1,12 @@
 class_name BasicSlimeEntity
 extends Entity
 
+# --- Enums --- #
+enum SlimeVariant {
+	GREEN, BLUE, RED, PURPLE,
+	CLOUD, STONE, TUNNEL
+}
+
 # --- Variables --- #
 const POSITION_REMAIN_RANGE := (2.0 * TileManager.TILE_SIZE)**2
 const POSITION_ADJUST_RANGE := (6.0 * TileManager.TILE_SIZE)**2
@@ -28,6 +34,7 @@ const JUMP_MODIFIER_ODDS := 0.10
 @export var terminal_velocity := 380.0
 
 @export_group("Variants", "variant_")
+var variant := SlimeVariant.GREEN
 
 @export var variant_green_texture: Texture2D
 @export var variant_blue_texture: Texture2D
@@ -92,7 +99,7 @@ func get_travel_direction() -> void:
 	# if no target, jump randomly
 	elif jump_remaining <= 0:
 		travel_direction = -travel_direction
-		jump_remaining = jump_per_direction_base + rng.randi_range(0, jump_per_direction_variance)
+		jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
 
 func try_jump(delta: float) -> void:
 	# try to jump
@@ -100,12 +107,12 @@ func try_jump(delta: float) -> void:
 		jump_timer -= delta
 		
 		if jump_timer <= 0:
-			jump_timer = jump_wait_base + rng.randf_range(0, jump_wait_variance)
+			jump_timer = jump_wait_base + randf_range(0, jump_wait_variance)
 			jump_remaining -= 1
 			
 			# set velocity
-			jump_velocity.x =  (move_power_base + rng.randf_range(0, move_power_variance)) * travel_direction
-			jump_velocity.y = -(jump_power_base + rng.randf_range(0, jump_power_variance))
+			jump_velocity.x =  (move_power_base + randf_range(0, move_power_variance)) * travel_direction
+			jump_velocity.y = -(jump_power_base + randf_range(0, jump_power_variance))
 			
 			if is_instance_valid(target_player):
 				var distance = global_position.distance_squared_to(target_player.global_position)
@@ -117,13 +124,13 @@ func try_jump(delta: float) -> void:
 				if distance > (20 * TileManager.TILE_SIZE)**2:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			else:
-				var roll: float = rng.randf()
+				var roll: float = randf()
 				
 				# random chance to perform a small jump
 				if roll < JUMP_MODIFIER_ODDS:
 					jump_velocity.y *= JUMP_POWER_SMALL
 				# random chance to perform a large jump (if not a small jump)
-				elif rng.randf() < JUMP_MODIFIER_ODDS * 2.0:
+				elif randf() < JUMP_MODIFIER_ODDS * 2.0:
 					jump_velocity.y *= JUMP_POWER_LARGE
 			
 			$'animator'.play(&'jump')
@@ -162,11 +169,20 @@ func _on_receive_damage(snapshot: Dictionary) -> void:
 		if snapshot.get(&'update_target'):
 			target_player = ServerManager.connected_players.get(snapshot[&'player_id'])
 
+func do_death() -> void:
+	if multiplayer.is_server():
+		should_free = true
+		
+		# spawn item
+		ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
+	else:
+		queue_free()
+
 func _on_death(from_server: bool) -> void:
 	if multiplayer.is_server():
 		EntityManager.create_entity(0, global_position - Vector2(0, 4), {
 			&'item_id': 2,
-			&'quantity': rng.randi_range(1, 3)
+			&'quantity': randi_range(1, 3)
 		})
 	
 	if from_server:
@@ -175,75 +191,66 @@ func _on_death(from_server: bool) -> void:
 #endregion
 
 #region Multiplayer
-func setup_entity() -> void:
-	var spawned: bool = data.get(&'spawned', true)
-	
-	rng = RandomNumberGenerator.new()
-	rng.seed = id
-	
+func setup_variant() -> void:
 	# variants
-	match data.get(&'variant', &'green'):
-		&'green':
+	match variant:
+		SlimeVariant.GREEN:
 			$'sprite'.texture = variant_green_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(96, spawned)		# only update hp to max if just spawned
-		&'blue':
+			hp_pool[0].set_max_hp(96, true)
+		SlimeVariant.BLUE:
 			$'sprite'.texture = variant_blue_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(138, spawned)		# only update hp to max if just spawned
-		&'red':
+			hp_pool[0].set_max_hp(138, true)
+		SlimeVariant.RED:
 			$'sprite'.texture = variant_red_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(224, spawned)		# only update hp to max if just spawned
-		&'purple':
+			hp_pool[0].set_max_hp(224, true)
+		SlimeVariant.PURPLE:
 			$'sprite'.texture = variant_purple_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(296, spawned)		# only update hp to max if just spawned
-		&'cloud':
+			hp_pool[0].set_max_hp(296, true)
+		SlimeVariant.CLOUD:
 			$'sprite'.texture = variant_cloud_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(158, spawned)		# only update hp to max if just spawned
+			hp_pool[0].set_max_hp(158, true)
 			
 			gravity *= 0.65
 			jump_power_base *= 1.10
 			jump_power_variance *= 1.10
 			move_power_base *= 1.10
 			move_power_variance *= 1.10
-		&'stone':
+		SlimeVariant.STONE:
 			$'sprite'.texture = variant_stone_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(362, spawned)		# only update hp to max if just spawned
+			hp_pool[0].set_max_hp(362, true)
 			
 			gravity *= 1.50
 			jump_power_base *= 1.20
 			jump_power_variance *= 1.20
 			move_power_base *= 1.20
 			move_power_variance *= 1.20
-		&'tunnel':
+		SlimeVariant.TUNNEL:
 			$'sprite'.texture = variant_tunnel_texture
 			
 			# stats
-			hp_pool[0].set_max_hp(172, spawned)		# only update hp to max if just spawned
+			hp_pool[0].set_max_hp(172, true)
 			
 			jump_power_base *= 0.60
 			jump_power_variance *= 0.60
 			move_power_base *= 1.60
 			move_power_variance *= 1.60
 	
-	# spawn-only logic
-	if not spawned:
-		return
-	
 	# set initial direction
-	travel_direction = 1 if rng.randf() < 0.50 else -1
-	jump_remaining = jump_per_direction_base + rng.randi_range(0, jump_per_direction_variance)
-	jump_timer = jump_wait_base + rng.randf_range(0, jump_wait_variance)
+	travel_direction = 1 if randf() < 0.50 else -1
+	jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
+	jump_timer = jump_wait_base + randf_range(0, jump_wait_variance)
 
 func receive_update(update_data: Dictionary) -> Dictionary:
 	super(update_data)
@@ -275,5 +282,26 @@ func receive_update(update_data: Dictionary) -> Dictionary:
 			$'animator'.queue(&'airborne')
 	
 	return NO_RESPONSE
+
+#endregion
+
+#region Spawning
+@warning_ignore("shadowed_variable")
+static func spawn(pos: Vector2, variant: SlimeVariant) -> void:
+	# create new item drop entity
+	var entity_scene: PackedScene = EntityManager.enemy_registry.get(1).entity_scene
+	if not entity_scene:
+		return
+	
+	var entity: BasicSlimeEntity = entity_scene.instantiate()
+	entity.global_position = pos
+	
+	entity.variant = variant
+	
+	# start entity logic
+	entity.setup_variant()
+	
+	# sync to players
+	EntityManager.add_entity(1, entity)
 
 #endregion

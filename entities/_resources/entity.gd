@@ -272,7 +272,7 @@ func serialize() -> PackedByteArray:
 
 func serialize_base(buffer: StreamPeerBuffer) -> void:
 	# uint32 (4) + 2 float32 (2 * 4) + 2 float32 (2 * 4) + uint32 (4) + uint8 (1)
-	buffer.resize(4 + (2 * 4) + (2 * 4) + 4 + 1)
+	buffer.resize(len(buffer.data_array) + 4 + (2 * 4) + (2 * 4) + 4 + 1)
 	
 	# entity id
 	buffer.put_u32(id)
@@ -359,7 +359,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 #endregion
 
 #region Spawning
-static func spawn_from_rule(rule: SpawnRule) -> void:
+static func spawn_from_rule(pos: Vector2, rule: SpawnRule) -> void:
 	pass
 
 #endregion

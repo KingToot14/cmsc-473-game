@@ -42,3 +42,7 @@ enum SpawnLocation {
 # --- Functions --- #
 func is_spawnable(biome: Biome, layer: Layer, time_state: TimeState) -> bool:
 	return (biome & spawn_biomes) and (layer & spawn_layers) and (time_state & spawn_times)
+
+@warning_ignore("unused_parameter")
+func do_spawn(position: Vector2) -> void:
+	return
