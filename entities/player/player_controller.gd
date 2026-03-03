@@ -119,8 +119,9 @@ func _ready() -> void:
 	active = false
 	$'chunk_loader'.area_loaded.connect(done_initial_load, CONNECT_ONE_SHOT)
 	
-	if multiplayer.is_server():
-		my_inventory.load_inventory()
+	# add inventory to child (weird workaround for RPCs)
+	my_inventory.name = "inventory"
+	add_child(my_inventory)
 	
 	if owner_id != multiplayer.get_unique_id():
 		interpolator.enabled = true
@@ -132,7 +133,8 @@ func _ready() -> void:
 		position = spawn_point
 		
 		# setup inventory
-		my_inventory.load_inventory()
+		my_inventory.owner_id = owner_id
+		#my_inventory.load_inventory()
 		
 		# Ensure the sibling hotbar is visible
 		$inventory_ui/hotbar_container.show()
@@ -157,14 +159,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	# update direction
 	if velocity.x != 0.0 and can_turn():
-		var changed := false
-		
 		if face_direction == -1 and velocity.x > 0.0:
 			face_direction = 1
-			changed = true
 		if face_direction == 1  and velocity.x < 0.0:
 			face_direction = -1
-			changed = true
 	
 	# update animation
 	update_is_on_floor()
@@ -344,7 +342,7 @@ func update_is_on_floor() -> void:
 #endregion
 
 #region Loading
-## The [class ChunkLoader] has loaded and autotiled the initial region of tiles.
+## The [ChunkLoader] has loaded and autotiled the initial region of tiles.
 ## [br]Enables input, the camera, and sets the camera bounds
 func done_initial_load() -> void:
 	active = true
@@ -354,6 +352,9 @@ func done_initial_load() -> void:
 	
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
+	
+	if multiplayer.is_server():
+		my_inventory.load_inventory()
 	
 	# only change music for the local client
 	# TODO: Move to BiomeManager when implemented

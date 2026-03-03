@@ -1,5 +1,5 @@
 class_name Inventory
-extends RefCounted
+extends Node
 
 # --- Signals --- #
 signal inventory_updated
@@ -10,6 +10,9 @@ const INVENTORY_SLOTS := 50
 var items: Array[ItemStack] = []
 var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
+
+var owner_id := 0
+
 # --- Functions --- #
 func _init():
 	for i in range(INVENTORY_SLOTS): # 50 empty inventory slots
@@ -31,6 +34,13 @@ func add_item(item_id: int, amount: int) -> int:
 			amount -= adding
 			if amount <= 0: 
 				inventory_updated.emit()
+				
+				# send to server
+				if multiplayer.is_server():
+					send_inventory()
+				else:
+					send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+				
 				return 0
 	
 	# add to first empty stack
@@ -39,8 +49,21 @@ func add_item(item_id: int, amount: int) -> int:
 			stack.item_id = item_id
 			stack.count = amount
 			inventory_updated.emit()
-			return 0
 			
+			# send to server
+			if multiplayer.is_server():
+				send_inventory()
+			else:
+				send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+			
+			return 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+	
 	return amount # Return leftovers if full
 
 func remove_item(item_id: int, count: int) -> void:
@@ -63,6 +86,12 @@ func remove_item(item_id: int, count: int) -> void:
 				count = abs(diff)
 			else:
 				count = 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_remove_item.rpc_id(Globals.SERVER_ID, item_id, count)
 	
 	inventory_updated.emit()
 #Unique inventory stuff: compare owner_id from player controler with multiplayer.get_unique_id() also from player controler
@@ -117,7 +146,13 @@ func interact_with_slot(index: int) -> void:
 		
 		held_item.item_id = temp_id
 		held_item.count = temp_count
-
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_mouse_input.rpc_id(Globals.SERVER_ID, index)
+	
 	# Update the UI
 	inventory_updated.emit()
 
@@ -147,14 +182,63 @@ func load_inventory() -> void:
 	
 	# if database entry not available, setup standard inventory
 	add_item(6, 1)		# wooden sword
-	add_item(7, 1) 		#wooden pickaxe
-	add_item(9, 1)		#wooden hammer
-	add_item(10, 1)		#wooden axe
+	add_item(7, 1) 		# wooden pickaxe
+	add_item(9, 1)		# wooden hammer
+	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
 	add_item(4, 10)		# stone blocks
 	add_item(0, 30)		# wood logs
 	add_item(8, 20)		# wood blocks
 
+
+#endregion
+
+#region Synchronization
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_add_item(item_id: int, amount: int) -> void:
+	add_item(item_id, amount)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_remove_item(item_id: int, amount: int) -> void:
+	remove_item(item_id, amount)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_mouse_input(index: int) -> void:
+	interact_with_slot(index)
+
+func send_inventory() -> void:
+	# buffer: (int16 for item_id, int16 for quantity) for every slot + held_item
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(INVENTORY_SLOTS * (2 + 2) + (2 + 2))
+	
+	# held item
+	buffer.put_16(held_item.item_id)
+	buffer.put_16(held_item.count)
+	
+	# main inventory
+	for i in range(INVENTORY_SLOTS):
+		buffer.put_16(items[i].item_id)
+		buffer.put_16(items[i].count)
+	
+	# send to client
+	receive_inventory.rpc_id(owner_id, buffer.data_array)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_inventory(inventory_data: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = inventory_data
+	
+	# held item
+	held_item.item_id = buffer.get_16()
+	held_item.count   = buffer.get_16()
+	
+	# main inventory
+	for i in range(INVENTORY_SLOTS):
+		items[i].item_id = buffer.get_16()
+		items[i].count   = buffer.get_16()
+	
+	# update inventory
+	inventory_updated.emit()
 
 #endregion
 
