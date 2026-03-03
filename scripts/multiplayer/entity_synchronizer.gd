@@ -27,6 +27,10 @@ func send_snapshots() -> void:
 		if not is_instance_valid(ServerManager.connected_players.get(player_id)):
 			continue
 		
+		# don't start syncing entities until player is done loading
+		if not ServerManager.is_player_finalized(player_id):
+			continue
+		
 		bundles[player_id] = PackedByteArray()
 		bundle_counts[player_id] = 0
 	
@@ -34,10 +38,12 @@ func send_snapshots() -> void:
 	for entity_id: int in EntityManager.loaded_entities:
 		if not (EntityManager.loaded_entities.get(entity_id)):
 			continue
-		if EntityManager.loaded_entities[entity_id] is not Entity:
-			continue
 		
-		var entity: Entity = EntityManager.loaded_entities[entity_id]
+		var entity_ref := EntityManager.loaded_entities[entity_id]
+		var entity := entity_ref.current_instance
+		
+		if not is_instance_valid(entity):
+			continue
 		
 		var entity_data := entity.serialize()
 		
@@ -52,6 +58,10 @@ func send_snapshots() -> void:
 	# send bundles
 	for player_id: int in ServerManager.connected_players:
 		if not is_instance_valid(ServerManager.connected_players.get(player_id)):
+			continue
+		
+		# don't start syncing entities until player is done loading
+		if not ServerManager.is_player_finalized(player_id):
 			continue
 		
 		if bundle_counts[player_id] == 0:
@@ -99,7 +109,9 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 		if not is_instance_valid(EntityManager.loaded_entities.get(entity_id)):
 			continue
 		
-		var entity: Entity = EntityManager.loaded_entities.get(entity_id)
+		var entity_ref := EntityManager.loaded_entities[entity_id]
+		var entity := entity_ref.current_instance
+		
 		var packet_stream := StreamPeerBuffer.new()
 		packet_stream.data_array = packet
 		

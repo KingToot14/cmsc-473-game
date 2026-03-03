@@ -18,6 +18,12 @@ const SNAPSHOT_INTERVAL := 1.0 / SNAPSHOT_RATE
 var snapshot_timer := 0.0
 
 # --- Functions --- #
+func _ready() -> void:
+	super()
+	
+	# connect signal to automatically reset interested players
+	ServerManager.players_changed.connect(_on_players_changed)
+
 func _process(delta: float) -> void:
 	if not enabled:
 		return
@@ -28,6 +34,9 @@ func _process(delta: float) -> void:
 	
 	# check for other snapshots
 	super(delta)
+
+func _on_players_changed() -> void:
+	interested_players = ServerManager.connected_players.keys()
 
 ## Sends a snapshot to other interpolators if [member snapshot_timer] is less
 ## than or equal to 0.0. This methods sends a snapshot with the [member root]'s

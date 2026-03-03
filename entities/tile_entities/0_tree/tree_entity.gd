@@ -6,6 +6,7 @@ const APPLE_DROP_ODDS := 0.10
 
 var branch_seed := 0
 
+var layer_hp: Array[EntityHp] = []
 var height := 0
 var curr_height := 0
 var variant := 0
@@ -33,21 +34,20 @@ func setup_entity() -> void:
 	# main body
 	height = rng.randi_range(15, 21)
 	curr_height = height
-	hp_pool.resize(height)
+	layer_hp.resize(height)
 	
-	#for i in range(height):
-		#var hp := EntityHp.new()
-		#hp.name = "HP_%s" % i
-		#hp.pool_id = i
-		#
-		#hp.entity = self
-		#hp.set_max_hp(100)
-		#
-		#hp_pool[i] = hp
-		#hp_pool[i].died.connect(_on_death.bind(i))
-		#
-		#add_child(hp)
-		#hp_pool[i].setup()
+	for i in range(height):
+		var new_hp := EntityHp.new()
+		new_hp.name = "HP_%s" % i
+		new_hp.pool_id = i
+		
+		new_hp.entity = self
+		new_hp.set_max_hp(100)
+		
+		layer_hp[i] = hp
+		layer_hp[i].died.connect(_on_layer_death.bind(i))
+		
+		add_child(hp)
 	
 	var last_branch_l := 0
 	var last_branch_r := 0
@@ -116,7 +116,8 @@ func break_place(tile_pos: Vector2i) -> bool:
 
 #region Damage
 func damage_layer(layer_id: int, damage: int) -> void:
-	var hp := hp_pool[layer_id]
+	var layer := layer_hp[layer_id]
+	layer.take_damage(damage, DamageSource.DamageSourceType.PLAYER)
 	
 	# deal damage to pool
 	#hp.take_damage({
@@ -125,7 +126,7 @@ func damage_layer(layer_id: int, damage: int) -> void:
 	#})
 	
 	# update sprite
-	var threshold := hp.get_hp_percent()
+	var threshold := layer.get_hp_percent()
 	var sprite: TileMapLayer = $'sprite'
 	
 	if threshold < 0.25:
@@ -141,13 +142,10 @@ func damage_layer(layer_id: int, damage: int) -> void:
 		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 0))
 		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 0))
 
-func _on_death(from_server: bool, pool_id: int) -> void:
+func _on_layer_death(pool_id: int) -> void:
 	# destroy tree when last layer is broken
 	if pool_id == 0:
-		hide()
-		
-		if from_server:
-			standard_death()
+		kill()
 	
 	# server spawns items
 	if multiplayer and multiplayer.is_server():

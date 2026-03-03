@@ -58,34 +58,32 @@ var rng: RandomNumberGenerator
 func _ready() -> void:
 	super()
 	
-	# enable physics process for client animations
-	set_physics_process(true)
-	
-	hp.died.connect(_on_death)
 	hp.hp_modified.connect(_on_hp_modified)
 	hp.received_damage.connect(_on_receive_damage)
+	
+	if multiplayer.is_server():
+		hp.died.connect(_on_death)
 
 func _physics_process(delta: float) -> void:
-	if multiplayer.is_server():
-		get_travel_direction()
-		try_jump(delta)
+	get_travel_direction()
+	try_jump(delta)
+	
+	# gravity
+	if not is_on_floor():
+		velocity.x = jump_velocity.x
+	
+	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	
+	# movement
+	move_and_slide()
+	
+	# snap to floor
+	if is_on_floor():
+		if airborne:
+			send_action_basic(LAND_ACTION)
 		
-		# gravity
-		if not is_on_floor():
-			velocity.x = jump_velocity.x
-		
-		velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
-		
-		# movement
-		move_and_slide()
-		
-		# snap to floor
-		if is_on_floor():
-			if airborne:
-				send_action_basic(LAND_ACTION)
-			
-			airborne = false
-			velocity.x = 0.0
+		airborne = false
+		velocity.x = 0.0
 
 #region Physics
 func get_travel_direction() -> void:
@@ -159,20 +157,10 @@ func _on_receive_damage(
 		if not is_instance_valid(target_player):
 			target_player = ServerManager.connected_players.get(player_id)
 
-func do_death() -> void:
-	if multiplayer.is_server():
-		should_free = true
-		
-		# spawn item
-		ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
-	else:
-		$'animator'.play(&'death')
-
 func _on_death() -> void:
 	if is_dead:
 		return
 	
-	#send_kill()
 	kill()
 
 func _on_hp_modified(delta: int) -> void:
@@ -182,6 +170,15 @@ func _on_hp_modified(delta: int) -> void:
 	# play damage effects
 	do_flash()
 	$'sfx'.play_sfx(&'hit')
+
+func do_death() -> void:
+	if multiplayer.is_server():
+		should_free = true
+		
+		# spawn item
+		ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
+	else:
+		$'animator'.play(&'death')
 
 #endregion
 

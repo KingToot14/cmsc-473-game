@@ -40,6 +40,10 @@ var queued_actions: Dictionary = {}
 ## Whether or not this node should be running snapshot interpolation
 var enabled := false
 
+## A list of interested players that should receive snapshot and action RPCs. This should
+## either be manually set by entities, or set to all players for [PlayerInterpolator]s
+var interested_players: Array[int] = []
+
 # --- Functions --- #
 func _ready() -> void:
 	await get_tree().process_frame
@@ -141,7 +145,8 @@ func queue_snapshot(time: float, snapshot: Dictionary) -> void:
 	if not (enabled and multiplayer.is_server()):
 		return
 	
-	send_snapshot.rpc(time, snapshot)
+	for player_id in interested_players:
+		send_snapshot.rpc_id(player_id, time, snapshot)
 
 ## Receives and adds [param snapshot] to the end of the queue and inserts
 ## the value [code]&'time': time[/code] into [param snapshot]. This is typically
@@ -164,7 +169,8 @@ func queue_action(time: float, action_info: PackedByteArray) -> void:
 	if not (enabled and multiplayer.is_server()):
 		return
 	
-	send_action.rpc(time, action_info)
+	for player_id in interested_players:
+		send_action.rpc_id(player_id, time, action_info)
 
 ## Receives and inserts [param action_info] into the action queue at [param time].
 ## This is typically only called from [method queue_action]

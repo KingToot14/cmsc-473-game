@@ -245,7 +245,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	await get_tree().create_timer(2.0).timeout
 	
 	# send update to server
-	done_loading.rpc_id(1, &'initial-load')
+	done_loading.rpc_id(Globals.SERVER_ID, &'initial-load')
 	await get_tree().create_timer(0.5).timeout
 	
 	set_process(true)
@@ -256,3 +256,4 @@ func done_loading(message: StringName) -> void:
 	if message == &'initial-load':
 		set_process(true)
 		area_loaded.emit()
+		ServerManager.finalized_players[player.owner_id] = true

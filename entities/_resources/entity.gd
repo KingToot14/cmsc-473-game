@@ -8,8 +8,6 @@ signal lost_all_interest()
 signal despawn()
 
 # --- Variables --- #
-const NO_RESPONSE: Dictionary = {}
-
 const KILL_ACTION := 0
 const PAUSE_ACTION := 1
 const RESUME_ACTION := 2
@@ -83,11 +81,21 @@ func setup_entity() -> void:
 
 #region Interest
 func add_interest(player_id: int) -> void:
+	if not ServerManager.is_player_finalized(player_id):
+		return
+	
+	send_process_state(RESUME_ACTION, player_id)
+	
 	interested_players[player_id] = true
 	
 	check_interest()
 
 func remove_interest(player_id: int) -> void:
+	if not ServerManager.is_player_finalized(player_id):
+		return
+	
+	send_process_state(PAUSE_ACTION, player_id)
+	
 	interested_players.erase(player_id)
 	
 	check_interest()
@@ -101,15 +109,19 @@ func check_interest() -> void:
 	
 	interest_changed.emit(interest_count)
 	
+	# update interpolator
+	interpolator.interested_players = interested_players.keys()
+	
 	# check if no players are loading
 	if interest_count == 0:
 		lost_all_interest.emit()
 		_despawn_timer = despawn_time
 		
-		# send signal to client entities
-		send_action_basic(PAUSE_ACTION)
+		# stop processing until loaded
+		process_mode = Node.PROCESS_MODE_DISABLED
 	else:
-		send_action_basic(RESUME_ACTION)
+		# resume processing
+		process_mode = Node.PROCESS_MODE_INHERIT
 
 func scan_interest() -> void:
 	var load_range := ChunkLoader.LOAD_RANGE
@@ -127,6 +139,7 @@ func scan_interest() -> void:
 		
 		# set interested
 		add_interest(player_id)
+		
 		if counts_towards_spawn_cap:
 			player.add_interest(id)
 	
@@ -154,6 +167,18 @@ func send_action_basic(action_id: int) -> void:
 
 func send_kill() -> void:
 	send_action_basic(KILL_ACTION)
+
+func send_process_state(action_id: int, player_id: int) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(2)
+	
+	# action id
+	buffer.put_u16(action_id)
+	
+	# player id
+	buffer.put_u32(player_id)
+	
+	interpolator.queue_action(NetworkTime.time, buffer.data_array)
 
 func kill() -> void:
 	if is_dead:
@@ -216,8 +241,20 @@ func handle_action(action_info: PackedByteArray) -> void:
 		KILL_ACTION:
 			kill()
 		PAUSE_ACTION:
+			var player_id := buffer.get_u32()
+			
+			# only process on requested client
+			if player_id != multiplayer.get_unique_id():
+				return
+			
 			process_mode = Node.PROCESS_MODE_DISABLED
 		RESUME_ACTION:
+			var player_id := buffer.get_u32()
+			
+			# only process on requested client
+			if player_id != multiplayer.get_unique_id():
+				return
+			
 			process_mode = Node.PROCESS_MODE_INHERIT
 
 #endregion
@@ -260,7 +297,7 @@ func serialize_base(buffer: StreamPeerBuffer) -> void:
 		buffer.put_u32(0)
 	
 	if is_dead and should_free:
-		send_kill()
+		EntityManager.send_update_important(id, KILL_ACTION)
 		EntityManager.erase_entity(self)
 		queue_free()
 
