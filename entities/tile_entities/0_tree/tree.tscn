@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dw56xaq3k2uek" path="res://entities/tile_entities/0_tree/tree_entity.gd" id="1_h6ae8"]
 [ext_resource type="TileSet" uid="uid://bslwlmjmcwrva" path="res://entities/tile_entities/0_tree/tree_tiles.tres" id="2_54gn5"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_ycj7j"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/tile_entity_hitbox.gd" id="4_awuoa"]
 
@@ -12,8 +13,15 @@ size = Vector2(12, 112)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e22dk"]
 size = Vector2(14, 6)
 
-[node name="tree" type="Node2D" unique_id=2081166833]
+[node name="tree" type="CharacterBody2D" unique_id=1280563612 node_paths=PackedStringArray("interpolator")]
 script = ExtResource("1_h6ae8")
+always_snapshot = false
+interpolator = NodePath("snapshot_interpolator")
+
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=2118042069 node_paths=PackedStringArray("root")]
+script = ExtResource("2_ycj7j")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
 
 [node name="sprite" type="TileMapLayer" parent="." unique_id=1112404873]
 z_index = 25

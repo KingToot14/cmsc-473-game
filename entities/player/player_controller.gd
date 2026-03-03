@@ -31,7 +31,7 @@ var center_point: Vector2:
 
 # - Movement
 @onready var input_sync: InputSynchronizer = $'input_sync'
-@onready var snapshot_interpolator: SnapshotInterpolator = $'snapshot_interpolator'
+@onready var interpolator: PlayerInterpolator = $'snapshot_interpolator'
 
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
@@ -113,7 +113,7 @@ func _ready() -> void:
 	
 	$'rollback_sync'.process_settings()
 	
-	$'snapshot_interpolator'.owner_id = owner_id
+	interpolator.owner_id = owner_id
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
@@ -123,7 +123,7 @@ func _ready() -> void:
 		my_inventory.load_inventory()
 	
 	if owner_id != multiplayer.get_unique_id():
-		$'snapshot_interpolator'.enabled = true
+		interpolator.enabled = true
 		
 		# disable inventory ui
 		$'inventory_ui'.queue_free()
@@ -143,13 +143,16 @@ func _ready() -> void:
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if owner_id != multiplayer.get_unique_id():
+		return
+	
 	if event.is_action_pressed(&"inventory_toggle"):
 		var inv_container = $inventory_ui/inventory_container
 		inv_container.visible = !inv_container.visible
 	#if event.is_action_pressed(&"crafting_toggle"):
 		var craft_container = $inventory_ui/crafting_container
 		craft_container.visible = !craft_container.visible
-
+	
 #region Animation
 func _process(_delta: float) -> void:
 	# update direction
@@ -338,13 +341,6 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
-## Handles an incomming damage snapshot
-@rpc('authority', 'call_remote', 'reliable')
-func receive_damage_snapshot(snapshot: Dictionary) -> void:
-	# apply knockback (if not dead)
-	if not snapshot.get(&'entity_dead', false) or true:
-		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-
 #endregion
 
 #region Loading
@@ -359,16 +355,19 @@ func done_initial_load() -> void:
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
 	
-	# swtich track to music TODO: Move this to a a function in biome manager when implemented
-	Globals.music.play_track(MusicManager.Area.FOREST_DAY, 1)
-
+	# only change music for the local client
+	# TODO: Move to BiomeManager when implemented
+	if owner_id == multiplayer.get_unique_id():
+		enter_biome(MusicManager.Area.FOREST_DAY)
 #endregion
+
+func enter_biome(area: MusicManager.Area) -> void:
+	Globals.music.reset_area(area)
+	Globals.music.play_track(area)
 
 #region Interest
 func add_interest(entity_id: int) -> void:
 	interested_entities[entity_id] = true
-
 func remove_interest(entity_id: int) -> void:
 	interested_entities.erase(entity_id)
-
 #endregion

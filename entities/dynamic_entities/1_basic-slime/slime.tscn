@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bftjxbs8d72yh" path="res://entities/dynamic_entities/1_basic-slime/stone_slime.png" id="7_7td2d"]
 [ext_resource type="Texture2D" uid="uid://bpan08mvhnmv5" path="res://entities/dynamic_entities/1_basic-slime/tunnel_slime.png" id="8_w88l4"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="9_j8mhm"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="10_j1jji"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="10_jsemx"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/entity_hp.gd" id="10_sgt0n"]
 [ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="11_7afba"]
@@ -161,11 +162,14 @@ tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.3),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1),
 "values": [{
 "args": [],
 "method": &"apply_jump"
+}, {
+"args": [],
+"method": &"client_apply_jump"
 }]
 }
 tracks/1/type = "value"
@@ -242,7 +246,7 @@ size = Vector2(14, 10)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
 size = Vector2(14, 10)
 
-[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp_pool")]
+[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("interpolator", "hp")]
 collision_layer = 8
 script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
@@ -255,10 +259,16 @@ variant_purple_texture = ExtResource("5_7afba")
 variant_cloud_texture = ExtResource("6_en8ih")
 variant_stone_texture = ExtResource("7_7td2d")
 variant_tunnel_texture = ExtResource("8_w88l4")
-hp_pool = [NodePath("hp")]
+interpolator = NodePath("snapshot_interpolator")
+hp = NodePath("hp")
 flash_material = SubResource("ShaderMaterial_515sv")
 knockback_power = 400.0
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
+
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1558705634 node_paths=PackedStringArray("root")]
+script = ExtResource("10_j1jji")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
 
 [node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=562441316]
 stream = SubResource("AudioStreamPolyphonic_en8ih")
