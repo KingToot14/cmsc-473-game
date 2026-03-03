@@ -63,6 +63,7 @@ func _ready() -> void:
 	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
 		return
+	
 	play_track(Area.TITLE_SCREEN)
 
 
