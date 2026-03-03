@@ -362,19 +362,19 @@ func done_initial_load() -> void:
 	# hide ui
 	get_tree().current_scene.get_node(^'join_ui').hide()
 	
-	# swtich track to music TODO: Move this to a a function in biome manager when implemented
-	enter_biome(MusicManager.Area.FOREST_DAY)
-
+	# only change music for the local client
+	# TODO: Move to BiomeManager when implemented
+	if owner_id == multiplayer.get_unique_id():
+		enter_biome(MusicManager.Area.FOREST_DAY)
 #endregion
 
 func enter_biome(area: MusicManager.Area) -> void:
 	Globals.music.reset_area(area)
 	Globals.music.play_track(area)
+
 #region Interest
 func add_interest(entity_id: int) -> void:
 	interested_entities[entity_id] = true
-
 func remove_interest(entity_id: int) -> void:
 	interested_entities.erase(entity_id)
-
 #endregion
