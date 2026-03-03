@@ -110,6 +110,9 @@ func modify_health(delta: int) -> void:
 	if curr_hp <= 0 and multiplayer.is_server():
 		died.emit()
 
+func set_hp(hp: int) -> void:
+	modify_health(-(curr_hp - hp))
+
 func set_max_hp(hp: int, heal_to_full := false) -> void:
 	max_hp = hp
 	if heal_to_full:

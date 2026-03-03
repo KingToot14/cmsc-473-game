@@ -8,6 +8,8 @@ enum TreeVariant {
 }
 
 # --- Variables --- #
+const HP_UPDATE_ACTION := 16
+
 const APPLE_DROP_ODDS := 0.10
 
 var branch_seed := 0
@@ -54,6 +56,9 @@ func setup_entity() -> void:
 		
 		layer_hp[i] = new_hp
 		layer_hp[i].died.connect(_on_layer_death.bind(i))
+		
+		if multiplayer.is_server():
+			layer_hp[i].hp_modified.connect(func (_d): send_hp_update())
 		
 		add_child(new_hp)
 	
@@ -108,6 +113,25 @@ func resize_tree() -> void:
 	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
 	$'hitbox/shape'.shape.size.y = (curr_height * 8.0)
 
+func update_layer_damage(layer_id: int) -> void:
+	var threshold := layer_hp[layer_id].get_hp_percent()
+	var sprite: TileMapLayer = $'sprite'
+	
+	if is_equal_approx(threshold, 1.0):
+		return
+	elif threshold < 0.25:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 3))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 3))
+	elif threshold < 0.50:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 2))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 2))
+	elif threshold < 0.75:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 1))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 1))
+	else:
+		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 0))
+		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 0))
+
 #endregion
 
 #region Interaction
@@ -132,21 +156,7 @@ func damage_layer(layer_id: int, dmg: int) -> void:
 	layer.take_damage(dmg, DamageSource.DamageSourceType.PLAYER)
 	
 	# update sprite
-	var threshold := layer.get_hp_percent()
-	var sprite: TileMapLayer = $'sprite'
-	
-	if threshold < 0.25:
-		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 3))
-		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 3))
-	elif threshold < 0.50:
-		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 2))
-		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 2))
-	elif threshold < 0.75:
-		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 1))
-		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 1))
-	else:
-		sprite.set_cell(Vector2i(0, -(layer_id + 1)), variant, Vector2i(4, 0))
-		sprite.set_cell(Vector2i(1, -(layer_id + 1)), variant, Vector2i(5, 0))
+	update_layer_damage(layer_id)
 
 func _on_layer_death(pool_id: int) -> void:
 	# destroy tree when last layer is broken
@@ -217,6 +227,44 @@ func _on_layer_death(pool_id: int) -> void:
 	
 	if curr_height > 0:
 		resize_tree()
+
+#endregion
+
+#region Multiplayer
+func send_hp_update() -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(2 + height)
+	
+	# action id
+	buffer.put_u16(HP_UPDATE_ACTION)
+	
+	# pack hp
+	for i in range(height):
+		buffer.put_u8(layer_hp[i].curr_hp)
+	
+	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+
+func handle_action(action_info: PackedByteArray) -> void:
+	super(action_info)
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	var action_id := buffer.get_u16()
+	
+	match action_id:
+		HP_UPDATE_ACTION:
+			for i in range(height):
+				# set hp
+				layer_hp[i].set_hp(buffer.get_u8())
+				if layer_hp[i].curr_hp == 0:
+					curr_height = min(curr_height, i)
+				
+				# update layer sprite
+				update_layer_damage(i)
+			
+			if curr_height != height:
+				resize_tree()
 
 #endregion
 

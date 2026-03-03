@@ -38,6 +38,7 @@ var _despawn_timer := 0.0
 
 var is_dead := false
 var should_free := false
+var should_free_instant := true
 
 @export_group("Combat")
 @export var damage := 25
@@ -188,7 +189,13 @@ func kill() -> void:
 
 func do_death() -> void:
 	if multiplayer.is_server():
-		should_free = true
+		# if sending constant snapshots, wait until next snapshot
+		if always_snapshot:
+			should_free = true
+		else:
+			EntityManager.send_update_important(id, KILL_ACTION, should_free_instant)
+			EntityManager.erase_entity(self)
+			queue_free()
 	else:
 		queue_free()
 
@@ -291,7 +298,7 @@ func serialize_base(buffer: StreamPeerBuffer) -> void:
 		buffer.put_u32(0)
 	
 	if is_dead and should_free:
-		EntityManager.send_update_important(id, KILL_ACTION)
+		EntityManager.send_update_important(id, KILL_ACTION, should_free_instant)
 		EntityManager.erase_entity(self)
 		queue_free()
 

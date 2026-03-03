@@ -183,6 +183,7 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	
 	other_item.merged = true
 	other_item.quantity = 0
+	other_item.should_free_instant = false
 	other_item.kill()
 
 #endregion
