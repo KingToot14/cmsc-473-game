@@ -157,6 +157,8 @@ func break_place(tile_pos: Vector2i) -> bool:
 	return true
 
 #endregion
+## check hovered hitbox
+
 
 #region Damage
 func damage_layer(layer_id: int, dmg: int) -> void:

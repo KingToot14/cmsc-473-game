@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://d2fd71npwecyw"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_8srkp"]
+
+[resource]
+script = ExtResource("1_8srkp")
+force_towards_mouse = true
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
