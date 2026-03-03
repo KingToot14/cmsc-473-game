@@ -105,7 +105,7 @@ func resize_tree() -> void:
 #region Interaction
 func break_place(tile_pos: Vector2i) -> bool:
 	var layer = abs(tile_pos.y - tile_position.y) - 1
-	
+
 	# TODO: Deal damage based on axe/tool
 	damage_layer(layer, 25)
 	
@@ -113,6 +113,8 @@ func break_place(tile_pos: Vector2i) -> bool:
 	return true
 
 #endregion
+## check hovered hitbox
+
 
 #region Damage
 func damage_layer(layer_id: int, damage: int) -> void:
