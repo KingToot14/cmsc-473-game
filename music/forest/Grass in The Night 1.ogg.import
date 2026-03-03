@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://rfja7l0kn5eo"
+path="res://.godot/imported/Grass in The Night 1.ogg-47b1321a56cc168abfd73d6e0b18dadc.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/forest/Grass in The Night 1.ogg"
+dest_files=["res://.godot/imported/Grass in The Night 1.ogg-47b1321a56cc168abfd73d6e0b18dadc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4
