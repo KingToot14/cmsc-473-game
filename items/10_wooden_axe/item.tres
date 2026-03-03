@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="SwingItem" format=3 uid="uid://cot2rbr1ur3fp"]
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://c6cmkg70km332"]
 
-[ext_resource type="PackedScene" uid="uid://cd51qmnhmiiba" path="res://items/10_wooden_axe/wooden_axe.tscn" id="1_u0flk"]
-[ext_resource type="Script" uid="uid://36ykp7c03y8e" path="res://items/_resources/swing_item.gd" id="2_xft6i"]
-[ext_resource type="Texture2D" uid="uid://ba3rr4xhw6d5f" path="res://items/10_wooden_axe/icon.png" id="3_0mnaa"]
+[ext_resource type="PackedScene" uid="uid://cbl55ji2g7o1d" path="res://items/9_wooden_hammer/wooden_hammer.tscn" id="1_u0flk"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_xft6i"]
+[ext_resource type="Texture2D" uid="uid://c07h7v5t1jaul" path="res://items/9_wooden_hammer/icon.png" id="3_u0flk"]
 
 [resource]
 script = ExtResource("2_xft6i")
@@ -11,6 +11,6 @@ use_speed = 0.6
 default_swing_object = ExtResource("1_u0flk")
 item_id = 10
 item_name = "Wooden Axe"
-texture = ExtResource("3_0mnaa")
+texture = ExtResource("3_u0flk")
 tooltip = "An axe that will barely chop a tree."
-max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

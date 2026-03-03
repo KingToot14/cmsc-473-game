@@ -28,48 +28,14 @@ func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) ->
 	# do animation
 	do_swing(player, mouse_position)
 	var selected: Inventory.ItemStack = player.my_inventory.get_selected_item()
-	if selected.item_id == 7:
-		# checks the range
-		if not is_point_in_range(player, mouse_position):
-			return
-
-		#grabs the tile position
-		var tile_position: Vector2i = TileManager.world_to_tile(
+	var tile_position: Vector2i = TileManager.world_to_tile(
 			floori(mouse_position.x),
 			floori(mouse_position.y)
 		)
+	if self is ToolItem: #checks if the item is a tool.
+		use_tool(player, mouse_position, tile_position)
+		#will send control to use_tool in the tool_item.gd
 
-		#sends the destroy block function.
-		if not TileManager.destroy_block(tile_position.x, tile_position.y):
-			return
-
-	elif selected.item_id == 9:
-		# checks the range
-		if not is_point_in_range(player, mouse_position):
-			return
-
-		#grabs the tile position
-		var tile_position: Vector2i = TileManager.world_to_tile(
-			floori(mouse_position.x),
-			floori(mouse_position.y)
-		)
-
-		#sends the destroy block function.
-		if not TileManager.destroy_wall(tile_position.x, tile_position.y):
-			return
-	elif selected.item_id == 10:
-		if not is_point_in_range(player, mouse_position):
-			return
-
-		#grabs the tile position
-		var tile_position: Vector2i = TileManager.world_to_tile(
-			floori(mouse_position.x),
-			floori(mouse_position.y)
-		)
-			
-		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
-			return
-	
 
 func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
 	# create dummy object
@@ -107,3 +73,7 @@ func do_swing(player: PlayerController, mouse_position: Vector2, swing_object: N
 			direction = -1
 	
 	player.do_swing(BASE_SWING_SPEED / use_speed, direction)
+	
+	
+func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: Vector2i) -> void:
+	pass #this function does nothing in here. its just so that the tool item can override it.
