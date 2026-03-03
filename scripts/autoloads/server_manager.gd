@@ -2,11 +2,13 @@ extends Node
 
 # --- Signals --- #
 signal server_started()
+signal players_changed()
 
 # --- Variables --- # 
 const DEFAULT_PORT = 7000
 
 var connected_players: Dictionary[int, PlayerController] = {}
+var finalized_players: Dictionary[int, bool] = {}
 
 # --- Functions --- #
 func _ready() -> void:
@@ -139,6 +141,8 @@ func _on_player_connect(id: int) -> void:
 	
 	get_tree().current_scene.get_node(^'players').add_child(player)
 	
+	players_changed.emit()
+	
 	# send world size
 	set_world_params.rpc_id(id, Globals.world_size)
 	
@@ -153,6 +157,8 @@ func _on_player_disconnect(id: int) -> void:
 	if player:
 		player.queue_free()
 	
+	players_changed.emit()
+	
 	if multiplayer.is_server():
 		print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
 
@@ -162,5 +168,27 @@ func _on_player_disconnect(id: int) -> void:
 @rpc('authority', 'call_remote', 'reliable')
 func set_world_params(world_size: Vector2i) -> void:
 	Globals.world_size = world_size
+
+#endregion
+
+#region Player Management
+func get_player(player_id: int, must_be_finalized := true) -> PlayerController:
+	if not is_instance_valid(connected_players.get(player_id)):
+		connected_players.erase(player_id)
+		finalized_players.erase(player_id)
+		return null
+	
+	if must_be_finalized and finalized_players.get(player_id, false):
+		return null
+	
+	return connected_players[player_id]
+
+func is_player_finalized(player_id: int) -> bool:
+	if not is_instance_valid(connected_players.get(player_id)):
+		connected_players.erase(player_id)
+		finalized_players.erase(player_id)
+		return false
+	
+	return finalized_players.get(player_id, false)
 
 #endregion
