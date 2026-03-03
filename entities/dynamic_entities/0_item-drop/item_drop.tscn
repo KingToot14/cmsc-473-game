@@ -13,12 +13,13 @@ radius = 16.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_mgq5h"]
 radius = 8.0
 
-[node name="item_drop" type="CharacterBody2D" unique_id=551616400]
+[node name="item_drop" type="CharacterBody2D" unique_id=551616400 node_paths=PackedStringArray("interpolator")]
 collision_layer = 32
 platform_floor_layers = 4294967041
 script = ExtResource("1_nu8wb")
 gravity = 700.0
 terminal_velocity = 300.0
+interpolator = NodePath("snapshot_interpolator")
 counts_towards_spawn_cap = false
 despawn_time = 300.0
 

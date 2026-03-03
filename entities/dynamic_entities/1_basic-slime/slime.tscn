@@ -246,7 +246,7 @@ size = Vector2(14, 10)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l7c8k"]
 size = Vector2(14, 10)
 
-[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("hp")]
+[node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("interpolator", "hp")]
 collision_layer = 8
 script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
@@ -259,6 +259,7 @@ variant_purple_texture = ExtResource("5_7afba")
 variant_cloud_texture = ExtResource("6_en8ih")
 variant_stone_texture = ExtResource("7_7td2d")
 variant_tunnel_texture = ExtResource("8_w88l4")
+interpolator = NodePath("snapshot_interpolator")
 hp = NodePath("hp")
 flash_material = SubResource("ShaderMaterial_515sv")
 knockback_power = 400.0

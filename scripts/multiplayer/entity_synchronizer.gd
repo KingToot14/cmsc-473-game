@@ -42,13 +42,22 @@ func send_snapshots() -> void:
 		var entity_ref := EntityManager.loaded_entities[entity_id]
 		var entity := entity_ref.current_instance
 		
+		# don't process null entities
 		if not is_instance_valid(entity):
+			continue
+		
+		# don't process non-snapshotting entities
+		if not entity.always_snapshot:
 			continue
 		
 		var entity_data := entity.serialize()
 		
 		for player_id: int in entity.interested_players:
 			if not is_instance_valid(ServerManager.connected_players.get(player_id)):
+				continue
+			
+			# only process players that are ready for bundles
+			if player_id not in bundles:
 				continue
 			
 			# add data to bundle

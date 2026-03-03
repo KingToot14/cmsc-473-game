@@ -77,7 +77,10 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
-	if spawn_id in loaded_entities:
+	var ref: EntityReference = loaded_entities.get(spawn_id, null)
+	
+	# don't process if entity exists and is loaded in reference
+	if ref and is_instance_valid(ref.current_instance):
 		return
 	
 	# create new entity instance
@@ -87,6 +90,7 @@ func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArra
 		return
 	
 	var entity: Entity = entity_scene.instantiate()
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
 	# load the latest buffer
 	var buffer := StreamPeerBuffer.new()
@@ -98,27 +102,36 @@ func load_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArra
 	entity.name = "entity_%s" % spawn_id
 	
 	# store entity reference
-	var ref := EntityReference.new()
+	if not ref:
+		ref = EntityReference.new()
+	
 	ref.registry_id = registry_id
 	ref.current_instance = entity
 	ref.is_tile_entity = true
+	ref.spawn_data = spawn_data
 	
 	loaded_entities[entity.id] = ref
 	
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	# update interest on the new instance
+	entity.scan_interest()
 
 @rpc('authority', 'call_remote', 'reliable')
 func load_tile_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
-	if spawn_id in loaded_entities:
+	var ref: EntityReference = loaded_entities.get(spawn_id, null)
+	
+	# don't process if entity exists and is loaded in reference
+	if ref and is_instance_valid(ref.current_instance):
 		return
 	
 	# create new entity instance
 	var entity_scene: PackedScene = tile_entity_registry.get(registry_id).entity_scene
+	
 	if not entity_scene:
 		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
 		return
 	
 	var entity: Entity = entity_scene.instantiate()
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
 	# load the latest buffer
 	var buffer := StreamPeerBuffer.new()
@@ -130,18 +143,58 @@ func load_tile_entity_new(spawn_id: int, registry_id: int, spawn_data: PackedByt
 	entity.name = "entity_%s" % spawn_id
 	
 	# store entity reference
-	var ref := EntityReference.new()
+	if not ref:
+		ref = EntityReference.new()
+	
+	ref.registry_id = registry_id
 	ref.current_instance = entity
+	ref.is_tile_entity = true
+	ref.spawn_data = spawn_data
 	
 	loaded_entities[entity.id] = ref
 	
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	# make sure the instance is aware of any nearby players
+	entity.scan_interest()
 
-func send_update_important(entity_id: int, action_id: int) -> void:
-	receive_update_important.rpc(entity_id, action_id)
+func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
+	# set ids
+	entity.id = curr_id
+	entity.registry_id = registry_id
+	curr_id += 1
+	
+	# create new reference
+	var ref := EntityReference.new()
+	ref.registry_id = registry_id
+	ref.spawn_data = entity.serialize_spawn_data()
+	ref.is_tile_entity = true
+	
+	loaded_entities[entity.id] = ref
+	
+	# anchor to chunk
+	entity.calculate_chunk()
+	var chunk := entity.current_chunk
+	
+	if chunk not in anchored_entities:
+		anchored_entities[chunk] = []
+	anchored_entities[chunk].append(entity.id)
+	
+	# attempt to load instantly
+	entity.scan_interest()
+	
+	# if no entities exist, just store data for now
+	if entity.interest_count == 0:
+		entity.queue_free()
+	else:
+		ref.current_instance = entity
+		
+		for player_id in entity.interested_players:
+			load_tile_entity_new.rpc_id(player_id, entity.id, registry_id, ref.spawn_data)
+
+func send_update_important(entity_id: int, action_id: int, instant := true) -> void:
+	receive_update_important.rpc(entity_id, action_id, NetworkTime.time, instant)
 
 @rpc('authority', 'call_remote', 'reliable')
-func receive_update_important(entity_id: int, action_id: int) -> void:
+func receive_update_important(entity_id: int, action_id: int, time: float, instant := true) -> void:
 	# make sure entity exists
 	var entity_ref: EntityReference = loaded_entities.get(entity_id, null)
 	if not entity_ref:
@@ -160,7 +213,10 @@ func receive_update_important(entity_id: int, action_id: int) -> void:
 			# action id
 			buffer.put_u16(action_id)
 			
-			entity.interpolator.perform_action(buffer.data_array)
+			if instant:
+				entity.interpolator.perform_action(buffer.data_array)
+			else:
+				entity.interpolator.send_action(time, buffer.data_array)
 
 func create_entity(
 		registry_id: int, position: Vector2i, spawn_data: Dictionary
@@ -468,11 +524,29 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 		
 		# switch replication logic
 		if reference.is_tile_entity:
+			# load on server if not already
+			if not is_instance_valid(reference.current_instance):
+				load_tile_entity_new(entity_id, reference.registry_id, reference.get_spawn_data())
+			
+			# mark new player as interested
+			if is_instance_valid(reference.current_instance):
+				# server-side interest ensures the entity won't despawn
+				reference.current_instance.add_interest(player_id)
+			
+			# send to client
 			load_tile_entity_new.rpc_id(player_id,
 				entity_id, reference.registry_id,
 				reference.get_spawn_data()
 			)
 		else:
+			# load on server if not already
+			if not is_instance_valid(reference.current_instance):
+				load_entity_new(entity_id, reference.registry_id, reference.get_spawn_data())
+			
+			# mark new player as interested
+			if is_instance_valid(reference.current_instance):
+				reference.current_instance.add_interest(player_id)
+			
 			load_entity_new.rpc_id(player_id,
 				entity_id, reference.registry_id,
 				reference.get_spawn_data()

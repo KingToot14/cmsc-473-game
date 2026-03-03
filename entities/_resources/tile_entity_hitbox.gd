@@ -2,7 +2,7 @@ class_name TileEntityHitbox
 extends Area2D
 
 # --- Variables --- #
-@export var entity: Node2D
+@export var entity: TileEntity
 
 # --- Functions --- #
 func _ready() -> void:

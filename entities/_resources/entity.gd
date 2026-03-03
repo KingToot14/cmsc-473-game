@@ -12,7 +12,8 @@ const KILL_ACTION := 0
 const PAUSE_ACTION := 1
 const RESUME_ACTION := 2
 
-@onready var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
+@export var always_snapshot := true
+@export var interpolator: SnapshotInterpolator
 
 var id := 0
 var registry_id := 0
@@ -20,7 +21,7 @@ var data: Dictionary
 var interested_players: Dictionary[int, bool] = {}
 var interest_count := 0
 
-var current_chunk: Vector2i
+@export var current_chunk: Vector2i
 
 @export var counts_towards_spawn_cap := true
 @export var process_on_client := false
@@ -76,14 +77,8 @@ func _process(delta: float) -> void:
 		EntityManager.move_dynamic_entity(id, prev_chunk, current_chunk)
 		scan_interest()
 
-func setup_entity() -> void:
-	return
-
 #region Interest
 func add_interest(player_id: int) -> void:
-	if not ServerManager.is_player_finalized(player_id):
-		return
-	
 	send_process_state(RESUME_ACTION, player_id)
 	
 	interested_players[player_id] = true
@@ -91,9 +86,6 @@ func add_interest(player_id: int) -> void:
 	check_interest()
 
 func remove_interest(player_id: int) -> void:
-	if not ServerManager.is_player_finalized(player_id):
-		return
-	
 	send_process_state(PAUSE_ACTION, player_id)
 	
 	interested_players.erase(player_id)
@@ -124,6 +116,8 @@ func check_interest() -> void:
 		process_mode = Node.PROCESS_MODE_INHERIT
 
 func scan_interest() -> void:
+	calculate_chunk()
+	
 	var load_range := ChunkLoader.LOAD_RANGE
 	
 	for player_id in ServerManager.connected_players:
@@ -319,9 +313,9 @@ func deserialize_base(buffer: StreamPeerBuffer, server_time: float) -> void:
 	velocity.x = buffer.get_float()
 	velocity.y = buffer.get_float()
 	
-	# update snapshot interpolator
-	if is_equal_approx(server_time, -1.0):
-		global_position = position
+	# immedietly set position if not sending snapshots or when server_time < 0.0
+	if server_time < 0.0 or not always_snapshot:
+		global_position = net_position
 	else:
 		interpolator.send_snapshot(server_time, {
 			&'position': net_position

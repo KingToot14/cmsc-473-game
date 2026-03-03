@@ -1,6 +1,12 @@
 class_name TreeEntity
 extends TileEntity
 
+# --- Enums --- #
+enum TreeVariant {
+	FOREST,
+	WINTER
+}
+
 # --- Variables --- #
 const APPLE_DROP_ODDS := 0.10
 
@@ -9,19 +15,22 @@ var branch_seed := 0
 var layer_hp: Array[EntityHp] = []
 var height := 0
 var curr_height := 0
-var variant := 0
+var variant := TreeVariant.FOREST
 
 # --- Functions --- #
 #region Visuals
 func setup_entity() -> void:
+	tile_position = TileManager.world_to_tile(
+		floori(global_position.x),
+		floori(global_position.y)
+	)
+	
 	# create deterministic rng
 	var rng := RandomNumberGenerator.new()
-	branch_seed = data.get(&'branch_seed', 0)
 	rng.seed = branch_seed
 	
 	# create visuals
 	var sprite: TileMapLayer = $'sprite'
-	variant = data.get(&'variant', 0)
 	
 	sprite.clear()
 	
@@ -39,15 +48,14 @@ func setup_entity() -> void:
 	for i in range(height):
 		var new_hp := EntityHp.new()
 		new_hp.name = "HP_%s" % i
-		new_hp.pool_id = i
 		
 		new_hp.entity = self
 		new_hp.set_max_hp(100)
 		
-		layer_hp[i] = hp
+		layer_hp[i] = new_hp
 		layer_hp[i].died.connect(_on_layer_death.bind(i))
 		
-		add_child(hp)
+		add_child(new_hp)
 	
 	var last_branch_l := 0
 	var last_branch_r := 0
@@ -106,6 +114,10 @@ func resize_tree() -> void:
 func break_place(tile_pos: Vector2i) -> bool:
 	var layer = abs(tile_pos.y - tile_position.y) - 1
 	
+	# only damage layers inside current height
+	if layer < 0 or layer > curr_height:
+		return true
+	
 	# TODO: Deal damage based on axe/tool
 	damage_layer(layer, 25)
 	
@@ -115,15 +127,9 @@ func break_place(tile_pos: Vector2i) -> bool:
 #endregion
 
 #region Damage
-func damage_layer(layer_id: int, damage: int) -> void:
+func damage_layer(layer_id: int, dmg: int) -> void:
 	var layer := layer_hp[layer_id]
-	layer.take_damage(damage, DamageSource.DamageSourceType.PLAYER)
-	
-	# deal damage to pool
-	#hp.take_damage({
-		#&'damage': damage,
-		#&'player_id': multiplayer.get_unique_id()
-	#})
+	layer.take_damage(dmg, DamageSource.DamageSourceType.PLAYER)
 	
 	# update sprite
 	var threshold := layer.get_hp_percent()
@@ -211,5 +217,60 @@ func _on_layer_death(pool_id: int) -> void:
 	
 	if curr_height > 0:
 		resize_tree()
+
+#endregion
+
+#region Serialization
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = super()
+	
+	# snap to end of current buffer
+	var cursor := len(buffer.data_array)
+	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	buffer.seek(cursor)
+	
+	# variant
+	buffer.put_u16(variant)
+	
+	# branch seed
+	buffer.put_u32(branch_seed)
+	
+	return buffer.data_array
+
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
+	
+	# process base snapshot
+	super(buffer)
+	
+	# variant
+	variant = buffer.get_u16() as TreeVariant
+	
+	# branch seed
+	branch_seed = buffer.get_u32()
+	
+	setup_entity()
+
+#endregion
+
+#region Spawning
+@warning_ignore("shadowed_variable", "shadowed_variable_base_class")
+static func create(position: Vector2i, variant: TreeVariant):
+	# create new tree entity
+	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(0).entity_scene
+	if not entity_scene:
+		return
+	
+	var entity: TreeEntity = entity_scene.instantiate()
+	
+	# setup default parameters
+	entity.tile_position = position
+	entity.global_position = TileManager.tile_to_world(position.x, position.y)
+	entity.variant = variant
+	
+	entity.branch_seed = randi()
+	
+	EntityManager.store_tile_entity(0, entity)
 
 #endregion

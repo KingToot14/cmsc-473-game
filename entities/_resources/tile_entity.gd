@@ -5,9 +5,6 @@ extends Entity
 var tile_position: Vector2i
 
 # --- Functions --- #
-func _ready() -> void:
-	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
-
 #region Interest
 func check_interest() -> void:
 	# reset interest count
