@@ -146,6 +146,9 @@ func queue_snapshot(time: float, snapshot: Dictionary) -> void:
 		return
 	
 	for player_id in interested_players:
+		if not ServerManager.is_player_finalized(player_id):
+			continue
+		
 		send_snapshot.rpc_id(player_id, time, snapshot)
 
 ## Receives and adds [param snapshot] to the end of the queue and inserts
@@ -170,6 +173,9 @@ func queue_action(time: float, action_info: PackedByteArray) -> void:
 		return
 	
 	for player_id in interested_players:
+		if not ServerManager.is_player_finalized(player_id):
+			continue
+		
 		send_action.rpc_id(player_id, time, action_info)
 
 ## Receives and inserts [param action_info] into the action queue at [param time].

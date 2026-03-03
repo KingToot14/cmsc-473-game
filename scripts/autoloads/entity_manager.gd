@@ -190,6 +190,22 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 		for player_id in entity.interested_players:
 			load_tile_entity_new.rpc_id(player_id, entity.id, registry_id, ref.spawn_data)
 
+func update_entity_data(entity: Entity) -> void:
+	var ref: EntityReference = loaded_entities.get(entity.id)
+	
+	# create reference if it doesn't exist
+	if not ref:
+		ref = EntityReference.new()
+		loaded_entities[entity.id] = ref
+	
+	ref.registry_id = entity.registry_id
+	ref.current_instance = entity
+	ref.is_tile_entity = entity is TileEntity
+	ref.spawn_data = entity.serialize_spawn_data()
+
+func clear_entity_data(entity: Entity) -> void:
+	loaded_entities.erase(entity.id)
+
 func send_update_important(entity_id: int, action_id: int, instant := true) -> void:
 	receive_update_important.rpc(entity_id, action_id, NetworkTime.time, instant)
 

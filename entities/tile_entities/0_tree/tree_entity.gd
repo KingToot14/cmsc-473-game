@@ -19,8 +19,16 @@ var height := 0
 var curr_height := 0
 var variant := TreeVariant.FOREST
 
+var is_setup := false
+
 # --- Functions --- #
 #region Visuals
+func setup_height() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = branch_seed
+	
+	height = rng.randi_range(15, 21)
+
 func setup_entity() -> void:
 	tile_position = TileManager.world_to_tile(
 		floori(global_position.x),
@@ -162,6 +170,9 @@ func _on_layer_death(pool_id: int) -> void:
 	# destroy tree when last layer is broken
 	if pool_id == 0:
 		kill()
+		
+		if multiplayer.is_server():
+			EntityManager.clear_entity_data(self)
 	
 	# server spawns items
 	if multiplayer and multiplayer.is_server():
@@ -243,6 +254,9 @@ func send_hp_update() -> void:
 		buffer.put_u8(layer_hp[i].curr_hp)
 	
 	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+	
+	# update cached data
+	EntityManager.update_entity_data(self)
 
 func handle_action(action_info: PackedByteArray) -> void:
 	super(action_info)
@@ -284,6 +298,16 @@ func serialize_spawn_data() -> PackedByteArray:
 	# branch seed
 	buffer.put_u32(branch_seed)
 	
+	# height
+	buffer.put_u8(height)
+	
+	# layer hp
+	for i in range(height):
+		if i >= len(layer_hp):
+			buffer.put_u8(100)
+		else:
+			buffer.put_u8(layer_hp[i].curr_hp)
+	
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
@@ -298,7 +322,23 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	# branch seed
 	branch_seed = buffer.get_u32()
 	
+	# height
+	height = buffer.get_u8()
+	
 	setup_entity()
+	
+	# layer hp
+	for i in range(height):
+		layer_hp[i].set_hp(buffer.get_u8())
+		
+		if layer_hp[i].curr_hp == 0:
+			curr_height = min(curr_height, i)
+		
+		# update layer sprite
+		update_layer_damage(i)
+	
+	if curr_height != height:
+		resize_tree()
 
 #endregion
 
@@ -318,6 +358,8 @@ static func create(position: Vector2i, variant: TreeVariant):
 	entity.variant = variant
 	
 	entity.branch_seed = randi()
+	
+	entity.setup_height()
 	
 	EntityManager.store_tile_entity(0, entity)
 
