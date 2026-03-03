@@ -19,24 +19,9 @@ const BASE_SWING_SPEED := 0.8
 func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
 	# send action to client
 	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
-	#player.snapshot_interpolator.queue_action.rpc_id(1, {
-		#&'tick': NetworkTime.tick,
-		#&'item_id': item_id,
-		#&'action_type': &'interact_mouse',
-		#&'mouse_position': mouse_position
-	#})
 	
 	# do animation
 	do_swing(player, mouse_position)
-	var selected: Inventory.ItemStack = player.my_inventory.get_selected_item()
-	var tile_position: Vector2i = TileManager.world_to_tile(
-			floori(mouse_position.x),
-			floori(mouse_position.y)
-		)
-	if self is ToolItem: #checks if the item is a tool.
-		use_tool(player, mouse_position, tile_position)
-		#will send control to use_tool in the tool_item.gd
-
 
 func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
 	# create dummy object
@@ -74,7 +59,3 @@ func do_swing(player: PlayerController, mouse_position: Vector2, swing_object: N
 			direction = -1
 	
 	player.do_swing(BASE_SWING_SPEED / use_speed, direction)
-	
-	
-func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: Vector2i) -> void:
-	pass #this function does nothing in here. its just so that the tool item can override it.

@@ -351,9 +351,3 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	deserialize_base(buffer, -1.0)
 
 #endregion
-
-#region Spawning
-static func spawn_from_rule(pos: Vector2, rule: SpawnRule) -> void:
-	pass
-
-#endregion
