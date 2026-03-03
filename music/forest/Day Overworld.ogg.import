@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cju2wa8tckd0c"
+path="res://.godot/imported/Day Overworld.ogg-44f2b76419d4b365d5442b49f9103c6e.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/forest/Day Overworld.ogg"
+dest_files=["res://.godot/imported/Day Overworld.ogg-44f2b76419d4b365d5442b49f9103c6e.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

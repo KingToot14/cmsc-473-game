@@ -356,10 +356,13 @@ func done_initial_load() -> void:
 	get_tree().current_scene.get_node(^'join_ui').hide()
 	
 	# swtich track to music TODO: Move this to a a function in biome manager when implemented
-	Globals.music.play_track(MusicManager.Area.FOREST_DAY, 1)
+	enter_biome(MusicManager.Area.FOREST_DAY)
 
 #endregion
 
+func enter_biome(area: MusicManager.Area) -> void:
+	Globals.music.reset_area(area)
+	Globals.music.play_track(area)
 #region Interest
 func add_interest(entity_id: int) -> void:
 	interested_entities[entity_id] = true
