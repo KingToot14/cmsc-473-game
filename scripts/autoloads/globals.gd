@@ -11,19 +11,24 @@ enum GameState {
 }
 
 enum CursorType {
+	NONE,
 	ARROW,
 	BEAM,
 	CROSS,
 	PICKAXE,
 	AXE,
 	HAMMER,
-	OPEN
+	BLOCK,
+	WALL,
+	PLUS,
+	HAND_OPEN,
+	HAND_GRAB,
 }
 
 # --- Variables --- #
 const SERVER_ID := 1
 
-const CURSOR_SIZE := 12
+const CURSOR_SIZE := 24
 const IN_GAME_CURSOR_SCALE := 0.75
 
 var game_state := GameState.MAIN_MENU
@@ -60,6 +65,8 @@ var music: MusicManager
 var item_registry: Dictionary[int, String] = {}
 
 # - Cursor
+var mouse: MouseManager
+
 var current_cursor := CursorType.ARROW
 var scale_factor := 1.0
 
@@ -99,41 +106,53 @@ func _on_viewport_size_changed() -> void:
 func reset_cursors() -> void:
 	# set beam cursor
 	var beam_image := get_cursor_image(1, 0)
-	Input.set_custom_mouse_cursor(beam_image, Input.CURSOR_IBEAM, Vector2(CURSOR_SIZE, CURSOR_SIZE))
+	Input.set_custom_mouse_cursor(
+		beam_image, Input.CURSOR_IBEAM,
+		Vector2(CURSOR_SIZE / 2.0, CURSOR_SIZE / 2.0)
+	)
 	
 	# reload current cursor
 	set_cursor(current_cursor)
 
 func set_cursor(type: CursorType) -> void:
 	var cursor_image: Image
-	var hotspot := Vector2(CURSOR_SIZE / 2.0, CURSOR_SIZE / 2.0)
+	var hotspot := Vector2(2, 2)
 	
 	current_cursor = type
 	
 	# set image and hotspots
 	match type:
+		CursorType.NONE:
+			Input.set_custom_mouse_cursor(null)
+			return
 		CursorType.ARROW:
 			cursor_image = get_cursor_image(0, 0)
-			hotspot = Vector2(2, 1)
+			hotspot = Vector2(6, 3)
 		CursorType.BEAM:
 			cursor_image = get_cursor_image(1, 0)
+			hotspot = Vector2(CURSOR_SIZE / 2.0, CURSOR_SIZE / 2.0)
 		CursorType.CROSS:
 			cursor_image = get_cursor_image(2, 0)
+			hotspot = Vector2(CURSOR_SIZE / 2.0, CURSOR_SIZE / 2.0)
 		CursorType.PICKAXE:
 			cursor_image = get_cursor_image(0, 1)
-			hotspot = Vector2(1, 1)
 		CursorType.AXE:
 			cursor_image = get_cursor_image(1, 1)
-			hotspot = Vector2(1, 1)
 		CursorType.HAMMER:
 			cursor_image = get_cursor_image(2, 1)
-			hotspot = Vector2(1, 1)
-		CursorType.OPEN:
+		CursorType.BLOCK:
 			cursor_image = get_cursor_image(0, 2)
-			hotspot = Vector2(1, 1)
+		CursorType.WALL:
+			cursor_image = get_cursor_image(1, 2)
+		CursorType.PLUS:
+			cursor_image = get_cursor_image(2, 2)
+		CursorType.HAND_OPEN:
+			cursor_image = get_cursor_image(0, 3)
+		CursorType.HAND_GRAB:
+			cursor_image = get_cursor_image(1, 3)
 	
 	# set custom mouse
-	var scale := scale_factor
+	var scale := scale_factor * 0.5
 	
 	if game_state == GameState.IN_GAME:
 		scale *= IN_GAME_CURSOR_SCALE
@@ -149,7 +168,7 @@ func get_cursor_image(x: int, y: int) -> Image:
 	cursor_texture.atlas = preload("res://ui/cursors.png")
 	cursor_texture.region = Rect2(x * CURSOR_SIZE, y * CURSOR_SIZE, CURSOR_SIZE, CURSOR_SIZE)
 	
-	var scale := scale_factor
+	var scale := scale_factor * 0.5
 	
 	if game_state == GameState.IN_GAME:
 		scale *= IN_GAME_CURSOR_SCALE
