@@ -21,8 +21,7 @@ func create_tables():
             id INTEGER PRIMARY KEY,
             health INTEGER,
             pos_x REAL,
-            pos_y REAL,
-            pos_z REAL
+            pos_y REAL
         );
 	""")
 
