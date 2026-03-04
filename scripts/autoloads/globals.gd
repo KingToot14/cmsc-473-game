@@ -4,6 +4,12 @@ extends Node
 signal world_size_changed(size: Vector2i)
 
 # --- Enums --- #
+enum GameState {
+	MAIN_MENU,
+	JOINING,
+	IN_GAME
+}
+
 enum CursorType {
 	ARROW,
 	BEAM,
@@ -18,7 +24,11 @@ enum CursorType {
 const SERVER_ID := 1
 
 const CURSOR_SIZE := 12
+const IN_GAME_CURSOR_SCALE := 0.75
 
+var game_state := GameState.MAIN_MENU
+
+# - World Size
 var world_size := Vector2i(4200, 1200):
 	set(_size):
 		world_chunks = Vector2i(
@@ -59,7 +69,7 @@ func _ready() -> void:
 	
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	
-	reset_cursors()
+	_on_viewport_size_changed()
 
 func parse_arguments() -> Dictionary:
 	var arguments: Dictionary = {}
@@ -73,6 +83,11 @@ func parse_arguments() -> Dictionary:
 			arguments[arg] = true
 	
 	return arguments
+
+func set_game_state(state: GameState) -> void:
+	game_state = state
+	
+	reset_cursors()
 
 #region Cursors
 func _on_viewport_size_changed() -> void:
@@ -118,10 +133,15 @@ func set_cursor(type: CursorType) -> void:
 			hotspot = Vector2(1, 1)
 	
 	# set custom mouse
+	var scale := scale_factor
+	
+	if game_state == GameState.IN_GAME:
+		scale *= IN_GAME_CURSOR_SCALE
+	
 	Input.set_custom_mouse_cursor(
 		cursor_image,
 		Input.CURSOR_ARROW,
-		Vector2(floori(hotspot.x * scale_factor), floori(hotspot.y * scale_factor))
+		Vector2(floori(hotspot.x * scale), floori(hotspot.y * scale))
 	)
 
 func get_cursor_image(x: int, y: int) -> Image:
@@ -129,11 +149,16 @@ func get_cursor_image(x: int, y: int) -> Image:
 	cursor_texture.atlas = preload("res://ui/cursors.png")
 	cursor_texture.region = Rect2(x * CURSOR_SIZE, y * CURSOR_SIZE, CURSOR_SIZE, CURSOR_SIZE)
 	
+	var scale := scale_factor
+	
+	if game_state == GameState.IN_GAME:
+		scale *= IN_GAME_CURSOR_SCALE
+	
 	# resize to fit viewport
 	var image := cursor_texture.get_image()
 	image.resize(
-		floori(CURSOR_SIZE * scale_factor),
-		floori(CURSOR_SIZE * scale_factor),
+		floori(CURSOR_SIZE * scale),
+		floori(CURSOR_SIZE * scale),
 		Image.INTERPOLATE_NEAREST
 	)
 	
