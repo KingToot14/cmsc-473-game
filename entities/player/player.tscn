@@ -1026,6 +1026,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("24_24ehl")
 player = NodePath("../..")
 grid_overlay = NodePath("../../grid_overlay")

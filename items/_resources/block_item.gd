@@ -18,13 +18,12 @@ enum TileType {
 @export var tile_id := 0
 
 # --- Functions --- #
-func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	# check range
 	if not is_point_in_range(player, mouse_position):
 		return
 	
-	# send action to client
-	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
+	super(player, mouse_position)
 	
 	# get tile range
 	var tile_position: Vector2i = TileManager.world_to_tile(  

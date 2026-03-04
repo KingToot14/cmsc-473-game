@@ -13,14 +13,13 @@ enum ToolType {
 @export var tool_power := 25
 
 # --- Functions --- #
-func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	var tile_position: Vector2i = TileManager.world_to_tile(
 			floori(mouse_position.x),
 			floori(mouse_position.y)
 		)
 	
-	# send action to client
-	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
+	super(player, mouse_position)
 	
 	# play swing animation
 	do_swing(player, mouse_position)

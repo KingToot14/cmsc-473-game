@@ -114,6 +114,7 @@ func chase_physics(delta: float) -> void:
 		
 		# add to inventory
 		target_player.my_inventory.add_item(item_id, quantity)
+		quantity = 0
 	
 	if distance <= SNAP_RADIUS:
 		velocity += difference.normalized() * fly_speed * delta * min(1.0, SNAP_RADIUS / distance) * SNAP_RADIUS

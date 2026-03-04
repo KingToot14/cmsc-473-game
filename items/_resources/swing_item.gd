@@ -16,9 +16,11 @@ const BASE_SWING_SPEED := 0.8
 @export var default_swing_object: PackedScene
 
 # --- Functions --- #
-func handle_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
-	# send action to client
-	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
+func process_item(player: PlayerController, mouse_position: Vector2) -> void:
+	pass
+
+func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
+	super(player, mouse_position)
 	
 	# do animation
 	do_swing(player, mouse_position)
