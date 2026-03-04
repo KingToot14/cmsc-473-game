@@ -17,6 +17,9 @@ const HOTBAR_INPUTS = [
 
 const HOTBAR_SIZE = 10
 
+var holding_item := false
+var hovered_slot := -1
+
 # --- Functions --- #
 func _input(event: InputEvent) -> void:
 	# check for hotbar inputs
@@ -46,7 +49,11 @@ func setup_ui(player_inventory: Inventory):
 	
 	# Create visual slots
 	for i in range(player_inventory.items.size()):
-		var new_slot = slot_scene.instantiate()
+		var new_slot: InventorySlot = slot_scene.instantiate()
+		
+		# connect signal to update cursor
+		new_slot.mouse_entered.connect(_on_slot_mouse_entered.bind(player_inventory, i))
+		new_slot.mouse_exited.connect(_on_slot_mouse_exited.bind(player_inventory, i))
 		
 		# First 10 go to hotbar, rest to main inventory
 		if i < HOTBAR_SIZE:
@@ -97,10 +104,49 @@ func refresh_ui(player_inventory: Inventory):
 	for button in crafting_buttons_container.get_children():
 		if button is CraftingButton:
 			button.update_availability(player_inventory)
-		
+	
+	# update cursors
+	set_is_holding(player_inventory.held_item.item_id != -1)
+
 func refresh_crafting_ui():
 	var player_inv = Globals.player.my_inventory
 	# Assuming crafting_buttons is your VBoxContainer
 	for button in $inventory_container/crafting_buttons.get_children():
 		if button is CraftingButton:
 			button.update_availability(player_inv)
+
+#region Cursors
+func set_is_holding(value: bool) -> void:
+	holding_item = value
+	
+	if holding_item:
+		Globals.mouse.cursor_locked = true
+		Globals.set_cursor(Globals.CursorType.HAND_GRAB)
+	elif hovered_slot != -1:
+		Globals.mouse.cursor_locked = true
+		Globals.set_cursor(Globals.CursorType.HAND_OPEN)
+	else:
+		Globals.mouse.cursor_locked = false
+		Globals.set_cursor(Globals.CursorType.ARROW)
+
+func _on_slot_mouse_entered(inventory: Inventory, index: int) -> void:
+	hovered_slot = index
+	
+	if not holding_item:
+		# don't show hand cursor when hovering empty slots
+		if inventory.items[index].item_id == -1:
+			Globals.set_cursor(Globals.CursorType.ARROW)
+		else:
+			Globals.set_cursor(Globals.CursorType.HAND_OPEN)
+		
+		Globals.mouse.cursor_locked = true
+
+func _on_slot_mouse_exited(_inventory: Inventory, index: int) -> void:
+	if hovered_slot == index:
+		hovered_slot = -1
+		
+		if not holding_item:
+			Globals.mouse.cursor_locked = false
+			Globals.set_cursor(Globals.CursorType.ARROW)
+
+#endregion
