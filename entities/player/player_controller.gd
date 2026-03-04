@@ -226,11 +226,10 @@ func can_turn() -> bool:
 	)
 
 func can_act() -> bool:
-	# make sure item can act (mouse not being held)
-	var current_item := ItemDatabase.get_item(my_inventory.get_selected_item().item_id)
-	var can_act_item := not (current_item and current_item.mouse_pressed)
-	
-	return can_turn() and can_act_item
+	return (
+		$'animator_upper'.current_animation != &'swing_right' and
+		$'animator_upper'.current_animation != &'swing_left'
+	)
 
 func do_swing(swing_speed := 1.0, direction := 0) -> void:
 	if direction != 0:

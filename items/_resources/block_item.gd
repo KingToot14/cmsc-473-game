@@ -18,13 +18,63 @@ enum TileType {
 @export var tile_id := 0
 
 # --- Functions --- #
+#region Interaction
+func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# only autoswing when enabled
+	if not autoswing:
+		return
+	
+	# only autoswing when mouse is held and player is not acting
+	if not (mouse_pressed and player.can_act()):
+		return
+	
+	# check range
+	if not is_point_in_range(player, mouse_position):
+		return
+	
+	place_block(player, mouse_position)
+
 func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	# check range
 	if not is_point_in_range(player, mouse_position):
 		return
 	
-	super(player, mouse_position)
+	mouse_pressed = true
+	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 	
+	place_block(player, mouse_position)
+
+#endregion
+
+#region Simulation
+func simulate_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# only autoswing when enabled
+	if not autoswing:
+		return
+	
+	# only autoswing when mouse is held and player is not acting
+	if not (mouse_pressed and player.can_act()):
+		return
+	
+	# create dummy object
+	var object = preload('res://items/_resources/item_tool.tscn').instantiate()
+	object.get_node(^'sprite').texture = texture
+	
+	if object is ItemToolObject:
+		object.set_to_simulate()
+	
+	do_swing(player, mouse_position, object)
+
+func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+	# create swing object
+	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
+	item_object.get_node(^'sprite').texture = texture
+	
+	do_swing(player, mouse_position, item_object)
+
+#endregion
+
+func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 	# get tile range
 	var tile_position: Vector2i = TileManager.world_to_tile(  
 		floori(mouse_position.x),
@@ -53,10 +103,3 @@ func handle_interact_mouse_press(player: PlayerController, mouse_position: Vecto
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
 		TileType.TILE:
 			print("TILE ENTITIES NOT IMPLEMENTED YET")
-
-func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
-	# create swing object
-	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
-	item_object.get_node(^'sprite').texture = texture
-	
-	do_swing(player, mouse_position, item_object)

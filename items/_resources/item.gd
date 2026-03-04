@@ -36,12 +36,10 @@ func handle_process(_player: PlayerController, _mouse_position: Vector2) -> void
 ## with the mouse. Does not happen when clicking inside the inventory
 func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	mouse_pressed = true
-	
 	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 
 func handle_interact_mouse_release(player: PlayerController, mouse_position: Vector2) -> void:
 	mouse_pressed = false
-	
 	player.interpolator.queue_mouse_release(NetworkTime.time, item_id, mouse_position)
 
 ## Called from [class InputSynchronizer] when the player presses the interact

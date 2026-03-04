@@ -86,7 +86,7 @@ func perform_action(action_info: PackedByteArray) -> void:
 			
 			# simulate input
 			current_item = ItemDatabase.get_item(item_id)
-			current_item.simulate_interact_mouse(root, mouse_pos)
+			current_item.simulate_interact_mouse_press(root, mouse_pos)
 		ActionType.MOUSE_RELEASE:
 			var item_id := buffer.get_u32()
 			
@@ -97,7 +97,7 @@ func perform_action(action_info: PackedByteArray) -> void:
 			
 			# simulate input
 			current_item = ItemDatabase.get_item(item_id)
-			current_item.simulate_interact_mouse(root, mouse_pos)
+			current_item.simulate_interact_mouse_release(root, mouse_pos)
 			
 			# clear item
 			current_item = null

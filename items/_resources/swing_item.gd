@@ -9,6 +9,9 @@ const BASE_SWING_SPEED := 0.8
 ## the player's movement direction
 @export var force_towards_mouse := false
 
+## Whether or not this item can be swung repeatedly while the mouse is held down
+@export var autoswing := true
+
 ## How many seconds this item takes to swing.
 @export var use_speed := 0.8
 
@@ -16,16 +19,43 @@ const BASE_SWING_SPEED := 0.8
 @export var default_swing_object: PackedScene
 
 # --- Functions --- #
-func process_item(player: PlayerController, mouse_position: Vector2) -> void:
-	pass
+func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# only autoswing when enabled
+	if not autoswing:
+		return
+	
+	# only autoswing when mouse is held and player is not acting
+	if not (mouse_pressed and player.can_act()):
+		return
+	
+	do_swing(player, mouse_position)
 
 func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
-	super(player, mouse_position)
+	mouse_pressed = true
+	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 	
 	# do animation
 	do_swing(player, mouse_position)
 
-func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
+func simulate_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# only autoswing when enabled
+	if not autoswing:
+		return
+	
+	# only autoswing when mouse is held and player is not acting
+	if not (mouse_pressed and player.can_act()):
+		return
+	
+	# create dummy object
+	var object: Node2D = default_swing_object.instantiate()
+	if object is ItemToolObject:
+		object.set_to_simulate()
+	
+	do_swing(player, mouse_position, object)
+
+func simulate_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
+	mouse_pressed = true
+	
 	# create dummy object
 	var object: Node2D = default_swing_object.instantiate()
 	if object is ItemToolObject:
