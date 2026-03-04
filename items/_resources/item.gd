@@ -24,28 +24,48 @@ enum ItemType {
 ## How many of this item can be stacked at once
 @export var max_stack: int = 9999 #pretty sure this is gonna end up being extra
 
+## Whether or not the mouse is currently being pressed
+var mouse_pressed := false
+
 # --- Functions --- #
 #region Interactions
+func handle_process(_player: PlayerController, _mouse_position: Vector2) -> void:
+	pass
+
 ## Called from [class InputSynchronizer] when the player clicks on the screen
 ## with the mouse. Does not happen when clicking inside the inventory
-func handle_interact_mouse(_player: PlayerController, _mouse_position: Vector2) -> void:
-	pass
+func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
+	mouse_pressed = true
+	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
+
+func handle_interact_mouse_release(player: PlayerController, mouse_position: Vector2) -> void:
+	mouse_pressed = false
+	player.interpolator.queue_mouse_release(NetworkTime.time, item_id, mouse_position)
 
 ## Called from [class InputSynchronizer] when the player presses the interact
 ## key on an item in the inventory
-func handle_interact_key(_player: PlayerController, ) -> void:
+func handle_interact_key(_player: PlayerController) -> void:
+	pass
+
+#endregion
+
+#region Simulation
+func simulate_process(_player: PlayerController, _mouse_position: Vector2) -> void:
 	pass
 
 ## Called from [class InputSynchronizer] when the player clicks on the screen
 ## with the mouse. Does not happen when clicking inside the inventory.
 ## [br][br]Does not interact with the world, this function should be purely visual
-func simulate_interact_mouse(_player: PlayerController, _mouse_position: Vector2) -> void:
-	pass
+func simulate_interact_mouse_press(_player: PlayerController, _mouse_position: Vector2) -> void:
+	mouse_pressed = true
+
+func simulate_interact_mouse_release(_player: PlayerController, _mouse_position: Vector2) -> void:
+	mouse_pressed = false
 
 ## Called from [class InputSynchronizer] when the player presses the interact
 ## key on an item in the inventory.
 ## [br][br]Does not interact with the world, this function should be purely visual
-func simulate_interact_key(_player: PlayerController, ) -> void:
+func simulate_interact_key(_player: PlayerController) -> void:
 	pass
 
 #endregion

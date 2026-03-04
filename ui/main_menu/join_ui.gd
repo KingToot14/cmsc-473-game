@@ -57,6 +57,8 @@ func _on_connection_failed() -> void:
 	$'connect_options'.show()
 	$'joining_panel'.hide()
 	
+	Globals.set_game_state(Globals.GameState.MAIN_MENU)
+	
 	# reload previous connections
 	load_previous_connections()
 
@@ -159,6 +161,8 @@ func create_client() -> Error:
 	$'joining_panel'.show()
 	
 	$'joining_panel/backing/title'.text = "Joining Server\n%s:%s" % [ip_address, port]
+	
+	Globals.set_game_state(Globals.GameState.JOINING)
 	
 	# store connection
 	save_connection(ip_address, port)

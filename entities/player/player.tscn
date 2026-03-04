@@ -27,7 +27,9 @@
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
 [ext_resource type="PackedScene" uid="uid://ctyqglpej7nkw" path="res://entities/player/crafting_button.tscn" id="23_ghoj8"]
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
+[ext_resource type="Script" uid="uid://cj5k0hwfnaogw" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
+[ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -741,6 +743,13 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
+shader = ExtResource("24_gt4e4")
+shader_parameter/mouse_range = 8.0
+shader_parameter/mouse_falloff = 32.0
+shader_parameter/grid_size = 8.0
+shader_parameter/line_size = 1.0
+
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 100
 y_sort_enabled = true
@@ -992,7 +1001,35 @@ vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
 
+[node name="grid_overlay" type="ColorRect" parent="." unique_id=691634126]
+show_behind_parent = true
+z_index = 50
+material = SubResource("ShaderMaterial_24ehl")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 992.0
+offset_bottom = 592.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.50980395)
+
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
+
+[node name="mouse_detector" type="Control" parent="inventory_ui" unique_id=1581306440 node_paths=PackedStringArray("player", "grid_overlay")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("24_24ehl")
+player = NodePath("../..")
+grid_overlay = NodePath("../../grid_overlay")
 
 [node name="inventory_container" type="Control" parent="inventory_ui" unique_id=2048304985]
 layout_mode = 3
@@ -1031,7 +1068,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 3.0
 offset_top = -21.0
-offset_right = 3.0
+offset_right = -279.0
 offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 0

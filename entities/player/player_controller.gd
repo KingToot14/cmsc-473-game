@@ -26,6 +26,11 @@ var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+## Points to the camera's current position (which remains padded inside the world bounds)
+var camera_point: Vector2:
+	get():
+		return $'camera'.global_position
+
 ## The max distance between which players can interact with entities and blocks
 @export var base_range := 10.0
 
@@ -221,7 +226,10 @@ func can_turn() -> bool:
 	)
 
 func can_act() -> bool:
-	return can_turn()
+	return (
+		$'animator_upper'.current_animation != &'swing_right' and
+		$'animator_upper'.current_animation != &'swing_left'
+	)
 
 func do_swing(swing_speed := 1.0, direction := 0) -> void:
 	if direction != 0:
@@ -355,6 +363,9 @@ func done_initial_load() -> void:
 	
 	if multiplayer.is_server():
 		my_inventory.load_inventory()
+	else:
+		# update game state
+		Globals.set_game_state(Globals.GameState.IN_GAME)
 	
 	# only change music for the local client
 	# TODO: Move to BiomeManager when implemented

@@ -20,6 +20,9 @@ func _init():
 
 #region Inventory Management
 func add_item(item_id: int, amount: int) -> int:
+	if amount <= 0:
+		return 0
+	
 	var item: Item = ItemDatabase.get_item(item_id)
 	
 	if not item:
@@ -67,6 +70,9 @@ func add_item(item_id: int, amount: int) -> int:
 	return amount # Return leftovers if full
 
 func remove_item(item_id: int, count: int) -> void:
+	if count <= 0:
+		return
+	
 	var item: Item = ItemDatabase.get_item(item_id)
 	
 	if not item:
