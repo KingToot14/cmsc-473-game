@@ -26,6 +26,11 @@ var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+## Points to the camera's current position (which remains padded inside the world bounds)
+var camera_point: Vector2:
+	get():
+		return $'camera'.global_position
+
 ## The max distance between which players can interact with entities and blocks
 @export var base_range := 10.0
 
