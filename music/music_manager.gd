@@ -21,9 +21,11 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/forest/forest_day_2.ogg",
 		"res://music/forest/Day Overworld.ogg",
 		#"res://music/forest/Surface Track.ogg",
-		"res://music/forest/Grass in The Night 1.ogg",
-		"res://music/forest/Day 5.ogg",
-		"res://music/forest/Day 4.ogg"
+		#"res://music/forest/Grass in The Night 1.ogg",
+		#"res://music/forest/Day 5.ogg",
+		"res://music/forest/Day 4.ogg",
+		"res://music/forest/Forest in the Day.ogg",
+		
 		
 	],
 	Area.FOREST_NIGHT: [
