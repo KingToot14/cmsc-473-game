@@ -9,6 +9,8 @@ var snapshot_timer := 0.0
 
 # --- Functions --- #
 func _ready() -> void:
+	Globals.entity_sync = self
+	
 	set_process(false)
 	ServerManager.server_started.connect(func (): set_process(true))
 
@@ -115,13 +117,33 @@ func receive_snapshots(snapshots: PackedByteArray) -> void:
 		
 		buffer.seek(cursor + packet_size - 6)
 		
-		if not is_instance_valid(EntityManager.loaded_entities.get(entity_id)):
-			continue
+		var entity := EntityManager.get_entity(entity_id)
 		
-		var entity_ref := EntityManager.loaded_entities[entity_id]
-		var entity := entity_ref.current_instance
+		if not entity:
+			continue
 		
 		var packet_stream := StreamPeerBuffer.new()
 		packet_stream.data_array = packet
 		
 		entity.deserialize(packet_stream, server_time)
+
+#region Actions
+@rpc('authority', 'call_remote', 'reliable')
+func queue_action(action_info: PackedByteArray):
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	# entity id
+	var entity_id := buffer.get_u32()
+	
+	# timestamp
+	var time := buffer.get_float()
+	
+	var entity := EntityManager.get_entity(entity_id)
+	
+	if not entity:
+		return
+	
+	entity.interpolator.send_action(time, action_info.slice(8, len(action_info)))
+
+#endregion

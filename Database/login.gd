@@ -14,9 +14,9 @@ func _ready():
 
 func _on_login_button_pressed():
 	var user = username_field.text
-	var pass = password_field.text
+	var password = password_field.text
 
-	var id = DatabaseManager.login(user, pass)
+	var id = DatabaseManager.login(user, password)
 
 	if id != -1:
 		DatabaseManager.remember_player_id(id)
@@ -27,9 +27,9 @@ func _on_login_button_pressed():
 
 func _on_create_button_pressed():
 	var user = username_field.text
-	var pass = password_field.text
+	var password = password_field.text
 
-	if DatabaseManager.create_account(user, pass):
+	if DatabaseManager.create_account(user, password):
 		status_label.text = "Account created! You can now log in."
 	else:
 		status_label.text = "Username already exists."

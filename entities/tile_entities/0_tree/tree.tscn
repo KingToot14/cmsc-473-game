@@ -17,6 +17,7 @@ size = Vector2(14, 6)
 script = ExtResource("1_h6ae8")
 always_snapshot = false
 interpolator = NodePath("snapshot_interpolator")
+counts_towards_spawn_cap = false
 
 [node name="snapshot_interpolator" type="Node" parent="." unique_id=2118042069 node_paths=PackedStringArray("root")]
 script = ExtResource("2_ycj7j")
