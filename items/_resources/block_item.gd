@@ -65,12 +65,17 @@ func simulate_process(player: PlayerController, mouse_position: Vector2) -> void
 	
 	do_swing(player, mouse_position, object)
 
-func simulate_interact_mouse(player: PlayerController, mouse_position: Vector2) -> void:
-	# create swing object
-	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
-	item_object.get_node(^'sprite').texture = texture
+func simulate_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
+	mouse_pressed = true
 	
-	do_swing(player, mouse_position, item_object)
+	# create swing object
+	var object = preload('res://items/_resources/item_tool.tscn').instantiate()
+	object.get_node(^'sprite').texture = texture
+	
+	if object is ItemToolObject:
+		object.set_to_simulate()
+	
+	do_swing(player, mouse_position, object)
 
 #endregion
 
