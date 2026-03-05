@@ -359,7 +359,7 @@ func done_initial_load() -> void:
 	$'camera'.limit_bottom = (Globals.world_size.y) * TileManager.TILE_SIZE
 	
 	# hide ui
-	get_tree().current_scene.get_node(^'join_ui').hide()
+	Globals.join_ui.hide()
 	
 	if multiplayer.is_server():
 		my_inventory.load_inventory()
