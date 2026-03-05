@@ -14,11 +14,11 @@ var finalized_players: Dictionary[int, bool] = {}
 func _ready() -> void:
 	var args := Globals.parse_arguments()
 	
+	await get_tree().process_frame
+	
 	if OS.has_feature('dedicated_server') or args.get('server', false):
 		# disable ui for servers
-		var ui = get_tree().current_scene.get_node_or_null(^'join_ui')
-		if ui:
-			ui.hide()
+		Globals.join_ui.hide()
 		
 		# get seed
 		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
@@ -75,9 +75,7 @@ func _ready() -> void:
 		
 		start_server(port, max_connections)
 	else:
-		var ui = get_tree().current_scene.get_node_or_null(^'join_ui')
-		if ui:
-			ui.show()
+		Globals.join_ui.show()
 
 #region Server Connections
 func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
@@ -112,43 +110,21 @@ func join_server(ip_address := '127.0.0.1', port := 7000) -> Error:
 		return error
 	
 	# set multiplayer
+	multiplayer.peer_connected.connect(_on_player_connect)
 	multiplayer.peer_disconnected.connect(_on_player_disconnect)
 	multiplayer.multiplayer_peer = peer
 	
 	return Error.OK
 
 func _on_player_connect(id: int) -> void:
-	if not multiplayer.is_server():
-		return
-	
-	print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
-	
-	# wait for world generation
-	var gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
-	if gen.generating:
-		await gen.done_generating
-	
-	# setup player
-	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
-	player.name = "player_%s" % id
-	player.owner_id = id
-	connected_players[id] = player
-	
-	# set position
-	var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
-	player.spawn_point = world_position
-	player.position = world_position
-	
-	get_tree().current_scene.get_node(^'players').add_child(player)
-	
-	players_changed.emit()
-	
-	# send world size
-	set_world_params.rpc_id(id, Globals.world_size)
-	
-	# send data
-	await get_tree().process_frame
-	player.get_node(^'chunk_loader').send_whole_area()
+	if multiplayer.is_server():
+		print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
+		
+		# send world size
+		set_world_params.rpc_id(id, Globals.world_size)
+	# show login page
+	else:
+		Globals.join_ui.set_active_panel("panel_login")
 
 func _on_player_disconnect(id: int) -> void:
 	var player = get_tree().current_scene.get_node('players/player_%s' % id)
@@ -172,6 +148,32 @@ func set_world_params(world_size: Vector2i) -> void:
 #endregion
 
 #region Player Management
+@rpc('any_peer', 'call_remote', 'reliable')
+func create_player(id: int) -> void:
+	# wait for world generation
+	var gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
+	if gen.generating:
+		await gen.done_generating
+	
+	# setup player
+	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
+	player.name = "player_%s" % id
+	player.owner_id = id
+	connected_players[id] = player
+	
+	# set position
+	var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
+	player.spawn_point = world_position
+	player.position = world_position
+	
+	get_tree().current_scene.get_node(^'players').add_child(player)
+	
+	players_changed.emit()
+	
+	# send data
+	await get_tree().process_frame
+	player.get_node(^'chunk_loader').send_whole_area()
+
 func get_player(player_id: int, must_be_finalized := true) -> PlayerController:
 	if not is_instance_valid(connected_players.get(player_id)):
 		connected_players.erase(player_id)

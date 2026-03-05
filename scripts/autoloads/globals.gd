@@ -33,6 +33,9 @@ const IN_GAME_CURSOR_SCALE := 0.75
 
 var game_state := GameState.MAIN_MENU
 
+# - UI
+var join_ui: JoinUi
+
 # - World Size
 var world_size := Vector2i(4200, 1200):
 	set(_size):
