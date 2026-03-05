@@ -280,6 +280,8 @@ func handle_action(action_info: PackedByteArray) -> void:
 				return
 			
 			process_mode = Node.PROCESS_MODE_DISABLED
+			interpolator.enabled = false
+			hide()
 		RESUME_ACTION:
 			var player_id := buffer.get_u32()
 			
@@ -288,6 +290,8 @@ func handle_action(action_info: PackedByteArray) -> void:
 				return
 			
 			process_mode = Node.PROCESS_MODE_INHERIT
+			interpolator.enabled = true
+			show()
 
 #endregion
 
