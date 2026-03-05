@@ -144,6 +144,9 @@ func queue_action(action_info: PackedByteArray):
 	if not entity:
 		return
 	
-	entity.interpolator.send_action(time, action_info.slice(8, len(action_info)))
+	if time < 0.0:
+		entity.interpolator.perform_action(action_info.slice(8, len(action_info)))
+	else:
+		entity.interpolator.send_action(time, action_info.slice(8, len(action_info)))
 
 #endregion
