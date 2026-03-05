@@ -61,6 +61,9 @@ var hovered_hitbox: TileEntityHitbox
 var player: PlayerController
 var music: MusicManager
 
+# - Entity
+var entity_sync: EntitySynchronizer
+
 # - Items
 var item_registry: Dictionary[int, String] = {}
 

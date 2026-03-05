@@ -84,6 +84,21 @@ func add_interest(player_id: int) -> void:
 	
 	interested_players[player_id] = true
 	
+	# send data to player
+	if multiplayer.is_server():
+		if self is TileEntity:
+			EntityManager.load_tile_entity.rpc_id(
+				player_id,
+				id, registry_id,
+				serialize_spawn_data()
+			)
+		else:
+			EntityManager.load_entity.rpc_id(
+				player_id,
+				id, registry_id,
+				serialize_spawn_data()
+			)
+	
 	check_interest()
 
 func remove_interest(player_id: int) -> void:
@@ -153,19 +168,35 @@ func check_player(player_id: int) -> bool:
 #region Life Cycle
 func send_action_basic(action_id: int) -> void:
 	var buffer := StreamPeerBuffer.new()
-	buffer.resize(2)
+	buffer.resize(4 + 4 + 2)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
 	
 	# action id
 	buffer.put_u16(action_id)
 	
-	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+	for player_id in interested_players.keys():
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 func send_kill() -> void:
 	send_action_basic(KILL_ACTION)
 
 func send_process_state(action_id: int, player_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	
 	var buffer := StreamPeerBuffer.new()
-	buffer.resize(2)
+	buffer.resize(4 + 4 + 2 + 4)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
 	
 	# action id
 	buffer.put_u16(action_id)
@@ -173,7 +204,7 @@ func send_process_state(action_id: int, player_id: int) -> void:
 	# player id
 	buffer.put_u32(player_id)
 	
-	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+	Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 func kill() -> void:
 	if is_dead:

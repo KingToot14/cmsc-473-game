@@ -3,7 +3,8 @@ extends Node
 var db := SQLite.new()
 
 func _ready():
-	db.open("user://game.db")
+	db.path = "user://game.db"
+	db.open_db()
 	create_tables()
 
 # TABLE CREATION

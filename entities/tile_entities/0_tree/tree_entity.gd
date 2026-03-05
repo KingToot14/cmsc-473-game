@@ -248,6 +248,12 @@ func send_hp_update() -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.resize(2 + height)
 	
+	# entity id
+	buffer.put_u32(id)
+	
+	# timestamp
+	buffer.put_float(NetworkTime.time)
+	
 	# action id
 	buffer.put_u16(HP_UPDATE_ACTION)
 	
@@ -255,7 +261,8 @@ func send_hp_update() -> void:
 	for i in range(height):
 		buffer.put_u8(layer_hp[i].curr_hp)
 	
-	interpolator.queue_action(NetworkTime.time, buffer.data_array)
+	for player_id in interested_players.keys():
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 	
 	# update cached data
 	EntityManager.update_entity_data(self)

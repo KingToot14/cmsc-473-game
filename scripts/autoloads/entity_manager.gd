@@ -72,6 +72,9 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 	for player_id in entity.interested_players:
 		load_entity.rpc_id(player_id, entity.id, registry_id, spawn_data)
 
+#endregion
+
+#region Entity Loading
 @rpc('authority', 'call_remote', 'reliable')
 func load_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
 	var ref: EntityReference = loaded_entities.get(spawn_id, null)
@@ -153,6 +156,9 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	# make sure the instance is aware of any nearby players
 	entity.scan_interest()
 
+#endregion
+
+#region Data Persistence
 func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	# set ids
 	entity.id = curr_id
@@ -203,6 +209,9 @@ func update_entity_data(entity: Entity) -> void:
 func clear_entity_data(entity: Entity) -> void:
 	loaded_entities.erase(entity.id)
 
+#endregion
+
+#region Entity Updates
 func send_update_important(entity_id: int, action_id: int, instant := true) -> void:
 	receive_update_important.rpc(entity_id, action_id, NetworkTime.time, instant)
 
@@ -230,6 +239,8 @@ func receive_update_important(entity_id: int, action_id: int, time: float, insta
 				entity.interpolator.perform_action(buffer.data_array)
 			else:
 				entity.interpolator.send_action(time, buffer.data_array)
+
+#endregion
 
 #region Interest Management
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -309,6 +320,20 @@ func move_dynamic_entity(entity_id: int, prev_chunk: Vector2i, curr_chunk: Vecto
 		anchored_entities[curr_chunk] = []
 	
 	anchored_entities[curr_chunk].append(entity_id)
+
+#endregion
+
+#region Helper Functions
+func get_entity(entity_id: int) -> Entity:
+	# first make sure entity exists
+	if entity_id not in loaded_entities:
+		return null
+	
+	# check if entity has recently been queued
+	if not is_instance_valid(loaded_entities[entity_id].current_instance):
+		return null
+	
+	return loaded_entities[entity_id].current_instance
 
 #endregion
 

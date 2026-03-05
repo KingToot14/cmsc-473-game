@@ -37,6 +37,7 @@ ServerManager="*uid://dc2gk5amixqah"
 TileManager="*uid://u5whg16t7ttu"
 EntityManager="*uid://cbrcmetbd2pq8"
 ItemDatabase="*uid://bmdvy4d1xjyp3"
+DatabaseManager="*uid://lrme4ahma8q3"
 
 [display]
 
