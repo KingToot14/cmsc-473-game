@@ -196,7 +196,7 @@ func send_process_state(action_id: int, player_id: int) -> void:
 	buffer.put_u32(id)
 	
 	# time
-	buffer.put_float(NetworkTime.time)
+	buffer.put_float(-1.0)
 	
 	# action id
 	buffer.put_u16(action_id)
