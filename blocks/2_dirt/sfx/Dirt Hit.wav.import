@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://d055kphod4ya3"
+path="res://.godot/imported/Dirt Hit.wav-2579620a9d84fd3cdade2b1764f04ea6.sample"
+
+[deps]
+
+source_file="res://blocks/2_dirt/sfx/Dirt Hit.wav"
+dest_files=["res://.godot/imported/Dirt Hit.wav-2579620a9d84fd3cdade2b1764f04ea6.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
