@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="2_x7v6d"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x7v6d"]
-size = Vector2(8, 8)
+size = Vector2(7, 7)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_x7v6d"]
 radius = 16.0

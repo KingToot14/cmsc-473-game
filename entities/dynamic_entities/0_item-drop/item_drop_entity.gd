@@ -10,6 +10,7 @@ enum SpawnBehavior {
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
 
+const STOP_RADIUS := (12.0 * TileManager.TILE_SIZE)**2
 const COLLECTION_RADIUS := 4.0**2
 const SNAP_RADIUS := 16.0**2
 const SNAP_STRENGTH := 2.0
@@ -108,6 +109,12 @@ func chase_physics(delta: float) -> void:
 	if not visible:
 		return
 	
+	# stop collecting when out of range
+	if distance > STOP_RADIUS:
+		target_player = null
+		stop_collection()
+		return
+	
 	# collect when close enough
 	if distance <= COLLECTION_RADIUS:
 		kill()
@@ -158,6 +165,7 @@ func _on_collect_area_entered(area: Area2D) -> void:
 	
 	# start chasing player
 	target_player = area.get_parent()
+	start_collection()
 
 func _on_merge_area_entered(area: Area2D) -> void:
 	if not (area.is_in_group(&'item_merge') and multiplayer.is_server()):
@@ -186,6 +194,14 @@ func _on_merge_area_entered(area: Area2D) -> void:
 	other_item.quantity = 0
 	other_item.should_free_instant = false
 	other_item.kill()
+
+func start_collection() -> void:
+	# disable world collision
+	$'shape'.set_deferred(&'disabled', true)
+
+func stop_collection() -> void:
+	# enable world collision
+	$'shape'.set_deferred(&'disabled', false)
 
 #endregion
 
