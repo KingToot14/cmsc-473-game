@@ -325,6 +325,12 @@ func destroy_block(x: int, y: int) -> bool:
 	
 	# TODO: Deal gradual damage rather than instantly destroying
 	
+	# play sfx
+	var block_id := TileManager.get_block_unsafe(x, y)
+	var block := BlockDatabase.get_block(block_id)
+	if block:
+		play_sfx(block.break_sfx, x, y, block.break_volume)
+	
 	# set tile to air
 	TileManager.set_block_unsafe(x, y, 0)
 	Globals.world_map.update_tile(x, y)
@@ -352,6 +358,12 @@ func destroy_wall(x: int, y: int) -> bool:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# play sfx
+	var wall_id := TileManager.get_wall_unsafe(x, y)
+	var wall := BlockDatabase.get_wall(wall_id)
+	if wall:
+		play_sfx(wall.break_sfx, x, y, wall.break_volume)
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
@@ -402,6 +414,11 @@ func place_block(x: int, y: int, item_id: int) -> bool:
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return false
 	
+	# play sfx
+	var block := BlockDatabase.get_block(block_id)
+	if block:
+		play_sfx(block.place_sfx, x, y, block.place_volume)
+	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
 	Globals.world_map.update_tile(x, y)
@@ -438,6 +455,11 @@ func place_wall(x: int, y: int, item_id: int) -> bool:
 	# check neighboring tiles
 	if not is_wall_placement_valid(x, y):
 		return false
+	
+	# play sfx
+	var wall := BlockDatabase.get_wall(wall_id)
+	if wall:
+		play_sfx(wall.place_sfx, x, y, wall.place_volume)
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
@@ -681,6 +703,25 @@ func receive_tile_state(x: int, y: int, tile: int) -> void:
 func load_chunks() -> void:
 	tiles = []
 	tiles.resize(world_width * world_height)
+
+#endregion
+
+#region Sound Effects
+func play_sfx(stream: AudioStream, x: int, y: int, volume := 0.0) -> void:
+	var player := AudioStreamPlayer2D.new()
+	player.global_position = tile_to_world(x, y, true)
+	
+	player.max_distance = 832
+	player.attenuation = 3.0
+	
+	player.bus = &'Tiles'
+	player.stream = stream
+	player.volume_db = volume
+	
+	player.finished.connect(player.queue_free)
+	
+	add_child(player)
+	player.play()
 
 #endregion
 

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://c7kax8e24g7sc"]
+
+[ext_resource type="AudioStream" uid="uid://d055kphod4ya3" path="res://blocks/2_dirt/sfx/Dirt Hit.wav" id="1_r1eu5"]
+[ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="2_y55px"]
+
+[resource]
+script = ExtResource("2_y55px")
+break_sfx = ExtResource("1_r1eu5")
+metadata/_custom_type_script = "uid://dymp18kf28isa"
