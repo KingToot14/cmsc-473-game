@@ -523,16 +523,18 @@ func send_destroy_block(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	var player_id := multiplayer.get_remote_sender_id()
+	
 	var block_id = get_block(x, y) #should grab the block id 
 	if block_id == 1 or block_id == 2: #if the block is dirt or grass
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn(drop_position, 3, 1)
+			ItemDropEntity.spawn_preferred(drop_position, 3, 1, player_id)
 				
 	if block_id == 3: #if the block is stone.
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn(drop_position, 4, 1)
+			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
 	
 	TileManager.set_block_unsafe(x, y, 0)
 	Globals.server_map.update_tile(x, y)

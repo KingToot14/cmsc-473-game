@@ -180,6 +180,9 @@ func send_action_basic(action_id: int) -> void:
 	buffer.put_u16(action_id)
 	
 	for player_id in interested_players.keys():
+		if not ServerManager.get_player(player_id):
+			continue
+		
 		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 func send_kill() -> void:
@@ -203,6 +206,9 @@ func send_process_state(action_id: int, player_id: int) -> void:
 	
 	# player id
 	buffer.put_u32(player_id)
+	
+	if not ServerManager.get_player(player_id):
+		return
 	
 	Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
