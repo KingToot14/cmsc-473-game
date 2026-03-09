@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://i7f288t7noum"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_d8i8t"]
+[ext_resource type="Texture2D" uid="uid://da0rfbeydfdxc" path="res://blocks/6_snow/icon.png" id="2_f2aim"]
+
+[resource]
+script = ExtResource("1_d8i8t")
+tile_id = 6
+use_speed = 0.25
+item_name = "Snow"
+texture = ExtResource("2_f2aim")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
