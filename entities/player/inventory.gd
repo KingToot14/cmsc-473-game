@@ -192,10 +192,7 @@ func load_inventory() -> void:
 	add_item(9, 1)		# wooden hammer
 	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
-	add_item(4, 10)		# stone blocks
-	add_item(0, 30)		# wood logs
-	add_item(8, 20)		# wood blocks
-
+	add_item(14, 30)	# sand
 
 #endregion
 
