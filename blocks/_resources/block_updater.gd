@@ -35,9 +35,9 @@ func _physics_process(_delta: float) -> void:
 
 #region Adding to Queue
 func add_to_queue(position: Vector2i) -> void:
-	var tile := TileManager.get_block_unsafe(position.x, position.y)
+	var block_id := TileManager.get_block_unsafe(position.x, position.y)
 	
-	match tile:
+	match block_id:
 		# dirt block
 		2:
 			# check for grass
@@ -52,11 +52,23 @@ func add_to_queue(position: Vector2i) -> void:
 			
 			# add to queue
 			update_queue.append(position)
+		# falling blocks (sand)
+		8:
+			# check for block below
+			if TileManager.get_block(position.x, position.y + 1) != 0:
+				return
+			
+			# set to air
+			TileManager.set_block_unsafe(position.x, position.y, 0)
+			TileManager.send_tile_update(position.x, position.y)
+			
+			# create falling block
+			FallingBlockEntity.spawn(position, block_id)
 
 func handle_update(pos_index: int, position: Vector2i) -> void:
-	var tile := TileManager.get_block_unsafe(position.x, position.y)
+	var block_id := TileManager.get_block_unsafe(position.x, position.y)
 	
-	match tile:
+	match block_id:
 		# dirt block
 		2:
 			# attempt to grow into grass

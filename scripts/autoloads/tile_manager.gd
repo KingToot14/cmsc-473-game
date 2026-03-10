@@ -573,7 +573,6 @@ func send_destroy_block(x: int, y: int) -> void:
 			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
 	
 	TileManager.set_block_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -603,7 +602,6 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -653,7 +651,6 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -692,7 +689,6 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -714,6 +710,9 @@ func send_tile_update(x: int, y: int) -> void:
 	Globals.block_updater.add_to_queue(Vector2i(x + 1, y))
 	Globals.block_updater.add_to_queue(Vector2i(x, y - 1))
 	Globals.block_updater.add_to_queue(Vector2i(x, y + 1))
+	
+	# update server map
+	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
 	for player in ServerManager.connected_players.keys():
