@@ -292,13 +292,17 @@ func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt
 	
 	return row
 
-## Checks the 8 surrounding neighbors for [param target]. Returns [code]true[/code]
+## Checks the 4 cardinal neighbors for [param target]. Returns [code]true[/code]
 ## if [param target] is found, and [code]false[/code] otherwise.
 func has_block_neighbor(x: int, y: int, target: int) -> bool:
-	for nx in range(max(0, x - 1), min(world_width, x + 2)):
-		for ny in range(max(0, y - 1), min(world_height, y + 2)):
-			if get_block_unsafe(nx, ny) == target:
-				return true
+	if TileManager.get_block(x - 1, y) == target:
+		return true
+	if TileManager.get_block(x + 1, y) == target:
+		return true
+	if TileManager.get_block(x, y - 1) == target:
+		return true
+	if TileManager.get_block(x, y + 1) == target:
+		return true
 	
 	return false
 
@@ -705,9 +709,11 @@ func receive_tile_state(x: int, y: int, tile: int) -> void:
 
 func send_tile_update(x: int, y: int) -> void:
 	# add neighbors to update queue
-	for nx in range(max(0, x - 1), min(world_width, x + 2)):
-		for ny in range(max(0, y - 1), min(world_height, y + 2)):
-			Globals.block_updater.add_to_queue(Vector2i(nx, ny))
+	Globals.block_updater.add_to_queue(Vector2i(x, y))
+	Globals.block_updater.add_to_queue(Vector2i(x - 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x + 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x, y - 1))
+	Globals.block_updater.add_to_queue(Vector2i(x, y + 1))
 	
 	# sync to clients
 	for player in ServerManager.connected_players.keys():
