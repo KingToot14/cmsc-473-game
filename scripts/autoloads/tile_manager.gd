@@ -292,6 +292,20 @@ func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt
 	
 	return row
 
+## Checks the 4 cardinal neighbors for [param target]. Returns [code]true[/code]
+## if [param target] is found, and [code]false[/code] otherwise.
+func has_block_neighbor(x: int, y: int, target: int) -> bool:
+	if TileManager.get_block(x - 1, y) == target:
+		return true
+	if TileManager.get_block(x + 1, y) == target:
+		return true
+	if TileManager.get_block(x, y - 1) == target:
+		return true
+	if TileManager.get_block(x, y + 1) == target:
+		return true
+	
+	return false
+
 #endregion
 
 #region Safe Interactions
@@ -559,11 +573,9 @@ func send_destroy_block(x: int, y: int) -> void:
 			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
 	
 	TileManager.set_block_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -590,11 +602,9 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to place [param block_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -641,11 +651,9 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to place [param wall_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -681,11 +689,9 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Receives a tile update from the server. Used for various tile interactions
 @rpc('authority', 'call_remote', 'reliable')
@@ -696,6 +702,21 @@ func receive_tile_state(x: int, y: int, tile: int) -> void:
 	
 	TileManager.tiles[_idx(x, y)] = tile
 	Globals.world_map.update_tile(x, y)
+
+func send_tile_update(x: int, y: int) -> void:
+	# add neighbors to update queue
+	Globals.block_updater.add_to_queue(Vector2i(x, y))
+	Globals.block_updater.add_to_queue(Vector2i(x - 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x + 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x, y - 1))
+	Globals.block_updater.add_to_queue(Vector2i(x, y + 1))
+	
+	# update server map
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player in ServerManager.connected_players.keys():
+		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
 
 #endregion
 

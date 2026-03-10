@@ -16,6 +16,7 @@
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://bvupsvk0k73i7" path="res://entities/_resources/entity_spawner.gd" id="8_trceg"]
 [ext_resource type="Script" uid="uid://cgxox2tiapsj2" path="res://scripts/multiplayer/entity_synchronizer.gd" id="10_jbj1t"]
+[ext_resource type="Script" uid="uid://d3ecqdqfqil5d" path="res://blocks/_resources/block_updater.gd" id="12_dp3eg"]
 [ext_resource type="Shader" uid="uid://cj52pvtlbjr0s" path="res://backgrounds/sky_shader.gdshader" id="12_muem4"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
@@ -1137,6 +1138,10 @@ metadata/_custom_type_script = "uid://cgxox2tiapsj2"
 
 [node name="entity_spawner" type="Node" parent="." unique_id=584931145]
 script = ExtResource("8_trceg")
+
+[node name="block_updater" type="Node" parent="." unique_id=1732781882]
+script = ExtResource("12_dp3eg")
+metadata/_custom_type_script = "uid://d3ecqdqfqil5d"
 
 [node name="players" type="Node2D" parent="." unique_id=1430324138]
 

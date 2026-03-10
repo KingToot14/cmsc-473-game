@@ -18,8 +18,6 @@ var scan_timer := 0.0
 ## The base damage of the damage source.
 ## [br]May be overwritten by classes that extend [DamageSource]
 @export var damage := 25
-## [br]Whether or not this damage source is owned by an enemy
-@export var is_enemy := true
 
 var overlapping_hitboxes: Array[EntityHitbox] = []
 
@@ -62,9 +60,9 @@ func damage_hitbox(hitbox: EntityHitbox) -> void:
 		return
 	
 	# don't process on incorrect types
-	if is_enemy and hitbox.player == null:
+	if source_type == DamageSourceType.ENTITY and hitbox.player == null:
 		return
-	if not is_enemy and hitbox.entity == null:
+	if source_type == DamageSourceType.PLAYER and hitbox.entity == null:
 		return
 	
 	# deal damage to entity

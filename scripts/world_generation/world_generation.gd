@@ -58,6 +58,9 @@ func generate_world() -> void:
 	
 	await run_pass(RocksInDirtPass.new())
 	await run_pass(DirtInRocksPass.new())
+	await run_pass(SandPatchPass.new())
+	await run_pass(ClayPatchPass.new())
+	
 	await run_pass(SmallHolesPass.new())
 	
 	# after terrain, before decoration
@@ -69,6 +72,9 @@ func generate_world() -> void:
 	# cleanup
 	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
+	
+	# add tiles that need updates to the queue
+	await run_pass(ActivationPass.new())
 	
 	print("[Wizbowo's Conquest] Done Generating World")
 	

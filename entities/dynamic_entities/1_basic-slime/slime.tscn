@@ -330,6 +330,5 @@ source_type = 0
 metadata/_custom_type_script = "uid://4bwchbw40ctn"
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=1528058351]
-visible = false
 shape = SubResource("RectangleShape2D_l7c8k")
 debug_color = Color(0.7, 0, 0, 0.41960785)
