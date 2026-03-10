@@ -73,6 +73,9 @@ func generate_world() -> void:
 	await run_pass(GrassPass.new())
 	await run_pass(SpawnPass.new())
 	
+	# add tiles that need updates to the queue
+	await run_pass(ActivationPass.new())
+	
 	print("[Wizbowo's Conquest] Done Generating World")
 	
 	generating = false
