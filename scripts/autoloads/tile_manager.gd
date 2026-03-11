@@ -363,21 +363,19 @@ func update_water_texture(x: int, y: int, update := true) -> void:
 	
 	var water_level := ((tiles[_idx(x, y)] >> 20) & MASK_EIGHT) / 255.0
 	
-	if water_level == 0.0:
-		return
-	
 	water_image.set_pixel(
 		x, y,
 		Color(water_level, 0.0, 0.0)
 	)
 	
-	print(water_image.get_pixel(x, y))
-	
 	if update:
-		RenderingServer.global_shader_parameter_set(
-			&"water_texture",
-			ImageTexture.create_from_image(water_image)
-		)
+		push_water_texture_update()
+
+func push_water_texture_update() -> void:
+	RenderingServer.global_shader_parameter_set(
+		&"water_texture",
+		ImageTexture.create_from_image(water_image)
+	)
 
 #endregion
 
@@ -801,6 +799,9 @@ func send_place_water(x: int, y: int) -> void:
 	# set water level
 	set_water_level(x, y, 255)
 	
+	# add to update queue
+	Globals.water_updater.add_to_queue(Vector2i(x, y))
+	
 	# sync to clients
 	send_tile_update(x, y)
 
@@ -923,13 +924,16 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 				)] = WorldTileMap.UpdateState.DIRTY
 				
 				# update water texture
-				update_water_texture(start_x + x, start_y + y)
+				update_water_texture(start_x + x, start_y + y, false)
 				
 				processed += 1
 			
 			if processed >= 128:
 				processed = 0
 				await get_tree().process_frame
+	
+	# push water update all at once
+	push_water_texture_update()
 	
 	# only change updated tiles
 	if dirty_width != 0 and dirty_height != 0:
