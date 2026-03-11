@@ -225,3 +225,7 @@ mouse_position={
 "type": "vec2",
 "value": Vector2(0, 0)
 }
+world_size={
+"type": "vec2",
+"value": Vector2(4200, 1200)
+}

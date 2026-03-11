@@ -29,7 +29,9 @@
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
 [ext_resource type="Script" uid="uid://cj5k0hwfnaogw" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
+[ext_resource type="Shader" uid="uid://di8of40o07gv4" path="res://blocks/_resources/water_renderer.gdshader" id="24_bwdx1"]
 [ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
+[ext_resource type="Texture2D" uid="uid://dky0u3mwq78si" path="res://water test.png" id="25_bwdx1"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -743,12 +745,17 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vewsg"]
 shader = ExtResource("24_gt4e4")
 shader_parameter/mouse_range = 8.0
 shader_parameter/mouse_falloff = 32.0
 shader_parameter/grid_size = 8.0
 shader_parameter/line_size = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
+shader = ExtResource("24_bwdx1")
+shader_parameter/water_texture = ExtResource("25_bwdx1")
+shader_parameter/water_color = Color(0, 0, 1, 0.6)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 100
@@ -1004,7 +1011,7 @@ target = NodePath("../arm_front_outfit")
 [node name="grid_overlay" type="ColorRect" parent="." unique_id=691634126]
 show_behind_parent = true
 z_index = 50
-material = SubResource("ShaderMaterial_24ehl")
+material = SubResource("ShaderMaterial_vewsg")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1016,6 +1023,21 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.50980395)
+
+[node name="water_overlay" type="ColorRect" parent="." unique_id=48487235]
+show_behind_parent = true
+z_index = -10
+material = SubResource("ShaderMaterial_24ehl")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 992.0
+offset_bottom = 592.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
 
