@@ -31,7 +31,6 @@
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
 [ext_resource type="Shader" uid="uid://di8of40o07gv4" path="res://blocks/_resources/water_renderer.gdshader" id="24_bwdx1"]
 [ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
-[ext_resource type="Texture2D" uid="uid://dky0u3mwq78si" path="res://water test.png" id="25_bwdx1"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -754,7 +753,6 @@ shader_parameter/line_size = 1.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
 shader = ExtResource("24_bwdx1")
-shader_parameter/water_texture = ExtResource("25_bwdx1")
 shader_parameter/water_color = Color(0, 0, 1, 0.6)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
@@ -1028,13 +1026,15 @@ color = Color(1, 1, 1, 0.50980395)
 show_behind_parent = true
 z_index = -10
 material = SubResource("ShaderMaterial_24ehl")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 992.0
-offset_bottom = 592.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -300.0
+offset_right = 500.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

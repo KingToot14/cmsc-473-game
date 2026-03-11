@@ -148,9 +148,6 @@ func _ready() -> void:
 		
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
-		
-		# set global water shader
-		
 
 func _unhandled_input(event: InputEvent) -> void:
 	if owner_id != multiplayer.get_unique_id():
