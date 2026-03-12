@@ -377,10 +377,9 @@ func build_water_texture() -> void:
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
-		var row := (water_origin.y + y) * WATER_WIDTH
+		var row := (water_origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			#print(water_origin.x + x, " | ", water_origin.y + y)
 			data[idx] = (tiles[row + water_origin.x + x] >> 20) & MASK_EIGHT
 			
 			idx += 1
