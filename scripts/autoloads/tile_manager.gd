@@ -37,12 +37,29 @@ var world_width: int
 var world_height: int
 
 ## A reference of the water texture for rendering
-var water_image: Image
+var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+var water_texture := ImageTexture.create_from_image(water_image)
+var water_origin: Vector2
+
+const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
+const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * 16
 
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_size_changed.connect(_update_world_size)
 	_update_world_size(Globals.world_size)
+	
+	water_image.fill(Color.BLACK)
+	var canvas := CanvasLayer.new()
+	canvas.layer = 10
+	
+	add_child(canvas)
+	
+	var render := TextureRect.new()
+	render.texture = water_texture
+	render.size = water_texture.get_size()
+	
+	canvas.add_child(render)
 
 func _update_world_size(size: Vector2i) -> void:
 	world_width = size.x
@@ -344,38 +361,64 @@ func get_water_level(x: int, y: int) -> int:
 	# get water level (20 to 27)
 	return (tiles[_idx(x, y)] >> 20) & MASK_EIGHT
 
-## Builds a water texture from [member tiles]. Should only be called
-## at the end of world generation, and only once. Use [method update_water_texture]
-## to update individual tiles
+## Rebuilds the water texture around the player. Should be called after water updates
+## and when loading new chunks
 func build_water_texture() -> void:
-	water_image = Image.create_empty(world_width, world_height, false, Image.FORMAT_R8)
-	water_image.fill(Color.BLACK)
+	# calculate upper point
+	var player_pos := Globals.player.center_point
+	var chunk := world_to_chunk(floori(player_pos.x), floori(player_pos.y))
+	var start_chunk = chunk - ChunkLoader.VISUAL_RANGE
+	water_origin = chunk_to_tile(start_chunk.x, start_chunk.y)
 	
-	RenderingServer.global_shader_parameter_set(
-		&"water_texture",
-		ImageTexture.create_from_image(water_image)
-	)
+	var data := PackedByteArray()
+	data.resize(WATER_WIDTH * WATER_HEIGHT)
+	
+	var idx := 0
+	
+	# rebuild texture
+	for y in range(WATER_HEIGHT):
+		var row := (water_origin.y + y) * WATER_WIDTH
+		
+		for x in range(WATER_WIDTH):
+			#print(water_origin.x + x, " | ", water_origin.y + y)
+			data[idx] = (tiles[row + water_origin.x + x] >> 20) & MASK_EIGHT
+			
+			idx += 1
+	
+	# update texture
+	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	water_texture.update(water_image)
+	
+	push_water_texture_update()
 
 ## Updates the water texture at ([param x], [param y]) using [member tiles].
 func update_water_texture(x: int, y: int, update := true) -> void:
-	if not water_image:
-		build_water_texture()
+	# only update in rendered range
+	if x < water_origin.x or x > (water_origin.x + WATER_WIDTH):
+		return
+	if y < water_origin.y or y > (water_origin.y + WATER_HEIGHT):
+		return
 	
-	var water_level := ((tiles[_idx(x, y)] >> 20) & MASK_EIGHT) / 255.0
-	
-	water_image.set_pixel(
-		x, y,
-		Color(water_level, 0.0, 0.0)
-	)
+	# update data
+	var data: PackedByteArray = water_image.data['data']
+	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = \
+		(tiles[y * world_width + x] >> 20) & MASK_EIGHT
+	# update image and texture
+	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	water_texture.update(water_image)
 	
 	if update:
 		push_water_texture_update()
 
+## Pushes a texture update to the server. This is automatically called by
+## [method update_water_texture] by defualt, but can be called manually
+## when performing bulk updates.
 func push_water_texture_update() -> void:
 	RenderingServer.global_shader_parameter_set(
 		&"water_texture",
-		ImageTexture.create_from_image(water_image)
+		water_texture
 	)
+	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
 
 #endregion
 
