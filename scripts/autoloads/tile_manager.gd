@@ -50,16 +50,6 @@ func _ready() -> void:
 	_update_world_size(Globals.world_size)
 	
 	water_image.fill(Color.BLACK)
-	var canvas := CanvasLayer.new()
-	canvas.layer = 10
-	
-	add_child(canvas)
-	
-	var render := TextureRect.new()
-	render.texture = water_texture
-	render.size = water_texture.get_size()
-	
-	canvas.add_child(render)
 
 func _update_world_size(size: Vector2i) -> void:
 	world_width = size.x
@@ -341,7 +331,7 @@ func has_block_neighbor(x: int, y: int, target: int) -> bool:
 
 #region Water
 ## Sets the water level at ([param x], [param y]). [param water_level] should
-## be a value between [code]0 - 255[/code].
+## be a value between [code]0 - 16[/code].
 func set_water_level(x: int, y: int, water_level: int) -> void:
 	# check bounds
 	if x < 0 or x >= world_width or y < 0 or y >= world_height:
@@ -393,9 +383,9 @@ func build_water_texture() -> void:
 ## Updates the water texture at ([param x], [param y]) using [member tiles].
 func update_water_texture(x: int, y: int, update := true) -> void:
 	# only update in rendered range
-	if x < water_origin.x or x > (water_origin.x + WATER_WIDTH):
+	if x < water_origin.x or x >= (water_origin.x + WATER_WIDTH):
 		return
-	if y < water_origin.y or y > (water_origin.y + WATER_HEIGHT):
+	if y < water_origin.y or y >= (water_origin.y + WATER_HEIGHT):
 		return
 	
 	# update data
@@ -656,7 +646,7 @@ func place_water(x: int, y: int) -> bool:
 		return false
 	
 	# set water level
-	set_water_level(x, y, 255)
+	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 	update_water_texture(x, y)
 	
 	# sync to server
@@ -839,7 +829,7 @@ func send_place_water(x: int, y: int) -> void:
 		return
 	
 	# set water level
-	set_water_level(x, y, 255)
+	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 	
 	# add to update queue
 	Globals.water_updater.add_to_queue(Vector2i(x, y))

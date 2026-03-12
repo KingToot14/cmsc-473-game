@@ -6,6 +6,8 @@ const PHYSICS_TICKS := 60
 const CYCLES := 10.0
 const QUEUE_SLICE := 1.0 / CYCLES
 
+const MAX_WATER_LEVEL := 255
+
 var update_queue: Array[Vector2i] = []
 var index := 0
 
@@ -16,7 +18,7 @@ func _ready() -> void:
 	set_physics_process(false)
 
 func _physics_process(_delta: float) -> void:
-	var width := maxi(1, ceili(len(update_queue) * QUEUE_SLICE))
+	var width := maxi(1, floori(len(update_queue) * QUEUE_SLICE))
 	
 	for i in range(index, index + width):
 		if i >= len(update_queue):
@@ -63,7 +65,7 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	
 	# move as much as possible
 	var bottom_water_level := TileManager.get_water_level(x, y + 1)
-	var available_space := 255 - bottom_water_level
+	var available_space := MAX_WATER_LEVEL - bottom_water_level
 	
 	# move as much as possible (limited by space or water level)
 	var diff = mini(available_space, water_level)
@@ -82,59 +84,97 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	return water_level
 
 func flow_side(x: int, y: int, water_level: int) -> int:
-	var left_solid := TileManager.get_block(x - 1, y) != 0
-	var right_solid := TileManager.get_block(x + 1, y) != 0
+	var can_flow_left_1 := TileManager.get_block(x - 1, y) == 0
+	var can_flow_right_1 := TileManager.get_block(x + 1, y) == 0
 	
-	# don't process if can't flow
-	if left_solid and right_solid:
-		return water_level
+	# try to flow to nearest neighbors
+	if can_flow_left_1 and can_flow_right_1:
+		var can_flow_left_2 := TileManager.get_block(x - 2, y) == 0
+		var can_flow_right_2 := TileManager.get_block(x + 2, y) == 0
+		
+		# try to flow to next neighbors
+		if can_flow_left_2 and can_flow_right_2:
+			var can_flow_left_3 := TileManager.get_block(x - 3, y) == 0
+			var can_flow_right_3 := TileManager.get_block(x + 3, y) == 0
+			
+			# try to flow to next neighbors
+			if can_flow_left_3 and can_flow_right_3:
+				var average := floori((
+					water_level +
+					TileManager.get_water_level(x - 1, y) +
+					TileManager.get_water_level(x + 1, y) +
+					TileManager.get_water_level(x - 2, y) +
+					TileManager.get_water_level(x + 2, y) +
+					TileManager.get_water_level(x - 3, y) +
+					TileManager.get_water_level(x + 3, y)
+				) / 7.0)
+				
+				TileManager.set_water_level(x, y, average)
+				TileManager.set_water_level(x - 1, y, average)
+				TileManager.set_water_level(x + 1, y, average)
+				TileManager.set_water_level(x - 2, y, average)
+				TileManager.set_water_level(x + 2, y, average)
+				TileManager.set_water_level(x - 3, y, average)
+				TileManager.set_water_level(x + 3, y, average)
+				
+				TileManager.send_tile_update(x, y)
+				TileManager.send_tile_update(x - 1, y)
+				TileManager.send_tile_update(x + 1, y)
+				TileManager.send_tile_update(x - 2, y)
+				TileManager.send_tile_update(x + 2, y)
+				TileManager.send_tile_update(x - 3, y)
+				TileManager.send_tile_update(x + 3, y)
+				
+				add_to_queue(Vector2i(x - 1, y))
+				add_to_queue(Vector2i(x + 1, y))
+				add_to_queue(Vector2i(x - 2, y))
+				add_to_queue(Vector2i(x + 2, y))
+				add_to_queue(Vector2i(x - 3, y))
+				add_to_queue(Vector2i(x + 3, y))
+			else:
+				var average := floori((
+					water_level +
+					TileManager.get_water_level(x - 1, y) +
+					TileManager.get_water_level(x + 1, y) +
+					TileManager.get_water_level(x - 2, y) +
+					TileManager.get_water_level(x + 2, y)
+				) / 5.0)
+				
+				TileManager.set_water_level(x, y, average)
+				TileManager.set_water_level(x - 1, y, average)
+				TileManager.set_water_level(x + 1, y, average)
+				TileManager.set_water_level(x - 2, y, average)
+				TileManager.set_water_level(x + 2, y, average)
+				
+				TileManager.send_tile_update(x, y)
+				TileManager.send_tile_update(x - 1, y)
+				TileManager.send_tile_update(x + 1, y)
+				TileManager.send_tile_update(x - 2, y)
+				TileManager.send_tile_update(x + 2, y)
+				
+				add_to_queue(Vector2i(x - 1, y))
+				add_to_queue(Vector2i(x + 1, y))
+				add_to_queue(Vector2i(x - 2, y))
+				add_to_queue(Vector2i(x + 2, y))
+		else:
+			var average := floori((
+				water_level +
+				TileManager.get_water_level(x - 1, y) +
+				TileManager.get_water_level(x + 1, y)
+			) / 3.0)
+			
+			TileManager.set_water_level(x, y, average)
+			TileManager.set_water_level(x - 1, y, average)
+			TileManager.set_water_level(x + 1, y, average)
+			
+			TileManager.send_tile_update(x, y)
+			TileManager.send_tile_update(x - 1, y)
+			TileManager.send_tile_update(x + 1, y)
+			
+			add_to_queue(Vector2i(x - 1, y))
+			add_to_queue(Vector2i(x + 1, y))
 	
-	# flow left
-	if right_solid:
-		var left_level := TileManager.get_water_level(x - 1, y)
-		var average := ceili((water_level + left_level) / 2.0)
-		
-		TileManager.set_water_level(x, y, average)
-		TileManager.set_water_level(x - 1, y, average)
-		
-		TileManager.send_tile_update(x, y)
-		TileManager.send_tile_update(x - 1, y)
-		
-		add_to_queue(Vector2i(x - 1, y))
-		
-		return average
-	# flow right
-	elif left_solid:
-		var right_level := TileManager.get_water_level(x + 1, y)
-		var average := ceili((water_level + right_level) / 2.0)
-		
-		TileManager.set_water_level(x, y, average)
-		TileManager.set_water_level(x + 1, y, average)
-		
-		TileManager.send_tile_update(x, y)
-		TileManager.send_tile_update(x + 1, y)
-		
-		add_to_queue(Vector2i(x + 1, y))
-		
-		return average
-	# flow both
-	else:
-		var left_level := TileManager.get_water_level(x - 1, y)
-		var right_level := TileManager.get_water_level(x + 1, y)
-		var average := ceili((water_level + left_level + right_level) / 3.0)
-		
-		TileManager.set_water_level(x, y, average)
-		TileManager.set_water_level(x - 1, y, average)
-		TileManager.set_water_level(x + 1, y, average)
-		
-		TileManager.send_tile_update(x, y)
-		TileManager.send_tile_update(x - 1, y)
-		TileManager.send_tile_update(x + 1, y)
-		
-		add_to_queue(Vector2i(x - 1, y))
-		add_to_queue(Vector2i(x + 1, y))
-		
-		return average
+	return water_level
 
 #endregion
 
