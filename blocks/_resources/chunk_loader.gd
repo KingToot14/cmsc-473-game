@@ -33,6 +33,9 @@ func _process(_delta: float) -> void:
 	if abs(diff.x) + abs(diff.y) >= 1:
 		current_chunk = new_chunk
 		
+		if not multiplayer.is_server() and player.owner_id == multiplayer.get_unique_id():
+			BiomeManager.check_biome(player.global_position)
+		
 		if multiplayer.is_server():
 			# server sends chunk updates
 			if diff.x != 0:

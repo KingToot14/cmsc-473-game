@@ -1,4 +1,3 @@
-class_name MusicManager
 extends AudioStreamPlayer
 
 enum Area {
@@ -60,22 +59,29 @@ var _current_area: Area = Area.TITLE_SCREEN
 
 # --- Functions --- #
 func _ready() -> void:
-	Globals.music = self
 	finished.connect(_on_track_finished)
 
 	# start playback
-	var args := Globals.parse_arguments()
+	if BiomeManager:
+		BiomeManager.biome_changed.connect(_on_biome_changed)
 
-	# only play on clients that haven't disabled music
+	# playback logic
+	var args := Globals.parse_arguments()
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
 		return
 	
 	play_track(Area.TITLE_SCREEN)
 
+func _on_biome_changed(new_biome: StringName) -> void:
+	match new_biome:
+		&"winter":
+			# Assuming you want WINTER_DAY by default for now
+			play_track(Area.WINTER_DAY)
+		&"forest":
+			play_track(Area.FOREST_DAY)
 
 func _on_track_finished() -> void:
 	play_track(_current_area)
-
 
 ## Returns the next track path for a queued area, refilling and reshuffling
 ## the queue once all tracks have been played.
