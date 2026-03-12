@@ -2,14 +2,12 @@ class_name WaterUpdater
 extends Node
 
 # --- Variables --- #
-const PHYSICS_TICKS := 60
-const CYCLES := 10.0
-const QUEUE_SLICE := 1.0 / CYCLES
-
+const UPDATE_TIME := 0.05
+const MAX_UPDATES_PER_FRAME := 200
 const MAX_WATER_LEVEL := 255
 
-var update_queue: Array[Vector2i] = []
-var index := 0
+var update_timer := 0.0
+var active_tiles: Dictionary[Vector2i, bool] = {}
 
 # --- Functions --- #
 func _ready() -> void:
@@ -17,35 +15,51 @@ func _ready() -> void:
 	
 	set_physics_process(false)
 
-func _physics_process(_delta: float) -> void:
-	var width := maxi(1, floori(len(update_queue) * QUEUE_SLICE))
+func _process(delta: float) -> void:
+	update_timer -= delta
 	
-	for i in range(index, index + width):
-		if i >= len(update_queue):
-			break
+	# wait for timer to be empty
+	if update_timer > 0.0:
+		return
+	
+	# do update
+	var tiles := active_tiles.keys()
+	
+	var index := 0
+	var processed := 0
+	
+	# process as many tiles as possible
+	while index < len(tiles):
+		var tile: Vector2i = tiles[index]
 		
-		handle_update(i, update_queue[i])
+		# make sure tile still exists
+		if tile not in active_tiles:
+			continue
+		
+		handle_update(tile)
+		
+		# update counter
+		processed += 1
+		index += 1
+		
+		if processed >= MAX_UPDATES_PER_FRAME:
+			await get_tree().process_frame
+			processed = 0
 	
-	# update index
-	index += width
-	
-	if index >= CYCLES and index >= len(update_queue):
-		index = 0
+	# update timer
+	update_timer = UPDATE_TIME
 
 #region Adding to Queue
 func add_to_queue(position: Vector2i) -> void:
 	# don't re-add if already in queue
-	if position in update_queue:
-		return
-	
-	update_queue.append(position)
+	active_tiles[position] = true
 
-func handle_update(pos_index: int, position: Vector2i) -> void:
+func handle_update(position: Vector2i) -> void:
 	var water_level := TileManager.get_water_level(position.x, position.y)
 	
 	# remove dry tiles
 	if water_level <= 0:
-		remove_from_queue(pos_index)
+		active_tiles.erase(position)
 		return
 	
 	# check downward flow
@@ -56,7 +70,7 @@ func handle_update(pos_index: int, position: Vector2i) -> void:
 	if water_level > 0:
 		water_level = flow_side(position.x, position.y, water_level)
 	else:
-		remove_from_queue(pos_index)
+		active_tiles.erase(position)
 
 func flow_down(x: int, y: int, water_level: int) -> int:
 	# check if tile below is solid
@@ -175,24 +189,5 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 			add_to_queue(Vector2i(x + 1, y))
 	
 	return water_level
-
-#endregion
-
-#region Removing From Queue
-func remove_from_queue(pos_index: int) -> void:
-	if pos_index == len(update_queue) - 1:
-		update_queue.pop_back()
-		return
-	
-	# replace with last
-	update_queue[pos_index] = update_queue.pop_back()
-
-func remove_position_from_queue(position: Vector2i) -> void:
-	for i in len(update_queue):
-		if update_queue[i] != position:
-			continue
-		
-		remove_from_queue(i)
-		return
 
 #endregion
