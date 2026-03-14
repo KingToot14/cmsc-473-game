@@ -409,6 +409,28 @@ func push_water_texture_update() -> void:
 	)
 	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
 
+func send_water_update(water_data: PackedByteArray) -> void:
+	receive_water_update.rpc(water_data)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_water_update(water_data: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = water_data
+	
+	# unpack data
+	var size := buffer.get_u16()
+	
+	for i in range(size):
+		# unpack position
+		var tile_x := buffer.get_u16()
+		var tile_y := buffer.get_u16()
+		
+		# water level
+		var water_level := buffer.get_u8()
+		
+		set_water_level(tile_x, tile_y, water_level)
+		update_water_texture(tile_x, tile_y)
+
 #endregion
 
 #region Safe Interactions

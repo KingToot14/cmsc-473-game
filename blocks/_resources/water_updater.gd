@@ -8,6 +8,7 @@ const MAX_WATER_LEVEL := 255
 
 var update_timer := 0.0
 var active_tiles: Dictionary[Vector2i, bool] = {}
+var updated_tiles: Dictionary[Vector2i, bool]
 
 # --- Functions --- #
 func _ready() -> void:
@@ -24,6 +25,7 @@ func _process(delta: float) -> void:
 	
 	# do update
 	var tiles := active_tiles.keys()
+	updated_tiles = {}
 	
 	var index := 0
 	var processed := 0
@@ -48,18 +50,28 @@ func _process(delta: float) -> void:
 	
 	# update timer
 	update_timer = UPDATE_TIME
+	
+	# send batched update
+	send_update()
 
 #region Adding to Queue
 func add_to_queue(position: Vector2i) -> void:
-	# don't re-add if already in queue
 	active_tiles[position] = true
+	
+	queue_update(position.x, position.y)
+
+func remove_from_queue(position: Vector2i) -> void:
+	active_tiles.erase(position)
+	
+	queue_update(position.x, position.y)
 
 func handle_update(position: Vector2i) -> void:
 	var water_level := TileManager.get_water_level(position.x, position.y)
+	var start_level := water_level
 	
 	# remove dry tiles
 	if water_level <= 0:
-		active_tiles.erase(position)
+		remove_from_queue(position)
 		return
 	
 	# check downward flow
@@ -70,7 +82,12 @@ func handle_update(position: Vector2i) -> void:
 	if water_level > 0:
 		water_level = flow_side(position.x, position.y, water_level)
 	else:
-		active_tiles.erase(position)
+		remove_from_queue(position)
+		return
+	
+	# remove tiles when not updated
+	if water_level == start_level:
+		remove_from_queue(position)
 
 func flow_down(x: int, y: int, water_level: int) -> int:
 	# check if tile below is solid
@@ -87,13 +104,13 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	water_level -= diff
 	
 	# update water level
-	add_to_queue(Vector2i(x, y + 1))
-	
 	TileManager.set_water_level(x, y, water_level)
 	TileManager.set_water_level(x, y + 1, bottom_water_level + diff)
 	
-	TileManager.send_tile_update(x, y)
-	TileManager.send_tile_update(x, y + 1)
+	# queue updates
+	queue_update(x, y)
+	
+	add_to_queue(Vector2i(x, y + 1))
 	
 	return water_level
 
@@ -123,6 +140,7 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 					TileManager.get_water_level(x + 3, y)
 				) / 7.0)
 				
+				# update water level
 				TileManager.set_water_level(x, y, average)
 				TileManager.set_water_level(x - 1, y, average)
 				TileManager.set_water_level(x + 1, y, average)
@@ -131,14 +149,10 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				TileManager.set_water_level(x - 3, y, average)
 				TileManager.set_water_level(x + 3, y, average)
 				
-				TileManager.send_tile_update(x, y)
-				TileManager.send_tile_update(x - 1, y)
-				TileManager.send_tile_update(x + 1, y)
-				TileManager.send_tile_update(x - 2, y)
-				TileManager.send_tile_update(x + 2, y)
-				TileManager.send_tile_update(x - 3, y)
-				TileManager.send_tile_update(x + 3, y)
+				# queue updates
+				queue_update(x, y)
 				
+				# re-add tiles to queue
 				add_to_queue(Vector2i(x - 1, y))
 				add_to_queue(Vector2i(x + 1, y))
 				add_to_queue(Vector2i(x - 2, y))
@@ -154,18 +168,17 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 					TileManager.get_water_level(x + 2, y)
 				) / 5.0)
 				
+				# update water level
 				TileManager.set_water_level(x, y, average)
 				TileManager.set_water_level(x - 1, y, average)
 				TileManager.set_water_level(x + 1, y, average)
 				TileManager.set_water_level(x - 2, y, average)
 				TileManager.set_water_level(x + 2, y, average)
 				
-				TileManager.send_tile_update(x, y)
-				TileManager.send_tile_update(x - 1, y)
-				TileManager.send_tile_update(x + 1, y)
-				TileManager.send_tile_update(x - 2, y)
-				TileManager.send_tile_update(x + 2, y)
+				# queue updates
+				queue_update(x, y)
 				
+				# re-add tiles to queue
 				add_to_queue(Vector2i(x - 1, y))
 				add_to_queue(Vector2i(x + 1, y))
 				add_to_queue(Vector2i(x - 2, y))
@@ -177,17 +190,44 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				TileManager.get_water_level(x + 1, y)
 			) / 3.0)
 			
+			# update water level
 			TileManager.set_water_level(x, y, average)
 			TileManager.set_water_level(x - 1, y, average)
 			TileManager.set_water_level(x + 1, y, average)
 			
-			TileManager.send_tile_update(x, y)
-			TileManager.send_tile_update(x - 1, y)
-			TileManager.send_tile_update(x + 1, y)
+			# queue updates
+			queue_update(x, y)
 			
+			# re-add tiles to queue
 			add_to_queue(Vector2i(x - 1, y))
 			add_to_queue(Vector2i(x + 1, y))
 	
 	return water_level
+
+#endregion
+
+#region Updating
+func queue_update(x: int, y: int) -> void:
+	updated_tiles[Vector2i(x, y)] = true
+
+func send_update() -> void:
+	var update_size := len(updated_tiles)
+	
+	if update_size == 0:
+		return
+	
+	# build buffer
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(1 + update_size * 5)
+	
+	buffer.put_u16(update_size)
+	
+	for tile: Vector2i in updated_tiles:
+		buffer.put_u16(tile.x)
+		buffer.put_u16(tile.y)
+		
+		buffer.put_u8(TileManager.get_water_level(tile.x, tile.y))
+	
+	TileManager.send_water_update(buffer.data_array)
 
 #endregion
