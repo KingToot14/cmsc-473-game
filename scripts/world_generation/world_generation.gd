@@ -25,6 +25,8 @@ var underground_low := 0
 
 var hill_positions: Array[Vector2i] = []
 
+var winter_on_right := false
+
 # --- Functions --- #
 func set_seed(new_seed: Variant) -> void:
 	# get special seeds
@@ -49,6 +51,8 @@ func generate_world() -> void:
 	rng = RandomNumberGenerator.new()
 	rng.seed = world_seed
 	
+	winter_on_right = rng.randf() > 0.5
+	
 	# perform passes
 	await run_pass(ResetPass.new())
 	
@@ -62,6 +66,9 @@ func generate_world() -> void:
 	await run_pass(ClayPatchPass.new())
 	
 	await run_pass(SmallHolesPass.new())
+	
+	await run_pass(DirtToSnowPass.new())
+	await run_pass(StoneToIcePass.new())
 	
 	# after terrain, before decoration
 	await run_pass(SmoothPass.new())

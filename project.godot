@@ -39,6 +39,8 @@ EntityManager="*uid://cbrcmetbd2pq8"
 ItemDatabase="*uid://bmdvy4d1xjyp3"
 DatabaseManager="*uid://lrme4ahma8q3"
 BlockDatabase="*uid://b21pv7qr3jic3"
+BiomeManager="*uid://cgql53i2vhk0c"
+MusicManager="*uid://dv38b28j7qbqj"
 
 [display]
 

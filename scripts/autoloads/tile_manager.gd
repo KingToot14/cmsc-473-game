@@ -716,6 +716,16 @@ func send_destroy_block(x: int, y: int) -> void:
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
 			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
+			
+	if block_id == 6: # Snow
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 12, 1, player_id)
+	
+	if block_id == 7: # Ice
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
 	
 	# set block
 	set_block_unsafe(x, y, 0)

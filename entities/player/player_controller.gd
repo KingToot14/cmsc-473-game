@@ -374,8 +374,8 @@ func done_initial_load() -> void:
 #endregion
 
 func enter_biome(area: MusicManager.Area) -> void:
-	Globals.music.reset_area(area)
-	Globals.music.play_track(area)
+	MusicManager.reset_area(area)
+	MusicManager.play_track(area)
 
 #region Interest
 func add_interest(entity_id: int) -> void:
