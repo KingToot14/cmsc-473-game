@@ -12,7 +12,7 @@ size = Vector2(6, 6)
 size = Vector2(6, 6)
 
 [node name="falling_block" type="CharacterBody2D" unique_id=976073606 node_paths=PackedStringArray("interpolator")]
-z_index = 100
+z_index = 50
 collision_layer = 32
 script = ExtResource("1_vsi20")
 interpolator = NodePath("entity_interpolator")
