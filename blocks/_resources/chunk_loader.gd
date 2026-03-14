@@ -56,6 +56,9 @@ func _process(_delta: float) -> void:
 				var boundary := diff
 				boundary.x = 0
 				autotile_boundary(boundary)
+			
+			# update water render
+			TileManager.build_water_texture()
 
 func clear_boundary(boundary: Vector2i) -> void:
 	var start_chunk := current_chunk - LOAD_RANGE
@@ -236,6 +239,9 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 			center_x + VISUAL_RANGE.x,
 			center_y + VISUAL_RANGE.y
 		)
+	
+	# build water texture
+	TileManager.build_water_texture()
 	
 	# load entities
 	EntityManager.load_region.rpc_id(

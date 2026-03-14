@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://8b5fkundrafv"]
 
 [ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_j1wjq"]
-[ext_resource type="Texture2D" uid="uid://d1oyf7a7otl5m" path="res://blocks/7_ice/icon.png" id="2_wc5tg"]
+[ext_resource type="Texture2D" uid="uid://wbrxh3tas3f1" path="res://blocks/11_iron_ore/icon.png" id="2_j1wjq"]
 
 [resource]
 script = ExtResource("1_j1wjq")
 tile_id = 11
 use_speed = 0.25
 item_name = "Iron Ore"
-texture = ExtResource("2_wc5tg")
+texture = ExtResource("2_j1wjq")
 item_type = 1
 metadata/_custom_type_script = "uid://drm3bg40b8m1s"
