@@ -717,7 +717,15 @@ func send_destroy_block(x: int, y: int) -> void:
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
 			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
 	
+	# set block
 	set_block_unsafe(x, y, 0)
+	
+	# update neighbors
+	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x - 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x + 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x, y - 1), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x, y + 1), WaterUpdater.MAX_WATER_LEVEL)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -796,6 +804,7 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
+	TileManager.set_water_level(x, y, 0)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -854,7 +863,7 @@ func send_place_water(x: int, y: int) -> void:
 	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 	
 	# add to update queue
-	Globals.water_updater.add_to_queue(Vector2i(x, y))
+	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
 	
 	# sync to clients
 	send_tile_update(x, y)
