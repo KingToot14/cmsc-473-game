@@ -106,6 +106,9 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	# move as much as possible (limited by space or water level)
 	var diff = mini(available_space, water_level)
 	
+	if diff == 0:
+		return water_level
+	
 	water_level -= diff
 	bottom_water_level += diff
 	

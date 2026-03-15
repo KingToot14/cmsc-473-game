@@ -4,6 +4,7 @@ shader_type canvas_item;
 global uniform sampler2D water_texture: filter_nearest;
 global uniform vec2 water_offset;
 uniform vec4 water_color: source_color = vec4(0.0, 0.0, 1.0, 0.6);
+uniform vec4 foam_color: source_color = vec4(0.0, 0.0, 1.0, 0.6);
 
 varying vec2 world_position;
 
@@ -18,8 +19,42 @@ void fragment() {
 	
 	vec2 tex_size = vec2(textureSize(water_texture, 0));
 	
-	float water_level = 1.0 - texture(water_texture, tile_position / tex_size).r;
+	// Get water level from red channel
+	float water_level = texture(water_texture, tile_position / tex_size).r;
+	float local_level = (8.0 - local_position.y) / 8.0;
 	
+	// Neighbors levels 
+	float top_level = texture(water_texture, (tile_position - vec2(0.0, 1.0)) / tex_size).r;
+	float bottom_level = texture(water_texture, (tile_position + vec2(0.0, 1.0)) / tex_size).r;
+	float left_level = texture(water_texture, (tile_position - vec2(1.0, 0.0)) / tex_size).r;
+	float right_level = texture(water_texture, (tile_position + vec2(1.0, 0.0)) / tex_size).r;
+	
+	// Combine water columns
+	water_level = step(0.001, water_level) * mix(water_level, 1.0, step(0.001, top_level));
+	
+	// Set base color;
 	COLOR = water_color;
-	COLOR.a *= step(water_level, local_position.y / 8.0);
+	
+	// Color edges
+	float foam_top = step(water_level - 0.125, local_level);
+	foam_top = foam_top * step(top_level, 0.0);
+	COLOR = mix(COLOR, foam_color, foam_top);
+	
+	float foam_bottom = step(local_level, 0.125);
+	foam_bottom = foam_bottom * step(bottom_level, 0.0);
+	COLOR = mix(COLOR, foam_color, foam_bottom);
+	
+	float foam_left = step(local_position.x, 1.0);
+	foam_left = foam_left * step(left_level, local_level);
+	COLOR = mix(COLOR, foam_color, foam_left);
+	
+	float foam_right = step(7.0, local_position.x);
+	foam_right = foam_right * step(right_level, local_level);
+	COLOR = mix(COLOR, foam_color, foam_right);
+	
+	// remove corners
+	COLOR.a *= step(foam_top + foam_left + foam_right + foam_bottom, 1.0);
+	
+	// Only color up to water level
+	COLOR.a *= step(local_level, water_level);
 }

@@ -227,7 +227,7 @@ mouse_position={
 }
 water_texture={
 "type": "sampler2D",
-"value": "::bwdx1"
+"value": "res://water_test.png"
 }
 water_offset={
 "type": "vec2",
