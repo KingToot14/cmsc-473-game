@@ -150,7 +150,7 @@ func _on_receive_damage(
 	
 	# set jump velocity to opposite of damage
 	if knockback.x != 0.0 and not is_on_floor() and sign(knockback.x) != sign(jump_velocity.x):
-		jump_velocity.x = sign(knockback.x)
+		jump_velocity.x = jump_velocity.x * sign(knockback.x)
 	
 	# set target if not already set
 	if multiplayer.is_server():

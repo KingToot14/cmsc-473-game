@@ -240,6 +240,13 @@ func receive_update_important(entity_id: int, action_id: int, time: float, insta
 			else:
 				entity.interpolator.send_action(time, buffer.data_array)
 
+@rpc('any_peer', 'call_remote', 'reliable')
+func entity_receive_damage(entity_id: int, data: PackedByteArray) -> void:
+	var entity := get_entity(entity_id)
+	
+	if entity:
+		entity.hp.receive_damage(data)
+
 #endregion
 
 #region Interest Management
