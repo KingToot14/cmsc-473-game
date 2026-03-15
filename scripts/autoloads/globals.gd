@@ -43,6 +43,8 @@ var world_size := Vector2i(4200, 1200):
 			ceili(float(_size.x) / TileManager.CHUNK_SIZE),
 			ceili(float(_size.y) / TileManager.CHUNK_SIZE)
 		)
+		space = _size.y * 0.10
+		
 		world_size = _size
 		world_size_changed.emit(world_size)
 
@@ -52,6 +54,10 @@ var world_chunks: Vector2i = Vector2i(
 	ceili(float(world_size.y) / TileManager.CHUNK_SIZE)
 )
 var world_spawn: Vector2i
+
+var space := world_size.y * 0.10
+var surface := 0
+var underground := 0
 
 # - TileMaps
 var server_map: ServerTileMap
@@ -86,6 +92,36 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	
 	_on_viewport_size_changed()
+	
+	# add node for synchronization
+	var sync = MultiplayerSynchronizer.new()
+	var config = SceneReplicationConfig.new()
+	sync.set_multiplayer_authority(SERVER_ID)
+	
+	# set synced properties
+	config.add_property(^':world_size')
+	config.property_set_replication_mode(
+		^':world_size',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	config.add_property(^':space')
+	config.property_set_replication_mode(
+		^':space',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	config.add_property(^':surface')
+	config.property_set_replication_mode(
+		^':surface',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	config.add_property(^':underground')
+	config.property_set_replication_mode(
+		^':underground',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	
+	sync.replication_config = config
+	add_child(sync)
 
 func parse_arguments() -> Dictionary:
 	var arguments: Dictionary = {}

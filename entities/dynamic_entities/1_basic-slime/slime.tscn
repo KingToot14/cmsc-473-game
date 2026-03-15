@@ -247,6 +247,7 @@ size = Vector2(14, 10)
 size = Vector2(14, 10)
 
 [node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
 collision_layer = 8
 script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
@@ -301,7 +302,6 @@ position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_fpuqc")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=467169453]
-z_index = 100
 material = SubResource("ShaderMaterial_515sv")
 position = Vector2(0, -7)
 texture = ExtResource("2_72hbc")

@@ -41,14 +41,14 @@ var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FO
 var water_texture := ImageTexture.create_from_image(water_image)
 var water_origin: Vector2
 
-const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
-const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * 16
+const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * CHUNK_SIZE
+const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * CHUNK_SIZE
 
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_size_changed.connect(_update_world_size)
 	_update_world_size(Globals.world_size)
-	
+	 
 	water_image.fill(Color.BLACK)
 
 func _update_world_size(size: Vector2i) -> void:
@@ -390,8 +390,11 @@ func update_water_texture(x: int, y: int, update := true) -> void:
 	
 	# update data
 	var data: PackedByteArray = water_image.data['data']
-	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = \
-		(tiles[y * world_width + x] >> 20) & MASK_EIGHT
+	var water_level := (tiles[y * world_width + x] >> 20) & MASK_EIGHT
+	
+	# update data
+	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = water_level
+	
 	# update image and texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
 	water_texture.update(water_image)
@@ -429,7 +432,9 @@ func receive_water_update(water_data: PackedByteArray) -> void:
 		var water_level := buffer.get_u8()
 		
 		set_water_level(tile_x, tile_y, water_level)
-		update_water_texture(tile_x, tile_y)
+		update_water_texture(tile_x, tile_y, false)
+	
+	push_water_texture_update()
 
 #endregion
 

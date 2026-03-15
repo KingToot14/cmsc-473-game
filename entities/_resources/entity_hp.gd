@@ -21,6 +21,7 @@ var curr_hp := 0
 
 ## How long before this hp can take damage from each different damage source
 @export var invincibility_time := 0.50
+@export var world_invincibility_time := 0.05
 
 var invincibility_timers: Dictionary[DamageSource.DamageSourceType, float] = {}
 
@@ -49,7 +50,10 @@ func take_damage(
 		return
 	
 	# add invincibility
-	invincibility_timers[source_type] = invincibility_time
+	if source_type == DamageSource.DamageSourceType.WORLD:
+		invincibility_timers[source_type] = world_invincibility_time
+	else:
+		invincibility_timers[source_type] = invincibility_time
 	
 	# deal damage
 	modify_health(-damage)

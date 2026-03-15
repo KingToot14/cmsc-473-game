@@ -55,6 +55,15 @@ var is_grounded := false
 ## The maximum vertical velocity the player can be going when affected by [member gravity]
 @export var terminal_velocity := 380.0
 
+@export_group("Water", "water_")
+@export var water_gravity_mod := 0.75
+@export var water_movement_mod := 0.75
+@export var water_jump_mod := 0.50
+
+@export var water_breath := 10.0
+var breath_timer := 0.0
+@export var water_drown_damage := 1
+
 ## How strong incoming knockback is applied. Represents the player's "weight"
 @export var knockback_power := 200.0
 ## The base velocity derived from movement (left/right movement, jumping, etc.)
@@ -247,6 +256,7 @@ func do_swing(swing_speed := 1.0, direction := 0) -> void:
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
+	z_index = 500 if mode else 25
 
 ## Run a rollback-friendly tick
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
@@ -262,16 +272,50 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 
 ## Gather input from the [class InputSynchronizer] node at [code]$'input_sync'[/code]
 func apply_input(delta: float) -> void:
+	# check if feet in water
+	var tile_pos := TileManager.world_to_tile(
+		floori(global_position.x),
+		floori(global_position.y)
+	)
+	
+	var in_water := \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# check if head is under water
+	var head_in_water := \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# start drowning
+	if head_in_water and not multiplayer.is_server():
+		breath_timer -= delta
+		
+		if breath_timer <= 0.0:
+			breath_timer = 0.0
+			hp.take_damage(water_drown_damage, DamageSource.DamageSourceType.WORLD)
+	else:
+		breath_timer = water_breath
+	
 	# fixes a NetFox bug with is_on_floor()
 	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
 			sfx.play_sfx(&'jump')
-			velocity.y = -jump_power
+			if in_water:
+				velocity.y = -jump_power * water_jump_mod
+			else:
+				velocity.y = -jump_power
 			pass
 	
 	# gravity
-	base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
+	if in_water:
+		base_velocity.y = min(
+			velocity.y + gravity * delta * water_gravity_mod, 
+			terminal_velocity * water_gravity_mod
+		)
+	else:
+		base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -282,13 +326,17 @@ func apply_input(delta: float) -> void:
 		free_cam_pressed = false
 	
 	# move right
+	var water_mod := 1.0
+	if in_water:
+		water_mod = water_movement_mod
+	
 	if $'input_sync'.input_direction.x > 0.0:
 		# turn around quicker
 		if base_velocity.x < -move_slowdown * delta:
 			base_velocity.x += move_slowdown * delta
 		# apply movement if not at max speed
 		if base_velocity.x < move_max_speed:
-			base_velocity.x += move_acceleration * delta
+			base_velocity.x += move_acceleration * delta * water_mod
 	# move left
 	elif $'input_sync'.input_direction.x < 0.0:
 		# turn around quicker
@@ -296,7 +344,7 @@ func apply_input(delta: float) -> void:
 			base_velocity.x -= move_slowdown * delta
 		# apply movement if not at max speed
 		if base_velocity.x > -move_max_speed:
-			base_velocity.x -= move_acceleration * delta
+			base_velocity.x -= move_acceleration * delta * water_mod
 	# slow down
 	else:
 		# reduce friction in air
@@ -313,10 +361,11 @@ func apply_input(delta: float) -> void:
 			base_velocity.x = 0.0
 	
 	if free_cam_mode:
-		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed
+		base_velocity.x = $'input_sync'.input_direction.x * move_max_speed * 10.0
+		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed * 10.0
 	
 	# clamp velocity
-	velocity.x = clamp(velocity.x, -move_max_speed, move_max_speed)
+	velocity.x = clamp(velocity.x, -move_max_speed * water_mod, move_max_speed * water_mod)
 	
 	# apply knockback
 	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)

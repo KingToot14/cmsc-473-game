@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://do1dgabbmwjjn"]
 
 [ext_resource type="Script" uid="uid://qyyemd8s1jod" path="res://entities/player/player_controller.gd" id="1_abrql"]
-[ext_resource type="Script" path="res://entities/_resources/entity_sfx_manager.gd" id="2_ghoj8"]
+[ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="2_ghoj8"]
 [ext_resource type="Script" uid="uid://bq3fpsk3a0egi" path="res://entities/player/input_synchronizer.gd" id="2_sglur"]
 [ext_resource type="AudioStream" uid="uid://b3p7vb1vw51mr" path="res://entities/player/sfx/jump.wav" id="3_50fht"]
 [ext_resource type="Script" uid="uid://blr4gmivynuus" path="res://addons/netfox/rollback/rollback-synchronizer.gd" id="3_bls4j"]
@@ -19,7 +19,7 @@
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="9_bectd"]
 [ext_resource type="Resource" uid="uid://bgi204dfg2byy" path="res://entities/player/outfits/tunic/tunic.tres" id="9_we0b7"]
 [ext_resource type="Texture2D" uid="uid://dxuheeoln4iv7" path="res://entities/player/outfits/skin/body.png" id="10_we0b7"]
-[ext_resource type="Script" path="res://scripts/multiplayer/player_interpolator.gd" id="10_wq0jh"]
+[ext_resource type="Script" uid="uid://dkigbjc1wamka" path="res://scripts/multiplayer/player_interpolator.gd" id="10_wq0jh"]
 [ext_resource type="Texture2D" uid="uid://ctq70pq6oilko" path="res://entities/player/outfits/skin/leg_front.png" id="11_mtric"]
 [ext_resource type="Texture2D" uid="uid://gxgy5dl8u6d2" path="res://entities/player/outfits/skin/head.png" id="12_eyb6c"]
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
@@ -27,10 +27,11 @@
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
 [ext_resource type="PackedScene" uid="uid://ctyqglpej7nkw" path="res://entities/player/crafting_button.tscn" id="23_ghoj8"]
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
-[ext_resource type="Script" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
+[ext_resource type="Script" uid="uid://cj5k0hwfnaogw" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
 [ext_resource type="Shader" uid="uid://di8of40o07gv4" path="res://blocks/_resources/water_renderer.gdshader" id="24_bwdx1"]
 [ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
+[ext_resource type="Script" uid="uid://dhi7ubk8umji5" path="res://blocks/_resources/water_manager.gd" id="26_vewsg"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -753,15 +754,18 @@ shader_parameter/line_size = 1.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
 shader = ExtResource("24_bwdx1")
-shader_parameter/water_color = Color(0, 0, 1, 0.6)
+shader_parameter/water_color = Color(0.123199984, 0.53944016, 0.88, 0.49019608)
+shader_parameter/foam_color = Color(0.7031, 0.83081496, 0.89, 0.60784316)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
-z_index = 100
+z_index = 25
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_abrql")
 move_acceleration = 180.0
 move_slowdown = 600.0
+water_gravity_mod = 0.25
+water_movement_mod = 0.3
 knockback_power = 160.0
 hp = NodePath("player_hp")
 
@@ -1023,7 +1027,7 @@ color = Color(1, 1, 1, 0.50980395)
 
 [node name="water_overlay" type="ColorRect" parent="." unique_id=48487235]
 show_behind_parent = true
-z_index = -10
+z_index = 10
 material = SubResource("ShaderMaterial_24ehl")
 anchors_preset = 8
 anchor_left = 0.5
@@ -1037,6 +1041,13 @@ offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("26_vewsg")
+forest_water = Color(0.14450002, 0.32087502, 0.85, 0.49019608)
+forest_foam = Color(0.63750005, 0.711875, 0.85, 0.60784316)
+underground_water = Color(0.12920001, 0.12920001, 0.76, 0.49019608)
+underground_foam = Color(0.568, 0.6066667, 0.8, 0.60784316)
+winter_water = Color(0.123199984, 0.53944016, 0.88, 0.49019608)
+winter_foam = Color(0.7031, 0.83081496, 0.89, 0.60784316)
 
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
 
@@ -1045,6 +1056,10 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 17.0
+offset_top = 18.0
+offset_right = 17.0
+offset_bottom = 18.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
