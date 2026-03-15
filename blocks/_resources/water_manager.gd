@@ -10,51 +10,33 @@ var current_layer := BiomeManager.current_layer
 var current_water := Color.BLUE
 var current_foam := Color.BLUE
 
-@export_group("Forest", "forest_")
-@export var forest_water := Color.BLUE
-@export var forest_foam := Color.BLUE
-
-@export_group("Underground", "underground_")
-@export var underground_water := Color.BLUE
-@export var underground_foam := Color.BLUE
-
-@export_group("Winter", "winter_")
-@export var winter_water := Color.BLUE
-@export var winter_foam := Color.BLUE
+@export var water_rules: Dictionary[StringName, WaterRule]
 
 # --- Functions --- #
 func _ready() -> void:
 	BiomeManager.biome_changed.connect(_on_biome_changed)
 	BiomeManager.layer_changed.connect(_on_layer_changed)
+	
+	transition_to_water(water_rules.get(current_biome))
 
 func _on_biome_changed(biome: StringName) -> void:
 	current_biome = biome
 	
-	match biome:
-		&'forest':
-			# since forest is the "default" state, we need to also check layer
-			match current_layer:
-				&'space', &'surface':
-					transition_to_water(forest_water, forest_foam)
-				&'underground', &'cavern':
-					transition_to_water(underground_water, underground_foam)
-		&'winter':
-			transition_to_water(winter_water, winter_foam)
+	transition_to_water(water_rules.get(current_biome))
 
 func _on_layer_changed(layer: StringName) -> void:
 	current_layer = layer
 	
-	# layer only matters for default underground (forest)
-	if current_biome != &'forest':
-		return
-	
-	match layer:
-		&'space', &'surface':
-			transition_to_water(forest_water, forest_foam)
-		&'underground', &'cavern':
-			transition_to_water(underground_water, underground_foam)
+	transition_to_water(water_rules.get(current_biome))
 
-func transition_to_water(water_color: Color, foam_color: Color) -> void:
+func transition_to_water(water_rule: WaterRule) -> void:
+	var water_color := water_rule.water_color
+	var foam_color  := water_rule.foam_color
+	
+	if water_rule.has_underground_color and current_layer in [&'underground', &'cavern']:
+		water_color = water_rule.underground_water
+		foam_color  = water_rule.underground_foam
+	
 	var tween := create_tween().set_parallel()
 	
 	tween.tween_method(set_water_color, current_water, water_color, TRANSITION_TIME)
