@@ -68,6 +68,7 @@ func _ready() -> void:
 	# playback logic
 	var args := Globals.parse_arguments()
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
+		AudioServer.set_bus_volume_db(0, -1000.0)
 		return
 	
 	play_track(Area.TITLE_SCREEN)

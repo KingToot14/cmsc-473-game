@@ -4,8 +4,8 @@ extends Control
 # --- Variables --- #
 const TRANSITION_TIME := 0.25
 
-var current_biome: StringName
-var current_layer: StringName
+var current_biome := BiomeManager.current_biome
+var current_layer := BiomeManager.current_layer
 
 var current_water := Color.BLUE
 var current_foam := Color.BLUE
@@ -25,21 +25,42 @@ var current_foam := Color.BLUE
 # --- Functions --- #
 func _ready() -> void:
 	BiomeManager.biome_changed.connect(_on_biome_changed)
+	BiomeManager.layer_changed.connect(_on_layer_changed)
 
 func _on_biome_changed(biome: StringName) -> void:
-	var tween := create_tween().set_parallel()
+	current_biome = biome
 	
 	match biome:
 		&'forest':
-			tween.tween_method(set_water_color, current_water, forest_water, TRANSITION_TIME)
-			tween.tween_method(set_foam_color,  current_foam,  forest_foam,  TRANSITION_TIME)
-			current_water = forest_water
-			current_foam = forest_foam
+			# since forest is the "default" state, we need to also check layer
+			match current_layer:
+				&'space', &'surface':
+					transition_to_water(forest_water, forest_foam)
+				&'underground', &'cavern':
+					transition_to_water(underground_water, underground_foam)
 		&'winter':
-			tween.tween_method(set_water_color, current_water, winter_water, TRANSITION_TIME)
-			tween.tween_method(set_foam_color,  current_foam,  winter_foam,  TRANSITION_TIME)
-			current_water = winter_water
-			current_foam = winter_foam
+			transition_to_water(winter_water, winter_foam)
+
+func _on_layer_changed(layer: StringName) -> void:
+	current_layer = layer
+	
+	# layer only matters for default underground (forest)
+	if current_biome != &'forest':
+		return
+	
+	match layer:
+		&'space', &'surface':
+			transition_to_water(forest_water, forest_foam)
+		&'underground', &'cavern':
+			transition_to_water(underground_water, underground_foam)
+
+func transition_to_water(water_color: Color, foam_color: Color) -> void:
+	var tween := create_tween().set_parallel()
+	
+	tween.tween_method(set_water_color, current_water, water_color, TRANSITION_TIME)
+	tween.tween_method(set_foam_color,  current_foam,  foam_color,  TRANSITION_TIME)
+	current_water = water_color
+	current_foam = foam_color
 
 func set_water_color(water_color: Color) -> void:
 	material.set_shader_parameter(&'water_color', water_color)
