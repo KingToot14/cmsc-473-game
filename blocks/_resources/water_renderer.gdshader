@@ -35,7 +35,7 @@ void fragment() {
 	// Combine water columns
 	water_level = step(0.001, water_level) * mix(water_level, 1.0, step(0.001, top_level));
 	
-	// Set base color;
+	// Set base color
 	COLOR = water_color;
 	
 	// Color edges

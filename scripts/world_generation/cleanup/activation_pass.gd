@@ -18,4 +18,4 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	
 	# start block updates
 	Globals.block_updater.set_physics_process(true)
-	Globals.water_updater.set_physics_process(true)
+	Globals.water_updater.set_process(true)

@@ -16,7 +16,7 @@ var updated_tiles: Dictionary[Vector2i, int]
 func _ready() -> void:
 	Globals.water_updater = self
 	
-	set_physics_process(false)
+	set_process(false)
 
 func _process(delta: float) -> void:
 	update_timer -= delta
@@ -57,13 +57,19 @@ func _process(delta: float) -> void:
 	send_update()
 
 #region Adding to Queue
-func add_to_queue(position: Vector2i, water_level: int) -> void:
+func add_to_queue(position: Vector2i, water_level := -1) -> void:
 	active_tiles[position] = STABLE_UPDATE_FRAMES
+	
+	if water_level == -1:
+		water_level = TileManager.get_water_level(position.x, position.y)
 	
 	queue_update(position.x, position.y, water_level)
 
-func remove_from_queue(position: Vector2i, water_level: int) -> void:
+func remove_from_queue(position: Vector2i, water_level := -1) -> void:
 	active_tiles.erase(position)
+	
+	if water_level == -1:
+		water_level = TileManager.get_water_level(position.x, position.y)
 	
 	queue_update(position.x, position.y, water_level)
 
@@ -119,12 +125,19 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	# queue updates
 	add_to_queue(Vector2i(x, y), water_level)
 	add_to_queue(Vector2i(x, y + 1), bottom_water_level)
+	add_to_queue(Vector2i(x, y - 1))
 	
 	return water_level
 
 func flow_side(x: int, y: int, water_level: int) -> int:
 	var can_flow_left_1 := TileManager.get_block(x - 1, y) == 0
 	var can_flow_right_1 := TileManager.get_block(x + 1, y) == 0
+	
+	# add an average modifier that helps settle shallow puddles
+	var puddle_mod := 0.0
+	
+	if water_level <= 4:
+		puddle_mod = -1.0
 	
 	# try to flow to nearest neighbors
 	if can_flow_left_1 and can_flow_right_1:
@@ -159,7 +172,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 					water_level_left_3 +
 					water_level_right_1 +
 					water_level_right_2 +
-					water_level_right_3
+					water_level_right_3 +
+					puddle_mod
 				) / 7.0)
 				
 				# update water levels
@@ -202,7 +216,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 					water_level_left_1 +
 					water_level_left_2 +
 					water_level_right_1 +
-					water_level_right_2
+					water_level_right_2 +
+					puddle_mod
 				) / 5.0)
 				
 				# update water levels
@@ -235,7 +250,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				water_level +
 				water_level_left_1 +
 				water_level_left_2 +
-				water_level_right_1
+				water_level_right_1 +
+				puddle_mod
 			) / 4.0)
 			
 			# update water levels
@@ -264,7 +280,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				water_level +
 				water_level_left_1 +
 				water_level_right_1 +
-				water_level_right_2
+				water_level_right_2 +
+				puddle_mod
 			) / 4.0)
 			
 			# update water levels
@@ -291,7 +308,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 			var average := roundi((
 				water_level +
 				water_level_left_1 +
-				water_level_right_1
+				water_level_right_1 +
+				puddle_mod
 			) / 3.0)
 			
 			# update water levels
@@ -312,7 +330,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 		
 		var average := roundi((
 			water_level +
-			water_level_left_1
+			water_level_left_1 +
+			puddle_mod
 		) / 2.0)
 		
 		# update water levels
@@ -329,7 +348,8 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 		
 		var average := roundi((
 			water_level +
-			water_level_right_1
+			water_level_right_1 +
+			puddle_mod
 		) / 2.0)
 		
 		# update water levels
