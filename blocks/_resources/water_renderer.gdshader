@@ -23,6 +23,9 @@ void fragment() {
 	float water_level = texture(water_texture, tile_position / tex_size).r;
 	float local_level = (8.0 - local_position.y) / 8.0;
 	
+	// Make sure at least 1 pixel of water is rendered (if water exists)
+	water_level = step(0.001, water_level) * max(water_level, 0.125);
+	
 	// Neighbors levels 
 	float top_level = texture(water_texture, (tile_position - vec2(0.0, 1.0)) / tex_size).r;
 	float bottom_level = texture(water_texture, (tile_position + vec2(0.0, 1.0)) / tex_size).r;
@@ -53,7 +56,9 @@ void fragment() {
 	COLOR = mix(COLOR, foam_color, foam_right);
 	
 	// remove corners
-	COLOR.a *= step(foam_top + foam_left + foam_right + foam_bottom, 1.0);
+	COLOR.a *= step(foam_top + foam_left + foam_right, 1.0);
+	COLOR.a *= step(foam_bottom + foam_left + foam_right, 1.0);
+	COLOR.a = mix(COLOR.a, foam_color.a, step(1.5, foam_top + foam_bottom));
 	
 	// Only color up to water level
 	COLOR.a *= step(local_level, water_level);
