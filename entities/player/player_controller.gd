@@ -60,6 +60,10 @@ var is_grounded := false
 @export var water_movement_mod := 0.75
 @export var water_jump_mod := 0.50
 
+@export var water_breath := 10.0
+var breath_timer := 0.0
+@export var water_drown_damage := 1
+
 ## How strong incoming knockback is applied. Represents the player's "weight"
 @export var knockback_power := 200.0
 ## The base velocity derived from movement (left/right movement, jumping, etc.)
@@ -252,6 +256,7 @@ func do_swing(swing_speed := 1.0, direction := 0) -> void:
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
+	z_index = 500 if mode else 25
 
 ## Run a rollback-friendly tick
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
@@ -276,6 +281,21 @@ func apply_input(delta: float) -> void:
 	var in_water := \
 		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
 		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# check if head is under water
+	var head_in_water := \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# start drowning
+	if head_in_water and not multiplayer.is_server():
+		breath_timer -= delta
+		
+		if breath_timer <= 0.0:
+			breath_timer = 0.0
+			hp.take_damage(water_drown_damage, DamageSource.DamageSourceType.WORLD)
+	else:
+		breath_timer = water_breath
 	
 	# fixes a NetFox bug with is_on_floor()
 	update_is_on_floor()
@@ -341,7 +361,8 @@ func apply_input(delta: float) -> void:
 			base_velocity.x = 0.0
 	
 	if free_cam_mode:
-		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed
+		base_velocity.x = $'input_sync'.input_direction.x * move_max_speed * 10.0
+		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed * 10.0
 	
 	# clamp velocity
 	velocity.x = clamp(velocity.x, -move_max_speed * water_mod, move_max_speed * water_mod)
