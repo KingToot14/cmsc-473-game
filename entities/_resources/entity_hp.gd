@@ -77,7 +77,10 @@ func send_damage(
 	buffer.put_float(knockback.x)
 	buffer.put_float(knockback.y)
 	
-	receive_damage.rpc_id(Globals.SERVER_ID, buffer.data_array)
+	send_damage_data(buffer.data_array)
+
+func send_damage_data(data: PackedByteArray) -> void:
+	EntityManager.entity_receive_damage.rpc_id(Globals.SERVER_ID, entity.id, data)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func receive_damage(damage_info: PackedByteArray) -> void:
