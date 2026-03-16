@@ -25,27 +25,37 @@ func _ready() -> void:
 		var world_seed = args.get('seed', randi())
 		
 		# world generation flags
-		var world_name: String = args.get('world_name', '')
+		var world_name: String = args.get('world-name', '')
 		var delete_mode: bool = args.get('delete', false)
+		var world_loaded := false
+		
+		Globals.world_name = world_name
 		
 		# TODO: Add world loading + deletion
 		if not world_name.strip_edges().is_empty():
 			if delete_mode:
 				print("[Wizbowo's Conquest] Deleting world '%s' (Not implemented)" % world_name)
+				
+				if FileAccess.file_exists("user://world/%s" % world_name):
+					OS.move_to_trash(ProjectSettings.globalize_path("user://world/%s" % world_name))
+				
 				get_tree().quit()
 				return
 			else:
 				print("[Wizbowo's Conquest] Loading world '%s' (Not implemented)" % world_name)
-				get_tree().quit()
-				return
+				world_loaded = TileManager.load_world()
 		elif delete_mode:
 			printerr("[Wizbowo's Conquest] Must specify world name to delete")
 			get_tree().quit()
 			return
+		else:
+			push_warning("[Wizbowo's Conquest] WARNING: No world_name specified, this world will
+				NOT be saved")
 		
 		# start world generation
-		world_gen.set_seed(world_seed)
-		await world_gen.generate_world()
+		if not world_loaded:
+			world_gen.set_seed(world_seed)
+			await world_gen.generate_world()
 		
 		# load initial spawn tilemap
 		print("[Wizbowo's Conquest] Loading Spawn Area Collision")
