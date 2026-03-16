@@ -253,6 +253,7 @@ script = ExtResource("1_udgdv")
 jump_wait_base = 1.0
 jump_wait_variance = 2.0
 move_power_base = 150.0
+move_float_base = 120.0
 variant_green_texture = ExtResource("2_72hbc")
 variant_blue_texture = ExtResource("3_odtd8")
 variant_red_texture = ExtResource("4_jsemx")

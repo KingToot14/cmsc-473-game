@@ -29,8 +29,10 @@ const JUMP_MODIFIER_ODDS := 0.10
 @export_group("Movement", "move_")
 @export var move_power_base := 100.0
 @export var move_power_variance := 50.0
+@export var move_float_base := 80.0
 
 @export var gravity := 980.0
+@export var buoyancy := 1960.0
 @export var terminal_velocity := 380.0
 
 @export_group("Variants", "variant_")
@@ -46,13 +48,15 @@ var variant := SlimeVariant.GREEN
 
 var target_player: PlayerController
 
-var travel_direction := -1
+var travel_direction := -1.0
 var jump_remaining := 0
 var jump_timer := 0.0
 var jump_velocity: Vector2
 var airborne := false
 
 var rng: RandomNumberGenerator
+
+var in_water := false
 
 # --- Functions --- #
 func _ready() -> void:
@@ -65,14 +69,30 @@ func _ready() -> void:
 		hp.died.connect(_on_death)
 
 func _physics_process(delta: float) -> void:
-	get_travel_direction()
+	# check water
+	var tile_pos := TileManager.world_to_tile(
+		floori(global_position.x - 0.5),
+		floori(global_position.y - 0.5)
+	)
+	
+	in_water = \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0
+	
+	get_travel_direction(delta)
 	try_jump(delta)
 	
 	# gravity
 	if not is_on_floor():
 		velocity.x = jump_velocity.x
 	
-	velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
+	velocity.y += gravity * delta
+	
+	# buoyancy
+	if in_water:
+		velocity.y -= buoyancy * delta
+	
+	velocity.y = clampf(velocity.y, -terminal_velocity, terminal_velocity)
 	
 	# movement
 	move_and_slide()
@@ -86,20 +106,27 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 
 #region Physics
-func get_travel_direction() -> void:
+func get_travel_direction(delta: float) -> void:
 	if not multiplayer.is_server():
 		return
 	
 	# jump towards target player
 	if is_instance_valid(target_player):
 		var distance: Vector2 = target_player.center_point - global_position
-		travel_direction = sign(distance.x)
+		
+		travel_direction += delta * signf(distance.x)
+		travel_direction = clampf(travel_direction, -1.0, 1.0)
 	# if no target, jump randomly
 	elif jump_remaining <= 0:
 		travel_direction = -travel_direction
 		jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
 
 func try_jump(delta: float) -> void:
+	# special water logic
+	if in_water:
+		jump_velocity.x = move_float_base * travel_direction
+		return
+	
 	# try to jump
 	if is_on_floor():
 		jump_timer -= delta
