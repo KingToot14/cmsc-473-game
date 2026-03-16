@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_78itg")
+break_item_id = 5
 metadata/_custom_type_script = "uid://dymp18kf28isa"

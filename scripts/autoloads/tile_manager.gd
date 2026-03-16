@@ -711,26 +711,16 @@ func send_destroy_block(x: int, y: int) -> void:
 	# TODO: Deal gradual damage rather than instantly destroying
 	var player_id := multiplayer.get_remote_sender_id()
 	
-	var block_id = get_block(x, y) #should grab the block id 
-	if block_id == 1 or block_id == 2: #if the block is dirt or grass
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn_preferred(drop_position, 3, 1, player_id)
-				
-	if block_id == 3: #if the block is stone.
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
-			
-	if block_id == 6: # Snow
-		if multiplayer.is_server():
-			var drop_position = tile_to_world(x, y)
-			ItemDropEntity.spawn_preferred(drop_position, 12, 1, player_id)
+	var block_id := get_block(x, y) # should grab the block id 
+	var block_info := BlockDatabase.get_block(block_id)
 	
-	if block_id == 7: # Ice
-		if multiplayer.is_server():
-			var drop_position = tile_to_world(x, y)
-			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
+	if block_info.custom_break_logic:
+		# add custom logic here when necessary
+		pass
+	else:
+		# generic drop logic based on break_item_id
+		var drop_position = tile_to_world(x,y) # grabs position for tile 
+		ItemDropEntity.spawn_preferred(drop_position, block_info.break_item_id, 1, player_id)
 	
 	# set block
 	set_block_unsafe(x, y, 0)
@@ -762,11 +752,18 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
-	var wall_id = get_wall(x,y)
-	if wall_id == 1: #if the wall is dirt wall
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for wall 
-			ItemDropEntity.spawn(drop_position, 5, 1)
+	var player_id := multiplayer.get_remote_sender_id()
+	
+	var wall_id := get_wall(x, y)
+	var wall_info := BlockDatabase.get_wall(wall_id)
+	
+	if wall_info.custom_break_logic:
+		# add custom logic here when necessary
+		pass
+	else:
+		# generic drop logic based on break_item_id
+		var drop_position = tile_to_world(x,y) # grabs position for tile 
+		ItemDropEntity.spawn_preferred(drop_position, wall_info.break_item_id, 1, player_id)
 	
 	# set tile to air
 	set_wall_unsafe(x, y, 0)
