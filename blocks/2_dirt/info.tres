@@ -5,5 +5,6 @@
 
 [resource]
 script = ExtResource("2_y55px")
+break_item_id = 3
 break_sfx = ExtResource("1_r1eu5")
 metadata/_custom_type_script = "uid://dymp18kf28isa"
