@@ -3,11 +3,14 @@ extends Node
 var db := SQLite.new()
 
 func _ready():
+	if multiplayer.is_server():
+		db.open("user://game.db")
+		create_tables()
 	db.path = "user://game.db"
 	db.open_db()
 	create_tables()
 
-# TABLE CREATION
+# TABLE CREATION (SERVER ONLY)
 func create_tables():
 	db.query("""
         CREATE TABLE IF NOT EXISTS users (
@@ -22,7 +25,8 @@ func create_tables():
             id INTEGER PRIMARY KEY,
             health INTEGER,
             pos_x REAL,
-            pos_y REAL
+            pos_y REAL,
+            pos_z REAL
         );
 	""")
 
@@ -42,16 +46,39 @@ func hash_password(password: String) -> String:
 	ctx.update(password.to_utf8_buffer())
 	return ctx.finish().hex_encode()
 
-# ACCOUNT CREATION
-func create_account(username: String, password: String) -> bool:
+# ACCOUNT CREATION (SERVER RPC)
+@rpc("any_peer", "call_remote", "reliable")
+func create_account(username: String, password: String) -> void:
+	if not multiplayer.is_server():
+		return
+
 	var hashed = hash_password(password)
-	return db.query("""
+
+	var success = db.query("""
         INSERT INTO users (username, password_hash)
         VALUES ('%s', '%s');
 	""" % [username, hashed])
 
-# LOGIN
-func login(username: String, password: String) -> int:
+	var new_id := -1
+	if success:
+		db.query("SELECT id FROM users WHERE username = '%s';" % username)
+		if db.next_row():
+			new_id = db.get_column("id")
+
+	# Send result back to the client who requested it
+	var peer_id = multiplayer.get_remote_sender_id()
+	create_account_result.rpc_id(peer_id, new_id)
+
+@rpc("authority", "call_remote", "reliable")
+func create_account_result(player_id: int) -> void:
+	pass
+
+# LOGIN (SERVER RPC)
+@rpc("any_peer", "call_remote", "reliable")
+func login(username: String, password: String) -> void:
+	if not multiplayer.is_server():
+		return
+
 	var hashed = hash_password(password)
 
 	db.query("""
@@ -59,12 +86,20 @@ func login(username: String, password: String) -> int:
         WHERE username = '%s' AND password_hash = '%s';
 	""" % [username, hashed])
 
+	var player_id := -1
 	if db.next_row():
-		return db.get_column("id")
+		player_id = db.get_column("id")
 
-	return -1
+	# Send result back to the client who requested login
+	var peer_id = multiplayer.get_remote_sender_id()
+	login_result.rpc_id(peer_id, player_id)
 
-# REMEMBER PLAYER ID
+@rpc("authority", "call_remote", "reliable")
+func login_result(player_id: int) -> void:
+	# The client overrides this in join_ui.gd
+	pass
+
+# REMEMBER PLAYER ID (CLIENT SIDE)
 func remember_player_id(player_id: int):
 	var cfg = ConfigFile.new()
 	cfg.set_value("login", "player_id", player_id)
@@ -76,15 +111,21 @@ func load_remembered_player_id() -> int:
 		return int(cfg.get_value("login", "player_id", -1))
 	return -1
 
-# SAVE PLAYER DATA
+# SAVE PLAYER DATA (SERVER ONLY)
 func save_player(player_id: int, position: Vector3, health: int):
+	if not multiplayer.is_server():
+		return
+
 	db.query("""
         INSERT OR REPLACE INTO player (id, health, pos_x, pos_y, pos_z)
         VALUES (%d, %d, %f, %f, %f);
 	""" % [player_id, health, position.x, position.y, position.z])
 
-# LOAD PLAYER DATA
+# LOAD PLAYER DATA (SERVER ONLY)
 func load_player(player_id: int) -> Dictionary:
+	if not multiplayer.is_server():
+		return {}
+
 	db.query("SELECT * FROM player WHERE id = %d;" % player_id)
 
 	if db.next_row():
@@ -97,8 +138,11 @@ func load_player(player_id: int) -> Dictionary:
 
 	return {}
 
-# SAVE INVENTORY
+# SAVE INVENTORY (SERVER ONLY)
 func save_inventory(player_id: int, items: Array):
+	if not multiplayer.is_server():
+		return
+
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
 	for item in items:
@@ -107,8 +151,11 @@ func save_inventory(player_id: int, items: Array):
             VALUES (%d, '%s', %d);
 		""" % [player_id, item["name"], item["qty"]])
 
-# LOAD INVENTORY 
+# LOAD INVENTORY (SERVER ONLY)
 func load_inventory(player_id: int) -> Array:
+	if not multiplayer.is_server():
+		return []
+
 	db.query("SELECT * FROM inventory WHERE player_id = %d;" % player_id)
 
 	var items = []
