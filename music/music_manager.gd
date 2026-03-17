@@ -1,3 +1,4 @@
+class_name MusicManager
 extends AudioStreamPlayer
 
 enum Area {
@@ -59,30 +60,24 @@ var _current_area: Area = Area.TITLE_SCREEN
 
 # --- Functions --- #
 func _ready() -> void:
+	Globals.music = self
 	finished.connect(_on_track_finished)
+	
+	BiomeManager.biome_changed.connect(_on_biome_changed)
 
 	# start playback
-	if BiomeManager:
-		BiomeManager.biome_changed.connect(_on_biome_changed)
-
-	# playback logic
 	var args := Globals.parse_arguments()
+
+	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
-		AudioServer.set_bus_volume_db(0, -1000.0)
 		return
 	
 	play_track(Area.TITLE_SCREEN)
 
-func _on_biome_changed(new_biome: StringName) -> void:
-	match new_biome:
-		&"winter":
-			# Assuming you want WINTER_DAY by default for now
-			play_track(Area.WINTER_DAY)
-		&"forest":
-			play_track(Area.FOREST_DAY)
 
 func _on_track_finished() -> void:
 	play_track(_current_area)
+
 
 ## Returns the next track path for a queued area, refilling and reshuffling
 ## the queue once all tracks have been played.
@@ -130,6 +125,12 @@ func play_track(area: Area, variant := -1) -> void:
 	play()
 	print("Is playing: ", playing)
 
+func _on_biome_changed(new_biome: StringName) -> void:
+	match new_biome:
+		&"winter":
+			play_track(Area.WINTER_DAY)
+		&"forest":
+			play_track(Area.FOREST_DAY)
 
 ## Resets the queue and intro state for [param area], so the intro plays
 ## again next time the player enters it.

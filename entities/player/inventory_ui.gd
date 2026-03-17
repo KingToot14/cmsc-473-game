@@ -21,14 +21,24 @@ var holding_item := false
 var hovered_slot := -1
 
 # --- Functions --- #
+# Inside inventory_ui.gd
+
 func _input(event: InputEvent) -> void:
 	# check for hotbar inputs
 	for i in range(len(HOTBAR_INPUTS)):
 		if event.is_action_pressed(HOTBAR_INPUTS[i]):
 			# set i'th hotbar slot to be selected
 			hotbar_grid.get_child(i).set_selected(true)
+			return
+	
+	if event.is_action_pressed(&"drop_item"):
+		if holding_item and visible and hovered_slot == -1:
+			var drop_pos = Globals.player.get_global_mouse_position()
 			
-			# consume input
+			# Check if the player exists before calling the inventory
+			if Globals.player:
+				Globals.player.my_inventory.drop_held_item(drop_pos) 
+			
 			get_viewport().set_input_as_handled()
 	
 	# check for scroll-wheel

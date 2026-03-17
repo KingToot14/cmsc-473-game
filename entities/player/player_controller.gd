@@ -128,6 +128,7 @@ func _ready() -> void:
 	$'rollback_sync'.process_settings()
 	
 	interpolator.owner_id = owner_id
+	my_inventory.owner_id = owner_id
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
@@ -147,7 +148,6 @@ func _ready() -> void:
 		position = spawn_point
 		
 		# setup inventory
-		my_inventory.owner_id = owner_id
 		#my_inventory.load_inventory()
 		
 		# Ensure the sibling hotbar is visible
@@ -419,12 +419,12 @@ func done_initial_load() -> void:
 	# only change music for the local client
 	# TODO: Move to BiomeManager when implemented
 	if owner_id == multiplayer.get_unique_id():
-		enter_biome(MusicManager.Area.FOREST_DAY)
+		enter_biome(Globals.music.Area.FOREST_DAY)
 #endregion
 
 func enter_biome(area: MusicManager.Area) -> void:
-	MusicManager.reset_area(area)
-	MusicManager.play_track(area)
+	Globals.music.reset_area(area)
+	Globals.music.play_track(area)
 
 #region Interest
 func add_interest(entity_id: int) -> void:

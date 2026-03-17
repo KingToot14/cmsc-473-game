@@ -4,11 +4,14 @@ extends Entity
 # --- Enums --- #
 enum SpawnBehavior {
 	NONE,
-	UPWARD_RANDOM
+	UPWARD_RANDOM,
+	THROW_LEFT,
+	THROW_RIGHT
 }
 
 # --- Variables --- #
 const UPWARD_RANDOM_POWER := 200.0
+const THROW_POWER := 200.0
 
 const STOP_RADIUS := (12.0 * TileManager.TILE_SIZE)**2
 const COLLECTION_RADIUS := 4.0**2
@@ -179,6 +182,10 @@ func load_item(spawn_behavior := SpawnBehavior.NONE) -> void:
 			pass
 		SpawnBehavior.UPWARD_RANDOM:
 			velocity = Vector2(randf_range(-0.5, 0.5), -1.0).normalized() * UPWARD_RANDOM_POWER
+		SpawnBehavior.THROW_LEFT:
+			velocity = Vector2(-1.0, -1.0).normalized() * THROW_POWER
+		SpawnBehavior.THROW_RIGHT:
+			velocity = Vector2(1.0, -1.0).normalized() * THROW_POWER
 
 func do_death() -> void:
 	if multiplayer.is_server():
@@ -358,7 +365,6 @@ static func spawn_restricted(
 		pos: Vector2, item_id: int, quantity: int, player_id: int, restricted_time := 1.0,
 		spawn_behavior := SpawnBehavior.UPWARD_RANDOM
 	) -> void:
-	
 	# create new item drop entity
 	var entity_scene: PackedScene = EntityManager.enemy_registry.get(0).entity_scene
 	if not entity_scene:
@@ -378,6 +384,7 @@ static func spawn_restricted(
 	
 	# sync to players
 	EntityManager.add_entity(0, entity)
+
 
 @warning_ignore("shadowed_variable")
 static func spawn_preferred(

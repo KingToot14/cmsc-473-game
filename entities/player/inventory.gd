@@ -161,6 +161,45 @@ func interact_with_slot(index: int) -> void:
 	
 	# Update the UI
 	inventory_updated.emit()
+	
+## Drops the currently held item at the specified world position.
+## Inside inventory.gd
+func drop_held_item(drop_position: Vector2) -> void:
+	if held_item.is_empty():
+		return
+
+	if multiplayer.is_server():
+		var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+		
+		# get throw direction
+		var spawn_behavior := ItemDropEntity.SpawnBehavior.THROW_LEFT
+		if drop_position.x > player.center_point.x:
+			spawn_behavior = ItemDropEntity.SpawnBehavior.THROW_RIGHT
+		
+		ItemDropEntity.spawn_restricted(
+			player.center_point,
+			held_item.item_id,
+			held_item.count,
+			owner_id,
+			1.0,
+			spawn_behavior
+		)
+		held_item.item_id = -1
+		held_item.count = 0
+		send_inventory()
+	else:
+		send_drop_item.rpc_id(1, drop_position) 
+	
+	inventory_updated.emit()
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_drop_item(drop_position: Vector2) -> void:
+	#ensure the drop position is within a reasonable distance of the player
+	var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	print(drop_position, " | ", player.global_position)
+	
+	if is_instance_valid(player) and drop_position.distance_to(player.global_position) < 500:
+		drop_held_item(drop_position)
 
 func remove_item_at(item_id: int, count: int, slot: int) -> void:
 	var item: Item = ItemDatabase.get_item(item_id)
