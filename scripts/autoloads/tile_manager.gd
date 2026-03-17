@@ -993,31 +993,31 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			var idx := (start_x + x) + (start_y + y) * world_width
 			
 			# only update tiles 
-			if tiles[idx] != tile:
-				# update tile
-				tiles[idx] = tile
-				
-				# shrink update region
-				dirty_x = min(dirty_x, start_x + x)
-				dirty_y = min(dirty_y, start_y + y)
-				dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
-				dirty_height = start_y + y - dirty_y + 1
-				
-				# set chunk as dirty
-				@warning_ignore('integer_division')
-				Globals.world_map.chunk_states[Vector2i(
-					(start_x + x) / CHUNK_SIZE,
-					(start_y + y) / CHUNK_SIZE
-				)] = WorldTileMap.UpdateState.DIRTY
-				
-				# update water texture
-				update_water_texture(start_x + x, start_y + y, false)
-				
-				processed += 1
+			#if tiles[idx] != tile:
+			# update tile
+			tiles[idx] = tile
 			
-			if processed >= 128:
-				processed = 0
-				await get_tree().process_frame
+			# shrink update region
+			dirty_x = min(dirty_x, start_x + x)
+			dirty_y = min(dirty_y, start_y + y)
+			dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
+			dirty_height = start_y + y - dirty_y + 1
+			
+			# set chunk as dirty
+			@warning_ignore('integer_division')
+			Globals.world_map.chunk_states[Vector2i(
+				(start_x + x) / CHUNK_SIZE,
+				(start_y + y) / CHUNK_SIZE
+			)] = WorldTileMap.UpdateState.DIRTY
+			
+			# update water texture
+			update_water_texture(start_x + x, start_y + y, false)
+			
+			processed += 1
+		
+		if processed >= 128:
+			processed = 0
+			await get_tree().process_frame
 	
 	# push water update all at once
 	push_water_texture_update()

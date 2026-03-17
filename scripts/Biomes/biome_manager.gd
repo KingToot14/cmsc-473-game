@@ -35,7 +35,8 @@ func check_biome(player_pos: Vector2) -> void:
 	var end_y = clampi(center_tile.y + scan_range, 0, Globals.world_size.y)
 	
 	# loop through tiles in range
-	# TODO: Optimize this loop
+	var processed := 0
+	
 	# TODO: Add remaining biome checks
 	for x in range(start_x, end_x):
 		for y in range(start_y, end_y):
@@ -46,6 +47,11 @@ func check_biome(player_pos: Vector2) -> void:
 			if snow_ice_count >= WINTER_THRESHOLD:
 				set_biome(&"winter")
 				return
+			
+			processed += 1
+			
+			if processed == 256:
+				await get_tree().process_frame
 			
 	set_biome(&"forest") #default is forest
 
