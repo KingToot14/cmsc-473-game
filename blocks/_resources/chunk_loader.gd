@@ -42,27 +42,32 @@ func _process(_delta: float) -> void:
 				var boundary := diff
 				boundary.y = 0
 				send_boundary(boundary)
+				unload_boundary(boundary)
 			if diff.y != 0:
 				var boundary := diff
 				boundary.x = 0
 				send_boundary(boundary)
+				unload_boundary(boundary)
 		else:
 			# client autotiles
 			if diff.x != 0:
 				var boundary := diff
 				boundary.y = 0
 				autotile_boundary(boundary)
+				unload_boundary(boundary)
 			if diff.y != 0:
 				var boundary := diff
 				boundary.x = 0
 				autotile_boundary(boundary)
+				unload_boundary(boundary)
 			
 			# update water render
 			TileManager.build_water_texture()
 
+#region Boundaries
 func clear_boundary(boundary: Vector2i) -> void:
-	var start_chunk := current_chunk - LOAD_RANGE
-	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
+	var start_chunk := current_chunk - UNLOAD_RANGE
+	var end_chunk := current_chunk + UNLOAD_RANGE + Vector2i.ONE
 	
 	if boundary.x < 0:
 		end_chunk.x = start_chunk.x - boundary.x
@@ -118,6 +123,42 @@ func autotile_boundary(boundary: Vector2i) -> void:
 	
 	autotile_region(start_chunk.x, start_chunk.y, end_chunk.x, end_chunk.y)
 
+func unload_boundary(boundary: Vector2i) -> void:
+	var start_chunk := current_chunk - LOAD_RANGE
+	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
+	
+	if boundary.x < 0:
+		end_chunk.x = start_chunk.x - boundary.x
+	elif boundary.x > 0:
+		start_chunk.x = end_chunk.x - boundary.x
+	if boundary.y < 0:
+		end_chunk.y = start_chunk.y - boundary.y
+	elif boundary.y > 0:
+		start_chunk.y = end_chunk.y - boundary.y
+	
+	if multiplayer.is_server():
+		# clear server map
+		pass
+	else:
+		# clear world map
+		start_chunk.x = clampi(start_chunk.x, 0, Globals.world_chunks.x)
+		start_chunk.y = clampi(start_chunk.y, 0, Globals.world_chunks.y)
+		end_chunk.x = clampi(end_chunk.x, 0, Globals.world_chunks.x)
+		end_chunk.y = clampi(end_chunk.y, 0, Globals.world_chunks.y)
+		
+		var width  := end_chunk.x - start_chunk.x
+		var height := end_chunk.y - start_chunk.y
+		
+		Globals.world_map.clear_region(
+			start_chunk.x * TileManager.CHUNK_SIZE,
+			start_chunk.y * TileManager.CHUNK_SIZE,
+			width * TileManager.CHUNK_SIZE,
+			height * TileManager.CHUNK_SIZE
+		)
+
+#endregion
+
+#region Regions
 func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int) -> void:
 	var dirty_chunks: Array[Vector2i] = []
 	
@@ -192,6 +233,9 @@ func send_region(start_chunk: Vector2i, end_chunk: Vector2i, autotile := false) 
 	# send tile data
 	load_chunks.rpc_id(player.owner_id, meta, data)
 
+#endregion
+
+#region Chunks
 @rpc("authority", "call_remote", "reliable")
 func load_chunks(meta: int, data: PackedByteArray) -> void:
 	# decode data
@@ -266,3 +310,5 @@ func done_loading(message: StringName) -> void:
 		set_process(true)
 		area_loaded.emit()
 		ServerManager.finalized_players[player.owner_id] = true
+
+#endregion
