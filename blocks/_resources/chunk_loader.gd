@@ -60,9 +60,6 @@ func _process(_delta: float) -> void:
 				boundary.x = 0
 				autotile_boundary(boundary)
 				unload_boundary(boundary)
-			
-			# update water render
-			TileManager.build_water_texture()
 
 #region Boundaries
 func clear_boundary(boundary: Vector2i) -> void:
