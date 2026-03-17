@@ -156,7 +156,7 @@ func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
 	var walls: TileMapLayer = $'walls'
 	
-	var processed := 0
+	#var processed := 0
 	for y in range(height):
 		for x in range(width):
 			var block := TileManager.get_block_unsafe(start_x + x, start_y + y)
@@ -174,18 +174,28 @@ func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 			else:
 				walls.set_cell(Vector2i(start_x + x, start_y + y), wall, Vector2i(2, 2))
 			
+			#processed += 1
+			#
+			#if processed == 256:
+				#await get_tree().process_frame
+				#processed = 0
+
+func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
+	var blocks: TileMapLayer = $'blocks'
+	var walls: TileMapLayer = $'walls'
+	
+	var processed := 0
+	
+	for y in range(height):
+		for x in range(width):
+			blocks.erase_cell(Vector2i(start_x + x, start_y + y))
+			walls.erase_cell(Vector2i(start_x + x, start_y + y))
+			
 			processed += 1
 			
 			if processed == 256:
 				await get_tree().process_frame
 				processed = 0
-
-func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
-	var blocks: TileMapLayer = $'blocks'
-	
-	for y in range(height):
-		for x in range(width):
-			blocks.set_cell(Vector2i(start_x + x, start_y + y), 0, Vector2i(0, 0))
 
 func update_tile(x: int, y: int) -> void:
 	var blocks: TileMapLayer = $'blocks'

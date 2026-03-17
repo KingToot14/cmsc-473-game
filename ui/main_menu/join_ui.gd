@@ -210,6 +210,8 @@ func login_button_pressed() -> void:
 	# TODO (Jacob): Show character creation when creating a new account and sync to server
 	pass
 	
+	%'username_field'.text
+	
 	# TODO: We'll eventually want to move this line to somewhere in the login function so
 	# the server has the final decision on whether or not to load the player
 	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())

@@ -124,17 +124,20 @@ func autotile_boundary(boundary: Vector2i) -> void:
 	autotile_region(start_chunk.x, start_chunk.y, end_chunk.x, end_chunk.y)
 
 func unload_boundary(boundary: Vector2i) -> void:
-	var start_chunk := current_chunk - LOAD_RANGE
-	var end_chunk := current_chunk + LOAD_RANGE + Vector2i.ONE
+	var start_chunk := current_chunk - UNLOAD_RANGE
+	var end_chunk := current_chunk + UNLOAD_RANGE
+	
+	if abs(boundary.x) > 1 or abs(boundary.y) > 1:
+		return
 	
 	if boundary.x < 0:
-		end_chunk.x = start_chunk.x - boundary.x
+		start_chunk.x = end_chunk.x + boundary.x
 	elif boundary.x > 0:
-		start_chunk.x = end_chunk.x - boundary.x
+		end_chunk.x = start_chunk.x + boundary.x
 	if boundary.y < 0:
-		end_chunk.y = start_chunk.y - boundary.y
+		start_chunk.y = end_chunk.y + boundary.y
 	elif boundary.y > 0:
-		start_chunk.y = end_chunk.y - boundary.y
+		end_chunk.y = start_chunk.y + boundary.y
 	
 	if multiplayer.is_server():
 		# clear server map
@@ -148,6 +151,9 @@ func unload_boundary(boundary: Vector2i) -> void:
 		
 		var width  := end_chunk.x - start_chunk.x
 		var height := end_chunk.y - start_chunk.y
+		
+		if width <= 0 or height <= 0:
+			return
 		
 		Globals.world_map.clear_region(
 			start_chunk.x * TileManager.CHUNK_SIZE,

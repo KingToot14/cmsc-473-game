@@ -378,6 +378,7 @@ func build_water_texture() -> void:
 	data.resize(WATER_WIDTH * WATER_HEIGHT)
 	
 	var idx := 0
+	var processed := 0
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
@@ -387,6 +388,11 @@ func build_water_texture() -> void:
 			data[idx] = (tiles[row + water_origin.x + x] >> 20) & MASK_EIGHT
 			
 			idx += 1
+			#processed += 1
+			#
+			#if processed == 256:
+				#await get_tree().process_frame
+				#processed = 0
 	
 	# update texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
@@ -1025,8 +1031,8 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 	push_water_texture_update()
 	
 	# only change updated tiles
-	if dirty_width != 0 and dirty_height != 0:
-		Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
+	#if dirty_width != 0 and dirty_height != 0:
+		#Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion
 
@@ -1102,11 +1108,14 @@ func load_world() -> bool:
 	# - Entity Data - #
 	print("Pre-Entity Pointer: ", buffer.get_position())
 	
+	Globals
+	
 	EntityManager.load_persistent_entities(buffer)
 	
 	print("Entity Pointer: ", buffer.get_position())
 	
-	# logging
+	# finishing
+	ActivationPass.new().start_pass(null)
 	print("[Wizbowo's Conquest] World Loaded!")
 	
 	return true
