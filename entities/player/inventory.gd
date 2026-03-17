@@ -172,12 +172,20 @@ func drop_held_item(drop_position: Vector2) -> void:
 
 	if multiplayer.is_server():
 		print("Test 3: Server is spawning entity at ", drop_position)
+		var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+		
+		# get throw direction
+		var spawn_behavior := ItemDropEntity.SpawnBehavior.THROW_LEFT
+		if drop_position.x > player.center_point.x:
+			spawn_behavior = ItemDropEntity.SpawnBehavior.THROW_RIGHT
+		
 		ItemDropEntity.spawn_restricted(
-			drop_position, 
-			held_item.item_id, 
-			held_item.count, 
-			owner_id, 
-			1.0 
+			player.center_point,
+			held_item.item_id,
+			held_item.count,
+			owner_id,
+			1.0,
+			spawn_behavior
 		)
 		held_item.item_id = -1
 		held_item.count = 0

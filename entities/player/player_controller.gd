@@ -128,6 +128,7 @@ func _ready() -> void:
 	$'rollback_sync'.process_settings()
 	
 	interpolator.owner_id = owner_id
+	my_inventory.owner_id = owner_id
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
@@ -147,7 +148,6 @@ func _ready() -> void:
 		position = spawn_point
 		
 		# setup inventory
-		my_inventory.owner_id = owner_id
 		#my_inventory.load_inventory()
 		
 		# Ensure the sibling hotbar is visible
