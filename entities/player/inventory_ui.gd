@@ -21,14 +21,20 @@ var holding_item := false
 var hovered_slot := -1
 
 # --- Functions --- #
+# Inside inventory_ui.gd
+
 func _input(event: InputEvent) -> void:
-	# check for hotbar inputs
-	for i in range(len(HOTBAR_INPUTS)):
-		if event.is_action_pressed(HOTBAR_INPUTS[i]):
-			# set i'th hotbar slot to be selected
-			hotbar_grid.get_child(i).set_selected(true)
+	if event.is_action_pressed(&"drop_item"):
+		if holding_item and visible and hovered_slot == -1:
+			var drop_pos = get_global_mouse_position()
 			
-			# consume input
+			# Check if the player exists before calling the inventory
+			if Globals.player:
+				print("UI: Found player, calling drop_held_item") 
+				Globals.player.my_inventory.drop_held_item(drop_pos) 
+			else:
+				print("UI ERROR: Globals.player is NIL")
+			
 			get_viewport().set_input_as_handled()
 	
 	# check for scroll-wheel
@@ -42,6 +48,18 @@ func _input(event: InputEvent) -> void:
 			hotbar_slot = posmod(hotbar_slot - 1, HOTBAR_SIZE)
 		
 		hotbar_grid.get_child(hotbar_slot).set_selected(true)
+	
+	# check for right-click drop
+	if event.is_action_pressed(&"drop_item"):
+		print("Drop action pressed. Holding: ", holding_item, " Visible: ", visible, " Hovered: ", hovered_slot)
+		
+		if holding_item and visible:
+			if hovered_slot == -1:
+				var drop_pos = get_global_mouse_position()
+				# Use the Globals.player reference to ensure we reach the correct inventory
+				if Globals.player and Globals.player.my_inventory:
+					Globals.player.my_inventory.drop_held_item(drop_pos)
+					get_viewport().set_input_as_handled()
 
 func setup_ui(player_inventory: Inventory):
 	for child in main_grid.get_children() + hotbar_grid.get_children():
