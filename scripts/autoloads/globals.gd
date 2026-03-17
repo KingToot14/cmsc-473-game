@@ -25,6 +25,12 @@ enum CursorType {
 	HAND_GRAB,
 }
 
+enum WorldSizeKey {
+	SMALL,
+	MEDIUM,
+	LARGE
+}
+
 # --- Variables --- #
 const SERVER_ID := 1
 
@@ -36,7 +42,21 @@ var game_state := GameState.MAIN_MENU
 # - UI
 var join_ui: JoinUi
 
-# - World Size
+# - World Info
+var world_name := ""
+
+var world_size_key := WorldSizeKey.SMALL:
+	set(_key):
+		match _key:
+			WorldSizeKey.SMALL:
+				world_size = Vector2i(4200, 1200)
+			WorldSizeKey.MEDIUM:
+				world_size = Vector2i(6400, 1800)
+			WorldSizeKey.LARGE:
+				world_size = Vector2i(8400, 2400)
+		
+		world_size_key = _key
+		
 var world_size := Vector2i(4200, 1200):
 	set(_size):
 		world_chunks = Vector2i(

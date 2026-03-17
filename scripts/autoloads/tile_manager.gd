@@ -50,6 +50,9 @@ func _ready() -> void:
 	_update_world_size(Globals.world_size)
 	 
 	water_image.fill(Color.BLACK)
+	
+	set_process(false)
+	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
 func _update_world_size(size: Vector2i) -> void:
 	world_width = size.x
@@ -58,8 +61,19 @@ func _update_world_size(size: Vector2i) -> void:
 func _idx(x: int, y: int) -> int:
 	return x + y * world_width
 
+func _process(_delta: float) -> void:
+	pass
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_world()
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&'test_input'):
+		if multiplayer.is_server():
+			save_world()
+			return
+		
 		var mouse_position := Globals.player.get_global_mouse_position()
 		var tile_position := world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 		
@@ -1013,5 +1027,88 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 	# only change updated tiles
 	if dirty_width != 0 and dirty_height != 0:
 		Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
+
+#endregion
+
+#region World Serialization
+func save_world() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	# warn if no world name is set
+	if Globals.world_name == "":
+		push_warning("[Wizbowo's Conquest] WARNING: world_name was not set, so the world has not 
+			been auto-saved")
+		return
+	
+	# make sure world folder exists
+	DirAccess.make_dir_recursive_absolute("user://world")
+	
+	# - Header - #
+	var buffer := StreamPeerBuffer.new()
+	
+	# world size
+	buffer.put_u8(Globals.world_size_key)
+	
+	# world spawn
+	buffer.put_16(Globals.world_spawn.x)
+	buffer.put_16(Globals.world_spawn.y)
+	
+	# - Tile Data - #
+	buffer.put_data(tiles.to_byte_array())
+	
+	# - Entity Data - #
+	print("Pre-Entity Pointer: ", buffer.get_position())
+	
+	buffer.put_data(EntityManager.get_persistent_entities())
+	
+	print("Entity Pointer: ", buffer.get_position())
+	
+	# - Write - #
+	var file := FileAccess.open("user://world/%s.save" % Globals.world_name, FileAccess.WRITE)
+	var compressed := buffer.data_array.compress(FileAccess.COMPRESSION_GZIP)
+	
+	print("[Wizbowo's Conquest] Compressed Save Size: %s bytes" % len(compressed))
+	
+	if file.store_buffer(compressed):
+		print("[Wizbowo's Conquest] Saved World")
+	else:
+		printerr("[Wizbowo's Conquest] ERROR: Failed to save world '%s'" % 
+			ProjectSettings.globalize_path("user://world/%s.save" % Globals.world_name))
+
+func load_world() -> bool:
+	# check if world already exists
+	if not FileAccess.file_exists("user://world/%s.save" % Globals.world_name):
+		print("[Wizbowo's Conquest] World %s does not exist, generating now" % Globals.world_name)
+		return false
+	
+	# - Header - #
+	var buffer := StreamPeerBuffer.new()
+	var data := FileAccess.get_file_as_bytes("user://world/%s.save" % Globals.world_name)
+	buffer.data_array = data.decompress_dynamic(-1, FileAccess.COMPRESSION_GZIP)
+	
+	# world size
+	Globals.world_size_key = buffer.get_u8() as Globals.WorldSizeKey
+	
+	# world spawn
+	Globals.world_spawn.x = buffer.get_16()
+	Globals.world_spawn.y = buffer.get_16()
+	
+	# - Tile Data - #
+	var world_size := Globals.world_size.x * Globals.world_size.y
+	
+	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
+	
+	# - Entity Data - #
+	print("Pre-Entity Pointer: ", buffer.get_position())
+	
+	EntityManager.load_persistent_entities(buffer)
+	
+	print("Entity Pointer: ", buffer.get_position())
+	
+	# logging
+	print("[Wizbowo's Conquest] World Loaded!")
+	
+	return true
 
 #endregion

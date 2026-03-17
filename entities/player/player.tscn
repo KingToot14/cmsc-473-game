@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://cou8r46bfe8oe" path="res://entities/player/player_hp.gd" id="7_mtric"]
 [ext_resource type="Texture2D" uid="uid://boi7elqyuhfq1" path="res://entities/player/outfits/skin/arm_back.png" id="8_3wlsy"]
 [ext_resource type="Script" uid="uid://cc2pcdii6gntf" path="res://entities/player/inventory_ui.gd" id="8_bectd"]
-[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/entity_hitbox.gd" id="8_mtric"]
+[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/combat/entity_hitbox.gd" id="8_mtric"]
 [ext_resource type="Texture2D" uid="uid://br2xx5gvli5ai" path="res://entities/player/outfits/skin/leg_back.png" id="9_b2kln"]
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="9_bectd"]
 [ext_resource type="Resource" uid="uid://bgi204dfg2byy" path="res://entities/player/outfits/tunic/tunic.tres" id="9_we0b7"]
@@ -32,7 +32,7 @@
 [ext_resource type="Shader" uid="uid://di8of40o07gv4" path="res://blocks/_resources/water_renderer.gdshader" id="24_bwdx1"]
 [ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
 [ext_resource type="Script" uid="uid://dhi7ubk8umji5" path="res://blocks/_resources/water_manager.gd" id="26_vewsg"]
-[ext_resource type="Script" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
+[ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 

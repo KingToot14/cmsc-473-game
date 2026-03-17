@@ -1264,6 +1264,7 @@ vframes = 5
 frame = 4
 
 [node name="background_snow" type="Node2D" parent="." unique_id=1299967546]
+visible = false
 y_sort_enabled = true
 
 [node name="layer_1" type="Parallax2D" parent="background_snow" unique_id=392378770]
