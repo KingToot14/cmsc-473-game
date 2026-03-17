@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dw56xaq3k2uek" path="res://entities/tile_entities/0_tree/tree_entity.gd" id="1_h6ae8"]
 [ext_resource type="TileSet" uid="uid://bslwlmjmcwrva" path="res://entities/tile_entities/0_tree/tree_tiles.tres" id="2_54gn5"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_ycj7j"]
+[ext_resource type="Script" uid="uid://d1w66o8kvkds" path="res://entities/_resources/combat/entity_pool_hp.gd" id="3_a71pf"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_awuoa"]
 
@@ -13,17 +14,24 @@ size = Vector2(12, 112)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e22dk"]
 size = Vector2(14, 6)
 
-[node name="tree" type="CharacterBody2D" unique_id=1280563612 node_paths=PackedStringArray("interpolator")]
+[node name="tree" type="CharacterBody2D" unique_id=1280563612 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
 script = ExtResource("1_h6ae8")
 always_snapshot = false
 interpolator = NodePath("snapshot_interpolator")
 counts_towards_spawn_cap = false
+hp = NodePath("hp")
 
 [node name="snapshot_interpolator" type="Node" parent="." unique_id=2118042069 node_paths=PackedStringArray("root")]
 script = ExtResource("2_ycj7j")
 root = NodePath("..")
 metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="hp" type="Node" parent="." unique_id=710042888 node_paths=PackedStringArray("entity")]
+script = ExtResource("3_a71pf")
+is_group = true
+entity = NodePath("..")
+metadata/_custom_type_script = "uid://d1w66o8kvkds"
 
 [node name="sprite" type="TileMapLayer" parent="." unique_id=1112404873]
 tile_map_data = PackedByteArray("AAAAAPH/AAACAAAAAAAAAPL/AAACAAAAAAAAAPP/AAACAAEAAAAAAPT/AAAGAAMAAAAAAPX/AAACAAMAAAAAAPb/AAACAAAAAAAAAPf/AAACAAEAAAAAAPj/AAACAAAAAAAAAPn/AAACAAIAAAAAAPr/AAACAAAAAAAAAPv/AAACAAMAAAAAAPz/AAAEAAIAAAAAAP3/AAACAAAAAAAAAP7/AAACAAIAAAAAAP//AAACAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAEAAAABAPH/AAADAAAAAAABAPL/AAADAAMAAAABAPP/AAADAAEAAAABAPT/AAAHAAMAAAABAPX/AAADAAAAAAABAPb/AAADAAIAAAABAPf/AAADAAAAAAABAPj/AAADAAEAAAABAPn/AAADAAAAAAABAPr/AAADAAMAAAABAPv/AAADAAAAAAABAPz/AAAFAAIAAAABAP3/AAADAAIAAAABAP7/AAADAAEAAAABAP//AAADAAAAAAABAAAAAAABAAAAAAABAAEAAAABAAEAAAA=")

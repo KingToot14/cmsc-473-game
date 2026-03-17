@@ -107,7 +107,7 @@ func load_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -
 	
 	ref.registry_id = registry_id
 	ref.current_instance = entity
-	ref.is_tile_entity = true
+	ref.is_tile_entity = false
 	ref.spawn_data = spawn_data
 	
 	loaded_entities[entity.id] = ref
@@ -215,19 +215,34 @@ func get_persistent_entities() -> PackedByteArray:
 	# header (chunk count)
 	buffer.put_u32(len(anchored_entities.keys()))
 	
+	print("Chunks: ", len(anchored_entities.keys()))
+	var entities := 0
+	
 	# entity data
 	for chunk: Vector2i in anchored_entities:
-		var id_list: Array = anchored_entities[chunk]
+		var id_list: Array = Array(anchored_entities[chunk])
+		var persistent_ids: Array[int] = []
+		
+		# prune non-persistent entities
+		for id in id_list:
+			var entity_ref: EntityReference = loaded_entities.get(id)
+			
+			if entity_ref and entity_ref.is_tile_entity:
+				print(entity_ref.registry_id)
+				
+				persistent_ids.append(id)
 		
 		# entity count
-		buffer.put_u16(len(id_list))
+		buffer.put_u16(len(persistent_ids))
+		
+		entities += len(persistent_ids)
 		
 		# chunk position
 		buffer.put_u16(chunk.x)
 		buffer.put_u16(chunk.y)
 		
 		# spawn data
-		for id in id_list:
+		for id in persistent_ids:
 			var entity_ref := loaded_entities[id]
 			
 			if not entity_ref:
@@ -248,16 +263,23 @@ func get_persistent_entities() -> PackedByteArray:
 			# data
 			buffer.put_data(spawn_data)
 	
+	print("Entities: ", entities)
+	
 	return buffer.data_array
 
 func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
 	# header
 	var chunk_count := buffer.get_u32()
 	
+	print("Chunks: ", chunk_count)
+	var entities := 0
+	
 	# loop through each chunk
 	for i in range(chunk_count):
 		# entity count
 		var entity_count := buffer.get_u16()
+		
+		entities += entity_count
 		
 		# chunk position
 		var chunk_x := buffer.get_u16()
@@ -298,6 +320,8 @@ func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
 				anchored_entities[chunk] = []
 			
 			anchored_entities[chunk].append(id)
+	
+	print("Entities: ", entities)
 
 #endregion
 

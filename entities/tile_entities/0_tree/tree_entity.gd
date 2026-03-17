@@ -56,7 +56,9 @@ func setup_entity() -> void:
 	layer_hp.resize(height)
 	
 	for i in range(height):
-		var new_hp := EntityHp.new()
+		var new_hp := EntityPoolHp.new()
+		new_hp.pool_id = i
+		new_hp.main_hp = hp
 		new_hp.name = "HP_%s" % i
 		
 		new_hp.entity = self
@@ -68,6 +70,7 @@ func setup_entity() -> void:
 		if multiplayer.is_server():
 			layer_hp[i].hp_modified.connect(func (_d): send_hp_update())
 		
+		hp.hp_pool[i] = new_hp
 		add_child(new_hp)
 	
 	var last_branch_l := 0
