@@ -110,15 +110,19 @@ func receive_damage(damage_info: PackedByteArray) -> void:
 func apply_knockback(knockback: Vector2) -> void:
 	entity.velocity += knockback * entity.knockback_power
 
-func modify_health(delta: int) -> void:
+func modify_health(delta: int, update := true) -> void:
 	curr_hp += delta
+	
+	if not update:
+		return
+	
 	hp_modified.emit(delta)
 	
 	if curr_hp <= 0 and multiplayer.is_server():
 		died.emit()
 
-func set_hp(hp: int) -> void:
-	modify_health(-(curr_hp - hp))
+func set_hp(hp: int, update := true) -> void:
+	modify_health(-(curr_hp - hp), update)
 
 func set_max_hp(hp: int, heal_to_full := false) -> void:
 	max_hp = hp

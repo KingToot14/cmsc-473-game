@@ -184,60 +184,33 @@ func _on_layer_death(pool_id: int) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = branch_seed
 		
-		var base_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
-		var apple_positions: Array[Vector2] = []
-		var apple_data: Array[Dictionary] = []
-		
-		var positions: Array[Vector2] = []
-		var spawn_data: Array[Dictionary] = []
-		positions.resize(curr_height - pool_id)
-		spawn_data.resize(curr_height - pool_id)
+		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
-			positions[y] = base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+			var item_pos := base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+			
 			# convert from tile position to world position
-			positions[y] = TileManager.tile_to_world(
-				floori(positions[y].x),
-				floori(positions[y].y)
+			item_pos = TileManager.tile_to_world(
+				floori(item_pos.x),
+				floori(item_pos.y)
 			)
-			spawn_data[y] = {
-				&'item_id': 0,
-				&'quantity': rng.randi_range(1, 2)
-			}
 			
-			ItemDropEntity.spawn(positions[y], 0, rng.randi_range(1, 2))
+			ItemDropEntity.spawn(item_pos, 0, rng.randi_range(1, 2))
 			
-			#consistent with seed
-			
+			# consistent with seed
 			if rng.randf() < APPLE_DROP_ODDS:
-				apple_positions.append(base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2)))
+				var apple_pos := base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+				
 				# convert from tile position to world position
-				apple_positions[-1] = TileManager.tile_to_world(
-					floori(apple_positions[-1].x),
-					floori(apple_positions[-1].y)
+				apple_pos = TileManager.tile_to_world(
+					floori(apple_pos.x),
+					floori(apple_pos.y)
 				)
-				apple_data.append({
-					&'item_id': 1, #references apple item id
-					&'quantity': 1 #drops 1 apple
-				})
+				
+				ItemDropEntity.spawn(apple_pos, 1, rng.randi_range(1, 2))
 				#rng.randi_range(0, 1) determines left or right side of the tree
 				#-(y + pool_id + 2)) determines what y value
-		
-		
-		#EntityManager.create_entities(
-			## item drop
-			#0,
-			#positions,
-			#spawn_data
-		#)
-		#
-		#EntityManager.create_entities(
-			## item drop
-			#0, #points to item drop entity
-			#apple_positions,
-			#apple_data
-		#)
 	
 	curr_height = pool_id
 	
@@ -341,7 +314,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# layer hp
 	for i in range(height):
-		layer_hp[i].set_hp(buffer.get_u8())
+		layer_hp[i].set_hp(buffer.get_u8(), false)
 		
 		if layer_hp[i].curr_hp == 0:
 			curr_height = min(curr_height, i)
