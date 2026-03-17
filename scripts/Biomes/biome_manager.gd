@@ -52,6 +52,7 @@ func check_biome(player_pos: Vector2) -> void:
 			
 			if processed == 256:
 				await get_tree().process_frame
+				processed = 0
 			
 	set_biome(&"forest") #default is forest
 

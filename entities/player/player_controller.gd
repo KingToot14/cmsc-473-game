@@ -143,6 +143,10 @@ func _ready() -> void:
 		
 		# disable inventory ui
 		$'inventory_ui'.queue_free()
+		
+		# disable overlays
+		$'grid_overlay'.hide()
+		$'water_overlay'.hide()
 	else:
 		# update position
 		position = spawn_point
