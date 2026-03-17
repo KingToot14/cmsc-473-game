@@ -199,12 +199,52 @@ func login_button_pressed() -> void:
 		return
 	
 	# TODO (Abby): Fetch username and password from fields (LineEdit nodes)
+	var username: String = %'username_field'.text.strip_edges()
+	var password: String = %'password_field'.text.strip_edges()
+
+	if username.is_empty() or password.is_empty():
+		print("[Login] Username or password empty")
+	return
+
+	print("[Login] Sending login request to server...")
+
+	DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
 	pass
 	
 	# TODO (Abby): Verify username and password combo in database
+func _on_login_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Login] Account not found. Creating new account...")
+
+	var username =  %'username_field'.text
+	var password = %'password_field'.text
+	DatabaseManager.create_account.rpc_id(Globals.SERVER_ID, username, password)
+	return
+
+	print("[Login] Login successful! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+
 	pass
 	
 	# TODO (Abby): If username and password don't exist, create new one
+func _on_create_account_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Account] Failed to create account (username taken?)")
+	return
+
+	print("[Account] Account created! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+
 	pass
 	
 	# TODO (Jacob): Show character creation when creating a new account and sync to server
