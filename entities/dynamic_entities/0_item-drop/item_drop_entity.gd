@@ -365,7 +365,6 @@ static func spawn_restricted(
 		pos: Vector2, item_id: int, quantity: int, player_id: int, restricted_time := 1.0,
 		spawn_behavior := SpawnBehavior.UPWARD_RANDOM
 	) -> void:
-	print("Test 5: spawn_restricted static call received for item_id: ", item_id)
 	# create new item drop entity
 	var entity_scene: PackedScene = EntityManager.enemy_registry.get(0).entity_scene
 	if not entity_scene:

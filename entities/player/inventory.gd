@@ -165,13 +165,10 @@ func interact_with_slot(index: int) -> void:
 ## Drops the currently held item at the specified world position.
 ## Inside inventory.gd
 func drop_held_item(drop_position: Vector2) -> void:
-	print("Test 1: Entering drop_held_item function")
 	if held_item.is_empty():
-		print("Test 2: Drop failed - held_item is empty")
 		return
 
 	if multiplayer.is_server():
-		print("Test 3: Server is spawning entity at ", drop_position)
 		var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
 		
 		# get throw direction
@@ -191,8 +188,6 @@ func drop_held_item(drop_position: Vector2) -> void:
 		held_item.count = 0
 		send_inventory()
 	else:
-		print("Test 4: Client is sending RPC to server")
-		#force the ID to 1 to ensure it hits the server authority
 		send_drop_item.rpc_id(1, drop_position) 
 	
 	inventory_updated.emit()
@@ -200,15 +195,11 @@ func drop_held_item(drop_position: Vector2) -> void:
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_drop_item(drop_position: Vector2) -> void:
 	#ensure the drop position is within a reasonable distance of the player
-	print("Server Test: Received RPC request from peer: ", multiplayer.get_remote_sender_id())
-	
 	var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
 	print(drop_position, " | ", player.global_position)
 	
 	if is_instance_valid(player) and drop_position.distance_to(player.global_position) < 500:
 		drop_held_item(drop_position)
-	else:
-		print("Server Test: Request rejected. Player valid: ", is_instance_valid(player))
 
 func remove_item_at(item_id: int, count: int, slot: int) -> void:
 	var item: Item = ItemDatabase.get_item(item_id)
