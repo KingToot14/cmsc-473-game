@@ -195,6 +195,9 @@ func create_client() -> Error:
 	return ServerManager.join_server(ip_address, port)
 
 func login_button_pressed() -> void:
+	if multiplayer.is_server():
+		return
+	
 	# TODO (Abby): Fetch username and password from fields (LineEdit nodes)
 	pass
 	

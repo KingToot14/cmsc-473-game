@@ -4,7 +4,7 @@
 [ext_resource type="TileSet" uid="uid://bslwlmjmcwrva" path="res://entities/tile_entities/0_tree/tree_tiles.tres" id="2_54gn5"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_ycj7j"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
-[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/tile_entity_hitbox.gd" id="4_awuoa"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_awuoa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ered6"]
 resource_local_to_scene = true

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cr8qvfwi7uc7y" path="res://entities/dynamic_entities/2_falling-block/falling_block_entity.gd" id="1_vsi20"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_3r1x2"]
 [ext_resource type="Texture2D" uid="uid://dok7jby27ehl1" path="res://blocks/8_sand/icons.png" id="2_sif4m"]
-[ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/entity_damage_source.gd" id="4_vsi20"]
+[ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/combat/entity_damage_source.gd" id="4_vsi20"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sif4m"]
 size = Vector2(6, 6)

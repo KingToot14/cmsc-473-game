@@ -209,6 +209,96 @@ func update_entity_data(entity: Entity) -> void:
 func clear_entity_data(entity: Entity) -> void:
 	loaded_entities.erase(entity.id)
 
+func get_persistent_entities() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	
+	# header (chunk count)
+	buffer.put_u32(len(anchored_entities.keys()))
+	
+	# entity data
+	for chunk: Vector2i in anchored_entities:
+		var id_list: Array = anchored_entities[chunk]
+		
+		# entity count
+		buffer.put_u16(len(id_list))
+		
+		# chunk position
+		buffer.put_u16(chunk.x)
+		buffer.put_u16(chunk.y)
+		
+		# spawn data
+		for id in id_list:
+			var entity_ref := loaded_entities[id]
+			
+			if not entity_ref:
+				# default to no size
+				buffer.put_u16(0)
+				continue
+			
+			# reset entity id
+			var spawn_data := PackedByteArray(entity_ref.spawn_data)
+			spawn_data.encode_u32(0, 0)
+			
+			# data size
+			buffer.put_u16(len(spawn_data))
+			
+			# registry id
+			buffer.put_u16(entity_ref.registry_id)
+			
+			# data
+			buffer.put_data(spawn_data)
+	
+	return buffer.data_array
+
+func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
+	# header
+	var chunk_count := buffer.get_u32()
+	
+	# loop through each chunk
+	for i in range(chunk_count):
+		# entity count
+		var entity_count := buffer.get_u16()
+		
+		# chunk position
+		var chunk_x := buffer.get_u16()
+		var chunk_y := buffer.get_u16()
+		
+		# populate chunk
+		for j in range(entity_count):
+			# data size
+			var data_size := buffer.get_u16()
+			
+			# skip empty entries
+			if data_size == 0:
+				continue
+			
+			# registry id
+			var registry_id := buffer.get_u16()
+			
+			# spawn data
+			var spawn_data: PackedByteArray = buffer.get_data(data_size)[1]
+			var id := curr_id
+			spawn_data.encode_u32(0, id)
+			curr_id += 1
+			
+			var entity_ref: EntityReference = loaded_entities.get(id)
+			
+			if not entity_ref:
+				entity_ref = EntityReference.new()
+				loaded_entities[id] = entity_ref
+			
+			entity_ref.spawn_data = spawn_data
+			entity_ref.registry_id = registry_id
+			entity_ref.is_tile_entity = true
+			
+			# anchor entity
+			var chunk := Vector2i(chunk_x, chunk_y)
+			
+			if chunk not in anchored_entities:
+				anchored_entities[chunk] = []
+			
+			anchored_entities[chunk].append(id)
+
 #endregion
 
 #region Entity Updates

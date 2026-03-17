@@ -64,6 +64,10 @@ func _idx(x: int, y: int) -> int:
 func _process(_delta: float) -> void:
 	pass
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_world()
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&'test_input'):
 		if multiplayer.is_server():
@@ -1046,14 +1050,23 @@ func save_world() -> void:
 	# world size
 	buffer.put_u8(Globals.world_size_key)
 	
+	# world spawn
+	buffer.put_16(Globals.world_spawn.x)
+	buffer.put_16(Globals.world_spawn.y)
+	
 	# - Tile Data - #
 	buffer.put_data(tiles.to_byte_array())
 	
 	# - Entity Data - #
+	print("Pre-Entity Pointer: ", buffer.get_position())
+	
+	buffer.put_data(EntityManager.get_persistent_entities())
+	
+	print("Entity Pointer: ", buffer.get_position())
 	
 	# - Write - #
 	var file := FileAccess.open("user://world/%s.save" % Globals.world_name, FileAccess.WRITE)
-	var compressed := buffer.data_array.compress(FileAccess.COMPRESSION_ZSTD)
+	var compressed := buffer.data_array.compress(FileAccess.COMPRESSION_GZIP)
 	
 	print("[Wizbowo's Conquest] Compressed Save Size: %s bytes" % len(compressed))
 	
@@ -1071,10 +1084,15 @@ func load_world() -> bool:
 	
 	# - Header - #
 	var buffer := StreamPeerBuffer.new()
-	buffer.data_array = FileAccess.get_file_as_bytes("user://world/%s.save")
+	var data := FileAccess.get_file_as_bytes("user://world/%s.save" % Globals.world_name)
+	buffer.data_array = data.decompress_dynamic(-1, FileAccess.COMPRESSION_GZIP)
 	
 	# world size
 	Globals.world_size_key = buffer.get_u8() as Globals.WorldSizeKey
+	
+	# world spawn
+	Globals.world_spawn.x = buffer.get_16()
+	Globals.world_spawn.y = buffer.get_16()
 	
 	# - Tile Data - #
 	var world_size := Globals.world_size.x * Globals.world_size.y
@@ -1082,7 +1100,13 @@ func load_world() -> bool:
 	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
 	
 	# - Entity Data - #
+	print("Pre-Entity Pointer: ", buffer.get_position())
 	
+	EntityManager.load_persistent_entities(buffer)
+	
+	print("Entity Pointer: ", buffer.get_position())
+	
+	# logging
 	print("[Wizbowo's Conquest] World Loaded!")
 	
 	return true
