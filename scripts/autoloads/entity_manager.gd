@@ -6,10 +6,9 @@ var curr_id := 0
 var enemy_registry: Dictionary[int, EntityInfo] = {}
 var tile_entity_registry: Dictionary[int, EntityInfo] = {}
 
-var tile_entities: Dictionary[Vector2i, Dictionary] = {}
-var dynamic_entities: Dictionary[Vector2i, Dictionary] = {}
+var anchored_entities: Dictionary[Vector2i, Array] = {}
 
-var loaded_entities: Dictionary[int, Node2D] = {}
+var loaded_entities: Dictionary[int, EntityReference] = {}
 
 # --- Functions --- #
 func _ready() -> void:
@@ -36,387 +35,419 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> 
 			printerr("[Wizbowo's Conquest] No file 'info.tres' found in directory %s" % dir_name)
 
 #region Entity Spawning
-func create_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary
-	) -> void:
-	
-	# setup new entity
-	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
-	if not entity_scene:
-		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
-		return
-	
-	# create new entity
-	var entity: Entity = entity_scene.instantiate()
-	var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
-	entity.position = position
-	if chunk not in dynamic_entities:
-		dynamic_entities[chunk] = {}
-	dynamic_entities[chunk][curr_id] = true
-	
-	entity.name = "entity_%s" % curr_id
-	
-	entity.initialize(curr_id, registry_id, spawn_data.merged({&'spawned': true}))
-	loaded_entities[curr_id] = entity
-	curr_id += 1
-	
-	# check interest
+func add_entity(registry_id: int, entity: Entity) -> void:
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
-	
-	for player in entity.interested_players:
-		if player not in ServerManager.connected_players.keys():
-			entity.remove_interest(player)
-			continue
-		
-		load_entity.rpc_id(player, registry_id, position, spawn_data, entity.id)
-
-func create_entities(
-		registry_id: int, positions: Array[Vector2], spawn_data: Array[Dictionary]
-	) -> void:
-	
-	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
-	if not entity_scene:
-		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
+	# don't process entities that don't have interested players
+	if entity.interest_count == 0:
+		entity.queue_free()
 		return
 	
-	# create new entity
-	var start_id := curr_id
-	var interested_players: Array[int]
-	
-	for i in range(len(positions)):
-		var position: Vector2 = positions[i]
-		
-		var entity: Entity = entity_scene.instantiate()
-		var chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
-		entity.position = position
-		if chunk not in dynamic_entities:
-			dynamic_entities[chunk] = {}
-		dynamic_entities[chunk][curr_id] = true
-		
-		entity.name = "entity_%s" % curr_id
-		
-		entity.initialize(curr_id, registry_id, spawn_data[i].merged({&'spawned': true}))
-		loaded_entities[curr_id] = entity
-		curr_id += 1
-		
-		# check interest
-		entity.scan_interest()
-		interested_players = entity.interested_players.keys()
-		
-		get_tree().current_scene.get_node(^'entities').add_child(entity)
-	
-	# send to players
-	for player in interested_players:
-		if player not in ServerManager.connected_players.keys():
-			continue
-		
-		load_entities.rpc_id(player, registry_id, positions, spawn_data, start_id)
-
-func create_tile_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary
-	) -> void:
-	
-	var entity_info := TileEntityInfo.new(curr_id, registry_id, position, spawn_data)
+	# set entity id
+	entity.id = curr_id
+	entity.registry_id = registry_id
 	curr_id += 1
 	
-	# add to chunk container
-	var chunk := TileManager.tile_to_chunk(position.x, position.y)
+	entity.name = "entity_%s" % entity.id
 	
-	if chunk not in tile_entities:
-		tile_entities[chunk] = {}
+	var ref := EntityReference.new()
+	ref.registry_id = registry_id
+	ref.current_instance = entity
+	ref.is_tile_entity = false
 	
-	tile_entities[chunk][curr_id - 1] = entity_info
-
-@rpc('authority', 'call_remote', 'reliable')
-func load_entity(
-		registry_id: int, position: Vector2, spawn_data: Dictionary, spawn_id: int
-	) -> void:
+	loaded_entities[entity.id] = ref
 	
-	# don't re-instantiate existing entities
-	if loaded_entities.get(spawn_id):
-		var loaded_entity: Entity = loaded_entities[spawn_id]
-		loaded_entity.add_interest(multiplayer.get_unique_id())
-		
-		if Globals.player and loaded_entity.counts_towards_spawn_cap:
-			Globals.player.add_interest(spawn_id)
-		return
+	# anchor to chunk
+	entity.calculate_chunk()
+	var chunk := entity.current_chunk
 	
-	# setup new entity
-	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
-	if not entity_scene:
-		return
+	if chunk not in anchored_entities:
+		anchored_entities[chunk] = []
+	anchored_entities[chunk].append(entity.id)
 	
-	var entity: Entity = entity_scene.instantiate()
-	entity.add_interest(multiplayer.get_unique_id())
-	if Globals.player:
-		Globals.player.remove_interest(spawn_id)
+	# send to interested players
+	var spawn_data := entity.serialize_spawn_data()
 	
-	entity.position = position
-	entity.name = "entity_%s" % spawn_id
-	
-	entity.initialize(spawn_id, registry_id, spawn_data)
-	loaded_entities[spawn_id] = entity
-	
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
-
-@rpc('authority', 'call_remote', 'reliable')
-func load_entities(
-		registry_id: int, positions: Array[Vector2], spawn_data: Array[Dictionary], 
-		spawn_id_start: int
-	) -> void:
-	
-	# setup new entity
-	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
-	if not entity_scene:
-		return
-	
-	for i in range(len(positions)):
-		var position := positions[i]
-		var spawn_id := spawn_id_start + i
-		
-		# don't re-instantiate existing entities
-		if loaded_entities.get(spawn_id):
-			var loaded_entity: Entity = loaded_entities[spawn_id]
-			loaded_entity.add_interest(multiplayer.get_unique_id())
-			
-			if Globals.player and loaded_entity.counts_towards_spawn_cap:
-				Globals.player.add_interest(spawn_id)
-			return
-		
-		var entity: Entity = entity_scene.instantiate()
-		entity.add_interest(multiplayer.get_unique_id())
-		if Globals.player:
-			Globals.player.remove_interest(spawn_id)
-		
-		entity.position = position
-		entity.name = "entity_%s" % spawn_id
-		
-		entity.initialize(spawn_id, registry_id, spawn_data[i])
-		loaded_entities[spawn_id] = entity
-		
-		get_tree().current_scene.get_node(^'entities').add_child(entity)
-
-@rpc('authority', 'call_remote', 'reliable')
-func load_tile_entity(
-		registry_id: int, position: Vector2i, spawn_data: Dictionary, spawn_id: int
-	) -> void:
-	
-	# don't re-instantiate existing entities
-	if loaded_entities.get(spawn_id):
-		return
-	
-	# setup new entity
-	var entity_scene: PackedScene = tile_entity_registry.get(registry_id).entity_scene
-	if not entity_scene:
-		return
-	
-	var entity: TileEntity = entity_scene.instantiate()
-	entity.position = TileManager.tile_to_world(position.x, position.y)
-	entity.name = "entity_%s" % spawn_id
-	
-	entity.initialize(spawn_id, registry_id, spawn_data)
-	loaded_entities[spawn_id] = entity
-	
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	for player_id in entity.interested_players:
+		load_entity.rpc_id(player_id, entity.id, registry_id, spawn_data)
 
 #endregion
 
-#region Entity Management
-@rpc('any_peer', 'call_remote', "reliable")
-func entity_take_damage(entity_id: int, snapshot: Dictionary) -> void:
-	var entity: Node2D = loaded_entities.get(entity_id)
+#region Entity Loading
+@rpc('authority', 'call_remote', 'reliable')
+func load_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
+	var ref: EntityReference = loaded_entities.get(spawn_id, null)
 	
-	if not (entity and len(entity.hp_pool) > 0):
+	# don't process if entity exists and is loaded in reference
+	if ref and is_instance_valid(ref.current_instance):
 		return
 	
-	# TODO: verify attack
-	var damage: int = snapshot.get(&'damage', 0)
-	var pool_id: int = snapshot.get(&'pool_id', 0)
-	
-	# apply damage
-	entity.hp_pool[pool_id].modify_health(-damage, true)
-	
-	# calculate knockback force
-	var player_obj: PlayerController = ServerManager.connected_players[snapshot[&'player_id']]
-	
-	# receive knockback away from player
-	if entity is Entity:
-		var knockback_force := Vector2(1.0, 0.0)
-		if player_obj.center_point.x > entity.global_position.x:
-			knockback_force.x *= -1
-		
-		# apply slight upward force if level
-		if entity.is_on_floor():
-			knockback_force.y = -0.5
-		
-		snapshot[&'knockback'] = knockback_force.normalized()
-	
-	# store hp
-	if entity is TileEntity:
-		var entity_info: TileEntityInfo = tile_entities[entity.current_chunk][entity.id]
-		
-		if &'hp' not in entity_info.data:
-			entity_info.data[&'hp'] = {}
-		
-		entity_info.data[&'hp'][pool_id] = entity.hp_pool[pool_id].curr_hp
-	else:
-		if &'hp' not in entity.data:
-			entity.data[&'hp'] = {}
-		
-		entity.data[&'hp'][pool_id] = entity.hp_pool[pool_id].curr_hp
-	
-	if entity.hp_pool[pool_id].curr_hp <= 0:
-		snapshot[&'entity_dead'] = true
-	
-	# call receive signal on server copy
-	entity.hp_pool[pool_id].received_damage.emit(snapshot)
-	
-	# send to relavent players
-	for player in entity.interested_players:
-		if player not in ServerManager.connected_players.keys():
-			entity.remove_interest(player)
-			continue
-		
-		entity.hp_pool[pool_id].receive_damage_snapshot.rpc_id(player, snapshot)
-
-@rpc('any_peer', 'call_remote', 'reliable')
-func entity_send_update(entity_id: int, data: Dictionary) -> void:
-	if not multiplayer.is_server():
+	# create new entity instance
+	var entity_scene: PackedScene = enemy_registry.get(registry_id).entity_scene
+	if not entity_scene:
+		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
 		return
 	
-	var entity: Node2D = loaded_entities.get(entity_id)
+	var entity: Entity = entity_scene.instantiate()
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	
-	if not entity:
-		return
+	# load the latest buffer
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = spawn_data
+	entity.deserialize_spawn_data(buffer)
 	
-	# update server entity
-	data.merge(entity.receive_update(data), true)
+	# set id and name
+	entity.id = spawn_id
+	entity.name = "entity_%s" % spawn_id
 	
-	# send to all interested players
-	for player in entity.interested_players.keys():
-		# make sure player still exists
-		if entity is Entity and not entity.check_player(player):
-			continue
-		
-		entity_receive_update.rpc_id(player, entity_id, data)
+	# store entity reference
+	if not ref:
+		ref = EntityReference.new()
+	
+	ref.registry_id = registry_id
+	ref.current_instance = entity
+	ref.is_tile_entity = true
+	ref.spawn_data = spawn_data
+	
+	loaded_entities[entity.id] = ref
+	
+	# update interest on the new instance
+	entity.scan_interest()
 
 @rpc('authority', 'call_remote', 'reliable')
-func entity_receive_update(entity_id: int, data: Dictionary) -> void:
-	var entity: Node2D = loaded_entities.get(entity_id)
+func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -> void:
+	var ref: EntityReference = loaded_entities.get(spawn_id, null)
 	
-	if not entity:
+	# don't process if entity exists and is loaded in reference
+	if ref and is_instance_valid(ref.current_instance):
 		return
 	
-	# load update
-	entity.receive_update(data)
+	# create new entity instance
+	var entity_scene: PackedScene = tile_entity_registry.get(registry_id).entity_scene
+	
+	if not entity_scene:
+		printerr("[Wizbowo's Conquest] Cannot locate entity with id '%s'" % registry_id)
+		return
+	
+	var entity: Entity = entity_scene.instantiate()
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	
+	# load the latest buffer
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = spawn_data
+	entity.deserialize_spawn_data(buffer)
+	
+	# set id and name
+	entity.id = spawn_id
+	entity.name = "entity_%s" % spawn_id
+	
+	# store entity reference
+	if not ref:
+		ref = EntityReference.new()
+	
+	ref.registry_id = registry_id
+	ref.current_instance = entity
+	ref.is_tile_entity = true
+	ref.spawn_data = spawn_data
+	
+	loaded_entities[entity.id] = ref
+	
+	# make sure the instance is aware of any nearby players
+	entity.scan_interest()
+
+#endregion
+
+#region Data Persistence
+func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
+	# set ids
+	entity.id = curr_id
+	entity.registry_id = registry_id
+	curr_id += 1
+	
+	# create new reference
+	var ref := EntityReference.new()
+	ref.registry_id = registry_id
+	ref.spawn_data = entity.serialize_spawn_data()
+	ref.is_tile_entity = true
+	
+	loaded_entities[entity.id] = ref
+	
+	# anchor to chunk
+	entity.calculate_chunk()
+	var chunk := entity.current_chunk
+	
+	if chunk not in anchored_entities:
+		anchored_entities[chunk] = []
+	anchored_entities[chunk].append(entity.id)
+	
+	# attempt to load instantly
+	entity.scan_interest()
+	
+	# if no entities exist, just store data for now
+	if entity.interest_count == 0:
+		entity.queue_free()
+	else:
+		ref.current_instance = entity
+		
+		for player_id in entity.interested_players:
+			load_tile_entity.rpc_id(player_id, entity.id, registry_id, ref.spawn_data)
+
+func update_entity_data(entity: Entity) -> void:
+	var ref: EntityReference = loaded_entities.get(entity.id)
+	
+	# create reference if it doesn't exist
+	if not ref:
+		ref = EntityReference.new()
+		loaded_entities[entity.id] = ref
+	
+	ref.registry_id = entity.registry_id
+	ref.current_instance = entity
+	ref.is_tile_entity = entity is TileEntity
+	ref.spawn_data = entity.serialize_spawn_data()
+
+func clear_entity_data(entity: Entity) -> void:
+	loaded_entities.erase(entity.id)
+
+func get_persistent_entities() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	
+	# header (chunk count)
+	buffer.put_u32(len(anchored_entities.keys()))
+	
+	# entity data
+	for chunk: Vector2i in anchored_entities:
+		var id_list: Array = anchored_entities[chunk]
+		
+		# entity count
+		buffer.put_u16(len(id_list))
+		
+		# chunk position
+		buffer.put_u16(chunk.x)
+		buffer.put_u16(chunk.y)
+		
+		# spawn data
+		for id in id_list:
+			var entity_ref := loaded_entities[id]
+			
+			if not entity_ref:
+				# default to no size
+				buffer.put_u16(0)
+				continue
+			
+			# reset entity id
+			var spawn_data := PackedByteArray(entity_ref.spawn_data)
+			spawn_data.encode_u32(0, 0)
+			
+			# data size
+			buffer.put_u16(len(spawn_data))
+			
+			# registry id
+			buffer.put_u16(entity_ref.registry_id)
+			
+			# data
+			buffer.put_data(spawn_data)
+	
+	return buffer.data_array
+
+func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
+	# header
+	var chunk_count := buffer.get_u32()
+	
+	# loop through each chunk
+	for i in range(chunk_count):
+		# entity count
+		var entity_count := buffer.get_u16()
+		
+		# chunk position
+		var chunk_x := buffer.get_u16()
+		var chunk_y := buffer.get_u16()
+		
+		# populate chunk
+		for j in range(entity_count):
+			# data size
+			var data_size := buffer.get_u16()
+			
+			# skip empty entries
+			if data_size == 0:
+				continue
+			
+			# registry id
+			var registry_id := buffer.get_u16()
+			
+			# spawn data
+			var spawn_data: PackedByteArray = buffer.get_data(data_size)[1]
+			var id := curr_id
+			spawn_data.encode_u32(0, id)
+			curr_id += 1
+			
+			var entity_ref: EntityReference = loaded_entities.get(id)
+			
+			if not entity_ref:
+				entity_ref = EntityReference.new()
+				loaded_entities[id] = entity_ref
+			
+			entity_ref.spawn_data = spawn_data
+			entity_ref.registry_id = registry_id
+			entity_ref.is_tile_entity = true
+			
+			# anchor entity
+			var chunk := Vector2i(chunk_x, chunk_y)
+			
+			if chunk not in anchored_entities:
+				anchored_entities[chunk] = []
+			
+			anchored_entities[chunk].append(id)
+
+#endregion
+
+#region Entity Updates
+func send_update_important(entity_id: int, action_id: int, instant := true) -> void:
+	receive_update_important.rpc(entity_id, action_id, NetworkTime.time, instant)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_update_important(entity_id: int, action_id: int, time: float, instant := true) -> void:
+	# make sure entity exists
+	var entity_ref: EntityReference = loaded_entities.get(entity_id, null)
+	if not entity_ref:
+		return
+	
+	var entity := entity_ref.current_instance
+	
+	if not is_instance_valid(entity):
+		return
+	
+	match action_id:
+		Entity.KILL_ACTION:
+			var buffer := StreamPeerBuffer.new()
+			buffer.resize(2)
+			
+			# action id
+			buffer.put_u16(action_id)
+			
+			if instant:
+				entity.interpolator.perform_action(buffer.data_array)
+			else:
+				entity.interpolator.send_action(time, buffer.data_array)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func entity_receive_damage(entity_id: int, data: PackedByteArray) -> void:
+	var entity := get_entity(entity_id)
+	
+	if entity:
+		entity.hp.receive_damage(data)
 
 #endregion
 
 #region Interest Management
 @rpc('any_peer', 'call_remote', 'reliable')
+func load_region(start: Vector2i, width: int, height: int, player_id: int) -> void:
+	for x in range(width):
+		for y in range(height):
+			load_chunk(Vector2i(start.x + x, start.y + y), player_id)
+
+@rpc('any_peer', 'call_remote', 'reliable')
 func load_chunk(chunk: Vector2i, player_id: int) -> void:
-	for entity_id in tile_entities.get(chunk, {}).keys():
-		var entity_info: TileEntityInfo = tile_entities[chunk][entity_id]
+	for entity_id in anchored_entities.get(chunk, []):
+		var reference: EntityReference = loaded_entities.get(entity_id)
 		
-		# create entity server-side
-		if not entity_info.entity_id in loaded_entities:
-			var entity_scene: PackedScene = tile_entity_registry.get(entity_info.registry_id).entity_scene
-			@warning_ignore("confusable_local_declaration")
-			var entity: TileEntity = entity_scene.instantiate()
-			entity.position = TileManager.tile_to_world(
-				entity_info.anchor_point.x,
-				entity_info.anchor_point.y
-			)
-			entity.name = "entity_%s" % entity_info.entity_id
-			
-			entity.initialize(entity_info.entity_id, entity_info.registry_id, entity_info.data)
-			loaded_entities[entity_info.entity_id] = entity
-			
-			get_tree().current_scene.get_node(^'entities').add_child(entity)
-		
-		# mark player as interested
-		if not is_instance_valid(loaded_entities[entity_info.entity_id]):
-			loaded_entities.erase(entity_info.entity_id)
-			return
-		
-		var entity: TileEntity = loaded_entities[entity_info.entity_id]
-		entity.add_interest(player_id)
-		
-		# send to player
-		load_tile_entity.rpc_id(player_id,
-			entity_info.registry_id, entity_info.anchor_point, entity_info.data, entity_info.entity_id
-		)
-	
-	for entity_id in dynamic_entities.get(chunk, {}).keys():
-		if entity_id not in loaded_entities:
+		# clear null references
+		if not reference:
+			anchored_entities[chunk].erase(entity_id)
+			loaded_entities.erase(entity_id)
 			continue
 		
-		var entity: Entity = loaded_entities[entity_id]
-		entity.add_interest(player_id)
-		
-		load_entity.rpc_id(
-			player_id,
-			entity.registry_id, entity.position,
-			# do not run spawn logic when syncing existing entities
-			entity.data.merged({&'spawned': false}, true),
-			entity.id
-		)
+		# switch replication logic
+		if reference.is_tile_entity:
+			# load on server if not already
+			if not is_instance_valid(reference.current_instance):
+				load_tile_entity(entity_id, reference.registry_id, reference.get_spawn_data())
+			
+			# mark new player as interested
+			if is_instance_valid(reference.current_instance):
+				# server-side interest ensures the entity won't despawn
+				reference.current_instance.add_interest(player_id)
+			
+			# send to client
+			load_tile_entity.rpc_id(player_id,
+				entity_id, reference.registry_id,
+				reference.get_spawn_data()
+			)
+		else:
+			# load on server if not already
+			if not is_instance_valid(reference.current_instance):
+				load_entity(entity_id, reference.registry_id, reference.get_spawn_data())
+			
+			# mark new player as interested
+			if is_instance_valid(reference.current_instance):
+				reference.current_instance.add_interest(player_id)
+			
+			load_entity.rpc_id(player_id,
+				entity_id, reference.registry_id,
+				reference.get_spawn_data()
+			)
 
 func unload_chunk(chunk: Vector2i, player_id: int) -> void:
 	print("Loaded chunk %s from player '%s'" % [chunk, player_id])
 
-func erase_entity(entity: Node2D) -> void:
+func erase_entity(entity: Entity) -> void:
+	var ref: EntityReference = loaded_entities.get(entity.id)
 	loaded_entities.erase(entity.id)
+	
 	if Globals.player:
 		Globals.player.remove_interest(entity.id)
 	
-	if multiplayer.is_server() and entity is TileEntity:
-		var chunk: Dictionary = tile_entities.get(entity.current_chunk, {})
-		chunk.erase(entity)
+	# remove dynamic entities from anchored positions
+	if ref and not ref.is_tile_entity:
+		var chunk := entity.current_chunk
 		
-		if len(chunk) == 0:
-			tile_entities.erase(entity.current_chunk)
-	if multiplayer.is_server() and entity is Entity:
-		var chunk: Vector2i = entity.current_chunk
-		
-		if chunk in dynamic_entities and entity.id in dynamic_entities[chunk]:
-			dynamic_entities[chunk].erase(entity.id)
-			if dynamic_entities[chunk].is_empty():
-				dynamic_entities.erase(chunk)
+		if chunk in anchored_entities:
+			anchored_entities[chunk].erase(entity.id)
 
 func move_dynamic_entity(entity_id: int, prev_chunk: Vector2i, curr_chunk: Vector2i) -> void:
 	# erase old chunk
-	if prev_chunk in dynamic_entities and entity_id in dynamic_entities[prev_chunk]:
-		dynamic_entities[prev_chunk].erase(entity_id)
-		if dynamic_entities[prev_chunk].is_empty():
-			dynamic_entities.erase(prev_chunk)
+	if prev_chunk in anchored_entities and entity_id in anchored_entities[prev_chunk]:
+		anchored_entities[prev_chunk].erase(entity_id)
+		
+		if anchored_entities[prev_chunk].is_empty():
+			anchored_entities.erase(prev_chunk)
 	
 	# add new chunk
-	if curr_chunk not in dynamic_entities:
-		dynamic_entities[curr_chunk] = {}
+	if curr_chunk not in anchored_entities:
+		anchored_entities[curr_chunk] = []
 	
-	dynamic_entities[curr_chunk][entity_id] = true
+	anchored_entities[curr_chunk].append(entity_id)
+
+#endregion
+
+#region Helper Functions
+func get_entity(entity_id: int) -> Entity:
+	# first make sure entity exists
+	if entity_id not in loaded_entities:
+		return null
+	
+	# check if entity has recently been queued
+	if not is_instance_valid(loaded_entities[entity_id].current_instance):
+		return null
+	
+	return loaded_entities[entity_id].current_instance
 
 #endregion
 
 #region Helper Classes
-class TileEntityInfo:
-	var entity_id: int
-	var registry_id: int
-	var anchor_point: Vector2i
-	var data: Dictionary
+class EntityReference:
 	var current_instance: Entity
+	var spawn_data: PackedByteArray
+	var is_tile_entity := false
+	var registry_id := 0
 	
-	@warning_ignore('shadowed_variable')
-	func _init(entity_id: int, registry_id: int, anchor_point: Vector2i, data: Dictionary):
-		self.entity_id = entity_id
-		self.registry_id = registry_id
-		self.anchor_point = anchor_point
-		self.data = data
-	
-	func spawn() -> void:
-		current_instance = EntityManager.tile_entity_registry[entity_id].entity_scene.instantiate()
+	func get_spawn_data() -> PackedByteArray:
+		# if instance exists, get most recent data
+		if is_instance_valid(current_instance):
+			return current_instance.serialize_spawn_data()
+		# otherwise return cached data (primarily for tile entities)
+		else:
+			current_instance = null
+			return spawn_data
 
 #endregion

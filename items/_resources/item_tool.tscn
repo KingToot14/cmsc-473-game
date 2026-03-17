@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bj6hggjsgnf3c"]
+
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="1_hdnlv"]
+
+[node name="item_tool" type="Node2D" unique_id=170739651]
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1724200844]
+texture = ExtResource("1_hdnlv")

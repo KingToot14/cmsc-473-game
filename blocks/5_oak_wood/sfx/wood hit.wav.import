@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cge3w252sspt4"
+path="res://.godot/imported/wood hit.wav-e0e2c4cbd9ac265c858152e1e3b8c620.sample"
+
+[deps]
+
+source_file="res://blocks/5_oak_wood/sfx/wood hit.wav"
+dest_files=["res://.godot/imported/wood hit.wav-e0e2c4cbd9ac265c858152e1e3b8c620.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

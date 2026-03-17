@@ -33,6 +33,9 @@ func _process(_delta: float) -> void:
 	if abs(diff.x) + abs(diff.y) >= 1:
 		current_chunk = new_chunk
 		
+		if not multiplayer.is_server() and player.owner_id == multiplayer.get_unique_id():
+			BiomeManager.check_biome(player.global_position)
+		
 		if multiplayer.is_server():
 			# server sends chunk updates
 			if diff.x != 0:
@@ -53,6 +56,9 @@ func _process(_delta: float) -> void:
 				var boundary := diff
 				boundary.x = 0
 				autotile_boundary(boundary)
+			
+			# update water render
+			TileManager.build_water_texture()
 
 func clear_boundary(boundary: Vector2i) -> void:
 	var start_chunk := current_chunk - LOAD_RANGE
@@ -175,12 +181,12 @@ func send_region(start_chunk: Vector2i, end_chunk: Vector2i, autotile := false) 
 	if len(data) == 0:
 		return
 	
-	# update server tilemap
+	# update server tilemap (allow buffer to keep entities in the world)
 	Globals.server_map.load_tiles(
-		start_chunk.x * TileManager.CHUNK_SIZE,
-		start_chunk.y * TileManager.CHUNK_SIZE,
-		width * TileManager.CHUNK_SIZE,
-		height * TileManager.CHUNK_SIZE
+		(start_chunk.x - 1) * TileManager.CHUNK_SIZE,
+		(start_chunk.y - 1) * TileManager.CHUNK_SIZE,
+		(width + 2) * TileManager.CHUNK_SIZE,
+		(height + 2) * TileManager.CHUNK_SIZE
 	)
 	
 	# send tile data
@@ -234,16 +240,21 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 			center_y + VISUAL_RANGE.y
 		)
 	
+	# build water texture
+	TileManager.build_water_texture()
+	
 	# load entities
-	for x in range(width):
-		for y in range(height):
-			EntityManager.load_chunk.rpc_id(1, Vector2i(start_x + x, start_y + y), player.owner_id)
+	EntityManager.load_region.rpc_id(
+		Globals.SERVER_ID,
+		Vector2i(start_x, start_y), width, height,
+		player.owner_id
+	)
 	
 	# this probably isn't a perfect solution, but should allow the server to load entities
 	await get_tree().create_timer(2.0).timeout
 	
 	# send update to server
-	done_loading.rpc_id(1, &'initial-load')
+	done_loading.rpc_id(Globals.SERVER_ID, &'initial-load')
 	await get_tree().create_timer(0.5).timeout
 	
 	set_process(true)
@@ -254,3 +265,4 @@ func done_loading(message: StringName) -> void:
 	if message == &'initial-load':
 		set_process(true)
 		area_loaded.emit()
+		ServerManager.finalized_players[player.owner_id] = true

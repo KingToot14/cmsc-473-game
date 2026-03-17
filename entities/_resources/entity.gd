@@ -8,7 +8,12 @@ signal lost_all_interest()
 signal despawn()
 
 # --- Variables --- #
-const NO_RESPONSE: Dictionary = {}
+const KILL_ACTION := 0
+const PAUSE_ACTION := 1
+const RESUME_ACTION := 2
+
+@export var always_snapshot := true
+@export var interpolator: SnapshotInterpolator
 
 var id := 0
 var registry_id := 0
@@ -16,41 +21,41 @@ var data: Dictionary
 var interested_players: Dictionary[int, bool] = {}
 var interest_count := 0
 
-var current_chunk: Vector2i
+@export var current_chunk: Vector2i
 
 @export var counts_towards_spawn_cap := true
 @export var process_on_client := false
 
-@export var hp_pool: Array[EntityHp]
+@export var hp: EntityHp
 @export var flash_material: ShaderMaterial
 
 @export var knockback_power := 200.0
 
 @export_group("Despawning")
 @export var free_on_despawn := true
-@export var despawn_time := 300.0
+@export var despawn_time := 15.0
 var _despawn_timer := 0.0
+
+var is_dead := false
+var should_free := false
+var should_free_instant := true
+
+@export_group("Combat")
+@export var damage := 25
+@export var defense := 0
 
 # --- Functions --- #
 func _ready() -> void:
-	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	calculate_chunk()
 	
 	_despawn_timer = despawn_time
 	
-	if not process_on_client and not multiplayer.is_server():
+	if not (process_on_client or multiplayer.is_server()):
 		set_process(false)
+		set_physics_process(false)
 
-func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
-	id = new_id
-	registry_id = reg_id
-	data = spawn_data
-	
+func calculate_chunk() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
-	
-	setup_entity()
-	
-	for hp in hp_pool:
-		hp.setup()
 
 func _process(delta: float) -> void:
 	# check despawn
@@ -66,38 +71,39 @@ func _process(delta: float) -> void:
 		return
 	
 	# check chunk boundaries
-	var new_chunk: Vector2i = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+	var prev_chunk: Vector2i = current_chunk
+	calculate_chunk()
 	
-	if new_chunk != current_chunk:
-		EntityManager.move_dynamic_entity(id, current_chunk, new_chunk)
-		
-		current_chunk = new_chunk
+	if prev_chunk != current_chunk:
+		EntityManager.move_dynamic_entity(id, prev_chunk, current_chunk)
 		scan_interest()
-
-func setup_entity() -> void:
-	return
-
-func receive_update(update_data: Dictionary) -> Dictionary:
-	if update_data.get(&'kill'):
-		standard_death()
-	
-	match update_data.get(&'type', &'none'):
-		&'knockback':
-			if multiplayer.is_server():
-				return NO_RESPONSE
-			
-			# apply knockback force
-			velocity += update_data.get(&'force', Vector2.ZERO)
-	
-	return NO_RESPONSE
 
 #region Interest
 func add_interest(player_id: int) -> void:
+	send_process_state(RESUME_ACTION, player_id)
+	
 	interested_players[player_id] = true
+	
+	# send data to player
+	if multiplayer.is_server():
+		if self is TileEntity:
+			EntityManager.load_tile_entity.rpc_id(
+				player_id,
+				id, registry_id,
+				serialize_spawn_data()
+			)
+		else:
+			EntityManager.load_entity.rpc_id(
+				player_id,
+				id, registry_id,
+				serialize_spawn_data()
+			)
 	
 	check_interest()
 
 func remove_interest(player_id: int) -> void:
+	send_process_state(PAUSE_ACTION, player_id)
+	
 	interested_players.erase(player_id)
 	
 	check_interest()
@@ -111,17 +117,23 @@ func check_interest() -> void:
 	
 	interest_changed.emit(interest_count)
 	
+	# update interpolator
+	interpolator.interested_players = interested_players.keys()
+	
 	# check if no players are loading
 	if interest_count == 0:
 		lost_all_interest.emit()
 		_despawn_timer = despawn_time
-	
-	# update interpolator
-	var interpolator: SnapshotInterpolator = get_node_or_null(^'snapshot_interpolator')
-	if interpolator:
-		interpolator.interested_players = interested_players.keys()
+		
+		# stop processing until loaded
+		process_mode = Node.PROCESS_MODE_DISABLED
+	else:
+		# resume processing
+		process_mode = Node.PROCESS_MODE_INHERIT
 
 func scan_interest() -> void:
+	calculate_chunk()
+	
 	var load_range := ChunkLoader.LOAD_RANGE
 	
 	for player_id in ServerManager.connected_players:
@@ -137,6 +149,7 @@ func scan_interest() -> void:
 		
 		# set interested
 		add_interest(player_id)
+		
 		if counts_towards_spawn_cap:
 			player.add_interest(id)
 	
@@ -153,6 +166,76 @@ func check_player(player_id: int) -> bool:
 #endregion
 
 #region Life Cycle
+func send_action_basic(action_id: int) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 4 + 2)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
+	
+	# action id
+	buffer.put_u16(action_id)
+	
+	for player_id in interested_players.keys():
+		if not ServerManager.get_player(player_id):
+			continue
+		
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
+
+func send_kill() -> void:
+	send_action_basic(KILL_ACTION)
+
+func send_process_state(action_id: int, player_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 4 + 2 + 4)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(-1.0)
+	
+	# action id
+	buffer.put_u16(action_id)
+	
+	# player id
+	buffer.put_u32(player_id)
+	
+	if not ServerManager.get_player(player_id):
+		return
+	
+	Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
+
+func kill() -> void:
+	if is_dead:
+		return
+	
+	is_dead = true
+	
+	# remove entity on client
+	if not multiplayer.is_server():
+		EntityManager.erase_entity(self)
+	
+	do_death()
+
+func do_death() -> void:
+	if multiplayer.is_server():
+		# if sending constant snapshots, wait until next snapshot
+		if always_snapshot:
+			should_free = true
+		else:
+			EntityManager.send_update_important(id, KILL_ACTION, should_free_instant)
+			EntityManager.erase_entity(self)
+			queue_free()
+	else:
+		queue_free()
+
 func standard_death() -> void:
 	EntityManager.erase_entity(self)
 	
@@ -164,11 +247,7 @@ func standard_death() -> void:
 	else:
 		queue_free()
 
-func standard_receive_damage(snapshot: Dictionary) -> void:
-	# apply knockback (if not dead)
-	if not snapshot.get(&'entity_dead', false):
-		velocity += snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-	
+func do_flash() -> void:
 	if not flash_material:
 		return
 	
@@ -189,5 +268,127 @@ func interact_with(_tile_position: Vector2i) -> bool:
 
 func break_place(_tile_position: Vector2i) -> bool:
 	return true
+
+func handle_action(action_info: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	var action_id := buffer.get_u16()
+	
+	match action_id:
+		KILL_ACTION:
+			kill()
+		PAUSE_ACTION:
+			var player_id := buffer.get_u32()
+			
+			# only process on requested client
+			if player_id != multiplayer.get_unique_id():
+				return
+			
+			process_mode = Node.PROCESS_MODE_DISABLED
+			interpolator.enabled = false
+			hide()
+		RESUME_ACTION:
+			var player_id := buffer.get_u32()
+			
+			# only process on requested client
+			if player_id != multiplayer.get_unique_id():
+				return
+			
+			process_mode = Node.PROCESS_MODE_INHERIT
+			interpolator.enabled = true
+			show()
+
+#endregion
+
+#region Serialization
+func serialize() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	
+	# reserve space for size
+	buffer.put_u16(0)
+	
+	serialize_base(buffer)
+	serialize_extra(buffer)
+	
+	# prepend size
+	buffer.seek(0)
+	buffer.put_u16(len(buffer.data_array))
+	
+	return buffer.data_array
+
+func serialize_base(buffer: StreamPeerBuffer) -> void:
+	# uint32 (4) + 2 float32 (2 * 4) + 2 float32 (2 * 4) + uint32 (4) + uint8 (1)
+	buffer.resize(len(buffer.data_array) + 4 + (2 * 4) + (2 * 4) + 4)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# position
+	buffer.put_float(global_position.x)
+	buffer.put_float(global_position.y)
+	
+	# velocity
+	buffer.put_float(velocity.x)
+	buffer.put_float(velocity.y)
+	
+	# entity hp
+	if hp:
+		buffer.put_u32(hp.curr_hp)
+	else:
+		buffer.put_u32(0)
+	
+	if is_dead and should_free:
+		EntityManager.send_update_important(id, KILL_ACTION, should_free_instant)
+		EntityManager.erase_entity(self)
+		queue_free()
+
+@warning_ignore("unused_parameter")
+func serialize_extra(buffer: StreamPeerBuffer) -> void:
+	return
+
+func deserialize(buffer: StreamPeerBuffer, server_time: float) -> void:
+	deserialize_base(buffer, server_time)
+	deserialize_extra(buffer, server_time)
+
+func deserialize_base(buffer: StreamPeerBuffer, server_time: float) -> void:
+	# entity position
+	var net_position: Vector2
+	net_position.x = buffer.get_float()
+	net_position.y = buffer.get_float()
+	
+	# entity velocity
+	velocity.x = buffer.get_float()
+	velocity.y = buffer.get_float()
+	
+	# immedietly set position if not sending snapshots or when server_time < 0.0
+	if server_time < 0.0 or not always_snapshot:
+		global_position = net_position
+	else:
+		interpolator.send_snapshot(server_time, {
+			&'position': net_position
+		})
+	
+	# entity hp
+	if hp:
+		hp.curr_hp = buffer.get_u32()
+	else:
+		buffer.get_u32()
+
+@warning_ignore("unused_parameter")
+func deserialize_extra(buffer: StreamPeerBuffer, server_time: float) -> void:
+	return
+
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	
+	# serialize base info
+	serialize_base(buffer)
+	
+	return buffer.data_array
+
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	# deserialize base info
+	deserialize_base(buffer, -1.0)
 
 #endregion

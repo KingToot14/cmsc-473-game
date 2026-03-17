@@ -43,7 +43,9 @@ func attempt_spawn() -> void:
 	
 	# get current spawning player
 	var spawn_player_id: int = spawn_player_queue[spawn_player_index]
-	var spawn_player: PlayerController = ServerManager.connected_players[spawn_player_id]
+	var spawn_player: PlayerController = ServerManager.connected_players.get(spawn_player_id)
+	if not spawn_player:
+		return
 	
 	spawn_player_index = (spawn_player_index + 1) % current_player_count
 	
@@ -131,8 +133,6 @@ func attempt_spawn() -> void:
 		return
 	
 	var spawn_rule: SpawnRule = possible_rules[RandomNumberGenerator.new().rand_weighted(possible_weights)]
-	var entity_id := spawn_rule_ids[spawn_rule]
-	var spawn_data: Dictionary = spawn_rule.spawn_data
 	
 	# get world position
 	for i in range(10):
@@ -158,7 +158,8 @@ func attempt_spawn() -> void:
 		
 		# spawn entity from pool
 		var world_position: Vector2 = TileManager.tile_to_world(tile_origin.x, tile_origin.y)
-		EntityManager.create_entity(entity_id, world_position, spawn_data)
+		
+		spawn_rule.do_spawn(world_position)
 		return
 
 @warning_ignore_restore('confusable_local_declaration')

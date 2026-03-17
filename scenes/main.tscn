@@ -1,18 +1,26 @@
 [gd_scene format=3 uid="uid://c6krrh5wjkitj"]
 
+[ext_resource type="AudioStream" uid="uid://ltqj1clnsf4v" path="res://music/music_tracks.tres" id="1_jkv2x"]
 [ext_resource type="Script" uid="uid://dyaogs04gmmc0" path="res://ui/main_menu/join_ui.gd" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bv73vyepe1qva" path="res://scripts/world_generation/world_generation.gd" id="2_0wfyh"]
+[ext_resource type="Script" uid="uid://dv38b28j7qbqj" path="res://music/music_manager.gd" id="2_jbj1t"]
 [ext_resource type="Texture2D" uid="uid://jt3wdqym51ek" path="res://ui/main_menu/title.png" id="3_85g3d"]
 [ext_resource type="Script" uid="uid://kyyn6cegbkju" path="res://blocks/_resources/world_tile_map.gd" id="3_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://6jr8n5613hvp" path="res://backgrounds/forest/background.png" id="3_tbgi4"]
 [ext_resource type="Texture2D" uid="uid://nxikvjr2q4g3" path="res://ui/main_menu/background_small.png" id="3_ya4ey"]
 [ext_resource type="Texture2D" uid="uid://dl63lmonxwici" path="res://ui/fill_panel.png" id="4_choun"]
 [ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="4_tbgi4"]
-[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://blocks/_resources/walls.tres" id="5_tefeu"]
+[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="5_tefeu"]
 [ext_resource type="Texture2D" uid="uid://vxvnv55mlw25" path="res://ui/main_menu/join_buttons.png" id="5_ya4ey"]
 [ext_resource type="Script" uid="uid://cfefioerjy2v6" path="res://ui/main_menu/previous_connection_button.gd" id="6_eb6dy"]
 [ext_resource type="Script" uid="uid://dtgcrr7uk7csi" path="res://blocks/_resources/server_tile_map.gd" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://bvupsvk0k73i7" path="res://entities/_resources/entity_spawner.gd" id="8_trceg"]
+[ext_resource type="Script" uid="uid://cgxox2tiapsj2" path="res://scripts/multiplayer/entity_synchronizer.gd" id="10_jbj1t"]
+[ext_resource type="Script" uid="uid://d3ecqdqfqil5d" path="res://blocks/_resources/block_updater.gd" id="12_dp3eg"]
+[ext_resource type="Shader" uid="uid://cj52pvtlbjr0s" path="res://backgrounds/sky_shader.gdshader" id="12_muem4"]
+[ext_resource type="Script" uid="uid://cv08nwow2dr3m" path="res://blocks/_resources/water_updater.gd" id="13_0ld40"]
+[ext_resource type="Script" uid="uid://cg1xal70l3w7t" path="res://backgrounds/background_manager.gd" id="14_yc10j"]
+[ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
@@ -26,9 +34,22 @@ region = Rect2(0, 16, 88, 16)
 atlas = ExtResource("5_ya4ey")
 region = Rect2(0, 32, 88, 16)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dp3eg"]
+shader = ExtResource("12_muem4")
+shader_parameter/top_color = Color(0.23921569, 0.5254902, 0.8784314, 1)
+shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
+
 [node name="main" type="Node2D" unique_id=1976494311]
 
+[node name="music_manager" type="AudioStreamPlayer" parent="." unique_id=280225988]
+stream = ExtResource("1_jkv2x")
+bus = &"Music"
+script = ExtResource("2_jbj1t")
+metadata/_custom_type_script = "uid://dv38b28j7qbqj"
+
 [node name="join_ui" type="CanvasLayer" parent="." unique_id=185611908]
+layer = 10
+visible = false
 script = ExtResource("1_o5qli")
 disabled_button = SubResource("AtlasTexture_eb6dy")
 normal_button = SubResource("AtlasTexture_ya4ey")
@@ -64,7 +85,7 @@ grow_horizontal = 2
 pivot_offset = Vector2(104, 44)
 texture = ExtResource("3_85g3d")
 
-[node name="connect_options" type="Control" parent="join_ui" unique_id=32637596]
+[node name="panel_connect" type="Control" parent="join_ui" unique_id=32637596]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -73,7 +94,7 @@ offset_top = 122.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ip_holder" type="Control" parent="join_ui/connect_options" unique_id=1471010576]
+[node name="ip_holder" type="Control" parent="join_ui/panel_connect" unique_id=1471010576]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -84,7 +105,7 @@ offset_right = 49.0
 offset_bottom = 43.0
 grow_horizontal = 2
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/ip_holder" unique_id=644743868]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/ip_holder" unique_id=644743868]
 self_modulate = Color(0.10980392, 0.14117648, 0.30980393, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -98,7 +119,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/ip_holder" unique_id=1023099333]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/ip_holder" unique_id=1023099333]
 self_modulate = Color(0.8901961, 0.8901961, 0.8901961, 1)
 layout_mode = 1
 anchors_preset = 10
@@ -112,7 +133,7 @@ text = "Server IP"
 scroll_active = false
 vertical_alignment = 2
 
-[node name="ip_field" type="LineEdit" parent="join_ui/connect_options/ip_holder" unique_id=1536200266]
+[node name="ip_field" type="LineEdit" parent="join_ui/panel_connect/ip_holder" unique_id=1536200266]
 unique_name_in_owner = true
 self_modulate = Color(0.7921569, 0.8235294, 0.9019608, 1)
 layout_mode = 1
@@ -127,7 +148,7 @@ pivot_offset_ratio = Vector2(0.5, 0.5)
 text = "127.0.0.1"
 flat = true
 
-[node name="underline" type="ColorRect" parent="join_ui/connect_options/ip_holder" unique_id=1885770584]
+[node name="underline" type="ColorRect" parent="join_ui/panel_connect/ip_holder" unique_id=1885770584]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -142,7 +163,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.5176471, 0.5686275, 0.72156864, 1)
 
-[node name="port_holder" type="Control" parent="join_ui/connect_options" unique_id=1740679506]
+[node name="port_holder" type="Control" parent="join_ui/panel_connect" unique_id=1740679506]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -153,7 +174,7 @@ offset_right = 49.0
 offset_bottom = 72.0
 grow_horizontal = 2
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/port_holder" unique_id=118672467]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/port_holder" unique_id=118672467]
 self_modulate = Color(0.10980392, 0.14117648, 0.30980393, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -167,7 +188,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/port_holder" unique_id=2094253596]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/port_holder" unique_id=2094253596]
 self_modulate = Color(0.8901961, 0.8901961, 0.8901961, 1)
 layout_mode = 1
 anchors_preset = 10
@@ -181,7 +202,7 @@ text = "Server Port"
 scroll_active = false
 vertical_alignment = 2
 
-[node name="port_field" type="LineEdit" parent="join_ui/connect_options/port_holder" unique_id=1453252933]
+[node name="port_field" type="LineEdit" parent="join_ui/panel_connect/port_holder" unique_id=1453252933]
 unique_name_in_owner = true
 self_modulate = Color(0.7921569, 0.8235294, 0.9019608, 1)
 layout_mode = 1
@@ -196,7 +217,7 @@ pivot_offset_ratio = Vector2(0.5, 0.5)
 text = "7000"
 flat = true
 
-[node name="underline" type="ColorRect" parent="join_ui/connect_options/port_holder" unique_id=1110112646]
+[node name="underline" type="ColorRect" parent="join_ui/panel_connect/port_holder" unique_id=1110112646]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -211,7 +232,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.5176471, 0.5686275, 0.72156864, 1)
 
-[node name="join_button" type="Button" parent="join_ui/connect_options" unique_id=1992856575]
+[node name="join_button" type="Button" parent="join_ui/panel_connect" unique_id=1992856575]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -226,7 +247,7 @@ offset_bottom = 29.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="button" type="TextureRect" parent="join_ui/connect_options/join_button" unique_id=1820687701]
+[node name="button" type="TextureRect" parent="join_ui/panel_connect/join_button" unique_id=1820687701]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -236,7 +257,7 @@ grow_vertical = 2
 mouse_filter = 2
 texture = SubResource("AtlasTexture_eb6dy")
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/join_button" unique_id=1169902260]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/join_button" unique_id=1169902260]
 self_modulate = Color(0.09803922, 0.5686275, 0.12156863, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -251,7 +272,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="previous_connections" type="Control" parent="join_ui/connect_options" unique_id=208805313]
+[node name="previous_connections" type="Control" parent="join_ui/panel_connect" unique_id=208805313]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -261,7 +282,7 @@ offset_right = 144.0
 offset_bottom = -6.0
 grow_vertical = 2
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections" unique_id=1192228175]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections" unique_id=1192228175]
 self_modulate = Color(0.10980392, 0.14117648, 0.30980393, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -275,7 +296,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections" unique_id=2133535162]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections" unique_id=2133535162]
 self_modulate = Color(0.8901961, 0.8901961, 0.8901961, 1)
 layout_mode = 1
 anchors_preset = 10
@@ -288,7 +309,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection_boxes" type="VBoxContainer" parent="join_ui/connect_options/previous_connections" unique_id=330978801]
+[node name="connection_boxes" type="VBoxContainer" parent="join_ui/panel_connect/previous_connections" unique_id=330978801]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 10
@@ -299,7 +320,7 @@ offset_right = -2.0
 offset_bottom = 132.0
 grow_horizontal = 2
 
-[node name="connection" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=1791580956]
+[node name="connection" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=1791580956]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -366,7 +387,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection" unique_id=830542752]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection" unique_id=830542752]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -380,7 +401,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection/backing" unique_id=1381149975]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection/backing" unique_id=1381149975]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -395,7 +416,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection2" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=486760421]
+[node name="connection2" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=486760421]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -462,7 +483,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection2" unique_id=2071334184]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection2" unique_id=2071334184]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -476,7 +497,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection2/backing" unique_id=2038283896]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection2/backing" unique_id=2038283896]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -491,7 +512,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection3" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=902993470]
+[node name="connection3" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=902993470]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -558,7 +579,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection3" unique_id=1783865929]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection3" unique_id=1783865929]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -572,7 +593,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection3/backing" unique_id=311420965]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection3/backing" unique_id=311420965]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -587,7 +608,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection4" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=1147580802]
+[node name="connection4" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=1147580802]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -654,7 +675,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection4" unique_id=934680453]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection4" unique_id=934680453]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -668,7 +689,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection4/backing" unique_id=593269162]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection4/backing" unique_id=593269162]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -683,7 +704,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection5" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=1483325364]
+[node name="connection5" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=1483325364]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -750,7 +771,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection5" unique_id=550152979]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection5" unique_id=550152979]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -764,7 +785,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection5/backing" unique_id=733775218]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection5/backing" unique_id=733775218]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -779,7 +800,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="connection6" type="BaseButton" parent="join_ui/connect_options/previous_connections/connection_boxes" unique_id=1221687098]
+[node name="connection6" type="BaseButton" parent="join_ui/panel_connect/previous_connections/connection_boxes" unique_id=1221687098]
 unique_name_in_owner = false
 process_mode = 0
 process_priority = 0
@@ -846,7 +867,7 @@ shortcut_feedback = true
 shortcut_in_tooltip = true
 script = ExtResource("6_eb6dy")
 
-[node name="backing" type="NinePatchRect" parent="join_ui/connect_options/previous_connections/connection_boxes/connection6" unique_id=371021390]
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection6" unique_id=371021390]
 self_modulate = Color(0.07058824, 0.09019608, 0.23921569, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -860,7 +881,7 @@ patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
 
-[node name="title" type="RichTextLabel" parent="join_ui/connect_options/previous_connections/connection_boxes/connection6/backing" unique_id=430542286]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_connect/previous_connections/connection_boxes/connection6/backing" unique_id=430542286]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -875,7 +896,7 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="joining_panel" type="Control" parent="join_ui" unique_id=1488995266]
+[node name="panel_join" type="Control" parent="join_ui" unique_id=1488995266]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -888,7 +909,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="backing" type="ColorRect" parent="join_ui/joining_panel" unique_id=378867860]
+[node name="backing" type="ColorRect" parent="join_ui/panel_join" unique_id=378867860]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -904,7 +925,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.10980392, 0.14117648, 0.30980393, 1)
 
-[node name="title" type="RichTextLabel" parent="join_ui/joining_panel/backing" unique_id=1210584413]
+[node name="title" type="RichTextLabel" parent="join_ui/panel_join/backing" unique_id=1210584413]
 self_modulate = Color(0.69411767, 0.72156864, 0.7882353, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -919,6 +940,193 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="panel_login" type="Control" parent="join_ui" unique_id=2145403830]
+visible = false
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -148.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="username_holder" type="Control" parent="join_ui/panel_login" unique_id=1224597080]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -49.0
+offset_top = 29.0
+offset_right = 49.0
+offset_bottom = 43.0
+grow_horizontal = 2
+
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_login/username_holder" unique_id=1070027250]
+self_modulate = Color(0.10980392, 0.14117648, 0.30980393, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_choun")
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+
+[node name="title" type="RichTextLabel" parent="join_ui/panel_login/username_holder" unique_id=1770847592]
+self_modulate = Color(0.8901961, 0.8901961, 0.8901961, 1)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 3.0
+offset_top = -12.0
+offset_right = -3.0
+grow_horizontal = 2
+mouse_filter = 2
+text = "Username"
+scroll_active = false
+vertical_alignment = 2
+
+[node name="username_field" type="LineEdit" parent="join_ui/panel_login/username_holder" unique_id=920804952]
+unique_name_in_owner = true
+self_modulate = Color(0.7921569, 0.8235294, 0.9019608, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_right = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+flat = true
+
+[node name="underline" type="ColorRect" parent="join_ui/panel_login/username_holder" unique_id=77014345]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = -2.0
+offset_right = -3.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.5176471, 0.5686275, 0.72156864, 1)
+
+[node name="password_holder" type="Control" parent="join_ui/panel_login" unique_id=624914596]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -49.0
+offset_top = 58.0
+offset_right = 49.0
+offset_bottom = 72.0
+grow_horizontal = 2
+
+[node name="backing" type="NinePatchRect" parent="join_ui/panel_login/password_holder" unique_id=1494848427]
+self_modulate = Color(0.10980392, 0.14117648, 0.30980393, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_choun")
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+
+[node name="title" type="RichTextLabel" parent="join_ui/panel_login/password_holder" unique_id=2042736744]
+self_modulate = Color(0.8901961, 0.8901961, 0.8901961, 1)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 3.0
+offset_top = -12.0
+offset_right = -3.0
+grow_horizontal = 2
+mouse_filter = 2
+text = "Password"
+scroll_active = false
+vertical_alignment = 2
+
+[node name="password_field" type="LineEdit" parent="join_ui/panel_login/password_holder" unique_id=129763623]
+unique_name_in_owner = true
+self_modulate = Color(0.7921569, 0.8235294, 0.9019608, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_right = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+flat = true
+
+[node name="underline" type="ColorRect" parent="join_ui/panel_login/password_holder" unique_id=1491897469]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = -2.0
+offset_right = -3.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.5176471, 0.5686275, 0.72156864, 1)
+
+[node name="login_button" type="Button" parent="join_ui/panel_login" unique_id=390824996]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -44.0
+offset_top = 13.5
+offset_right = 44.0
+offset_bottom = 29.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="button" type="TextureRect" parent="join_ui/panel_login/login_button" unique_id=536917434]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("AtlasTexture_eb6dy")
+
+[node name="title" type="RichTextLabel" parent="join_ui/panel_login/login_button" unique_id=1952805533]
+self_modulate = Color(0.09803922, 0.5686275, 0.12156863, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "Login"
+scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="world_generation" type="Node" parent="." unique_id=1221375703]
 script = ExtResource("2_0wfyh")
 metadata/_custom_type_script = "uid://bv73vyepe1qva"
@@ -927,83 +1135,233 @@ metadata/_custom_type_script = "uid://bv73vyepe1qva"
 _spawnable_scenes = PackedStringArray("uid://do1dgabbmwjjn")
 spawn_path = NodePath("../players")
 
+[node name="entity_synchronizer" type="Node" parent="." unique_id=1597427544]
+script = ExtResource("10_jbj1t")
+metadata/_custom_type_script = "uid://cgxox2tiapsj2"
+
 [node name="entity_spawner" type="Node" parent="." unique_id=584931145]
 script = ExtResource("8_trceg")
-metadata/_custom_type_script = "uid://bvupsvk0k73i7"
+
+[node name="block_updater" type="Node" parent="." unique_id=1732781882]
+script = ExtResource("12_dp3eg")
+metadata/_custom_type_script = "uid://d3ecqdqfqil5d"
+
+[node name="water_updater" type="Node" parent="." unique_id=1805500223]
+script = ExtResource("13_0ld40")
+metadata/_custom_type_script = "uid://cv08nwow2dr3m"
 
 [node name="players" type="Node2D" parent="." unique_id=1430324138]
 
 [node name="entities" type="Node2D" parent="." unique_id=2069981181]
 
-[node name="background" type="Node2D" parent="." unique_id=1195479764]
+[node name="background_manager" type="Node" parent="." unique_id=200435995 node_paths=PackedStringArray("biome_backgrounds")]
+script = ExtResource("14_yc10j")
+biome_backgrounds = {
+&"forest": NodePath("../background_forest"),
+&"winter": NodePath("../background_snow")
+}
+metadata/_custom_type_script = "uid://cg1xal70l3w7t"
 
-[node name="layer_1" type="Parallax2D" parent="background" unique_id=698714807]
+[node name="background_forest" type="Node2D" parent="." unique_id=1195479764]
+y_sort_enabled = true
+
+[node name="layer_1" type="Parallax2D" parent="background_forest" unique_id=698714807]
+y_sort_enabled = true
 scroll_scale = Vector2(0, 0)
-repeat_size = Vector2(1440, 810)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
 
-[node name="sprite" type="Sprite2D" parent="background/layer_1" unique_id=453390010]
-texture = ExtResource("3_tbgi4")
-vframes = 5
+[node name="sky" type="ColorRect" parent="background_forest/layer_1" unique_id=1189338386]
+material = SubResource("ShaderMaterial_dp3eg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="layer_2" type="Parallax2D" parent="background" unique_id=1081296847]
+[node name="layer_2" type="Parallax2D" parent="background_forest" unique_id=1081296847]
+z_index = 1
+y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
-repeat_size = Vector2(1440, 810)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
 
-[node name="sprite" type="Sprite2D" parent="background/layer_2" unique_id=1183965369]
+[node name="sprite" type="Sprite2D" parent="background_forest/layer_2" unique_id=1183965369]
 texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 1
 
-[node name="layer_3" type="Parallax2D" parent="background" unique_id=694896544]
-scroll_scale = Vector2(0.1, 0)
-repeat_size = Vector2(1440, 810)
+[node name="layer_3" type="Parallax2D" parent="background_forest" unique_id=694896544]
+z_index = 2
+y_sort_enabled = true
+scroll_scale = Vector2(0.075, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
 
-[node name="sprite" type="Sprite2D" parent="background/layer_3" unique_id=2072890722]
+[node name="sprite" type="Sprite2D" parent="background_forest/layer_3" unique_id=2072890722]
 texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 2
 
-[node name="fog" type="ColorRect" parent="background/layer_3" unique_id=1327032755]
+[node name="fog" type="ColorRect" parent="background_forest/layer_3" unique_id=1327032755]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -720.0
-offset_top = -405.0
-offset_right = 720.0
-offset_bottom = 405.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.23921569, 0.5254902, 0.8784314, 0.47058824)
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
-[node name="layer_4" type="Parallax2D" parent="background" unique_id=878093720]
-scroll_scale = Vector2(0.2, 0)
-repeat_size = Vector2(1440, 810)
+[node name="layer_4" type="Parallax2D" parent="background_forest" unique_id=878093720]
+z_index = 3
+y_sort_enabled = true
+scroll_scale = Vector2(0.125, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
 
-[node name="sprite" type="Sprite2D" parent="background/layer_4" unique_id=124492712]
+[node name="sprite" type="Sprite2D" parent="background_forest/layer_4" unique_id=124492712]
 texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 3
 
-[node name="fog" type="ColorRect" parent="background/layer_4" unique_id=358934040]
+[node name="fog" type="ColorRect" parent="background_forest/layer_4" unique_id=358934040]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -720.0
-offset_top = -405.0
-offset_right = 720.0
-offset_bottom = 405.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.23921569, 0.5254902, 0.8784314, 0.23529412)
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
-[node name="layer_5" type="Parallax2D" parent="background" unique_id=809503557]
-scroll_scale = Vector2(0.4, 0)
-repeat_size = Vector2(1440, 810)
+[node name="layer_5" type="Parallax2D" parent="background_forest" unique_id=809503557]
+z_index = 4
+y_sort_enabled = true
+scroll_scale = Vector2(0.2, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
 
-[node name="sprite" type="Sprite2D" parent="background/layer_5" unique_id=1459122372]
+[node name="sprite" type="Sprite2D" parent="background_forest/layer_5" unique_id=1459122372]
 texture = ExtResource("3_tbgi4")
+vframes = 5
+frame = 4
+
+[node name="background_snow" type="Node2D" parent="." unique_id=1299967546]
+visible = false
+y_sort_enabled = true
+
+[node name="layer_1" type="Parallax2D" parent="background_snow" unique_id=392378770]
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sky" type="ColorRect" parent="background_snow/layer_1" unique_id=35379983]
+material = SubResource("ShaderMaterial_dp3eg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="layer_2" type="Parallax2D" parent="background_snow" unique_id=2146955307]
+z_index = 1
+y_sort_enabled = true
+scroll_scale = Vector2(0.05, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_snow/layer_2" unique_id=2042684971]
+texture = ExtResource("16_gqmmt")
+vframes = 5
+frame = 1
+
+[node name="layer_3" type="Parallax2D" parent="background_snow" unique_id=53369859]
+z_index = 2
+y_sort_enabled = true
+scroll_scale = Vector2(0.075, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_snow/layer_3" unique_id=855758219]
+texture = ExtResource("16_gqmmt")
+vframes = 5
+frame = 2
+
+[node name="fog" type="ColorRect" parent="background_snow/layer_3" unique_id=571784365]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
+
+[node name="layer_4" type="Parallax2D" parent="background_snow" unique_id=878408690]
+z_index = 3
+y_sort_enabled = true
+scroll_scale = Vector2(0.125, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_snow/layer_4" unique_id=897259032]
+texture = ExtResource("16_gqmmt")
+vframes = 5
+frame = 3
+
+[node name="fog" type="ColorRect" parent="background_snow/layer_4" unique_id=835599939]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
+
+[node name="layer_5" type="Parallax2D" parent="background_snow" unique_id=174230143]
+z_index = 4
+y_sort_enabled = true
+scroll_scale = Vector2(0.2, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_snow/layer_5" unique_id=1708572742]
+texture = ExtResource("16_gqmmt")
 vframes = 5
 frame = 4
 
@@ -1021,6 +1379,7 @@ z_index = 10
 tile_set = ExtResource("5_tefeu")
 occlusion_enabled = false
 rendering_quadrant_size = 8
+collision_enabled = false
 navigation_enabled = false
 
 [node name="blocks" type="TileMapLayer" parent="world_tiles" unique_id=592496937]
@@ -1030,4 +1389,5 @@ occlusion_enabled = false
 rendering_quadrant_size = 8
 navigation_enabled = false
 
-[connection signal="pressed" from="join_ui/connect_options/join_button" to="join_ui" method="create_client"]
+[connection signal="pressed" from="join_ui/panel_connect/join_button" to="join_ui" method="create_client"]
+[connection signal="pressed" from="join_ui/panel_login/login_button" to="join_ui" method="login_button_pressed"]

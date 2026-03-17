@@ -23,6 +23,8 @@ var restricted_tiles: Array[int] = []
 
 var size_decay := 1.0
 
+var requires_solid_below := false
+
 # --- Functions --- #
 func _init(new_size: float, new_steps: float, x: int, y: int, tile_id: int) -> void:
 	initialize(new_size, new_steps, x, y, tile_id)
@@ -64,6 +66,11 @@ func set_size_decay(decay: float) -> TileRunner:
 	
 	return self
 
+func set_requires_solid_below(value: bool) -> TileRunner:
+	requires_solid_below = value
+	
+	return self
+
 func start(gen: WorldGeneration) -> void:
 	# randomize direction
 	if direction == Vector2.ZERO:
@@ -83,8 +90,8 @@ func start(gen: WorldGeneration) -> void:
 		# calculate bounding box
 		var start_x := clampi(floori(position.x - curr_size / 2.0), 0, world_size.x)
 		var end_x := clampi(floori(position.x + curr_size / 2.0), 0, world_size.x)
-		var start_y := clampi(floori(position.y - curr_size / 2.0), 0, world_size.y)
-		var end_y := clampi(floori(position.y + curr_size / 2.0), 0, world_size.y)
+		var start_y := clampi(floori(position.y - curr_size / 2.0), 0, world_size.y - 1)
+		var end_y := clampi(floori(position.y + curr_size / 2.0), 0, world_size.y - 1)
 		
 		# replace tiles
 		for y in range(start_y, end_y):
@@ -107,6 +114,10 @@ func start(gen: WorldGeneration) -> void:
 				if not (replace_mode & ReplaceMode.ADD_NEW) and block == 0:
 					continue
 				if not (replace_mode & ReplaceMode.REPLACE) and block != 0:
+					continue
+				
+				# check tile below
+				if requires_solid_below and TileManager.get_block_unsafe(x, y + 1) == 0:
 					continue
 				
 				TileManager.set_block_unsafe(x, y, replace_tile)

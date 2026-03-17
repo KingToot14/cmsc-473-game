@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ci2nyvb3i2om7"
+path="res://.godot/imported/Surface Track.ogg-fa57b90898e9c573a88413db192b4b1f.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/forest/Surface Track.ogg"
+dest_files=["res://.godot/imported/Surface Track.ogg-fa57b90898e9c573a88413db192b4b1f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

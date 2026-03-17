@@ -2,46 +2,60 @@ extends Node
 
 # --- Signals --- #
 signal server_started()
+signal players_changed()
 
 # --- Variables --- # 
 const DEFAULT_PORT = 7000
 
 var connected_players: Dictionary[int, PlayerController] = {}
+var finalized_players: Dictionary[int, bool] = {}
 
 # --- Functions --- #
 func _ready() -> void:
 	var args := Globals.parse_arguments()
 	
+	await get_tree().process_frame
+	
 	if OS.has_feature('dedicated_server') or args.get('server', false):
 		# disable ui for servers
-		get_tree().current_scene.get_node(^'join_ui').hide()
+		Globals.join_ui.hide()
 		
 		# get seed
 		var world_gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
 		var world_seed = args.get('seed', randi())
 		
 		# world generation flags
-		var world_name: String = args.get('world_name', '')
+		var world_name: String = args.get('world-name', '')
 		var delete_mode: bool = args.get('delete', false)
+		var world_loaded := false
+		
+		Globals.world_name = world_name
 		
 		# TODO: Add world loading + deletion
 		if not world_name.strip_edges().is_empty():
 			if delete_mode:
 				print("[Wizbowo's Conquest] Deleting world '%s' (Not implemented)" % world_name)
+				
+				if FileAccess.file_exists("user://world/%s" % world_name):
+					OS.move_to_trash(ProjectSettings.globalize_path("user://world/%s" % world_name))
+				
 				get_tree().quit()
 				return
 			else:
 				print("[Wizbowo's Conquest] Loading world '%s' (Not implemented)" % world_name)
-				get_tree().quit()
-				return
+				world_loaded = TileManager.load_world()
 		elif delete_mode:
 			printerr("[Wizbowo's Conquest] Must specify world name to delete")
 			get_tree().quit()
 			return
+		else:
+			push_warning("[Wizbowo's Conquest] WARNING: No world_name specified, this world will
+				NOT be saved")
 		
 		# start world generation
-		world_gen.set_seed(world_seed)
-		await world_gen.generate_world()
+		if not world_loaded:
+			world_gen.set_seed(world_seed)
+			await world_gen.generate_world()
 		
 		# load initial spawn tilemap
 		print("[Wizbowo's Conquest] Loading Spawn Area Collision")
@@ -71,7 +85,7 @@ func _ready() -> void:
 		
 		start_server(port, max_connections)
 	else:
-		get_tree().current_scene.get_node(^'join_ui').show()
+		Globals.join_ui.show()
 
 #region Server Connections
 func start_server(port := DEFAULT_PORT, max_connections := 32) -> Error:
@@ -106,17 +120,46 @@ func join_server(ip_address := '127.0.0.1', port := 7000) -> Error:
 		return error
 	
 	# set multiplayer
+	multiplayer.peer_connected.connect(_on_player_connect)
 	multiplayer.peer_disconnected.connect(_on_player_disconnect)
 	multiplayer.multiplayer_peer = peer
 	
 	return Error.OK
 
 func _on_player_connect(id: int) -> void:
-	if not multiplayer.is_server():
-		return
+	if multiplayer.is_server():
+		print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
+		
+		# send world size
+		set_world_params.rpc_id(id, Globals.world_size)
+	# show login page
+	else:
+		Globals.join_ui.set_active_panel("panel_login")
+
+func _on_player_disconnect(id: int) -> void:
+	var player = get_tree().current_scene.get_node('players/player_%s' % id)
+	connected_players.erase(id)
 	
-	print("[Wizbowo's Conquest] Client '%s' has joined the server" % id)
+	if player:
+		player.queue_free()
 	
+	players_changed.emit()
+	
+	if multiplayer.is_server():
+		print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
+
+#endregion
+
+#region Setting Up World
+@rpc('authority', 'call_remote', 'reliable')
+func set_world_params(world_size: Vector2i) -> void:
+	Globals.world_size = world_size
+
+#endregion
+
+#region Player Management
+@rpc('any_peer', 'call_remote', 'reliable')
+func create_player(id: int) -> void:
 	# wait for world generation
 	var gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
 	if gen.generating:
@@ -135,28 +178,29 @@ func _on_player_connect(id: int) -> void:
 	
 	get_tree().current_scene.get_node(^'players').add_child(player)
 	
-	# send world size
-	set_world_params.rpc_id(id, Globals.world_size)
+	players_changed.emit()
 	
 	# send data
 	await get_tree().process_frame
 	player.get_node(^'chunk_loader').send_whole_area()
 
-func _on_player_disconnect(id: int) -> void:
-	var player = get_tree().current_scene.get_node('players/player_%s' % id)
-	connected_players.erase(id)
+func get_player(player_id: int, must_be_finalized := true) -> PlayerController:
+	if not is_instance_valid(connected_players.get(player_id)):
+		connected_players.erase(player_id)
+		finalized_players.erase(player_id)
+		return null
 	
-	if player:
-		player.queue_free()
+	if must_be_finalized and finalized_players.get(player_id, false):
+		return null
 	
-	if multiplayer.is_server():
-		print("[Wizbowo's Conquest] Client '%s' has left the server" % id)
+	return connected_players[player_id]
 
-#endregion
-
-#region Setting Up World
-@rpc('authority', 'call_remote', 'reliable')
-func set_world_params(world_size: Vector2i) -> void:
-	Globals.world_size = world_size
+func is_player_finalized(player_id: int) -> bool:
+	if not is_instance_valid(connected_players.get(player_id)):
+		connected_players.erase(player_id)
+		finalized_players.erase(player_id)
+		return false
+	
+	return finalized_players.get(player_id, false)
 
 #endregion

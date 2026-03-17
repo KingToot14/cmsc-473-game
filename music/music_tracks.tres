@@ -1,0 +1,53 @@
+[gd_resource type="AudioStreamInteractive" format=3 uid="uid://ltqj1clnsf4v"]
+
+[ext_resource type="AudioStream" uid="uid://bjga54ic27cyx" path="res://music/menus/title.ogg" id="1_mx5f5"]
+[ext_resource type="AudioStream" uid="uid://c4nnwnnkh42cp" path="res://music/forest/forest_day_1.ogg" id="2_nyelv"]
+[ext_resource type="AudioStream" uid="uid://cfsnc5jph1ero" path="res://music/forest/Day 4.ogg" id="3_fv61n"]
+[ext_resource type="AudioStream" uid="uid://dm4vjmnpnhrup" path="res://music/forest/forest_day_2.ogg" id="3_qwonx"]
+[ext_resource type="AudioStream" uid="uid://cu2n2epckmx3w" path="res://music/forest/Forest in the Day.ogg" id="4_2eu7h"]
+[ext_resource type="AudioStream" uid="uid://cc8njp2f3jypt" path="res://music/winter/winter_day_1.ogg" id="4_c42op"]
+[ext_resource type="AudioStream" uid="uid://chtl36vn5bmf6" path="res://music/winter/winter_day_2.ogg" id="5_0lotu"]
+[ext_resource type="AudioStream" uid="uid://cju2wa8tckd0c" path="res://music/forest/Day Overworld.ogg" id="6_nyelv"]
+[ext_resource type="AudioStream" uid="uid://ci2nyvb3i2om7" path="res://music/forest/Surface Track.ogg" id="7_0lotu"]
+[ext_resource type="AudioStream" uid="uid://c7ymwcuue8ukx" path="res://music/forest/Night Track.ogg" id="8_cdg3t"]
+[ext_resource type="AudioStream" uid="uid://rfja7l0kn5eo" path="res://music/forest/Grass in The Night 1.ogg" id="9_fv61n"]
+[ext_resource type="AudioStream" uid="uid://o5rlr7cehmqb" path="res://music/forest/Day 5.ogg" id="10_cdg3t"]
+
+[resource]
+clip_count = 12
+clip_0/name = &"Title"
+clip_0/stream = ExtResource("1_mx5f5")
+clip_0/auto_advance = 0
+clip_1/name = &"Forest Day 2"
+clip_1/stream = ExtResource("3_qwonx")
+clip_1/auto_advance = 0
+clip_2/name = &"Winter Day 1"
+clip_2/stream = ExtResource("4_c42op")
+clip_2/auto_advance = 0
+clip_3/name = &"Winter Day 2"
+clip_3/stream = ExtResource("5_0lotu")
+clip_3/auto_advance = 0
+clip_4/name = &"Forest Day 1"
+clip_4/stream = ExtResource("2_nyelv")
+clip_4/auto_advance = 0
+clip_5/name = &"Day Overworld"
+clip_5/stream = ExtResource("6_nyelv")
+clip_5/auto_advance = 0
+clip_6/name = &"Surface Track"
+clip_6/stream = ExtResource("7_0lotu")
+clip_6/auto_advance = 0
+clip_7/name = &"Night Track"
+clip_7/stream = ExtResource("8_cdg3t")
+clip_7/auto_advance = 0
+clip_8/name = &"Grass In The Night 1"
+clip_8/stream = ExtResource("9_fv61n")
+clip_8/auto_advance = 0
+clip_9/name = &"Day 5"
+clip_9/stream = ExtResource("10_cdg3t")
+clip_9/auto_advance = 0
+clip_10/name = &"Day 4"
+clip_10/stream = ExtResource("3_fv61n")
+clip_10/auto_advance = 0
+clip_11/name = &"Forest In The Day"
+clip_11/stream = ExtResource("4_2eu7h")
+clip_11/auto_advance = 0
