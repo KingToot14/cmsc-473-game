@@ -29,9 +29,28 @@ const CONNECTION_MAP = {
 
 var chunk_states: Dictionary[Vector2i, UpdateState] = {}
 
+var queued_chunks: Dictionary[Vector2i, bool] = {}
+
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_map = self
+	
+	ServerManager.server_started.connect(func(): set_process(not multiplayer.is_server()))
+
+func _process(_delta: float) -> void:
+	if len(queued_chunks) > 0:
+		var chunks := queued_chunks.keys()
+		
+		for chunk in chunks:
+			if chunk_states.get(chunk, UpdateState.UNLOADED) == UpdateState.DIRTY:
+				autotile_region(
+					chunk.x * TileManager.CHUNK_SIZE - 1,
+					chunk.y * TileManager.CHUNK_SIZE - 1,
+					TileManager.CHUNK_SIZE + 2,
+					TileManager.CHUNK_SIZE + 2
+				)
+				
+				queued_chunks.erase(chunk)
 
 #region Tile Management
 func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
@@ -122,7 +141,7 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 		prev = curr
 		curr = next
 		next = TileManager.get_visual_row(start_x - 1, start_y + y + 2, width + 2)
-
+	
 	# apply tiles
 	var blocks: TileMapLayer = $'blocks'
 	var walls: TileMapLayer = $'walls'

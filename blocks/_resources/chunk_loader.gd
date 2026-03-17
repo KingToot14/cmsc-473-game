@@ -30,8 +30,14 @@ func _process(_delta: float) -> void:
 	var new_chunk = TileManager.world_to_chunk(floori(player.position.x), floori(player.position.y))
 	
 	var diff: Vector2i = new_chunk - current_chunk
-	if abs(diff.x) + abs(diff.y) >= 1:
+	var size := absi(diff.x) + absi(diff.y)
+	
+	if size >= 1:
 		current_chunk = new_chunk
+		
+		# don't process overly large boundary jumps
+		if size > 4:
+			return
 		
 		if not multiplayer.is_server() and player.owner_id == multiplayer.get_unique_id():
 			BiomeManager.check_biome(player.global_position)
@@ -118,7 +124,11 @@ func autotile_boundary(boundary: Vector2i) -> void:
 	elif boundary.y > 0:
 		start_chunk.y = end_chunk.y - boundary.y
 	
-	autotile_region(start_chunk.x, start_chunk.y, end_chunk.x, end_chunk.y)
+	for x in range(start_chunk.x, end_chunk.x):
+		for y in range(start_chunk.y, end_chunk.y):
+			Globals.world_map.queued_chunks[Vector2i(x, y)] = true
+	
+	#autotile_region(start_chunk.x, start_chunk.y, end_chunk.x, end_chunk.y)
 
 func unload_boundary(boundary: Vector2i) -> void:
 	var start_chunk := current_chunk - UNLOAD_RANGE
@@ -169,7 +179,7 @@ func autotile_region(start_x: int, start_y: int, end_x: int, end_y: int) -> void
 	for y in range(start_y, end_y):
 		for x in range(start_x, end_x):
 			var state = Globals.world_map.chunk_states.get(Vector2i(x, y), WorldTileMap.UpdateState.UNLOADED)
-			if state == WorldTileMap.UpdateState.DIRTY:
+			if state != WorldTileMap.UpdateState.TILED:
 				dirty_chunks.append(Vector2i(x, y))
 	
 	# sort chunks by distance

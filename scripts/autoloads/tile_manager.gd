@@ -997,6 +997,8 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 	var dirty_width := 0
 	var dirty_height := 0
 	
+	var dirty_chunks: Dictionary[Vector2i, bool] = {}
+	
 	for y in range(height):
 		for x in range(width):
 			var tile := data[x + y * width]
@@ -1015,10 +1017,10 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			
 			# set chunk as dirty
 			@warning_ignore('integer_division')
-			Globals.world_map.chunk_states[Vector2i(
+			dirty_chunks[Vector2i(
 				(start_x + x) / CHUNK_SIZE,
 				(start_y + y) / CHUNK_SIZE
-			)] = WorldTileMap.UpdateState.DIRTY
+			)] = true
 			
 			# update water texture
 			update_water_texture(start_x + x, start_y + y, false)
@@ -1028,6 +1030,10 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 		if processed >= 128:
 			processed = 0
 			await get_tree().process_frame
+	
+	# set chunk state
+	for chunk in dirty_chunks:
+		Globals.world_map.chunk_states[chunk] = WorldTileMap.UpdateState.DIRTY
 	
 	# push water update all at once
 	push_water_texture_update()
