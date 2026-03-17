@@ -40,6 +40,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if len(queued_chunks) > 0:
 		var chunks := queued_chunks.keys()
+		var start := Time.get_ticks_usec()
 		
 		for chunk in chunks:
 			if chunk_states.get(chunk, UpdateState.UNLOADED) == UpdateState.DIRTY:
@@ -51,6 +52,10 @@ func _process(_delta: float) -> void:
 				)
 				
 				queued_chunks.erase(chunk)
+				
+				# only process for up to 4ms
+				if Time.get_ticks_usec() - start >= 4000:
+					break
 
 #region Tile Management
 func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
@@ -69,6 +74,8 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	
 	if width <= 0 or height <= 0:
 		return
+	
+	print(start_x, " | ", start_y, " | ", width, " | ", height)
 	
 	var prev: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y - 1, width + 2)
 	var curr: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y + 0, width + 2)
@@ -215,6 +222,8 @@ func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 			if processed == 256:
 				await get_tree().process_frame
 				processed = 0
+	
+	print(blocks.get_used_rect())
 
 func update_tile(x: int, y: int) -> void:
 	var blocks: TileMapLayer = $'blocks'

@@ -926,8 +926,21 @@ func send_tile_update(x: int, y: int) -> void:
 	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue
+		
+		var start := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		
+		if x < start.x or x > end.x:
+			continue
+		
+		if y < start.y or y > end.y:
+			continue
+		
+		receive_tile_state.rpc_id(player_id, x, y, tiles[_idx(x, y)])
 
 #endregion
 
