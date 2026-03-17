@@ -163,8 +163,7 @@ func interact_with_slot(index: int) -> void:
 	inventory_updated.emit()
 	
 ## Drops the currently held item at the specified world position.
-# Inside inventory.gd
-
+## Inside inventory.gd
 func drop_held_item(drop_position: Vector2) -> void:
 	print("Test 1: Entering drop_held_item function")
 	if held_item.is_empty():
@@ -194,7 +193,10 @@ func drop_held_item(drop_position: Vector2) -> void:
 func send_drop_item(drop_position: Vector2) -> void:
 	#ensure the drop position is within a reasonable distance of the player
 	print("Server Test: Received RPC request from peer: ", multiplayer.get_remote_sender_id())
+	
 	var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	print(drop_position, " | ", player.global_position)
+	
 	if is_instance_valid(player) and drop_position.distance_to(player.global_position) < 500:
 		drop_held_item(drop_position)
 	else:

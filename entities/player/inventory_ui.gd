@@ -24,9 +24,16 @@ var hovered_slot := -1
 # Inside inventory_ui.gd
 
 func _input(event: InputEvent) -> void:
+	# check for hotbar inputs
+	for i in range(len(HOTBAR_INPUTS)):
+		if event.is_action_pressed(HOTBAR_INPUTS[i]):
+			# set i'th hotbar slot to be selected
+			hotbar_grid.get_child(i).set_selected(true)
+			return
+	
 	if event.is_action_pressed(&"drop_item"):
 		if holding_item and visible and hovered_slot == -1:
-			var drop_pos = get_global_mouse_position()
+			var drop_pos = Globals.player.get_global_mouse_position()
 			
 			# Check if the player exists before calling the inventory
 			if Globals.player:
