@@ -41,14 +41,14 @@ var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FO
 var water_texture := ImageTexture.create_from_image(water_image)
 var water_origin: Vector2
 
-const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * CHUNK_SIZE
-const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * CHUNK_SIZE
+const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
+const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * 16
 
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_size_changed.connect(_update_world_size)
 	_update_world_size(Globals.world_size)
-	 
+	
 	water_image.fill(Color.BLACK)
 
 func _update_world_size(size: Vector2i) -> void:
@@ -390,11 +390,8 @@ func update_water_texture(x: int, y: int, update := true) -> void:
 	
 	# update data
 	var data: PackedByteArray = water_image.data['data']
-	var water_level := (tiles[y * world_width + x] >> 20) & MASK_EIGHT
-	
-	# update data
-	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = water_level
-	
+	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = \
+		(tiles[y * world_width + x] >> 20) & MASK_EIGHT
 	# update image and texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
 	water_texture.update(water_image)
@@ -432,9 +429,7 @@ func receive_water_update(water_data: PackedByteArray) -> void:
 		var water_level := buffer.get_u8()
 		
 		set_water_level(tile_x, tile_y, water_level)
-		update_water_texture(tile_x, tile_y, false)
-	
-	push_water_texture_update()
+		update_water_texture(tile_x, tile_y)
 
 #endregion
 
@@ -711,16 +706,26 @@ func send_destroy_block(x: int, y: int) -> void:
 	# TODO: Deal gradual damage rather than instantly destroying
 	var player_id := multiplayer.get_remote_sender_id()
 	
-	var block_id := get_block(x, y) # should grab the block id 
-	var block_info := BlockDatabase.get_block(block_id)
+	var block_id = get_block(x, y) #should grab the block id 
+	if block_id == 1 or block_id == 2: #if the block is dirt or grass
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for tile 
+			ItemDropEntity.spawn_preferred(drop_position, 3, 1, player_id)
+				
+	if block_id == 3: #if the block is stone.
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for tile 
+			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
+			
+	if block_id == 6: # Snow
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 12, 1, player_id)
 	
-	if block_info.custom_break_logic:
-		# add custom logic here when necessary
-		pass
-	else:
-		# generic drop logic based on break_item_id
-		var drop_position = tile_to_world(x,y) # grabs position for tile 
-		ItemDropEntity.spawn_preferred(drop_position, block_info.break_item_id, 1, player_id)
+	if block_id == 7: # Ice
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
 	
 	# set block
 	set_block_unsafe(x, y, 0)
@@ -752,18 +757,11 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
-	var player_id := multiplayer.get_remote_sender_id()
-	
-	var wall_id := get_wall(x, y)
-	var wall_info := BlockDatabase.get_wall(wall_id)
-	
-	if wall_info.custom_break_logic:
-		# add custom logic here when necessary
-		pass
-	else:
-		# generic drop logic based on break_item_id
-		var drop_position = tile_to_world(x,y) # grabs position for tile 
-		ItemDropEntity.spawn_preferred(drop_position, wall_info.break_item_id, 1, player_id)
+	var wall_id = get_wall(x,y)
+	if wall_id == 1: #if the wall is dirt wall
+		if multiplayer.is_server(): 
+			var drop_position = tile_to_world(x,y) #grabs position for wall 
+			ItemDropEntity.spawn(drop_position, 5, 1)
 	
 	# set tile to air
 	set_wall_unsafe(x, y, 0)
