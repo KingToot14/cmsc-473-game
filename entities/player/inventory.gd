@@ -233,6 +233,7 @@ func load_inventory() -> void:
 	add_item(3, 30)		# dirt blocks
 	add_item(14, 30)	# sand
 	add_item(15, 30)	# clay
+	add_item(11, 10)	# acorns
 
 #endregion
 
@@ -288,6 +289,8 @@ func receive_inventory(inventory_data: PackedByteArray) -> void:
 #region Selected Item
 func get_selected_item() -> ItemStack:
 	# TODO: Check item held by mouse
+	if held_item.item_id != -1:
+		return held_item
 	
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]

@@ -20,6 +20,17 @@ enum TileType {
 # --- Functions --- #
 #region Interaction
 func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# set placement preview
+	match tile_type:
+		TileType.BLOCK:
+			pass
+		TileType.WALL:
+			pass
+		TileType.TILE:
+			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry[tile_id]
+			
+			entity_info.setup_placement_preview(mouse_position)
+	
 	# only autoswing when enabled
 	if not autoswing:
 		return
@@ -43,6 +54,14 @@ func handle_interact_mouse_press(player: PlayerController, mouse_position: Vecto
 	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 	
 	place_block(player, mouse_position)
+
+func handle_selected_start() -> void:
+	Globals.mouse.placement_preview.show()
+
+func handle_selected_end() -> void:
+	mouse_pressed = false
+	
+	Globals.mouse.placement_preview.hide()
 
 #endregion
 
@@ -90,8 +109,6 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
 	item_object.get_node(^'sprite').texture = texture
 	
-	do_swing(player, mouse_position, item_object)
-	
 	# attempt to place block
 	match tile_type:
 		TileType.BLOCK:
@@ -100,11 +117,37 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+			
 		TileType.WALL:
 			if TileManager.place_wall(tile_position.x, tile_position.y, item_id):
 				# decrement item TODO: check held item first
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+			
 		TileType.TILE:
-			print("TILE ENTITIES NOT IMPLEMENTED YET")
+			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry.get(tile_id)
+			
+			if entity_info and entity_info.entity_script.is_placement_valid(tile_position):
+				# adjusted position
+				var adjusted_pos := mouse_position + entity_info.preview_position_offset
+				var adjusted_tile := TileManager.world_to_tile(
+					floori(adjusted_pos.x),
+					floori(adjusted_pos.y)
+				)
+				
+				# create entity
+				EntityManager.create_tile_entity.rpc_id(Globals.SERVER_ID, tile_id, adjusted_tile)
+				
+				# decrement item TODO: check held item first
+				var hotbar_slot: int = player.my_inventory.hotbar_slot
+				
+				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+	
+	do_swing(player, mouse_position, item_object)

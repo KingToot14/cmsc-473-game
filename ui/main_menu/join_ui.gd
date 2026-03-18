@@ -202,14 +202,18 @@ func login_button_pressed() -> void:
 	var username: String = %'username_field'.text.strip_edges()
 	var password: String = %'password_field'.text.strip_edges()
 
-	if username.is_empty() or password.is_empty():
-		print("[Login] Username or password empty")
-	return
+	#if username.is_empty() or password.is_empty():
+		#print("[Login] Username or password empty")
+		#return
+#
+	#print("[Login] Sending login request to server...")
 
-	print("[Login] Sending login request to server...")
-
-	DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
-	pass
+	#DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
+	
+	# TODO: We'll eventually want to move this line to somewhere in the login function so
+	# the server has the final decision on whether or not to load the player
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+	set_active_panel("panel_join")
 	
 	# TODO (Abby): Verify username and password combo in database
 func _on_login_result(player_id: int) -> void:
@@ -251,8 +255,3 @@ func _on_create_account_result(player_id: int) -> void:
 	pass
 	
 	%'username_field'.text
-	
-	# TODO: We'll eventually want to move this line to somewhere in the login function so
-	# the server has the final decision on whether or not to load the player
-	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
-	set_active_panel("panel_join")

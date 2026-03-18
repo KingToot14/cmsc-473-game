@@ -20,6 +20,9 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> 
 	var entity_dir := DirAccess.open(root_dir)
 	
 	for dir_name in entity_dir.get_directories():
+		if dir_name.begins_with('_'):
+			continue
+		
 		var id_str := dir_name.split('_')[0]
 		
 		if not id_str.is_valid_int():
@@ -156,6 +159,15 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	# make sure the instance is aware of any nearby players
 	entity.scan_interest()
 
+@rpc('any_peer', 'call_remote', 'reliable')
+func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
+	var info: EntityInfo = tile_entity_registry.get(entity_id)
+	
+	if not info:
+		return
+	
+	info.entity_script.create(tile_pos)
+
 #endregion
 
 #region Data Persistence
@@ -182,6 +194,7 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	anchored_entities[chunk].append(entity.id)
 	
 	# attempt to load instantly
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
 	# if no entities exist, just store data for now
