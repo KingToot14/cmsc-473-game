@@ -201,6 +201,11 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	if entity.interest_count == 0:
 		entity.queue_free()
 	else:
+		# make sure entity is setup
+		var buffer := StreamPeerBuffer.new()
+		buffer.data_array = ref.spawn_data
+		entity.deserialize_spawn_data(buffer)
+		
 		ref.current_instance = entity
 		
 		for player_id in entity.interested_players:
@@ -228,9 +233,6 @@ func get_persistent_entities() -> PackedByteArray:
 	# header (chunk count)
 	buffer.put_u32(len(anchored_entities.keys()))
 	
-	print("Chunks: ", len(anchored_entities.keys()))
-	var entities := 0
-	
 	# entity data
 	for chunk: Vector2i in anchored_entities:
 		var id_list: Array = Array(anchored_entities[chunk])
@@ -247,8 +249,6 @@ func get_persistent_entities() -> PackedByteArray:
 		
 		# entity count
 		buffer.put_u16(len(persistent_ids))
-		
-		entities += len(persistent_ids)
 		
 		# chunk position
 		buffer.put_u16(chunk.x)
@@ -276,23 +276,16 @@ func get_persistent_entities() -> PackedByteArray:
 			# data
 			buffer.put_data(spawn_data)
 	
-	print("Entities: ", entities)
-	
 	return buffer.data_array
 
 func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
 	# header
 	var chunk_count := buffer.get_u32()
 	
-	print("Chunks: ", chunk_count)
-	var entities := 0
-	
 	# loop through each chunk
 	for i in range(chunk_count):
 		# entity count
 		var entity_count := buffer.get_u16()
-		
-		entities += entity_count
 		
 		# chunk position
 		var chunk_x := buffer.get_u16()
@@ -333,8 +326,6 @@ func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
 				anchored_entities[chunk] = []
 			
 			anchored_entities[chunk].append(id)
-	
-	print("Entities: ", entities)
 
 #endregion
 

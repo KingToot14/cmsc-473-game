@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("2_xft6i")
+tool_type = 1
 force_towards_mouse = true
 use_speed = 0.6
 default_swing_object = ExtResource("1_u0flk")

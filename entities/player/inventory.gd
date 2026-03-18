@@ -216,9 +216,12 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 		
 		if diff <= 0:
 			stack.item_id = -1
-			count = abs(diff)
-		else:
-			count = 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_remove_item_at.rpc_id(Globals.SERVER_ID, item_id, count, slot)
 	
 	inventory_updated.emit()
 
@@ -245,6 +248,10 @@ func send_add_item(item_id: int, amount: int) -> void:
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_remove_item(item_id: int, amount: int) -> void:
 	remove_item(item_id, amount)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_remove_item_at(item_id: int, amount: int, slot: int) -> void:
+	remove_item_at(item_id, amount, slot)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_mouse_input(index: int) -> void:

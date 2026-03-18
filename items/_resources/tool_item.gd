@@ -3,13 +3,13 @@ extends SwingItem
 
 # --- Enums --- #
 enum ToolType {
-	AXE,
-	PICKAXE,
-	HAMMER
+	AXE = 1,
+	PICKAXE = 2,
+	HAMMER = 4
 }
 
 # --- Variables --- #
-@export var tool_type := ToolType.AXE
+@export_flags("Axe:1", "Pickaxe:2", "Hammer:4") var tool_type := 0
 @export var tool_power := 25
 
 # --- Functions --- #
@@ -50,10 +50,21 @@ func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: 
 	if not is_point_in_range(player, mouse_position):
 		return # this checks to make sure the player is in range of the block.
 	
-	if tool_type == ToolType.AXE:
+	if tool_type & ToolType.AXE:
+		# check if hitbox exists
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
 			return
-	elif tool_type == ToolType.PICKAXE:
-		TileManager.destroy_block(tile_position.x, tile_position.y)
-	elif tool_type == ToolType.HAMMER:
-		TileManager.destroy_wall(tile_position.x, tile_position.y)
+	
+	if tool_type & ToolType.PICKAXE:
+		# check if hitbox exists
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(tile_position):
+			return
+		
+		# if hitbox doesn't exist, break block
+		if TileManager.destroy_block(tile_position.x, tile_position.y):
+			return
+	
+	if tool_type & ToolType.HAMMER:
+		# destroy wall if hammer
+		if TileManager.destroy_wall(tile_position.x, tile_position.y):
+			return

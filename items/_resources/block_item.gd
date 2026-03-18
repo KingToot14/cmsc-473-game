@@ -132,14 +132,14 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 		TileType.TILE:
 			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry.get(tile_id)
 			
-			if entity_info and entity_info.entity_script.is_placement_valid(tile_position):
-				# adjusted position
-				var adjusted_pos := mouse_position + entity_info.preview_position_offset
-				var adjusted_tile := TileManager.world_to_tile(
-					floori(adjusted_pos.x),
-					floori(adjusted_pos.y)
-				)
-				
+			# adjusted position
+			var adjusted_pos := mouse_position + entity_info.preview_position_offset
+			var adjusted_tile := TileManager.world_to_tile(
+				floori(adjusted_pos.x),
+				floori(adjusted_pos.y)
+			)
+			
+			if entity_info and entity_info.entity_script.is_placement_valid(adjusted_tile):
 				# create entity
 				EntityManager.create_tile_entity.rpc_id(Globals.SERVER_ID, tile_id, adjusted_tile)
 				
