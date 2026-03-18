@@ -29,7 +29,8 @@ var mouse_pressed := false
 
 # --- Functions --- #
 #region Interactions
-func handle_process(_player: PlayerController, _mouse_position: Vector2) -> void:
+@warning_ignore('unused_parameter')
+func handle_process(_player: PlayerController, mouse_position: Vector2) -> void:
 	pass
 
 ## Called from [class InputSynchronizer] when the player clicks on the screen
@@ -44,28 +45,52 @@ func handle_interact_mouse_release(player: PlayerController, mouse_position: Vec
 
 ## Called from [class InputSynchronizer] when the player presses the interact
 ## key on an item in the inventory
-func handle_interact_key(_player: PlayerController) -> void:
+@warning_ignore('unused_parameter')
+func handle_interact_key(player: PlayerController) -> void:
+	pass
+
+func handle_selected_start() -> void:
+	pass
+
+func handle_selected_end() -> void:
 	pass
 
 #endregion
 
 #region Simulation
-func simulate_process(_player: PlayerController, _mouse_position: Vector2) -> void:
+@warning_ignore('unused_parameter')
+func simulate_process(player: PlayerController, mouse_position: Vector2) -> void:
 	pass
 
 ## Called from [class InputSynchronizer] when the player clicks on the screen
 ## with the mouse. Does not happen when clicking inside the inventory.
 ## [br][br]Does not interact with the world, this function should be purely visual
-func simulate_interact_mouse_press(_player: PlayerController, _mouse_position: Vector2) -> void:
+@warning_ignore('unused_parameter')
+func simulate_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	mouse_pressed = true
 
-func simulate_interact_mouse_release(_player: PlayerController, _mouse_position: Vector2) -> void:
+@warning_ignore('unused_parameter')
+func simulate_interact_mouse_release(player: PlayerController, mouse_position: Vector2) -> void:
 	mouse_pressed = false
 
 ## Called from [class InputSynchronizer] when the player presses the interact
 ## key on an item in the inventory.
 ## [br][br]Does not interact with the world, this function should be purely visual
-func simulate_interact_key(_player: PlayerController) -> void:
+@warning_ignore('unused_parameter')
+func simulate_interact_key(player: PlayerController) -> void:
+	pass
+
+#endregion
+
+#region Item Actions
+@warning_ignore('unused_parameter')
+## Called when the player selects this item either in the hotbar or as the held item
+func item_selected(player: PlayerController, mouse_position) -> void:
+	pass
+
+@warning_ignore('unused_parameter')
+## Called when the player deselects this item either in the hotbar or as the held item
+func item_deselected(player: PlayerController, mouse_position) -> void:
 	pass
 
 #endregion

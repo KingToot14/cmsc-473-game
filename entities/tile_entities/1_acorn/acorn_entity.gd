@@ -1,0 +1,120 @@
+class_name AcornEntity
+extends TileEntity
+
+# --- Variables --- #
+const GROW_ODDS := 0.0015
+const GROW_STEP := 10
+const MAX_GROWTH := 100
+
+var placement_valid := false
+var variant := TreeEntity.TreeVariant.FOREST
+var branch_seed := 0
+
+var growth := 0
+
+# --- Functions --- #
+#region Growth
+func get_height() -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = branch_seed
+	
+	return rng.randi_range(15, 21)
+
+#endregion
+
+#region Placement
+func setup_variant() -> void:
+	var block_bl := TileManager.get_block(tile_position.x,     tile_position.y)
+	var block_br := TileManager.get_block(tile_position.x + 1, tile_position.y)
+	var block_tl := TileManager.get_block(tile_position.x,     tile_position.y - 1)
+	var block_tr := TileManager.get_block(tile_position.x + 1, tile_position.y - 1)
+	
+	# only update sprite on valid ground
+	if block_bl == 0 or block_br == 0 or block_tl != 0 or block_tr != 0:
+		placement_valid = false
+		return
+	
+	# only update sprite on ground of similar type
+	if block_bl != block_br:
+		placement_valid = false
+		return
+	
+	# update validity
+	placement_valid = true
+	
+	match block_bl:
+		# dirt or grass
+		1, 2:
+			variant = TreeEntity.TreeVariant.FOREST
+		
+		# snow blocks
+		6:
+			variant = TreeEntity.TreeVariant.WINTER
+
+#endregion
+
+#region Serialization
+func serialize_spawn_data() -> PackedByteArray:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = super()
+	
+	# snap to end of current buffer
+	var cursor := len(buffer.data_array)
+	buffer.resize(len(buffer.data_array) + 4 + 2)	# base + uint32 (4) + uint16 (2)
+	buffer.seek(cursor)
+	
+	# variant
+	buffer.put_u16(variant)
+	
+	# branch seed
+	buffer.put_u32(branch_seed)
+	
+	# growth state
+	buffer.put_u8(growth)
+	
+	return buffer.data_array
+
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
+	
+	# process base snapshot
+	super(buffer)
+	
+	# variant
+	variant = buffer.get_u16() as TreeEntity.TreeVariant
+	
+	# branch seed
+	branch_seed = buffer.get_u32()
+	
+	# growth state
+	buffer.put_u8(growth)
+
+#endregion
+
+#region Spawning
+@warning_ignore("shadowed_variable_base_class")
+static func create(tile_position: Vector2i) -> bool:
+	# create new tree entity
+	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(1).entity_scene
+	if not entity_scene:
+		return false
+	
+	var entity: AcornEntity = entity_scene.instantiate()
+	
+	# setup default parameters
+	entity.tile_position = tile_position
+	
+	entity.branch_seed = randi()
+	
+	entity.setup_variant()
+	
+	# make sure placement is valid
+	if not entity.placement_valid:
+		entity.queue_free()
+		return false
+	
+	EntityManager.store_tile_entity(1, entity)
+	
+	return true
+
+#endregion

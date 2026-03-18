@@ -20,6 +20,9 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> 
 	var entity_dir := DirAccess.open(root_dir)
 	
 	for dir_name in entity_dir.get_directories():
+		if dir_name.begins_with('_'):
+			continue
+		
 		var id_str := dir_name.split('_')[0]
 		
 		if not id_str.is_valid_int():

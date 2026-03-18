@@ -20,6 +20,17 @@ enum TileType {
 # --- Functions --- #
 #region Interaction
 func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
+	# set placement preview
+	match tile_type:
+		TileType.BLOCK:
+			pass
+		TileType.WALL:
+			pass
+		TileType.TILE:
+			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry[tile_id]
+			
+			entity_info.setup_placement_preview(mouse_position)
+	
 	# only autoswing when enabled
 	if not autoswing:
 		return
@@ -43,6 +54,12 @@ func handle_interact_mouse_press(player: PlayerController, mouse_position: Vecto
 	player.interpolator.queue_mouse_press(NetworkTime.time, item_id, mouse_position)
 	
 	place_block(player, mouse_position)
+
+func handle_selected_start() -> void:
+	Globals.mouse.placement_preview.show()
+
+func handle_selected_end() -> void:
+	Globals.mouse.placement_preview.hide()
 
 #endregion
 
@@ -107,4 +124,10 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
 		TileType.TILE:
-			print("TILE ENTITIES NOT IMPLEMENTED YET")
+			var entity_info: EntityInfo = EntityManager.tile_entity_registry.get(tile_id)
+			
+			if entity_info and entity_info.entity_script.create(tile_position):
+				# decrement item TODO: check held item first
+				var hotbar_slot: int = player.my_inventory.hotbar_slot
+				
+				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)

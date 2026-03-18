@@ -328,8 +328,8 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 #endregion
 
 #region Spawning
-@warning_ignore("shadowed_variable", "shadowed_variable_base_class")
-static func create(position: Vector2i, variant: TreeVariant):
+@warning_ignore("shadowed_variable", "shadowed_variable_base_class", "shadowed_global_identifier")
+static func create(position: Vector2i, variant: TreeVariant, seed := -1):
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(0).entity_scene
 	if not entity_scene:
@@ -342,7 +342,10 @@ static func create(position: Vector2i, variant: TreeVariant):
 	entity.global_position = TileManager.tile_to_world(position.x, position.y)
 	entity.variant = variant
 	
-	entity.branch_seed = randi()
+	if seed == -1:
+		entity.branch_seed = randi()
+	else:
+		entity.branch_seed = seed
 	
 	entity.setup_height()
 	
