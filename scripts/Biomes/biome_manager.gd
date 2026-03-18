@@ -90,7 +90,7 @@ func set_biome(new_biome: Biome) -> void:
 		biome_changed.emit(current_biome)
 		
 		send_set_biome.rpc_id(Globals.SERVER_ID, new_biome)
-		print("[BiomeManager] Switched to: ", current_biome)
+		#print("[BiomeManager] Switched to: ", current_biome)
 
 func set_layer(new_layer: Layer) -> void:
 	if current_layer != new_layer:
@@ -98,7 +98,7 @@ func set_layer(new_layer: Layer) -> void:
 		layer_changed.emit(current_layer)
 		
 		send_set_layer.rpc_id(Globals.SERVER_ID, new_layer)
-		print("[BiomeManager] Switched to: ", current_layer)
+		#print("[BiomeManager] Switched to: ", current_layer)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_set_biome(new_biome: Biome) -> void:

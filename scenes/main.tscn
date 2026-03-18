@@ -1156,9 +1156,11 @@ biome_backgrounds = {
 &"winter": NodePath("../background_snow")
 }
 
-[node name="background_forest" type="Node2D" parent="." unique_id=1195479764]
+[node name="background_forest" type="Node2D" parent="." unique_id=1195479764 groups=["background"]]
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
+allowed_layers = 31
+allowed_biomes = 11
 
 [node name="layer_1" type="Parallax2D" parent="background_forest" unique_id=698714807]
 y_sort_enabled = true
@@ -1258,10 +1260,12 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 4
 
-[node name="background_snow" type="Node2D" parent="." unique_id=1299967546]
-visible = false
+[node name="background_snow" type="Node2D" parent="." unique_id=1299967546 groups=["background"]]
+modulate = Color(1, 1, 1, 0)
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
+allowed_layers = 31
+allowed_biomes = 4
 
 [node name="layer_1" type="Parallax2D" parent="background_snow" unique_id=392378770]
 y_sort_enabled = true
