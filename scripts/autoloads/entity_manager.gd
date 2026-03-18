@@ -159,6 +159,15 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	# make sure the instance is aware of any nearby players
 	entity.scan_interest()
 
+@rpc('any_peer', 'call_remote', 'reliable')
+func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
+	var info: EntityInfo = tile_entity_registry.get(entity_id)
+	
+	if not info:
+		return
+	
+	info.entity_script.create(tile_pos)
+
 #endregion
 
 #region Data Persistence
@@ -185,6 +194,7 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	anchored_entities[chunk].append(entity.id)
 	
 	# attempt to load instantly
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
 	# if no entities exist, just store data for now

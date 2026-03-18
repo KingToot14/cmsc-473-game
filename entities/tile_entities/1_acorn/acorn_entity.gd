@@ -92,29 +92,78 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 #endregion
 
 #region Spawning
-@warning_ignore("shadowed_variable_base_class")
-static func create(tile_position: Vector2i) -> bool:
+@rpc('any_peer', 'call_local', 'reliable')
+static func create(tile_pos: Vector2i) -> bool:
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(1).entity_scene
 	if not entity_scene:
 		return false
 	
+	# make sure placement is valid
+	if not is_placement_valid(tile_pos):
+		return false
+	
 	var entity: AcornEntity = entity_scene.instantiate()
 	
 	# setup default parameters
-	entity.tile_position = tile_position
+	entity.tile_position = tile_pos
 	
 	entity.branch_seed = randi()
 	
 	entity.setup_variant()
 	
-	# make sure placement is valid
-	if not entity.placement_valid:
-		entity.queue_free()
-		return false
-	
 	EntityManager.store_tile_entity(1, entity)
 	
 	return true
+
+static func get_variant(tile_pos: Vector2i) -> int:
+	var block_bl := TileManager.get_block(tile_pos.x,     tile_pos.y + 1)
+	var block_br := TileManager.get_block(tile_pos.x + 1, tile_pos.y + 1)
+	
+	# check placement blocks
+	var curr_variant := 0
+	
+	match block_bl:
+		# air
+		0:
+			return -1
+		# dirt or grass
+		1, 2:
+			curr_variant = TreeEntity.TreeVariant.FOREST
+		
+		# snow blocks
+		6:
+			curr_variant = TreeEntity.TreeVariant.WINTER
+	
+	match block_br:
+		# air
+		0:
+			return -1
+		# dirt or grass
+		1, 2:
+			if curr_variant == TreeEntity.TreeVariant.FOREST:
+				return TreeEntity.TreeVariant.FOREST
+		
+		# snow blocks
+		6:
+			if curr_variant == TreeEntity.TreeVariant.WINTER:
+				return TreeEntity.TreeVariant.WINTER
+	
+	return -1
+
+static func is_placement_valid(tile_pos: Vector2i) -> bool:
+	var block_bl := TileManager.get_block(tile_pos.x,     tile_pos.y)
+	var block_br := TileManager.get_block(tile_pos.x + 1, tile_pos.y)
+	var block_tl := TileManager.get_block(tile_pos.x,     tile_pos.y - 1)
+	var block_tr := TileManager.get_block(tile_pos.x + 1, tile_pos.y - 1)
+	
+	# can only be placed in a clear 2x2 area
+	if block_bl != 0 or block_br != 0 or block_tl != 0 or block_tr != 0:
+		return false
+	
+	# make sure variant is valid
+	var curr_variant := get_variant(tile_pos)
+	
+	return curr_variant != -1
 
 #endregion

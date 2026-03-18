@@ -53,7 +53,7 @@ func handle_selected_start() -> void:
 	pass
 
 func handle_selected_end() -> void:
-	pass
+	mouse_pressed = false
 
 #endregion
 

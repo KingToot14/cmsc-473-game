@@ -329,6 +329,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 
 #region Spawning
 @warning_ignore("shadowed_variable", "shadowed_variable_base_class", "shadowed_global_identifier")
+@rpc('any_peer', 'call_local', 'reliable')
 static func create(position: Vector2i, variant: TreeVariant, seed := -1):
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(0).entity_scene

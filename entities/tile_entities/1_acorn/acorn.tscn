@@ -2,11 +2,20 @@
 
 [ext_resource type="Script" uid="uid://chacx4gjstk2v" path="res://entities/tile_entities/1_acorn/acorn_entity.gd" id="1_7koqc"]
 [ext_resource type="Texture2D" uid="uid://dkfpr876efkey" path="res://entities/tile_entities/1_acorn/sprite.png" id="2_7koqc"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_hcmix"]
 
-[node name="acorn" type="CharacterBody2D" unique_id=197811974]
+[node name="acorn" type="CharacterBody2D" unique_id=197811974 node_paths=PackedStringArray("interpolator")]
+z_index = 15
 script = ExtResource("1_7koqc")
+always_snapshot = false
+interpolator = NodePath("entity_interpolator")
 metadata/_custom_type_script = "uid://cqx62b7syxl08"
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1160549193]
 position = Vector2(8, 4)
 texture = ExtResource("2_7koqc")
+
+[node name="entity_interpolator" type="Node" parent="." unique_id=475839953 node_paths=PackedStringArray("root")]
+script = ExtResource("3_hcmix")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"

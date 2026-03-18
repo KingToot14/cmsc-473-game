@@ -1,13 +1,17 @@
-[gd_resource type="Resource" script_class="TileEntityInfo" format=3 uid="uid://cn4hs7t82m2cn"]
+[gd_resource type="Resource" script_class="AcornEntityInfo" format=3 uid="uid://cn4hs7t82m2cn"]
 
 [ext_resource type="PackedScene" uid="uid://oc55idwhop2b" path="res://entities/tile_entities/1_acorn/acorn.tscn" id="1_xaehq"]
 [ext_resource type="Script" uid="uid://chacx4gjstk2v" path="res://entities/tile_entities/1_acorn/acorn_entity.gd" id="2_d05a8"]
 [ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_h4j12"]
 [ext_resource type="Texture2D" uid="uid://dkfpr876efkey" path="res://entities/tile_entities/1_acorn/sprite.png" id="3_d05a8"]
-[ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="4_vid5m"]
+[ext_resource type="Script" uid="uid://ddjlewfse3la8" path="res://entities/tile_entities/1_acorn/acorn_entity_info.gd" id="4_d05a8"]
 
 [resource]
-script = ExtResource("4_vid5m")
+script = ExtResource("4_d05a8")
+preview_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("3_d05a8"),
+1: ExtResource("3_d05a8")
+})
 preview_sprite = ExtResource("3_d05a8")
 preview_sprite_offset = Vector2(8, 4)
 name = "Acorn"

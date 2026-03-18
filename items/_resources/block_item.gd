@@ -59,6 +59,8 @@ func handle_selected_start() -> void:
 	Globals.mouse.placement_preview.show()
 
 func handle_selected_end() -> void:
+	mouse_pressed = false
+	
 	Globals.mouse.placement_preview.hide()
 
 #endregion
@@ -126,7 +128,10 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 		TileType.TILE:
 			var entity_info: EntityInfo = EntityManager.tile_entity_registry.get(tile_id)
 			
-			if entity_info and entity_info.entity_script.create(tile_position):
+			if entity_info and entity_info.entity_script.is_placement_valid(tile_position):
+				# create entity
+				EntityManager.create_tile_entity.rpc_id(Globals.SERVER_ID, tile_id, tile_position)
+				
 				# decrement item TODO: check held item first
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				

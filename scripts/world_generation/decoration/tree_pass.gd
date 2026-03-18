@@ -31,8 +31,4 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		TreeEntity.create(Vector2i(x, y), TreeEntity.TreeVariant.FOREST)
 		
-		#EntityManager.create_tile_entity(0, Vector2i(x, y), {
-			#&'branch_seed': gen.rng.randi()
-		#})
-		
 		x += gen.rng.randi_range(4, 8)
