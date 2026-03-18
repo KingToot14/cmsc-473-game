@@ -130,11 +130,18 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 				return
 			
 		TileType.TILE:
-			var entity_info: EntityInfo = EntityManager.tile_entity_registry.get(tile_id)
+			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry.get(tile_id)
 			
 			if entity_info and entity_info.entity_script.is_placement_valid(tile_position):
+				# adjusted position
+				var adjusted_pos := mouse_position + entity_info.preview_position_offset
+				var adjusted_tile := TileManager.world_to_tile(
+					floori(adjusted_pos.x),
+					floori(adjusted_pos.y)
+				)
+				
 				# create entity
-				EntityManager.create_tile_entity.rpc_id(Globals.SERVER_ID, tile_id, tile_position)
+				EntityManager.create_tile_entity.rpc_id(Globals.SERVER_ID, tile_id, adjusted_tile)
 				
 				# decrement item TODO: check held item first
 				var hotbar_slot: int = player.my_inventory.hotbar_slot

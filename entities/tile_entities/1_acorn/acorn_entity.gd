@@ -24,32 +24,11 @@ func get_height() -> int:
 
 #region Placement
 func setup_variant() -> void:
-	var block_bl := TileManager.get_block(tile_position.x,     tile_position.y)
-	var block_br := TileManager.get_block(tile_position.x + 1, tile_position.y)
-	var block_tl := TileManager.get_block(tile_position.x,     tile_position.y - 1)
-	var block_tr := TileManager.get_block(tile_position.x + 1, tile_position.y - 1)
-	
-	# only update sprite on valid ground
-	if block_bl == 0 or block_br == 0 or block_tl != 0 or block_tr != 0:
-		placement_valid = false
-		return
-	
-	# only update sprite on ground of similar type
-	if block_bl != block_br:
-		placement_valid = false
-		return
-	
-	# update validity
-	placement_valid = true
-	
-	match block_bl:
-		# dirt or grass
-		1, 2:
-			variant = TreeEntity.TreeVariant.FOREST
-		
-		# snow blocks
-		6:
-			variant = TreeEntity.TreeVariant.WINTER
+	match variant:
+		TreeEntity.TreeVariant.FOREST:
+			print("Forest")
+		TreeEntity.TreeVariant.WINTER:
+			print("Winter")
 
 #endregion
 
@@ -109,6 +88,7 @@ static func create(tile_pos: Vector2i) -> bool:
 	entity.tile_position = tile_pos
 	
 	entity.branch_seed = randi()
+	entity.variant = get_variant(tile_pos) as TreeEntity.TreeVariant
 	
 	entity.setup_variant()
 	
