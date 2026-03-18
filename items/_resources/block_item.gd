@@ -23,9 +23,13 @@ func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
 	# set placement preview
 	match tile_type:
 		TileType.BLOCK:
-			pass
+			var block_info := BlockDatabase.get_block(tile_id)
+			
+			block_info.setup_placement_preview(mouse_position)
 		TileType.WALL:
-			pass
+			var wall_info := BlockDatabase.get_wall(tile_id)
+			
+			wall_info.setup_placement_preview(mouse_position)
 		TileType.TILE:
 			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry[tile_id]
 			
