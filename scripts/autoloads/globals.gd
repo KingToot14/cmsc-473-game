@@ -10,6 +10,13 @@ var world_size := Vector2i(4200, 1200):
 			ceili(float(_size.x) / TileManager.CHUNK_SIZE),
 			ceili(float(_size.y) / TileManager.CHUNK_SIZE)
 		)
+<<<<<<< Updated upstream
+=======
+		space = _size.y * 0.10
+		surface = _size.y * 0.30
+		underground = _size.y * 0.60
+		
+>>>>>>> Stashed changes
 		world_size = _size
 		world_size_changed.emit(world_size)
 
@@ -20,6 +27,13 @@ var world_chunks: Vector2i = Vector2i(
 )
 var world_spawn: Vector2i
 
+<<<<<<< Updated upstream
+=======
+var space := world_size.y * 0.10
+var surface := world_size.y * 0.30
+var underground := world_size.y * 0.60
+
+>>>>>>> Stashed changes
 # - TileMaps
 var server_map: ServerTileMap
 var world_map: WorldTileMap

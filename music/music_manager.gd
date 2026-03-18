@@ -9,7 +9,8 @@ enum Area {
 	WINTER_NIGHT,
 	UNDERGROUND,
 	CAVERN,
-	DUNGEON
+	DUNGEON,
+	SPACE,
 }
 
 # --- Variables --- #
@@ -25,8 +26,6 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		#"res://music/forest/Day 5.ogg",
 		"res://music/forest/Day 4.ogg",
 		"res://music/forest/Forest in the Day.ogg",
-		
-		
 	],
 	Area.FOREST_NIGHT: [
 		"res://music/forest/Night Track.ogg",
@@ -37,15 +36,27 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/winter/winter_day_2.ogg",
 	],
 	Area.WINTER_NIGHT: [],
-	Area.UNDERGROUND: [],
-	Area.CAVERN: [],
+	Area.UNDERGROUND: [
+		"res://music/Caves/Cave 2.ogg"
+		],
+	Area.CAVERN: [
+		"res://music/Caves/Deep Cave 1.ogg"
+	],
+		
+	
 	Area.DUNGEON: [],
+	Area.SPACE: [
+		"res://music/Space/Space 1.ogg",
+		"res://music/Space/Space 2.ogg",
+		"res://music/Space/Space 3.ogg",
+	],
 }
 
 # Areas that use a shuffled queue instead of random selection
 const QUEUED_AREAS: Array[Area] = [
 	Area.FOREST_DAY,
 	Area.FOREST_NIGHT,
+	Area.SPACE,
 ]
 
 # The track to always play first when entering a queued area.
@@ -62,6 +73,12 @@ var _current_area: Area = Area.TITLE_SCREEN
 func _ready() -> void:
 	Globals.music = self
 	finished.connect(_on_track_finished)
+<<<<<<< Updated upstream
+=======
+
+	BiomeManager.biome_changed.connect(_on_biome_changed)
+	BiomeManager.layer_changed.connect(_on_layer_changed)
+>>>>>>> Stashed changes
 
 	# start playback
 	var args := Globals.parse_arguments()
@@ -69,6 +86,10 @@ func _ready() -> void:
 	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
 		return
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 	play_track(Area.TITLE_SCREEN)
 
 
@@ -122,6 +143,43 @@ func play_track(area: Area, variant := -1) -> void:
 	play()
 	print("Is playing: ", playing)
 
+<<<<<<< Updated upstream
+=======
+
+func _on_biome_changed(new_biome: StringName) -> void:
+	match new_biome:
+		&"winter":
+			if BiomeManager.current_layer==&"surface":
+				enter_area(Area.WINTER_DAY)
+			if BiomeManager.current_layer==&"underground":
+				enter_area(Area.UNDERGROUND)
+		&"forest":
+			if BiomeManager.current_layer==&"surface":
+				enter_area(Area.FOREST_DAY)
+		&"cavern":
+			if BiomeManager.current_layer==&"cavern":
+				enter_area(Area.CAVERN)
+
+
+
+func _on_layer_changed(new_layer: StringName) -> void:
+	match new_layer:
+		&"space":
+			enter_area(Area.SPACE)
+		&"surface":
+			_on_biome_changed(BiomeManager.current_biome)
+		&"underground":
+			enter_area(Area.UNDERGROUND)
+		&"cavern":
+			enter_area(Area.CAVERN)
+
+
+## Switches to a new area, resetting the queue so the intro plays again.
+func enter_area(area: Area) -> void:
+	reset_area(area)
+	play_track(area)
+
+>>>>>>> Stashed changes
 
 ## Resets the queue and intro state for [param area], so the intro plays
 ## again next time the player enters it.
