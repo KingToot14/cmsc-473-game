@@ -15,6 +15,12 @@ var growth_timer := GROW_TIME
 var growth := 0
 
 # --- Functions --- #
+func _ready() -> void:
+	super()
+	
+	if multiplayer.is_server():
+		hp.died.connect(_on_death)
+
 func _process(delta: float) -> void:
 	growth_timer -= delta
 	
@@ -28,18 +34,20 @@ func _process(delta: float) -> void:
 			if growth >= MAX_GROWTH:
 				grow_to_tree()
 
-#region Growth
-## Returns the height of the tree that will spawn. This should remain
-## contant with the same [member branch_seed].
-func get_height() -> int:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = branch_seed
+func _on_death() -> void:
+	if is_dead:
+		return
 	
-	return rng.randi_range(15, 21)
+	kill()
 
+#region Growth
+## Attempts to delete this entity and spawn a tree in it's place.
+## Fails if there's not enough space above the acorn for the tree to grow
 func grow_to_tree() -> void:
-	# TODO: check if space is valid
-	pass
+	# check if space is valid
+	if not TreeEntity.is_space_available(tile_position, variant, branch_seed):
+		growth -= GROW_STEP
+		return
 	
 	# create tree
 	TreeEntity.create(tile_position, variant, branch_seed)
@@ -53,7 +61,7 @@ func grow_to_tree() -> void:
 #endregion
 
 #region Interaction
-func break_place(tile_pos: Vector2i) -> bool:
+func break_place(_tile_pos: Vector2i) -> bool:
 	# check held item
 	var item_stack := Globals.player.my_inventory.get_selected_item()
 	var item := ItemDatabase.get_item(item_stack.item_id)
@@ -63,7 +71,7 @@ func break_place(tile_pos: Vector2i) -> bool:
 		return false
 	
 	# make sure tool is an axe
-	if not item.tool_type & ToolItem.ToolType.AXE:
+	if not item.tool_type & ToolItem.ToolType.PICKAXE:
 		return false
 	
 	# deal damage based on tool power

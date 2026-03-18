@@ -341,9 +341,14 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 #endregion
 
 #region Spawning
-@warning_ignore("shadowed_variable", "shadowed_variable_base_class", "shadowed_global_identifier")
-@rpc('any_peer', 'call_local', 'reliable')
-static func create(position: Vector2i, variant: TreeVariant, seed := -1):
+static func create(tile_pos: Vector2i, tree_variant: TreeVariant, tree_seed := -1):
+	if tree_seed == -1:
+		tree_seed = randi()
+	
+	# make sure there's enough space above
+	if not is_space_available(tile_pos, tree_variant, tree_seed):
+		return
+	
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(0).entity_scene
 	if not entity_scene:
@@ -352,17 +357,34 @@ static func create(position: Vector2i, variant: TreeVariant, seed := -1):
 	var entity: TreeEntity = entity_scene.instantiate()
 	
 	# setup default parameters
-	entity.tile_position = position
-	entity.global_position = TileManager.tile_to_world(position.x, position.y)
-	entity.variant = variant
+	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
-	if seed == -1:
-		entity.branch_seed = randi()
-	else:
-		entity.branch_seed = seed
+	entity.variant = tree_variant
+	entity.branch_seed = tree_seed
 	
 	entity.setup_height()
 	
 	EntityManager.store_tile_entity(0, entity)
+
+static func is_space_available(tile_pos: Vector2i, tree_variant: TreeVariant, tree_seed: int) -> bool:
+	var tree_height := get_tree_height(tree_variant, tree_seed)
+	
+	# make sure each block is available
+	for y in range(tree_height):
+		if TileManager.get_block(tile_pos.x, tile_pos.y - y) != 0:
+			return false
+		if TileManager.get_block(tile_pos.x + 1, tile_pos.y - y) != 0:
+			return false
+	
+	return true
+
+static func get_tree_height(tree_variant: TreeVariant, tree_seed: int) -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = tree_seed
+	
+	match tree_variant:
+		_:
+			return rng.randi_range(15, 21)
 
 #endregion
