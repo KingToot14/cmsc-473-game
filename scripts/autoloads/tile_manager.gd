@@ -1070,11 +1070,7 @@ func save_world() -> void:
 	buffer.put_data(tiles.to_byte_array())
 	
 	# - Entity Data - #
-	print("Pre-Entity Pointer: ", buffer.get_position())
-	
 	buffer.put_data(EntityManager.get_persistent_entities())
-	
-	print("Entity Pointer: ", buffer.get_position())
 	
 	# - Write - #
 	var file := FileAccess.open("user://world/%s.save" % Globals.world_name, FileAccess.WRITE)
@@ -1112,13 +1108,7 @@ func load_world() -> bool:
 	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
 	
 	# - Entity Data - #
-	print("Pre-Entity Pointer: ", buffer.get_position())
-	
-	Globals
-	
 	EntityManager.load_persistent_entities(buffer)
-	
-	print("Entity Pointer: ", buffer.get_position())
 	
 	# finishing
 	ActivationPass.new().start_pass(null)
