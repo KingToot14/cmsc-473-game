@@ -2,7 +2,8 @@ class_name AcornEntity
 extends TileEntity
 
 # --- Variables --- #
-const GROW_ODDS := 0.0015
+const GROW_TIME := 0.25
+const GROW_ODDS := 1.0 # 0.015
 const GROW_STEP := 10
 const MAX_GROWTH := 100
 
@@ -10,15 +11,44 @@ var placement_valid := false
 var variant := TreeEntity.TreeVariant.FOREST
 var branch_seed := 0
 
+var growth_timer := GROW_TIME
 var growth := 0
 
 # --- Functions --- #
+func _process(delta: float) -> void:
+	growth_timer -= delta
+	
+	if growth_timer <= 0.0:
+		growth_timer += GROW_TIME
+		
+		# try to grow
+		if randf() < GROW_ODDS:
+			growth += GROW_STEP
+			
+			if growth >= MAX_GROWTH:
+				grow_to_tree()
+
 #region Growth
+## Returns the height of the tree that will spawn. This should remain
+## contant with the same [member branch_seed].
 func get_height() -> int:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = branch_seed
 	
 	return rng.randi_range(15, 21)
+
+func grow_to_tree() -> void:
+	# TODO: check if space is valid
+	pass
+	
+	# create tree
+	TreeEntity.create(tile_position, variant, branch_seed)
+	
+	# remove acorn
+	kill()
+		
+	if multiplayer.is_server():
+		EntityManager.clear_entity_data(self)
 
 #endregion
 
