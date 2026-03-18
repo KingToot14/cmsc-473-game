@@ -2,9 +2,15 @@
 
 [ext_resource type="AudioStream" uid="uid://ddtu3q3qmeewo" path="res://blocks/1_grass/sfx/Grass Hit.wav" id="1_d38y0"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_j58il"]
+[ext_resource type="Texture2D" uid="uid://dkt40leofvbqa" path="res://blocks/1_grass/tiles.png" id="2_2x6uy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4rqv"]
+atlas = ExtResource("2_2x6uy")
+region = Rect2(0, 0, 8, 8)
 
 [resource]
 script = ExtResource("1_j58il")
+preview_sprite = SubResource("AtlasTexture_j4rqv")
 break_item_id = 3
 break_sfx = ExtResource("1_d38y0")
 break_volume = 2.0

@@ -184,7 +184,7 @@ func set_cursor(type: CursorType) -> void:
 		return
 	
 	var cursor_image: Image
-	var hotspot := Vector2(2, 2)
+	var hotspot := Vector2(0, 0)
 	
 	current_cursor = type
 	
