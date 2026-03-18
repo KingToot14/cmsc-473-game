@@ -13,3 +13,19 @@ func update_preview(tile_pos: Vector2i) -> void:
 
 func attempt_placement() -> bool:
 	return false
+
+#region Helpers
+static func query_tile_collision(tile_pos: Vector2i) -> bool:
+	# create query
+	var direct_space: PhysicsDirectSpaceState2D = \
+		Globals.get_tree().current_scene.get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = TileManager.tile_to_world(tile_pos.x, tile_pos.y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
+	
+	# check collision
+	return not direct_space.intersect_shape(query, 1).is_empty()
+
+#endregion

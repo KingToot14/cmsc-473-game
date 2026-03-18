@@ -102,7 +102,8 @@ func setup_entity() -> void:
 	tree_top.show()
 	
 	# hitbox
-	$'hitbox'.position.y = -(height * 8.0 / 2.0)
+	$'shape'.position.y = -(height * 4.0)
+	$'hitbox'.position.y = -(height * 4.0)
 	$'hitbox/shape'.shape.size.y = (height * 8.0)
 
 func resize_tree() -> void:
@@ -121,7 +122,8 @@ func resize_tree() -> void:
 		sprite.erase_cell(Vector2i(1, -(y + 1)))
 	
 	# hitbox
-	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
+	$'shape'.position.y = -(curr_height * 4.0)
+	$'hitbox'.position.y = -(curr_height * 4.0)
 	$'hitbox/shape'.shape.size.y = (curr_height * 8.0)
 
 func update_layer_damage(layer_id: int) -> void:
