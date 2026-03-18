@@ -309,8 +309,6 @@ func serialize_spawn_data() -> PackedByteArray:
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
-	id = buffer.get_u32()
-	
 	# process base snapshot
 	super(buffer)
 	

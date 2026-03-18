@@ -17,6 +17,10 @@ enum TileType {
 ## The tile_id that this item points to. Changes based on [member tile_type]
 @export var tile_id := 0
 
+## The variant that gets passed into [code]TileEntity.create[/code]. This is only used
+## when [member tile_type] is set to [enum TileType.TILE].
+@export var tile_variant := &''
+
 # --- Functions --- #
 #region Interaction
 func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
@@ -33,7 +37,7 @@ func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
 		TileType.TILE:
 			var entity_info: TileEntityInfo = EntityManager.tile_entity_registry[tile_id]
 			
-			entity_info.setup_placement_preview(mouse_position)
+			entity_info.setup_placement_preview(mouse_position, tile_variant)
 	
 	# only autoswing when enabled
 	if not autoswing:

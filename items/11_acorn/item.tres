@@ -7,7 +7,7 @@
 script = ExtResource("1_8srkp")
 tile_type = 2
 tile_id = 1
-force_towards_mouse = true
+use_speed = 0.25
 item_name = "Acorn"
 texture = ExtResource("2_0kdna")
 tooltip = "A tiny acorn that grows into large tree with time."

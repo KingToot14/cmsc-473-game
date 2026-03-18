@@ -113,8 +113,6 @@ func serialize_spawn_data() -> PackedByteArray:
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
-	id = buffer.get_u32()
-	
 	# process base snapshot
 	super(buffer)
 	
@@ -135,15 +133,15 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 ## [code]AcornEntity.rpc_id(Globals.SERVER_ID, tile_pos)[/code]
 ## when calling from a client.
 @rpc('any_peer', 'call_local', 'reliable')
-static func create(tile_pos: Vector2i) -> bool:
+static func create(tile_pos: Vector2i, _tile_variant := &'') -> void:
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(1).entity_scene
 	if not entity_scene:
-		return false
+		return
 	
 	# make sure placement is valid
 	if not is_placement_valid(tile_pos):
-		return false
+		return
 	
 	var entity: AcornEntity = entity_scene.instantiate()
 	
@@ -157,7 +155,7 @@ static func create(tile_pos: Vector2i) -> bool:
 	
 	EntityManager.store_tile_entity(1, entity)
 	
-	return true
+	return
 
 ## Returns an integer representation of [enum TreeEntity.TreeVariant].
 ## [br]Returns [code]-1[/code] if no variant is valid (ground is not solid,

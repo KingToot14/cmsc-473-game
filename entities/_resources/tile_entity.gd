@@ -14,6 +14,14 @@ func update_preview(tile_pos: Vector2i) -> void:
 func attempt_placement() -> bool:
 	return false
 
+#region Serialization
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
+	
+	super(buffer)
+
+#endregion
+
 #region Helpers
 static func query_tile_collision(tile_pos: Vector2i) -> bool:
 	# create query

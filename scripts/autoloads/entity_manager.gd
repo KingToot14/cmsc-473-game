@@ -197,6 +197,8 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
+	print(entity.id, " | ", entity.name, " | ", entity.interest_count)
+	
 	# if no entities exist, just store data for now
 	if entity.interest_count == 0:
 		entity.queue_free()
