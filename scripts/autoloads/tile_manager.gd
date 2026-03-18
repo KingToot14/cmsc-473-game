@@ -23,6 +23,12 @@ const MASK_VISUAL := MASK_BLOCK | MASK_WALL
 ## a bitmask that isolates the water level
 const MASK_WATER := ((1 << 8) - 1) << 20
 
+## How often to autosave in seconds
+const AUTOSAVE_RATE := 60.0
+
+## The current time until the next autosave
+var autosave_timer := AUTOSAVE_RATE
+
 ## A flat-packed representation of the world tiles. Each integer represents
 ## a single tile in the following format:
 ## [br] - Bits 00 - 09: Block ID
@@ -61,8 +67,18 @@ func _update_world_size(size: Vector2i) -> void:
 func _idx(x: int, y: int) -> int:
 	return x + y * world_width
 
-func _process(_delta: float) -> void:
-	pass
+func _process(delta: float) -> void:
+	autosave_timer -= delta
+	
+	if autosave_timer <= 0.0:
+		autosave_timer += AUTOSAVE_RATE
+		
+		# check if world name is not empty
+		if Globals.world_name.is_empty():
+			set_process(false)
+			return
+		
+		save_world()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -1062,6 +1078,10 @@ func save_world() -> void:
 	buffer.put_16(Globals.world_spawn.x)
 	buffer.put_16(Globals.world_spawn.y)
 	
+	# world layers
+	buffer.put_u16(Globals.surface)
+	buffer.put_u16(Globals.underground)
+	
 	# - Tile Data - #
 	buffer.put_data(tiles.to_byte_array())
 	
@@ -1097,6 +1117,10 @@ func load_world() -> bool:
 	# world spawn
 	Globals.world_spawn.x = buffer.get_16()
 	Globals.world_spawn.y = buffer.get_16()
+	
+	# world layers
+	Globals.surface     = buffer.get_u16()
+	Globals.underground = buffer.get_u16()
 	
 	# - Tile Data - #
 	var world_size := Globals.world_size.x * Globals.world_size.y

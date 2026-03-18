@@ -243,8 +243,6 @@ func get_persistent_entities() -> PackedByteArray:
 			var entity_ref: EntityReference = loaded_entities.get(id)
 			
 			if entity_ref and entity_ref.is_tile_entity:
-				print(entity_ref.registry_id)
-				
 				persistent_ids.append(id)
 		
 		# entity count

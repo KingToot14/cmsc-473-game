@@ -75,8 +75,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	if width <= 0 or height <= 0:
 		return
 	
-	print(start_x, " | ", start_y, " | ", width, " | ", height)
-	
 	var prev: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y - 1, width + 2)
 	var curr: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y + 0, width + 2)
 	var next: PackedInt32Array = TileManager.get_visual_row(start_x - 1, start_y + 1, width + 2)
@@ -140,9 +138,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 			
 			variations[index] = value
 			index += 1
-			
-			#if index % 32 == 0:
-				#await get_tree().process_frame
 		
 		# update window
 		prev = curr
@@ -174,9 +169,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 				)
 			
 			index += 1
-			
-			#if index % 128:
-				#await get_tree().process_frame
 
 func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
@@ -199,12 +191,6 @@ func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 				walls.erase_cell(Vector2i(start_x + x, start_y + y))
 			else:
 				walls.set_cell(Vector2i(start_x + x, start_y + y), wall, Vector2i(2, 2))
-			
-			#processed += 1
-			#
-			#if processed == 256:
-				#await get_tree().process_frame
-				#processed = 0
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
@@ -222,8 +208,6 @@ func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 			if processed == 256:
 				await get_tree().process_frame
 				processed = 0
-	
-	print(blocks.get_used_rect())
 
 func update_tile(x: int, y: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
