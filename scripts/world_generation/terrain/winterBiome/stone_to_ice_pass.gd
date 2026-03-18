@@ -6,7 +6,8 @@ func get_pass_name() -> String:
 
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
-	var center_x := world_size.x / 2
+	var center_x := floori(world_size.x / 2)
+	
 	var min_dist := floori(world_size.x * 0.10)
 	var edge_buffer := floori(world_size.x * 0.20)
 	

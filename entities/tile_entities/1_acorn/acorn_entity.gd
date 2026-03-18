@@ -61,7 +61,7 @@ func grow_to_tree() -> void:
 #endregion
 
 #region Interaction
-func break_place(_tile_pos: Vector2i) -> bool:
+func break_place(_mouse_position: Vector2) -> bool:
 	# check held item
 	var item_stack := Globals.player.my_inventory.get_selected_item()
 	var item := ItemDatabase.get_item(item_stack.item_id)

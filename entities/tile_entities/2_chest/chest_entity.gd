@@ -7,9 +7,20 @@ enum ChestVariant {
 }
 
 # --- Variables --- #
+const SYNC_ACTION := 16
+
+const INVENTORY_SIZE := 40
+
 @export var variant := ChestVariant.NORMAL
 
+var inventory := Inventory.new(INVENTORY_SIZE)
+
 # --- Functions --- #
+func _ready() -> void:
+	super()
+	
+	inventory.inventory_updated.connect(send_inventory_update)
+
 #region Sprite
 func setup_variant() -> void:
 	var info := EntityManager.tile_entity_registry[2]
@@ -17,6 +28,63 @@ func setup_variant() -> void:
 	match variant:
 		ChestVariant.NORMAL:
 			pass
+
+#endregion
+
+#region Interaction
+func interact_with(mouse_position: Vector2) -> bool:
+	# make sure player is within interaction range
+	if not Globals.player.is_point_in_range(mouse_position):
+		return false
+	
+	# handle interaction 
+	# NOTE: the 'id' variable in this script is a unique id that is synchronized between the server
+	# and the client, so you could use this to handle opening and displaying the chest inventory.
+	print("Chest Interacted!")
+	
+	return true
+
+func handle_action(action_info: PackedByteArray) -> void:
+	super(action_info)
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = action_info
+	
+	# action id
+	var action_id := buffer.get_u16()
+	
+	# actions
+	match action_id:
+		SYNC_ACTION:
+			var inventory_size := buffer.get_u16()
+			
+			inventory.receive_inventory(buffer.get_data(inventory_size))
+
+func send_inventory_update() -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 4 + 2)
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
+	
+	# action id
+	buffer.put_u16(SYNC_ACTION)
+	
+	# inventory size
+	var inventory_data := inventory.serialize_inventory()
+	buffer.put_u16(len(inventory_data))
+	
+	# inventory
+	buffer.put_data(inventory_data)
+	
+	for player_id in interested_players.keys():
+		if not ServerManager.get_player(player_id):
+			continue
+		
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 #endregion
 
@@ -33,6 +101,13 @@ func serialize_spawn_data() -> PackedByteArray:
 	# variant
 	buffer.put_u16(variant)
 	
+	# inventory size
+	var inventory_data := inventory.serialize_inventory()
+	buffer.put_u16(len(inventory_data))
+	
+	# inventory
+	buffer.put_data(inventory_data)
+	
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
@@ -41,6 +116,12 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# variant
 	variant = buffer.get_u16() as ChestVariant
+	
+	# inventory size
+	var inventory_size := buffer.get_u16()
+	
+	# inventory
+	inventory.receive_inventory(buffer.get_data(inventory_size)[1])
 	
 	setup_variant()
 

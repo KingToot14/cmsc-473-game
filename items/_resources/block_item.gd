@@ -48,14 +48,14 @@ func handle_process(player: PlayerController, mouse_position: Vector2) -> void:
 		return
 	
 	# check range
-	if not is_point_in_range(player, mouse_position):
+	if not player.is_point_in_range(mouse_position):
 		return
 	
 	place_block(player, mouse_position)
 
 func handle_interact_mouse_press(player: PlayerController, mouse_position: Vector2) -> void:
 	# check range
-	if not is_point_in_range(player, mouse_position):
+	if not player.is_point_in_range(mouse_position):
 		return
 	
 	mouse_pressed = true

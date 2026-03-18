@@ -67,15 +67,17 @@ func _process(_delta: float) -> void:
 	
 	Globals.set_cursor(Globals.CursorType.ARROW)
 
-func _gui_input(event: InputEvent) -> void:
-	# calculate global mouse position
+func _input(event: InputEvent) -> void:
 	var mouse_position := player.get_global_mouse_position()
-	var tile_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 	
 	# only used for client-side interaction
 	if event.is_action_pressed(&'interact'):
-		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(tile_position):
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(mouse_position):
 			return
+
+func _gui_input(event: InputEvent) -> void:
+	# calculate global mouse position
+	var mouse_position := player.get_global_mouse_position()
 		
 	if event.is_action_pressed(&'break_place'):
 		# check if player can act
