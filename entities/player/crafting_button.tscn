@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="2_s46wt"]
 
 [node name="CraftingButton" type="Button" unique_id=962517664]
-custom_minimum_size = Vector2(100, 30)
+custom_minimum_size = Vector2(18, 18)
 focus_mode = 0
 script = ExtResource("1_5j5g8")
 

@@ -27,8 +27,10 @@ func update_availability(inv: Inventory):
 	disabled = not CraftingManager.can_craft(recipe, inv)
 	modulate.a = 1.0 if not disabled else 0.5
 
+var recipe_index: int
+
 func _on_pressed():
-	CraftingManager.craft_item(recipe, Globals.player.my_inventory)
+	Globals.player.my_inventory.request_craft(recipe_index)
 
 func _on_mouse_entered():
 	Globals.mouse.cursor_locked = true

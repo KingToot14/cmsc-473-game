@@ -13,10 +13,15 @@ var held_item := ItemStack.new(-1, 0)
 
 var owner_id := 0
 
+var recipes: Array[Recipe] = [] #add more recipes in the inspector
+
 # --- Functions --- #
-func _init(slots := INVENTORY_SLOTS):
-	for i in range(slots): # 50 empty inventory slots
-		items.append(ItemStack.new(-1, 0)) # list of items stored in items array
+
+func _init():
+	for i in range(INVENTORY_SLOTS):
+		items.append(ItemStack.new(-1, 0))
+	# Load recipes immediately when the inventory is created
+	_load_recipes()
 
 #region Inventory Management
 func add_item(item_id: int, amount: int) -> int:
@@ -292,6 +297,38 @@ func receive_inventory(inventory_data: PackedByteArray) -> void:
 	
 	# update inventory
 	inventory_updated.emit()
+
+func _load_recipes() -> void:
+	recipes.clear()
+	var path = "res://entities/player/recipes"
+	var dir = DirAccess.open(path)
+	
+	if dir:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		
+		while file_name != "":
+			if file_name.ends_with(".tres") or file_name.ends_with(".res"):
+				var recipe = load(path + "/" + file_name) as Recipe
+				if recipe:
+					recipes.append(recipe)
+			file_name = dir.get_next()
+
+# requests the server to craft a specific recipe
+func request_craft(recipe_index: int) -> void:
+	if multiplayer.is_server():
+		
+		if recipe_index >= 0 and recipe_index < recipes.size():
+			var recipe = recipes[recipe_index]
+			if CraftingManager.can_craft(recipe, self):
+				CraftingManager.craft_item(recipe, self) 
+	else:
+		send_craft_request.rpc_id(1, recipe_index)
+
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_craft_request(recipe_index: int) -> void:
+	request_craft(recipe_index)
 
 #endregion
 
