@@ -13,7 +13,10 @@ var current_biome: StringName = &"forest"
 var current_layer: StringName = &'surface'
 
 func check_biome(player_pos: Vector2) -> void:
-	var center_tile = TileManager.world_to_tile(player_pos.x, player_pos.y) 
+	var center_tile = TileManager.world_to_tile(
+		floori(player_pos.x),
+		floori(player_pos.y)
+	) 
 	
 	# check layer (lower y = higher elevation)
 	if center_tile.y > Globals.underground:

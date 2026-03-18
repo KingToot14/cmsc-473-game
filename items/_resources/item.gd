@@ -94,14 +94,3 @@ func item_deselected(player: PlayerController, mouse_position) -> void:
 	pass
 
 #endregion
-
-#region Helper Functions
-## Returns whether or not [param position] is in range of [param player].
-## [br]Has an optional [param range_modifier] which gets added to
-## [member PlayerController.base_range]
-func is_point_in_range(player: PlayerController, position: Vector2, range_modifier := 0) -> bool:
-	var player_range: float = (player.base_range + range_modifier) * TileManager.TILE_SIZE
-	
-	return position.distance_to(player.center_point) <= player_range
-
-#endregion

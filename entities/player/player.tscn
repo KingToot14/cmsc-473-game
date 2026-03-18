@@ -1063,6 +1063,7 @@ water_rules = Dictionary[StringName, ExtResource("27_2soq1")]({
 })
 
 [node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]
+self_modulate = Color(1, 1, 1, 0.7058824)
 
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
 

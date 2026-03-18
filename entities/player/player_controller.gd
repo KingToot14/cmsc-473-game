@@ -424,6 +424,7 @@ func done_initial_load() -> void:
 	# TODO: Move to BiomeManager when implemented
 	if owner_id == multiplayer.get_unique_id():
 		enter_biome(Globals.music.Area.FOREST_DAY)
+
 #endregion
 
 func enter_biome(area: MusicManager.Area) -> void:
@@ -433,6 +434,19 @@ func enter_biome(area: MusicManager.Area) -> void:
 #region Interest
 func add_interest(entity_id: int) -> void:
 	interested_entities[entity_id] = true
+
 func remove_interest(entity_id: int) -> void:
 	interested_entities.erase(entity_id)
+
+#endregion
+
+#region Helper Functions
+## Returns whether or not [param point] is in range of this player.
+## [br]Has an optional [param range_modifier] which gets added to
+## [member base_range]
+func is_point_in_range(point: Vector2, range_modifier := 0) -> bool:
+	var player_range: float = (base_range + range_modifier) * TileManager.TILE_SIZE
+	
+	return point.distance_to(center_point) <= player_range
+
 #endregion

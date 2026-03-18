@@ -47,7 +47,7 @@ func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: 
 	# play swing animation
 	do_swing(player, mouse_position)
 	
-	if not is_point_in_range(player, mouse_position):
+	if not player.is_point_in_range(mouse_position):
 		return # this checks to make sure the player is in range of the block.
 	
 	if tool_type & ToolType.AXE:

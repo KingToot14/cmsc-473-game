@@ -990,11 +990,6 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
 	
-	var dirty_x := start_x + width
-	var dirty_y := start_y + height
-	var dirty_width := 0
-	var dirty_height := 0
-	
 	var dirty_chunks: Dictionary[Vector2i, bool] = {}
 	
 	for y in range(height):
@@ -1002,16 +997,8 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			var tile := data[x + y * width]
 			var idx := (start_x + x) + (start_y + y) * world_width
 			
-			# only update tiles 
-			#if tiles[idx] != tile:
 			# update tile
 			tiles[idx] = tile
-			
-			# shrink update region
-			dirty_x = min(dirty_x, start_x + x)
-			dirty_y = min(dirty_y, start_y + y)
-			dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
-			dirty_height = start_y + y - dirty_y + 1
 			
 			# set chunk as dirty
 			@warning_ignore('integer_division')
@@ -1035,10 +1022,6 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 	
 	# push water update all at once
 	push_water_texture_update()
-	
-	# only change updated tiles
-	#if dirty_width != 0 and dirty_height != 0:
-		#Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion
 

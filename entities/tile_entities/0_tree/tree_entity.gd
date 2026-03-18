@@ -148,7 +148,9 @@ func update_layer_damage(layer_id: int) -> void:
 #endregion
 
 #region Interaction
-func break_place(tile_pos: Vector2i) -> bool:
+func break_place(mouse_position: Vector2) -> bool:
+	var tile_pos := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
+	
 	var layer := absi(tile_pos.y - tile_position.y) - 1
 	
 	# only damage layers inside current height
@@ -309,8 +311,6 @@ func serialize_spawn_data() -> PackedByteArray:
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
-	id = buffer.get_u32()
-	
 	# process base snapshot
 	super(buffer)
 	

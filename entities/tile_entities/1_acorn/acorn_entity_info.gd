@@ -7,7 +7,7 @@ extends TileEntityInfo
 var curr_variant := TreeEntity.TreeVariant.FOREST
 
 # --- Functions --- #
-func setup_placement_preview(mouse_position: Vector2) -> void:
+func setup_placement_preview(mouse_position: Vector2, _variant := &'') -> void:
 	# set tile position
 	var preview := Globals.mouse.placement_preview
 	
