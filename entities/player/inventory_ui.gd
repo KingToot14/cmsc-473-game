@@ -11,7 +11,6 @@ const HOTBAR_INPUTS = [
 @onready var main_grid = $"inventory_grid"
 @onready var hotbar_grid = $"../hotbar_container/hotbar_grid"
 
-@export var recipes: Array[Recipe] = [] # Populate this in the Inspector
 @export var crafting_button_scene: PackedScene
 @onready var crafting_buttons_container = $"../crafting_container/crafting_buttons"
 
@@ -21,7 +20,6 @@ var holding_item := false
 var hovered_slot := -1
 
 # --- Functions --- #
-# Inside inventory_ui.gd
 
 func _input(event: InputEvent) -> void:
 	# check for hotbar inputs
@@ -35,7 +33,7 @@ func _input(event: InputEvent) -> void:
 		if holding_item and visible and hovered_slot == -1:
 			var drop_pos = Globals.player.get_global_mouse_position()
 			
-			# Check if the player exists before calling the inventory
+			# check if the player exists before calling the inventory
 			if Globals.player:
 				Globals.player.my_inventory.drop_held_item(drop_pos) 
 			
@@ -57,7 +55,7 @@ func setup_ui(player_inventory: Inventory):
 	for child in main_grid.get_children() + hotbar_grid.get_children():
 		child.free()
 	
-	# Create visual slots
+	# create visual slots
 	for i in range(player_inventory.items.size()):
 		var new_slot: InventorySlot = slot_scene.instantiate()
 		
@@ -65,7 +63,7 @@ func setup_ui(player_inventory: Inventory):
 		new_slot.mouse_entered.connect(_on_slot_mouse_entered.bind(player_inventory, i))
 		new_slot.mouse_exited.connect(_on_slot_mouse_exited.bind(player_inventory, i))
 		
-		# First 10 go to hotbar, rest to main inventory
+		# first 10 go to hotbar, rest to main inventory
 		if i < HOTBAR_SIZE:
 			hotbar_grid.add_child(new_slot)
 			new_slot.is_hotbar = true
@@ -82,31 +80,22 @@ func setup_ui(player_inventory: Inventory):
 	refresh_ui(player_inventory)
 
 func setup_crafting_ui():
-	# Clear any dummy buttons you made in the editor
+	# Clean up old buttons
 	for child in crafting_buttons_container.get_children():
 		child.queue_free()
-		
-	var path = "res://entities/player/recipes"
-	var dir = DirAccess.open(path)
 	
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		
-		while file_name != "":
-			# Make sure we only load Godot resource files
-			if file_name.ends_with(".tres") or file_name.ends_with(".res"):
-				# Load the Recipe resource
-				var recipe = load(path + "/" + file_name) as Recipe
-				if recipe:
-					# Spawn a button for it!
-					var btn = crafting_button_scene.instantiate()
-					btn.recipe = recipe
-					crafting_buttons_container.add_child(btn)
-				file_name = dir.get_next()
+	# Get the recipes from the inventory we are displaying
+	var player_inv = Globals.player.my_inventory
+	
+	for i in range(player_inv.recipes.size()):
+		var recipe = player_inv.recipes[i]
+		var btn = crafting_button_scene.instantiate()
+		btn.recipe = recipe
+		btn.recipe_index = i # This index perfectly matches the inventory array
+		crafting_buttons_container.add_child(btn)
 
 func refresh_ui(player_inventory: Inventory):
-	# Combine children of both grids to match the order of the items array
+	# combine children of both grids to match the order of the items array
 	var all_slots = hotbar_grid.get_children() + main_grid.get_children()
 	for i in range(player_inventory.items.size()):
 		all_slots[i].update_slot(player_inventory.items[i])

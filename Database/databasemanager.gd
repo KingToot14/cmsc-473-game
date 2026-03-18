@@ -4,11 +4,9 @@ var db := SQLite.new()
 
 func _ready():
 	if multiplayer.is_server():
-		db.open("user://game.db")
+		db.path = "user://game.db"
+		db.open_db()
 		create_tables()
-	db.path = "user://game.db"
-	db.open_db()
-	create_tables()
 
 # TABLE CREATION (SERVER ONLY)
 func create_tables():

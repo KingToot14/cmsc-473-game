@@ -14,4 +14,5 @@ item_id = 7
 item_name = "Wooden Pickaxe"
 texture = ExtResource("3_03ynu")
 tooltip = "An untrusty pickaxe. "
+max_stack = 1
 metadata/_custom_type_script = "uid://dfkswaldm4e5a"

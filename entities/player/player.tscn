@@ -1215,5 +1215,7 @@ grow_vertical = 0
 horizontal_scroll_mode = 0
 
 [node name="crafting_buttons" type="GridContainer" parent="inventory_ui/crafting_container" unique_id=2117356799]
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
+theme_override_constants/h_separation = 2
 columns = 5

@@ -13,4 +13,5 @@ item_id = 10
 item_name = "Wooden Axe"
 texture = ExtResource("3_u0flk")
 tooltip = "An axe that will barely chop a tree."
+max_stack = 1
 metadata/_custom_type_script = "uid://dfkswaldm4e5a"

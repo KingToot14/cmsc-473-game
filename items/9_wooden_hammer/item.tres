@@ -14,4 +14,5 @@ item_id = 9
 item_name = "Wooden Hammer"
 texture = ExtResource("3_g7yx6")
 tooltip = "Probably the sadest hammer you will ever see."
+max_stack = 1
 metadata/_custom_type_script = "uid://dfkswaldm4e5a"
