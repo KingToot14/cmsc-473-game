@@ -52,6 +52,27 @@ func grow_to_tree() -> void:
 
 #endregion
 
+#region Interaction
+func break_place(tile_pos: Vector2i) -> bool:
+	# check held item
+	var item_stack := Globals.player.my_inventory.get_selected_item()
+	var item := ItemDatabase.get_item(item_stack.item_id)
+	
+	# make sure item is a tool
+	if not item or item is not ToolItem:
+		return false
+	
+	# make sure tool is an axe
+	if not item.tool_type & ToolItem.ToolType.AXE:
+		return false
+	
+	# deal damage based on tool power
+	hp.take_damage(item.tool_power, DamageSource.DamageSourceType.PLAYER)
+	
+	return true
+
+#endregion
+
 #region Placement
 func setup_variant() -> void:
 	match variant:

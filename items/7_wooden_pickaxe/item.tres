@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://cj4mtahy6gpfl"]
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://bs5vaobxlyido"]
 
 [ext_resource type="PackedScene" uid="uid://cuplg84yd21bp" path="res://items/7_wooden_pickaxe/wooden_pickaxe.tscn" id="1_r4xpt"]
 [ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_r4xpt"]
@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("2_r4xpt")
-tool_type = 1
+tool_type = 2
 force_towards_mouse = true
 use_speed = 0.6
 default_swing_object = ExtResource("1_r4xpt")

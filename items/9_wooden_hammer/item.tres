@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://0g7akqlayoqi"]
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://ddy7horgmykm7"]
 
 [ext_resource type="PackedScene" uid="uid://cbl55ji2g7o1d" path="res://items/9_wooden_hammer/wooden_hammer.tscn" id="1_g7yx6"]
 [ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_g7yx6"]
@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("2_g7yx6")
-tool_type = 2
+tool_type = 4
 force_towards_mouse = true
 use_speed = 0.6
 default_swing_object = ExtResource("1_g7yx6")

@@ -149,16 +149,27 @@ func update_layer_damage(layer_id: int) -> void:
 
 #region Interaction
 func break_place(tile_pos: Vector2i) -> bool:
-	var layer = abs(tile_pos.y - tile_position.y) - 1
+	var layer := absi(tile_pos.y - tile_position.y) - 1
 	
 	# only damage layers inside current height
 	if layer < 0 or layer > curr_height:
 		return true
 	
-	# TODO: Deal damage based on axe/tool
-	damage_layer(layer, 25)
+	# check held item
+	var item_stack := Globals.player.my_inventory.get_selected_item()
+	var item := ItemDatabase.get_item(item_stack.item_id)
 	
-	# TODO: Only return true if atempting to break with an axe
+	# make sure item is a tool
+	if not item or item is not ToolItem:
+		return false
+	
+	# make sure tool is an axe
+	if not item.tool_type & ToolItem.ToolType.AXE:
+		return false
+	
+	# deal damage based on tool power
+	damage_layer(layer, item.tool_power)
+	
 	return true
 
 #endregion
