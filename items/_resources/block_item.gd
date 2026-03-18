@@ -109,8 +109,6 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 	var item_object = preload('res://items/_resources/item_tool.tscn').instantiate()
 	item_object.get_node(^'sprite').texture = texture
 	
-	do_swing(player, mouse_position, item_object)
-	
 	# attempt to place block
 	match tile_type:
 		TileType.BLOCK:
@@ -119,12 +117,18 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+			
 		TileType.WALL:
 			if TileManager.place_wall(tile_position.x, tile_position.y, item_id):
 				# decrement item TODO: check held item first
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+			
 		TileType.TILE:
 			var entity_info: EntityInfo = EntityManager.tile_entity_registry.get(tile_id)
 			
@@ -136,3 +140,7 @@ func place_block(player: PlayerController, mouse_position: Vector2) -> void:
 				var hotbar_slot: int = player.my_inventory.hotbar_slot
 				
 				player.my_inventory.remove_item_at(item_id, 1, hotbar_slot)
+			else:
+				return
+	
+	do_swing(player, mouse_position, item_object)
