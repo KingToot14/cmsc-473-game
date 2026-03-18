@@ -372,25 +372,33 @@ func build_water_texture() -> void:
 	var player_pos := Globals.player.center_point
 	var chunk := world_to_chunk(floori(player_pos.x), floori(player_pos.y))
 	var start_chunk = chunk - ChunkLoader.VISUAL_RANGE
-	water_origin = chunk_to_tile(start_chunk.x, start_chunk.y)
+	var origin := chunk_to_tile(start_chunk.x, start_chunk.y)
 	
 	var data := PackedByteArray()
 	data.resize(WATER_WIDTH * WATER_HEIGHT)
 	
 	var idx := 0
+	var processed := 0
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
-		var row := (water_origin.y + y) * world_width
+		var row := (origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			data[idx] = (tiles[row + water_origin.x + x] >> 20) & MASK_EIGHT
+			data[idx] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
 			
 			idx += 1
+			processed += 1
+			
+			if processed == 2048:
+				await get_tree().process_frame
+				processed = 0
 	
 	# update texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
 	water_texture.update(water_image)
+	
+	water_origin = origin
 	
 	push_water_texture_update()
 
@@ -982,33 +990,22 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
 	
-	var dirty_x := start_x + width
-	var dirty_y := start_y + height
-	var dirty_width := 0
-	var dirty_height := 0
+	var dirty_chunks: Dictionary[Vector2i, bool] = {}
 	
 	for y in range(height):
 		for x in range(width):
 			var tile := data[x + y * width]
 			var idx := (start_x + x) + (start_y + y) * world_width
 			
-			# only update tiles 
-			#if tiles[idx] != tile:
 			# update tile
 			tiles[idx] = tile
 			
-			# shrink update region
-			dirty_x = min(dirty_x, start_x + x)
-			dirty_y = min(dirty_y, start_y + y)
-			dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
-			dirty_height = start_y + y - dirty_y + 1
-			
 			# set chunk as dirty
 			@warning_ignore('integer_division')
-			Globals.world_map.chunk_states[Vector2i(
+			dirty_chunks[Vector2i(
 				(start_x + x) / CHUNK_SIZE,
 				(start_y + y) / CHUNK_SIZE
-			)] = WorldTileMap.UpdateState.DIRTY
+			)] = true
 			
 			# update water texture
 			update_water_texture(start_x + x, start_y + y, false)
@@ -1019,12 +1016,12 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			processed = 0
 			await get_tree().process_frame
 	
+	# set chunk state
+	for chunk in dirty_chunks:
+		Globals.world_map.chunk_states[chunk] = WorldTileMap.UpdateState.DIRTY
+	
 	# push water update all at once
 	push_water_texture_update()
-	
-	# only change updated tiles
-	if dirty_width != 0 and dirty_height != 0:
-		Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
 
 #endregion
 
@@ -1056,11 +1053,7 @@ func save_world() -> void:
 	buffer.put_data(tiles.to_byte_array())
 	
 	# - Entity Data - #
-	print("Pre-Entity Pointer: ", buffer.get_position())
-	
 	buffer.put_data(EntityManager.get_persistent_entities())
-	
-	print("Entity Pointer: ", buffer.get_position())
 	
 	# - Write - #
 	var file := FileAccess.open("user://world/%s.save" % Globals.world_name, FileAccess.WRITE)
@@ -1098,13 +1091,10 @@ func load_world() -> bool:
 	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
 	
 	# - Entity Data - #
-	print("Pre-Entity Pointer: ", buffer.get_position())
-	
 	EntityManager.load_persistent_entities(buffer)
 	
-	print("Entity Pointer: ", buffer.get_position())
-	
-	# logging
+	# finishing
+	ActivationPass.new().start_pass(null)
 	print("[Wizbowo's Conquest] World Loaded!")
 	
 	return true

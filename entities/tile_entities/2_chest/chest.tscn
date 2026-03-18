@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://bfm11s6bppakd"]
+
+[ext_resource type="Script" uid="uid://cg0bss5y65hdm" path="res://entities/tile_entities/2_chest/chest_entity.gd" id="1_xxhxo"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_0cexg"]
+[ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="2_fac27"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="3_fac27"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_00tvw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
+resource_local_to_scene = true
+size = Vector2(14, 14)
+
+[node name="chest" type="CharacterBody2D" unique_id=1877535798 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
+collision_layer = 64
+collision_mask = 0
+script = ExtResource("1_xxhxo")
+interpolator = NodePath("entity_interpolator")
+hp = NodePath("hp")
+metadata/_custom_type_script = "uid://cg0bss5y65hdm"
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=846430157]
+position = Vector2(8, 4)
+texture = ExtResource("2_fac27")
+hframes = 2
+
+[node name="entity_interpolator" type="Node" parent="." unique_id=646767752 node_paths=PackedStringArray("root")]
+script = ExtResource("2_0cexg")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="hp" type="Node" parent="." unique_id=622851920 node_paths=PackedStringArray("entity")]
+script = ExtResource("3_fac27")
+entity = NodePath("..")
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
+visible = false
+position = Vector2(8, 1)
+shape = SubResource("RectangleShape2D_jvdps")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=1111801398 node_paths=PackedStringArray("entity")]
+position = Vector2(8, 1)
+collision_layer = 64
+collision_mask = 65
+script = ExtResource("4_00tvw")
+entity = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=621062776]
+shape = SubResource("RectangleShape2D_jvdps")

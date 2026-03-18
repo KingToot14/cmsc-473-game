@@ -1,8 +1,14 @@
 [gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://d2fd71npwecyw"]
 
 [ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_8srkp"]
+[ext_resource type="Texture2D" uid="uid://c6gs04qefspyk" path="res://entities/tile_entities/1_acorn/icon.png" id="2_0kdna"]
 
 [resource]
 script = ExtResource("1_8srkp")
-force_towards_mouse = true
+tile_type = 2
+tile_id = 1
+use_speed = 0.25
+item_name = "Acorn"
+texture = ExtResource("2_0kdna")
+tooltip = "A tiny acorn that grows into large tree with time."
 metadata/_custom_type_script = "uid://drm3bg40b8m1s"

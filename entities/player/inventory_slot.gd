@@ -56,6 +56,7 @@ func set_selected(value: bool) -> void:
 		
 		# update player's hotbar slot
 		Globals.player.my_inventory.hotbar_slot = get_index()
+		Globals.player.my_inventory.inventory_updated.emit()
 		
 		# update other hotbar slots
 		for slot: InventorySlot in get_tree().get_nodes_in_group(&'hotbar_slot'):

@@ -180,8 +180,11 @@ func reset_cursors() -> void:
 	set_cursor(current_cursor)
 
 func set_cursor(type: CursorType) -> void:
+	if type == current_cursor:
+		return
+	
 	var cursor_image: Image
-	var hotspot := Vector2(2, 2)
+	var hotspot := Vector2(0, 0)
 	
 	current_cursor = type
 	

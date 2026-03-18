@@ -5,15 +5,18 @@ extends Control
 @export var player: PlayerController
 
 @export var grid_overlay: Control
+@export var placement_preview: Sprite2D
 
 var current_item: Item
-
 var cursor_locked := false
 
 # --- Functions --- #
 func _ready() -> void:
 	if player.owner_id == multiplayer.get_unique_id():
 		Globals.mouse = self
+		
+		# listen for inventory updates
+		player.my_inventory.inventory_updated.connect(_on_inventory_changed)
 
 func _process(_delta: float) -> void:
 	# update grid overlay position (snap to actual tile grid)
@@ -64,35 +67,48 @@ func _process(_delta: float) -> void:
 	
 	Globals.set_cursor(Globals.CursorType.ARROW)
 
-func _gui_input(event: InputEvent) -> void:
-	# calculate global mouse position
+func _input(event: InputEvent) -> void:
 	var mouse_position := player.get_global_mouse_position()
-	var tile_position := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 	
 	# only used for client-side interaction
 	if event.is_action_pressed(&'interact'):
-		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(tile_position):
+		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(mouse_position):
 			return
+
+func _gui_input(event: InputEvent) -> void:
+	# calculate global mouse position
+	var mouse_position := player.get_global_mouse_position()
+		
 	if event.is_action_pressed(&'break_place'):
 		# check if player can act
 		if not player.can_act():
 			return
 		
-		# check if hotbar item is empty
-		var item_stack := player.my_inventory.get_selected_item()
-		
 		# check if item exists
-		current_item = ItemDatabase.get_item(item_stack.item_id)
 		if current_item:
 			current_item.handle_interact_mouse_press(player, mouse_position)
-	elif event.is_action_released(&'break_place'):
-		# check if hotbar item is empty
-		var item_stack := player.my_inventory.get_selected_item()
 		
+	elif event.is_action_released(&'break_place'):
 		# check if item exists
-		current_item = ItemDatabase.get_item(item_stack.item_id)
 		if current_item:
 			current_item.handle_interact_mouse_release(player, mouse_position)
-		
-		# clear item
+
+func _on_inventory_changed() -> void:
+	var item_stack := player.my_inventory.get_selected_item()
+	
+	# don't process if item already set
+	if current_item and item_stack.item_id == current_item.item_id:
+		return
+	
+	# disable old item
+	if current_item:
+		current_item.handle_selected_end()
+	
+	# check for null item
+	if item_stack.item_id == -1:
 		current_item = null
+		return
+	
+	# otherwise update current item
+	current_item = ItemDatabase.get_item(item_stack.item_id)
+	current_item.handle_selected_start()

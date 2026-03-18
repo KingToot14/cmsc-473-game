@@ -102,7 +102,8 @@ func setup_entity() -> void:
 	tree_top.show()
 	
 	# hitbox
-	$'hitbox'.position.y = -(height * 8.0 / 2.0)
+	$'shape'.position.y = -(height * 4.0)
+	$'hitbox'.position.y = -(height * 4.0)
 	$'hitbox/shape'.shape.size.y = (height * 8.0)
 
 func resize_tree() -> void:
@@ -121,7 +122,8 @@ func resize_tree() -> void:
 		sprite.erase_cell(Vector2i(1, -(y + 1)))
 	
 	# hitbox
-	$'hitbox'.position.y = -(curr_height * 8.0 / 2.0)
+	$'shape'.position.y = -(curr_height * 4.0)
+	$'hitbox'.position.y = -(curr_height * 4.0)
 	$'hitbox/shape'.shape.size.y = (curr_height * 8.0)
 
 func update_layer_damage(layer_id: int) -> void:
@@ -146,17 +148,30 @@ func update_layer_damage(layer_id: int) -> void:
 #endregion
 
 #region Interaction
-func break_place(tile_pos: Vector2i) -> bool:
-	var layer = abs(tile_pos.y - tile_position.y) - 1
+func break_place(mouse_position: Vector2) -> bool:
+	var tile_pos := TileManager.world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
+	
+	var layer := absi(tile_pos.y - tile_position.y) - 1
 	
 	# only damage layers inside current height
 	if layer < 0 or layer > curr_height:
 		return true
 	
-	# TODO: Deal damage based on axe/tool
-	damage_layer(layer, 25)
+	# check held item
+	var item_stack := Globals.player.my_inventory.get_selected_item()
+	var item := ItemDatabase.get_item(item_stack.item_id)
 	
-	# TODO: Only return true if atempting to break with an axe
+	# make sure item is a tool
+	if not item or item is not ToolItem:
+		return false
+	
+	# make sure tool is an axe
+	if not item.tool_type & ToolItem.ToolType.AXE:
+		return false
+	
+	# deal damage based on tool power
+	damage_layer(layer, item.tool_power)
+	
 	return true
 
 #endregion
@@ -296,8 +311,6 @@ func serialize_spawn_data() -> PackedByteArray:
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
-	id = buffer.get_u32()
-	
 	# process base snapshot
 	super(buffer)
 	
@@ -328,8 +341,14 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 #endregion
 
 #region Spawning
-@warning_ignore("shadowed_variable", "shadowed_variable_base_class")
-static func create(position: Vector2i, variant: TreeVariant):
+static func create(tile_pos: Vector2i, tree_variant: TreeVariant, tree_seed := -1):
+	if tree_seed == -1:
+		tree_seed = randi()
+	
+	# make sure there's enough space above
+	if not is_space_available(tile_pos, tree_variant, tree_seed):
+		return
+	
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(0).entity_scene
 	if not entity_scene:
@@ -338,14 +357,34 @@ static func create(position: Vector2i, variant: TreeVariant):
 	var entity: TreeEntity = entity_scene.instantiate()
 	
 	# setup default parameters
-	entity.tile_position = position
-	entity.global_position = TileManager.tile_to_world(position.x, position.y)
-	entity.variant = variant
+	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
-	entity.branch_seed = randi()
+	entity.variant = tree_variant
+	entity.branch_seed = tree_seed
 	
 	entity.setup_height()
 	
 	EntityManager.store_tile_entity(0, entity)
+
+static func is_space_available(tile_pos: Vector2i, tree_variant: TreeVariant, tree_seed: int) -> bool:
+	var tree_height := get_tree_height(tree_variant, tree_seed)
+	
+	# make sure each block is available
+	for y in range(tree_height):
+		if TileManager.get_block(tile_pos.x, tile_pos.y - y) != 0:
+			return false
+		if TileManager.get_block(tile_pos.x + 1, tile_pos.y - y) != 0:
+			return false
+	
+	return true
+
+static func get_tree_height(tree_variant: TreeVariant, tree_seed: int) -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = tree_seed
+	
+	match tree_variant:
+		_:
+			return rng.randi_range(15, 21)
 
 #endregion

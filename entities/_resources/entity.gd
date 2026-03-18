@@ -263,10 +263,12 @@ func do_flash() -> void:
 #endregion
 
 #region Interaction
-func interact_with(_tile_position: Vector2i) -> bool:
+@warning_ignore("unused_parameter")
+func interact_with(mouse_position: Vector2) -> bool:
 	return true
 
-func break_place(_tile_position: Vector2i) -> bool:
+@warning_ignore("unused_parameter")
+func break_place(mouse_position: Vector2) -> bool:
 	return true
 
 func handle_action(action_info: PackedByteArray) -> void:

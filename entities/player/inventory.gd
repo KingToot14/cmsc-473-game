@@ -16,10 +16,7 @@ var owner_id := 0
 var recipes: Array[Recipe] = [] #add more recipes in the inspector
 
 # --- Functions --- #
-#func _init():
-	#for i in range(INVENTORY_SLOTS): # 50 empty inventory slots
-		#items.append(ItemStack.new(-1, 0)) # list of items stored in items array
-		
+
 func _init():
 	for i in range(INVENTORY_SLOTS):
 		items.append(ItemStack.new(-1, 0))
@@ -204,7 +201,6 @@ func drop_held_item(drop_position: Vector2) -> void:
 func send_drop_item(drop_position: Vector2) -> void:
 	#ensure the drop position is within a reasonable distance of the player
 	var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
-	print(drop_position, " | ", player.global_position)
 	
 	if is_instance_valid(player) and drop_position.distance_to(player.global_position) < 500:
 		drop_held_item(drop_position)
@@ -224,9 +220,12 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 		
 		if diff <= 0:
 			stack.item_id = -1
-			count = abs(diff)
-		else:
-			count = 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_remove_item_at.rpc_id(Globals.SERVER_ID, item_id, count, slot)
 	
 	inventory_updated.emit()
 
@@ -240,7 +239,8 @@ func load_inventory() -> void:
 	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
 	add_item(14, 30)	# sand
-	add_item(15, 30)	# clay
+	add_item(11, 10)	# acorns
+	add_item(24, 4)		# chests
 
 #endregion
 
@@ -254,25 +254,32 @@ func send_remove_item(item_id: int, amount: int) -> void:
 	remove_item(item_id, amount)
 
 @rpc('any_peer', 'call_remote', 'reliable')
+func send_remove_item_at(item_id: int, amount: int, slot: int) -> void:
+	remove_item_at(item_id, amount, slot)
+
+@rpc('any_peer', 'call_remote', 'reliable')
 func send_mouse_input(index: int) -> void:
 	interact_with_slot(index)
 
-func send_inventory() -> void:
+func serialize_inventory() -> PackedByteArray:
 	# buffer: (int16 for item_id, int16 for quantity) for every slot + held_item
 	var buffer := StreamPeerBuffer.new()
-	buffer.resize(INVENTORY_SLOTS * (2 + 2) + (2 + 2))
+	buffer.resize(len(items) * (2 + 2) + (2 + 2))
 	
 	# held item
 	buffer.put_16(held_item.item_id)
 	buffer.put_16(held_item.count)
 	
 	# main inventory
-	for i in range(INVENTORY_SLOTS):
+	for i in range(len(items)):
 		buffer.put_16(items[i].item_id)
 		buffer.put_16(items[i].count)
 	
+	return buffer.data_array
+
+func send_inventory() -> void:
 	# send to client
-	receive_inventory.rpc_id(owner_id, buffer.data_array)
+	receive_inventory.rpc_id(owner_id, serialize_inventory())
 
 @rpc('authority', 'call_remote', 'reliable')
 func receive_inventory(inventory_data: PackedByteArray) -> void:
@@ -284,7 +291,7 @@ func receive_inventory(inventory_data: PackedByteArray) -> void:
 	held_item.count   = buffer.get_16()
 	
 	# main inventory
-	for i in range(INVENTORY_SLOTS):
+	for i in range(len(items)):
 		items[i].item_id = buffer.get_16()
 		items[i].count   = buffer.get_16()
 	
@@ -328,6 +335,8 @@ func send_craft_request(recipe_index: int) -> void:
 #region Selected Item
 func get_selected_item() -> ItemStack:
 	# TODO: Check item held by mouse
+	if held_item.item_id != -1:
+		return held_item
 	
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]
