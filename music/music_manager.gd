@@ -126,11 +126,11 @@ func play_track(area: Area, variant := -1) -> void:
 	play()
 	print("Is playing: ", playing)
 
-func _on_biome_changed(new_biome: StringName) -> void:
+func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	match new_biome:
-		&"winter":
+		BiomeManager.Biome.SNOW:
 			play_track(Area.WINTER_DAY)
-		&"forest":
+		BiomeManager.Biome.FOREST:
 			play_track(Area.FOREST_DAY)
 
 ## Resets the queue and intro state for [param area], so the intro plays

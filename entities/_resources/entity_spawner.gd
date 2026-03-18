@@ -5,7 +5,7 @@ extends Node
 const PLAYER_CAP := 20.0
 const GLOBAL_CAP := 150.0
 
-@export var spawn_rate := 2.0
+@export var spawn_rate := 10.0
 var spawn_timer := spawn_rate
 
 var current_player_count := 0
@@ -43,7 +43,7 @@ func attempt_spawn() -> void:
 	
 	# get current spawning player
 	var spawn_player_id: int = spawn_player_queue[spawn_player_index]
-	var spawn_player: PlayerController = ServerManager.connected_players.get(spawn_player_id)
+	var spawn_player: PlayerController = ServerManager.get_player(spawn_player_id)
 	if not spawn_player:
 		return
 	
@@ -53,7 +53,7 @@ func attempt_spawn() -> void:
 	
 	var total_entities := 0
 	for player_id in ServerManager.connected_players.keys():
-		var player: PlayerController = ServerManager.connected_players[player_id]
+		var player: PlayerController = ServerManager.get_player(spawn_player_id)
 		
 		var chunk: Vector2i = TileManager.world_to_chunk(
 			floori(player.center_point.x),
@@ -110,8 +110,8 @@ func attempt_spawn() -> void:
 		return
 	
 	# get entity from pool
-	var biome := SpawnRule.Biome.FOREST
-	var layer := SpawnRule.Layer.SURFACE
+	var biome := BiomeManager.get_player_biome(spawn_player_id)
+	var layer := BiomeManager.get_player_layer(spawn_player_id)
 	var time := SpawnRule.TimeState.DAY
 	
 	var spawn_rule_ids: Dictionary[SpawnRule, int] = {}
