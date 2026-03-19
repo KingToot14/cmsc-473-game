@@ -155,13 +155,13 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
-		&"space":
+		BiomeManager.Layer.SPACE:
 			enter_area(Area.SPACE)
-		&"surface":
+		BiomeManager.Layer.SURFACE:
 			_on_biome_changed(BiomeManager.current_biome)
-		&"underground":
+		BiomeManager.Layer.UNDERGROUND:
 			enter_area(Area.UNDERGROUND)
-		&"cavern":
+		BiomeManager.Layer.CAVERN:
 			enter_area(Area.CAVERN)
 
 
