@@ -139,23 +139,21 @@ func play_track(area: Area, variant := -1) -> void:
 	print("Is playing: ", playing)
 
 
-func _on_biome_changed(new_biome: StringName) -> void:
+func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	match new_biome:
 		&"winter":
-			if BiomeManager.current_layer==&"surface":
+			if BiomeManager.current_layer == BiomeManager.Layer.SURFACE:
 				enter_area(Area.WINTER_DAY)
-			if BiomeManager.current_layer==&"underground":
+			if BiomeManager.current_layer == BiomeManager.Layer.UNDERGROUND:
 				enter_area(Area.UNDERGROUND)
 		&"forest":
-			if BiomeManager.current_layer==&"surface":
+			if BiomeManager.current_layer == BiomeManager.Layer.SURFACE:
 				enter_area(Area.FOREST_DAY)
 		&"cavern":
-			if BiomeManager.current_layer==&"cavern":
+			if BiomeManager.current_layer == BiomeManager.Layer.CAVERN:
 				enter_area(Area.CAVERN)
 
-
-
-func _on_layer_changed(new_layer: StringName) -> void:
+func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
 		&"space":
 			enter_area(Area.SPACE)
