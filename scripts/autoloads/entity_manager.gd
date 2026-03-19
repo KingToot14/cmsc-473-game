@@ -39,6 +39,12 @@ func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> 
 
 #region Entity Spawning
 func add_entity(registry_id: int, entity: Entity) -> void:
+	# set entity id
+	entity.id = curr_id
+	entity.registry_id = registry_id
+	curr_id += 1
+	
+	# check interest
 	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
@@ -46,11 +52,6 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 	if entity.interest_count == 0:
 		entity.queue_free()
 		return
-	
-	# set entity id
-	entity.id = curr_id
-	entity.registry_id = registry_id
-	curr_id += 1
 	
 	entity.name = "entity_%s" % entity.id
 	
@@ -307,12 +308,9 @@ func load_persistent_entities(buffer: StreamPeerBuffer) -> void:
 			spawn_data.encode_u32(0, id)
 			curr_id += 1
 			
-			var entity_ref: EntityReference = loaded_entities.get(id)
+			var entity_ref: EntityReference = EntityReference.new()
 			
-			if not entity_ref:
-				entity_ref = EntityReference.new()
-				loaded_entities[id] = entity_ref
-			
+			loaded_entities[id] = entity_ref
 			entity_ref.spawn_data = spawn_data
 			entity_ref.registry_id = registry_id
 			entity_ref.is_tile_entity = true
@@ -400,6 +398,7 @@ func load_chunk(chunk: Vector2i, player_id: int) -> void:
 				reference.get_spawn_data()
 			)
 		else:
+			
 			# load on server if not already
 			if not is_instance_valid(reference.current_instance):
 				load_entity(entity_id, reference.registry_id, reference.get_spawn_data())

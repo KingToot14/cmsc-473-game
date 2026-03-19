@@ -5,7 +5,7 @@ extends Node
 const PLAYER_CAP := 20.0
 const GLOBAL_CAP := 150.0
 
-@export var spawn_rate := 10.0
+@export var spawn_rate := 6.0
 var spawn_timer := spawn_rate
 
 var current_player_count := 0
@@ -17,7 +17,7 @@ var rng := RandomNumberGenerator.new()
 # --- Functions --- #
 func _ready() -> void:
 	set_process(false)
-	ServerManager.server_started.connect(func (): set_process(true))
+	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
 func _process(delta: float) -> void:
 	if len(ServerManager.connected_players.keys()) == 0:
