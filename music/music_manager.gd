@@ -37,13 +37,11 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 	],
 	Area.WINTER_NIGHT: [],
 	Area.UNDERGROUND: [
-		"res://music/Caves/Cave 2.ogg"
-		],
-	Area.CAVERN: [
-		"res://music/Caves/Deep Cave 1.ogg"
+		"res://music/Caves/Cave 2.ogg",
 	],
-		
-	
+	Area.CAVERN: [
+		"res://music/Caves/Deep Cave 1.ogg",
+	],
 	Area.DUNGEON: [],
 	Area.SPACE: [
 		"res://music/Space/Space 1.ogg",
@@ -78,13 +76,13 @@ func _ready() -> void:
 	BiomeManager.layer_changed.connect(_on_layer_changed)
 
 	# start playback
-	var args := Globals.parse_arguments()
+	var args = Globals.parse_arguments()
 
 	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
 		AudioServer.set_bus_volume_db(0, -1000)
 		return
-  
+
 	play_track(Area.TITLE_SCREEN)
 
 
@@ -139,6 +137,7 @@ func play_track(area: Area, variant := -1) -> void:
 	print("Is playing: ", playing)
 
 
+<<<<<<< Updated upstream
 func _on_biome_changed(new_biome: StringName) -> void:
 	match new_biome:
 		&"winter":
@@ -152,6 +151,27 @@ func _on_biome_changed(new_biome: StringName) -> void:
 		&"cavern":
 			if BiomeManager.current_layer==&"cavern":
 				enter_area(Area.CAVERN)
+=======
+func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
+	# layer overrides biome music for non-surface layers
+	match BiomeManager.current_layer:
+		BiomeManager.Layer.SPACE:
+			return
+		BiomeManager.Layer.UNDERGROUND:
+			enter_area(Area.UNDERGROUND)
+			return
+		BiomeManager.Layer.CAVERN:
+			enter_area(Area.CAVERN)
+			return
+
+	# surface biome music
+	match new_biome:
+		BiomeManager.Biome.SNOW:
+			enter_area(Area.WINTER_DAY)
+		BiomeManager.Biome.FOREST:
+			enter_area(Area.FOREST_DAY)
+
+>>>>>>> Stashed changes
 
 
 
@@ -171,6 +191,7 @@ func _on_layer_changed(new_layer: StringName) -> void:
 func enter_area(area: Area) -> void:
 	reset_area(area)
 	play_track(area)
+
 
 ## Resets the queue and intro state for [param area], so the intro plays
 ## again next time the player enters it.
