@@ -7,7 +7,8 @@ const CHUNK_SIZE := 16
 const CHUNK_AREA := CHUNK_SIZE * CHUNK_SIZE
 ## The widht and height of each tile in world coordinates
 const TILE_SIZE := 8
-
+## Stores health for tiles that have been damaged
+var tile_damaged: Dictionary = {} #uses the coordinates for key
 ## A bitmask that isolates the bottom 8 bits
 const MASK_EIGHT := (1 << 8) - 1
 ## A bitmask that isolates the bottom 10 bits
@@ -472,6 +473,53 @@ func receive_water_update(water_data: PackedByteArray) -> void:
 #endregion
 
 #region Safe Interactions
+
+func get_block_health(block_id: int): #takes block id
+	var block = BlockDatabase.get_block(block_id)
+	if block is BlockInfo: #makes sure its pulling block info
+		return block.block_health #should return the variable for block health in block info NOT in item.
+	else: 
+		return -1 #this should not happen
+
+func hurt_block(x: int, y:int, tool_power: int):
+		# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# do not process if no block exists
+	if not TileManager.get_block_unsafe(x, y):
+		return false
+		
+	# check for reserved tiles using physics query
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
+	
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return true
+	
+	var block_id := get_block(x, y)
+	var max_health = get_block_health(block_id)
+	var key := Vector2i(x, y) #key for the dictionary is the position of the block
+	
+	
+	if not tile_damaged.has(key):
+		tile_damaged[key] = max_health
+		## damage should work only at the value for the dictionary
+
+	tile_damaged[key] -= tool_power
+
+
+	if tile_damaged[key] <= 0:
+		# block is destroyed — clean up and let destroy_block handle the rest
+		tile_damaged.erase(key)
+		destroy_block(x, y)
+	
 ## Attempts to destroy the block at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is
 ## only [code]false[/code] when there is no block at the given position.
