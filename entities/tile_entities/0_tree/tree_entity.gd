@@ -12,6 +12,8 @@ const HP_UPDATE_ACTION := 16
 
 const APPLE_DROP_ODDS := 0.10
 
+@export var top_variants: Dictionary[TreeVariant, Texture2D] = {}
+
 var branch_seed := 0
 
 var layer_hp: Array[EntityHp] = []
@@ -97,6 +99,7 @@ func setup_entity() -> void:
 	
 	# tree top
 	var tree_top := $'tree_top'
+	tree_top.texture = top_variants[variant]
 	
 	tree_top.position.y = -(height + 2) * 8.0
 	tree_top.show()
