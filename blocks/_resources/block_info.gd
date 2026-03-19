@@ -22,6 +22,7 @@ extends Resource
 @export var place_sfx: AudioStream
 ## Determines the volume of [member place_sfx] in decibels.
 @export var place_volume: float
+@export var block_health := 50
 
 # --- Functions --- #
 func setup_placement_preview(mouse_position: Vector2) -> void:
