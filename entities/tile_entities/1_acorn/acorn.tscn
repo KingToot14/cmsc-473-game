@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://oc55idwhop2b"]
+
+[ext_resource type="Script" uid="uid://chacx4gjstk2v" path="res://entities/tile_entities/1_acorn/acorn_entity.gd" id="1_7koqc"]
+[ext_resource type="Texture2D" uid="uid://dkfpr876efkey" path="res://entities/tile_entities/1_acorn/sprite.png" id="2_7koqc"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_hcmix"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="4_hs13f"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_qtn84"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hs13f"]
+resource_local_to_scene = true
+size = Vector2(14, 16)
+
+[node name="acorn" type="CharacterBody2D" unique_id=197811974 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
+collision_layer = 64
+collision_mask = 0
+script = ExtResource("1_7koqc")
+always_snapshot = false
+interpolator = NodePath("entity_interpolator")
+hp = NodePath("hp")
+metadata/_custom_type_script = "uid://cqx62b7syxl08"
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1160549193]
+position = Vector2(8, 4)
+texture = ExtResource("2_7koqc")
+
+[node name="entity_interpolator" type="Node" parent="." unique_id=475839953 node_paths=PackedStringArray("root")]
+script = ExtResource("3_hcmix")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="hp" type="Node" parent="." unique_id=1025116091 node_paths=PackedStringArray("entity")]
+script = ExtResource("4_hs13f")
+entity = NodePath("..")
+max_hp = 10
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1129881082]
+visible = false
+position = Vector2(8, 0)
+shape = SubResource("RectangleShape2D_hs13f")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=1341107106 node_paths=PackedStringArray("entity")]
+position = Vector2(8, 0)
+collision_layer = 64
+collision_mask = 65
+script = ExtResource("4_qtn84")
+entity = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1495074538]
+shape = SubResource("RectangleShape2D_hs13f")

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bos2lgxyitdor"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_uido8"]
+[ext_resource type="Texture2D" uid="uid://dwktma6tvwubv" path="res://walls/3_snow_wall/icon.png" id="2_u1ot2"]
+
+[resource]
+script = ExtResource("1_uido8")
+tile_type = 1
+tile_id = 3
+use_speed = 0.25
+item_name = "Snow Wall"
+texture = ExtResource("2_u1ot2")
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

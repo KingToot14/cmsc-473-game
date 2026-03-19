@@ -73,23 +73,18 @@ var _current_area: Area = Area.TITLE_SCREEN
 func _ready() -> void:
 	Globals.music = self
 	finished.connect(_on_track_finished)
-<<<<<<< Updated upstream
-=======
 
 	BiomeManager.biome_changed.connect(_on_biome_changed)
 	BiomeManager.layer_changed.connect(_on_layer_changed)
->>>>>>> Stashed changes
 
 	# start playback
 	var args := Globals.parse_arguments()
 
 	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
+		AudioServer.set_bus_volume_db(0, -1000)
 		return
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
+  
 	play_track(Area.TITLE_SCREEN)
 
 
@@ -143,8 +138,6 @@ func play_track(area: Area, variant := -1) -> void:
 	play()
 	print("Is playing: ", playing)
 
-<<<<<<< Updated upstream
-=======
 
 func _on_biome_changed(new_biome: StringName) -> void:
 	match new_biome:
@@ -178,8 +171,6 @@ func _on_layer_changed(new_layer: StringName) -> void:
 func enter_area(area: Area) -> void:
 	reset_area(area)
 	play_track(area)
-
->>>>>>> Stashed changes
 
 ## Resets the queue and intro state for [param area], so the intro plays
 ## again next time the player enters it.

@@ -19,11 +19,23 @@ func _ready():
 	
 	# Connect the button click to our function
 	pressed.connect(_on_pressed)
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
 
 func update_availability(inv: Inventory):
 	# Enable/Disable based on whether the player has materials
 	disabled = not CraftingManager.can_craft(recipe, inv)
 	modulate.a = 1.0 if not disabled else 0.5
 
+var recipe_index: int
+
 func _on_pressed():
-	CraftingManager.craft_item(recipe, Globals.player.my_inventory)
+	Globals.player.my_inventory.request_craft(recipe_index)
+
+func _on_mouse_entered():
+	Globals.mouse.cursor_locked = true
+	Globals.set_cursor(Globals.CursorType.PLUS)
+
+func _on_mouse_exited():
+	Globals.mouse.cursor_locked = false
+	Globals.set_cursor(Globals.CursorType.ARROW)

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cuplg84yd21bp"]
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_0e3fc"]
-[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="1_8gs75"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="1_8gs75"]
 [ext_resource type="Texture2D" uid="uid://ccdxfihy0r8cq" path="res://items/7_wooden_pickaxe/pickaxe.png" id="3_6ml85"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]

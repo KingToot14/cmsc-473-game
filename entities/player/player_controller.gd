@@ -26,12 +26,17 @@ var center_point: Vector2:
 	get():
 		return $'center'.global_position
 
+## Points to the camera's current position (which remains padded inside the world bounds)
+var camera_point: Vector2:
+	get():
+		return $'camera'.global_position
+
 ## The max distance between which players can interact with entities and blocks
 @export var base_range := 10.0
 
 # - Movement
 @onready var input_sync: InputSynchronizer = $'input_sync'
-@onready var snapshot_interpolator: SnapshotInterpolator = $'snapshot_interpolator'
+@onready var interpolator: PlayerInterpolator = $'snapshot_interpolator'
 
 ## The quickest that this player can move during normal movement
 @export var move_max_speed := 120.0
@@ -49,6 +54,15 @@ var is_grounded := false
 @export var gravity := 980.0
 ## The maximum vertical velocity the player can be going when affected by [member gravity]
 @export var terminal_velocity := 380.0
+
+@export_group("Water", "water_")
+@export var water_gravity_mod := 0.75
+@export var water_movement_mod := 0.75
+@export var water_jump_mod := 0.50
+
+@export var water_breath := 10.0
+var breath_timer := 0.0
+@export var water_drown_damage := 1
 
 ## How strong incoming knockback is applied. Represents the player's "weight"
 @export var knockback_power := 200.0
@@ -113,26 +127,30 @@ func _ready() -> void:
 	
 	$'rollback_sync'.process_settings()
 	
-	$'snapshot_interpolator'.owner_id = owner_id
+	interpolator.owner_id = owner_id
+	my_inventory.owner_id = owner_id
 	
 	# disable movement while loading new areas (for now, just on spawn)
 	active = false
 	$'chunk_loader'.area_loaded.connect(done_initial_load, CONNECT_ONE_SHOT)
 	
-	if multiplayer.is_server():
-		my_inventory.load_inventory()
+	# add inventory to child (weird workaround for RPCs)
+	my_inventory.name = "inventory"
+	add_child(my_inventory)
 	
 	if owner_id != multiplayer.get_unique_id():
-		$'snapshot_interpolator'.enabled = true
+		interpolator.enabled = true
 		
 		# disable inventory ui
 		$'inventory_ui'.queue_free()
+		
+		# disable overlays
+		$'grid_overlay'.hide()
+		$'water_overlay'.hide()
 	else:
 		# update position
 		position = spawn_point
 		
-		# setup inventory
-		my_inventory.load_inventory()
 		
 		# Ensure the sibling hotbar is visible
 		$inventory_ui/hotbar_container.show()
@@ -157,14 +175,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	# update direction
 	if velocity.x != 0.0 and can_turn():
-		var changed := false
-		
 		if face_direction == -1 and velocity.x > 0.0:
 			face_direction = 1
-			changed = true
 		if face_direction == 1  and velocity.x < 0.0:
 			face_direction = -1
-			changed = true
 	
 	# update animation
 	update_is_on_floor()
@@ -223,7 +237,10 @@ func can_turn() -> bool:
 	)
 
 func can_act() -> bool:
-	return can_turn()
+	return (
+		$'animator_upper'.current_animation != &'swing_right' and
+		$'animator_upper'.current_animation != &'swing_left'
+	)
 
 func do_swing(swing_speed := 1.0, direction := 0) -> void:
 	if direction != 0:
@@ -241,6 +258,7 @@ func do_swing(swing_speed := 1.0, direction := 0) -> void:
 func set_free_cam_mode(mode: bool) -> void:
 	free_cam_mode = mode
 	$'shape'.disabled = free_cam_mode
+	z_index = 500 if mode else 25
 
 ## Run a rollback-friendly tick
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
@@ -256,16 +274,50 @@ func _rollback_tick(delta, _tick, _is_fresh) -> void:
 
 ## Gather input from the [class InputSynchronizer] node at [code]$'input_sync'[/code]
 func apply_input(delta: float) -> void:
+	# check if feet in water
+	var tile_pos := TileManager.world_to_tile(
+		floori(global_position.x),
+		floori(global_position.y)
+	)
+	
+	var in_water := \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# check if head is under water
+	var head_in_water := \
+		TileManager.get_water_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	
+	# start drowning
+	if head_in_water and not multiplayer.is_server():
+		breath_timer -= delta
+		
+		if breath_timer <= 0.0:
+			breath_timer = 0.0
+			hp.take_damage(water_drown_damage, DamageSource.DamageSourceType.WORLD)
+	else:
+		breath_timer = water_breath
+	
 	# fixes a NetFox bug with is_on_floor()
 	update_is_on_floor()
 	if $'input_sync'.input_jump:
 		if is_on_floor():
 			sfx.play_sfx(&'jump')
-			velocity.y = -jump_power
+			if in_water:
+				velocity.y = -jump_power * water_jump_mod
+			else:
+				velocity.y = -jump_power
 			pass
 	
 	# gravity
-	base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
+	if in_water:
+		base_velocity.y = min(
+			velocity.y + gravity * delta * water_gravity_mod, 
+			terminal_velocity * water_gravity_mod
+		)
+	else:
+		base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -276,13 +328,17 @@ func apply_input(delta: float) -> void:
 		free_cam_pressed = false
 	
 	# move right
+	var water_mod := 1.0
+	if in_water:
+		water_mod = water_movement_mod
+	
 	if $'input_sync'.input_direction.x > 0.0:
 		# turn around quicker
 		if base_velocity.x < -move_slowdown * delta:
 			base_velocity.x += move_slowdown * delta
 		# apply movement if not at max speed
 		if base_velocity.x < move_max_speed:
-			base_velocity.x += move_acceleration * delta
+			base_velocity.x += move_acceleration * delta * water_mod
 	# move left
 	elif $'input_sync'.input_direction.x < 0.0:
 		# turn around quicker
@@ -290,7 +346,7 @@ func apply_input(delta: float) -> void:
 			base_velocity.x -= move_slowdown * delta
 		# apply movement if not at max speed
 		if base_velocity.x > -move_max_speed:
-			base_velocity.x -= move_acceleration * delta
+			base_velocity.x -= move_acceleration * delta * water_mod
 	# slow down
 	else:
 		# reduce friction in air
@@ -307,10 +363,11 @@ func apply_input(delta: float) -> void:
 			base_velocity.x = 0.0
 	
 	if free_cam_mode:
-		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed
+		base_velocity.x = $'input_sync'.input_direction.x * move_max_speed * 10.0
+		base_velocity.y = $'input_sync'.input_direction.y * move_max_speed * 10.0
 	
 	# clamp velocity
-	velocity.x = clamp(velocity.x, -move_max_speed, move_max_speed)
+	velocity.x = clamp(velocity.x, -move_max_speed * water_mod, move_max_speed * water_mod)
 	
 	# apply knockback
 	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, knockback_power * 4.0 * delta)
@@ -341,17 +398,10 @@ func update_is_on_floor() -> void:
 	move_and_slide()
 	velocity = temp_velocity
 
-## Handles an incomming damage snapshot
-@rpc('authority', 'call_remote', 'reliable')
-func receive_damage_snapshot(snapshot: Dictionary) -> void:
-	# apply knockback (if not dead)
-	if not snapshot.get(&'entity_dead', false) or true:
-		pending_knockback = snapshot.get(&'knockback', Vector2.ZERO) * knockback_power
-
 #endregion
 
 #region Loading
-## The [class ChunkLoader] has loaded and autotiled the initial region of tiles.
+## The [ChunkLoader] has loaded and autotiled the initial region of tiles.
 ## [br]Enables input, the camera, and sets the camera bounds
 func done_initial_load() -> void:
 	active = true
@@ -360,12 +410,19 @@ func done_initial_load() -> void:
 	$'camera'.limit_bottom = (Globals.world_size.y) * TileManager.TILE_SIZE
 	
 	# hide ui
-	get_tree().current_scene.get_node(^'join_ui').hide()
+	Globals.join_ui.hide()
+	
+	if multiplayer.is_server():
+		my_inventory.load_inventory()
+	else:
+		# update game state
+		Globals.set_game_state(Globals.GameState.IN_GAME)
 	
 	# only change music for the local client
 	# TODO: Move to BiomeManager when implemented
 	if owner_id == multiplayer.get_unique_id():
-		enter_biome(MusicManager.Area.FOREST_DAY)
+		enter_biome(Globals.music.Area.FOREST_DAY)
+
 #endregion
 
 func enter_biome(area: MusicManager.Area) -> void:
@@ -375,6 +432,19 @@ func enter_biome(area: MusicManager.Area) -> void:
 #region Interest
 func add_interest(entity_id: int) -> void:
 	interested_entities[entity_id] = true
+
 func remove_interest(entity_id: int) -> void:
 	interested_entities.erase(entity_id)
+
+#endregion
+
+#region Helper Functions
+## Returns whether or not [param point] is in range of this player.
+## [br]Has an optional [param range_modifier] which gets added to
+## [member base_range]
+func is_point_in_range(point: Vector2, range_modifier := 0) -> bool:
+	var player_range: float = (base_range + range_modifier) * TileManager.TILE_SIZE
+	
+	return point.distance_to(center_point) <= player_range
+
 #endregion

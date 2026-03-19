@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bna7m4cldflfr"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_6bo0b"]
+[ext_resource type="Texture2D" uid="uid://bdr0fqo3s5kav" path="res://entities/tile_entities/2_chest/icon.png" id="2_a8m12"]
+
+[resource]
+script = ExtResource("1_6bo0b")
+tile_type = 2
+tile_id = 2
+tile_variant = &"normal"
+use_speed = 0.25
+item_name = "Chest"
+texture = ExtResource("2_a8m12")
+tooltip = "A simple storage solution"
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

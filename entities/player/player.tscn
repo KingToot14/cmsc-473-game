@@ -9,17 +9,17 @@
 [ext_resource type="Script" uid="uid://vfummajngrt2" path="res://addons/netfox/tick-interpolator.gd" id="4_8fjmc"]
 [ext_resource type="AudioStream" uid="uid://chqf0lie1pt03" path="res://entities/player/sfx/collect.tres" id="4_qpopc"]
 [ext_resource type="AudioStream" uid="uid://bgqyalg6p8rno" path="res://entities/player/sfx/land.wav" id="4_wuv6x"]
-[ext_resource type="Script" uid="uid://cs1epdsuqh1uk" path="res://scripts/multiplayer/snapshot_interpolator.gd" id="5_qiwj3"]
 [ext_resource type="Script" uid="uid://br2yvj337a0vt" path="res://blocks/_resources/chunk_loader.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://c01fup0uojudj" path="res://entities/player/outfits/outfit_loader.gd" id="7_gx6sm"]
 [ext_resource type="Script" uid="uid://cou8r46bfe8oe" path="res://entities/player/player_hp.gd" id="7_mtric"]
 [ext_resource type="Texture2D" uid="uid://boi7elqyuhfq1" path="res://entities/player/outfits/skin/arm_back.png" id="8_3wlsy"]
 [ext_resource type="Script" uid="uid://cc2pcdii6gntf" path="res://entities/player/inventory_ui.gd" id="8_bectd"]
-[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/entity_hitbox.gd" id="8_mtric"]
+[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/combat/entity_hitbox.gd" id="8_mtric"]
 [ext_resource type="Texture2D" uid="uid://br2xx5gvli5ai" path="res://entities/player/outfits/skin/leg_back.png" id="9_b2kln"]
 [ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="9_bectd"]
 [ext_resource type="Resource" uid="uid://bgi204dfg2byy" path="res://entities/player/outfits/tunic/tunic.tres" id="9_we0b7"]
 [ext_resource type="Texture2D" uid="uid://dxuheeoln4iv7" path="res://entities/player/outfits/skin/body.png" id="10_we0b7"]
+[ext_resource type="Script" uid="uid://dkigbjc1wamka" path="res://scripts/multiplayer/player_interpolator.gd" id="10_wq0jh"]
 [ext_resource type="Texture2D" uid="uid://ctq70pq6oilko" path="res://entities/player/outfits/skin/leg_front.png" id="11_mtric"]
 [ext_resource type="Texture2D" uid="uid://gxgy5dl8u6d2" path="res://entities/player/outfits/skin/head.png" id="12_eyb6c"]
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
@@ -27,7 +27,12 @@
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
 [ext_resource type="PackedScene" uid="uid://ctyqglpej7nkw" path="res://entities/player/crafting_button.tscn" id="23_ghoj8"]
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
+[ext_resource type="Script" uid="uid://cj5k0hwfnaogw" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="24_50fht"]
+[ext_resource type="Shader" uid="uid://di8of40o07gv4" path="res://blocks/_resources/water_renderer.gdshader" id="24_bwdx1"]
+[ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
+[ext_resource type="Script" uid="uid://dhi7ubk8umji5" path="res://blocks/_resources/water_manager.gd" id="26_vewsg"]
+[ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -741,13 +746,42 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vewsg"]
+shader = ExtResource("24_gt4e4")
+shader_parameter/mouse_range = 8.0
+shader_parameter/mouse_falloff = 32.0
+shader_parameter/grid_size = 8.0
+shader_parameter/line_size = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
+shader = ExtResource("24_bwdx1")
+shader_parameter/water_color = Color(0, 0, 1, 0.6)
+shader_parameter/foam_color = Color(0, 0, 1, 0.6)
+
+[sub_resource type="Resource" id="Resource_2soq1"]
+script = ExtResource("27_2soq1")
+water_color = Color(0.14509805, 0.32156864, 0.8509804, 0.49019608)
+foam_color = Color(0.6392157, 0.7137255, 0.8509804, 0.60784316)
+has_underground_color = true
+underground_water = Color(0.12941177, 0.12941177, 0.7607843, 0.49019608)
+underground_foam = Color(0.5686275, 0.60784316, 0.8, 0.60784316)
+metadata/_custom_type_script = "uid://bo71smfwf3o2c"
+
+[sub_resource type="Resource" id="Resource_8q4fm"]
+script = ExtResource("27_2soq1")
+water_color = Color(0.12156863, 0.5411765, 0.8784314, 0.49019608)
+foam_color = Color(0.7019608, 0.83137256, 0.8901961, 0.60784316)
+metadata/_custom_type_script = "uid://bo71smfwf3o2c"
+
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
-z_index = 100
+z_index = 25
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_abrql")
 move_acceleration = 180.0
 move_slowdown = 600.0
+water_gravity_mod = 0.25
+water_movement_mod = 0.3
 knockback_power = 160.0
 hp = NodePath("player_hp")
 
@@ -763,7 +797,6 @@ sound_effects = Dictionary[StringName, AudioStream]({
 &"land": ExtResource("4_wuv6x"),
 &"whoosh": ExtResource("3_t1t22")
 })
-metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
 
 [node name="animator_upper" type="AnimationPlayer" parent="." unique_id=657236536]
 libraries/ = SubResource("AnimationLibrary_yqrof")
@@ -789,13 +822,10 @@ script = ExtResource("4_8fjmc")
 root = NodePath("..")
 properties = Array[String]([":global_transform"])
 
-[node name="snapshot_interpolator" type="Node" parent="." unique_id=1391114518 node_paths=PackedStringArray("root", "visual_root")]
-script = ExtResource("5_qiwj3")
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1149663231 node_paths=PackedStringArray("root")]
+script = ExtResource("10_wq0jh")
 root = NodePath("..")
-visual_root = NodePath("..")
-update_root = false
 auto_start = false
-metadata/_custom_type_script = "uid://cs1epdsuqh1uk"
 
 [node name="chunk_loader" type="Node" parent="." unique_id=51122964 node_paths=PackedStringArray("player")]
 script = ExtResource("6_qiwj3")
@@ -994,7 +1024,70 @@ vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
 
+[node name="grid_overlay" type="ColorRect" parent="." unique_id=691634126]
+show_behind_parent = true
+z_index = 50
+material = SubResource("ShaderMaterial_vewsg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 992.0
+offset_bottom = 592.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.3137255)
+
+[node name="water_overlay" type="ColorRect" parent="." unique_id=48487235]
+show_behind_parent = true
+z_index = 10
+material = SubResource("ShaderMaterial_24ehl")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -300.0
+offset_right = 500.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("26_vewsg")
+water_rules = Dictionary[int, ExtResource("27_2soq1")]({
+1: SubResource("Resource_2soq1"),
+4: SubResource("Resource_8q4fm")
+})
+
+[node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]
+self_modulate = Color(1, 1, 1, 0.7058824)
+
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
+
+[node name="mouse_detector" type="Control" parent="inventory_ui" unique_id=1581306440 node_paths=PackedStringArray("player", "grid_overlay", "placement_preview")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 17.0
+offset_top = 18.0
+offset_right = 17.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("24_24ehl")
+player = NodePath("../..")
+grid_overlay = NodePath("../../grid_overlay")
+placement_preview = NodePath("../../placement_preview")
+
+[node name="texture" type="TextureRect" parent="inventory_ui/mouse_detector" unique_id=1403037145]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
 [node name="inventory_container" type="Control" parent="inventory_ui" unique_id=2048304985]
 layout_mode = 3
@@ -1006,6 +1099,7 @@ offset_top = -105.0
 offset_right = 201.0
 offset_bottom = -3.0
 grow_vertical = 0
+mouse_filter = 1
 script = ExtResource("8_bectd")
 slot_scene = ExtResource("9_bectd")
 crafting_button_scene = ExtResource("23_ghoj8")
@@ -1033,7 +1127,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 3.0
 offset_top = -21.0
-offset_right = 3.0
+offset_right = -279.0
 offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -1131,5 +1225,7 @@ grow_vertical = 0
 horizontal_scroll_mode = 0
 
 [node name="crafting_buttons" type="GridContainer" parent="inventory_ui/crafting_container" unique_id=2117356799]
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
+theme_override_constants/h_separation = 2
 columns = 5

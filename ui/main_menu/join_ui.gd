@@ -24,6 +24,8 @@ var previous_connections: Array[String] = []
 
 # --- Functions --- #
 func _ready() -> void:
+	Globals.join_ui = self
+	
 	# multiplayer signals
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
@@ -34,6 +36,9 @@ func _ready() -> void:
 	
 	%'join_button'.mouse_entered.connect(_on_join_mouse_entered)
 	%'join_button'.mouse_exited.connect(_on_join_mouse_exited)
+	
+	%'login_button'.mouse_entered.connect(_on_login_mouse_entered)
+	%'login_button'.mouse_exited.connect(_on_login_mouse_exited)
 	
 	# update validity
 	_on_ip_changed(%'ip_field'.text)
@@ -54,11 +59,19 @@ func _on_connection_failed() -> void:
 	print("[Wizbowo's Conquest] Client '%s' failed to connect" % multiplayer.get_unique_id())
 	
 	# re-enable connect options
-	$'connect_options'.show()
-	$'joining_panel'.hide()
+	set_active_panel("panel_connect")
+	
+	Globals.set_game_state(Globals.GameState.MAIN_MENU)
 	
 	# reload previous connections
 	load_previous_connections()
+
+func set_active_panel(panel_name: String) -> void:
+	for child in get_children():
+		if not child.name.begins_with("panel_"):
+			continue
+		
+		child.visible = child.name == panel_name
 
 #region Connection Info Parsing
 func _on_ip_changed(new_text: String) -> void:
@@ -98,15 +111,29 @@ func _on_join_mouse_exited() -> void:
 		%'join_button'.get_node(^'button').texture = normal_button
 		%'join_button'.get_node(^'title').self_modulate = normal_button_color
 
+func _on_login_mouse_entered() -> void:
+	button_hovered = true
+	
+	if not %'login_button'.disabled:
+		%'login_button'.get_node(^'button').texture = hovered_button
+		%'login_button'.get_node(^'title').self_modulate = normal_button_color
+
+func _on_login_mouse_exited() -> void:
+	button_hovered = false
+	
+	if not %'login_button'.disabled:
+		%'login_button'.get_node(^'button').texture = normal_button
+		%'join_button'.get_node(^'title').self_modulate = normal_button_color
+
 #endregion
 
 #region Connection Storing
 func load_previous_connections() -> void:
 	if not FileAccess.file_exists('user://previous_connections'):
-		$'connect_options/previous_connections'.hide()
+		$'panel_connect/previous_connections'.hide()
 		return
 	
-	$'connect_options/previous_connections'.show()
+	$'panel_connect/previous_connections'.show()
 	
 	var file: FileAccess = FileAccess.open('user://previous_connections', FileAccess.READ)
 	
@@ -155,13 +182,76 @@ func create_client() -> Error:
 	var port: int = int(port_str)
 	
 	# update ui
-	$'connect_options'.hide()
-	$'joining_panel'.show()
+	set_active_panel("panel_join")
 	
-	$'joining_panel/backing/title'.text = "Joining Server\n%s:%s" % [ip_address, port]
+	$'panel_join/backing/title'.text = "Joining Server\n%s:%s" % [ip_address, port]
+	
+	Globals.set_game_state(Globals.GameState.JOINING)
 	
 	# store connection
 	save_connection(ip_address, port)
 	
 	# create client
 	return ServerManager.join_server(ip_address, port)
+
+func login_button_pressed() -> void:
+	if multiplayer.is_server():
+		return
+	
+	# TODO (Abby): Fetch username and password from fields (LineEdit nodes)
+	var username: String = %'username_field'.text.strip_edges()
+	var password: String = %'password_field'.text.strip_edges()
+
+	#if username.is_empty() or password.is_empty():
+		#print("[Login] Username or password empty")
+		#return
+#
+	#print("[Login] Sending login request to server...")
+
+	#DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
+	
+	# TODO: We'll eventually want to move this line to somewhere in the login function so
+	# the server has the final decision on whether or not to load the player
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+	set_active_panel("panel_join")
+	
+	# TODO (Abby): Verify username and password combo in database
+func _on_login_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Login] Account not found. Creating new account...")
+
+	var username =  %'username_field'.text
+	var password = %'password_field'.text
+	DatabaseManager.create_account.rpc_id(Globals.SERVER_ID, username, password)
+	return
+
+	print("[Login] Login successful! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+
+	pass
+	
+	# TODO (Abby): If username and password don't exist, create new one
+func _on_create_account_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Account] Failed to create account (username taken?)")
+	return
+
+	print("[Account] Account created! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+
+	pass
+	
+	# TODO (Jacob): Show character creation when creating a new account and sync to server
+	pass
+	
+	%'username_field'.text

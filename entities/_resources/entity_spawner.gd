@@ -5,7 +5,7 @@ extends Node
 const PLAYER_CAP := 20.0
 const GLOBAL_CAP := 150.0
 
-@export var spawn_rate := 2.0
+@export var spawn_rate := 6.0
 var spawn_timer := spawn_rate
 
 var current_player_count := 0
@@ -17,7 +17,7 @@ var rng := RandomNumberGenerator.new()
 # --- Functions --- #
 func _ready() -> void:
 	set_process(false)
-	ServerManager.server_started.connect(func (): set_process(true))
+	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
 func _process(delta: float) -> void:
 	if len(ServerManager.connected_players.keys()) == 0:
@@ -43,7 +43,7 @@ func attempt_spawn() -> void:
 	
 	# get current spawning player
 	var spawn_player_id: int = spawn_player_queue[spawn_player_index]
-	var spawn_player: PlayerController = ServerManager.connected_players.get(spawn_player_id)
+	var spawn_player: PlayerController = ServerManager.get_player(spawn_player_id)
 	if not spawn_player:
 		return
 	
@@ -53,7 +53,7 @@ func attempt_spawn() -> void:
 	
 	var total_entities := 0
 	for player_id in ServerManager.connected_players.keys():
-		var player: PlayerController = ServerManager.connected_players[player_id]
+		var player: PlayerController = ServerManager.get_player(spawn_player_id)
 		
 		var chunk: Vector2i = TileManager.world_to_chunk(
 			floori(player.center_point.x),
@@ -110,8 +110,8 @@ func attempt_spawn() -> void:
 		return
 	
 	# get entity from pool
-	var biome := SpawnRule.Biome.FOREST
-	var layer := SpawnRule.Layer.SURFACE
+	var biome := BiomeManager.get_player_biome(spawn_player_id)
+	var layer := BiomeManager.get_player_layer(spawn_player_id)
 	var time := SpawnRule.TimeState.DAY
 	
 	var spawn_rule_ids: Dictionary[SpawnRule, int] = {}
@@ -133,8 +133,6 @@ func attempt_spawn() -> void:
 		return
 	
 	var spawn_rule: SpawnRule = possible_rules[RandomNumberGenerator.new().rand_weighted(possible_weights)]
-	var entity_id := spawn_rule_ids[spawn_rule]
-	var spawn_data: Dictionary = spawn_rule.spawn_data
 	
 	# get world position
 	for i in range(10):
@@ -160,7 +158,8 @@ func attempt_spawn() -> void:
 		
 		# spawn entity from pool
 		var world_position: Vector2 = TileManager.tile_to_world(tile_origin.x, tile_origin.y)
-		EntityManager.create_entity(entity_id, world_position, spawn_data)
+		
+		spawn_rule.do_spawn(world_position)
 		return
 
 @warning_ignore_restore('confusable_local_declaration')

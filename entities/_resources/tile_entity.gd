@@ -1,99 +1,39 @@
 class_name TileEntity
-extends Node2D
-
-# --- Signals --- #
-signal interest_changed(interest: int)
+extends Entity
 
 # --- Variables --- #
-const NO_RESPONSE: Dictionary = {}
-
-var id := 0
-var registry_id := 0
-var data: Dictionary
-var interested_players: Dictionary[int, bool] = {}
-var interest_count := 0
-
-var current_chunk: Vector2i
-var tile_position: Vector2i
-
-@export var hp_pool: Array[EntityHp]
+var tile_position: Vector2i:
+	set(_pos):
+		tile_position = _pos
+		global_position = TileManager.tile_to_world(_pos.x, _pos.y, false)
 
 # --- Functions --- #
-func _ready() -> void:
-	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
+func update_preview(tile_pos: Vector2i) -> void:
+	tile_position = tile_pos
 
-func initialize(new_id: int, reg_id: int, spawn_data: Dictionary) -> void:
-	id = new_id
-	registry_id = reg_id
-	data = spawn_data
-	
-	setup_entity()
-	tile_position = TileManager.world_to_tile(floori(position.x), floori(position.y))
-	
-	for hp in hp_pool:
-		hp.setup()
+func attempt_placement() -> bool:
+	return false
 
-func setup_entity() -> void:
-	return
-
-func receive_update(update_data: Dictionary) -> Dictionary:
-	if update_data.get(&'kill'):
-		standard_death()
+#region Serialization
+func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
+	id = buffer.get_u32()
 	
-	return NO_RESPONSE
-
-#region Interest
-func add_interest(player_id: int) -> void:
-	interested_players[player_id] = true
-	
-	check_interest()
-
-func remove_interest(player_id: int) -> void:
-	interested_players[player_id] = false
-	
-	check_interest()
-
-func check_interest() -> void:
-	# reset interest count
-	interest_count = 0
-	for player in interested_players:
-		if interested_players[player]:
-			interest_count += 1
-	
-	interest_changed.emit(interest_count)
-
-func scan_interest() -> void:
-	var load_range := ChunkLoader.LOAD_RANGE
-	
-	for player_id in ServerManager.connected_players:
-		var player: PlayerController = ServerManager.connected_players[player_id]
-		var player_chunk := TileManager.world_to_chunk(floori(player.position.x), floori(player.position.y))
-		var diff := current_chunk - player_chunk
-		
-		# skip out of range players
-		if abs(diff.x) > load_range.x or abs(diff.y) > load_range.y:
-			interested_players[player_id] = false
-			continue
-		
-		# set interested
-		interested_players[player_id] = true
-	
-	check_interest()
+	super(buffer)
 
 #endregion
 
-#region Life Cycle
-func standard_death() -> void:
-	EntityManager.erase_entity(self)
-	queue_free()
-
-#endregion
-
-#region Interaction
-func interact_with(_tile_position: Vector2i) -> bool:
-	return true
-
-func break_place(_tile_position: Vector2i) -> bool:
-	return true
+#region Helpers
+static func query_tile_collision(tile_pos: Vector2i) -> bool:
+	# create query
+	var direct_space: PhysicsDirectSpaceState2D = \
+		Globals.get_tree().current_scene.get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = TileManager.tile_to_world(tile_pos.x, tile_pos.y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
+	
+	# check collision
+	return not direct_space.intersect_shape(query, 1).is_empty()
 
 #endregion

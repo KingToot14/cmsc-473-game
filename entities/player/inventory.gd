@@ -1,5 +1,5 @@
 class_name Inventory
-extends RefCounted
+extends Node
 
 # --- Signals --- #
 signal inventory_updated
@@ -10,13 +10,24 @@ const INVENTORY_SLOTS := 50
 var items: Array[ItemStack] = []
 var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
+
+var owner_id := 0
+
+var recipes: Array[Recipe] = [] #add more recipes in the inspector
+
 # --- Functions --- #
+
 func _init():
-	for i in range(INVENTORY_SLOTS): # 50 empty inventory slots
-		items.append(ItemStack.new(-1, 0)) # list of items stored in items array
+	for i in range(INVENTORY_SLOTS):
+		items.append(ItemStack.new(-1, 0))
+	# Load recipes immediately when the inventory is created
+	_load_recipes()
 
 #region Inventory Management
 func add_item(item_id: int, amount: int) -> int:
+	if amount <= 0:
+		return 0
+	
 	var item: Item = ItemDatabase.get_item(item_id)
 	
 	if not item:
@@ -31,6 +42,13 @@ func add_item(item_id: int, amount: int) -> int:
 			amount -= adding
 			if amount <= 0: 
 				inventory_updated.emit()
+				
+				# send to server
+				if multiplayer.is_server():
+					send_inventory()
+				else:
+					send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+				
 				return 0
 	
 	# add to first empty stack
@@ -39,11 +57,27 @@ func add_item(item_id: int, amount: int) -> int:
 			stack.item_id = item_id
 			stack.count = amount
 			inventory_updated.emit()
-			return 0
 			
+			# send to server
+			if multiplayer.is_server():
+				send_inventory()
+			else:
+				send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+			
+			return 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+	
 	return amount # Return leftovers if full
 
 func remove_item(item_id: int, count: int) -> void:
+	if count <= 0:
+		return
+	
 	var item: Item = ItemDatabase.get_item(item_id)
 	
 	if not item:
@@ -63,6 +97,12 @@ func remove_item(item_id: int, count: int) -> void:
 				count = abs(diff)
 			else:
 				count = 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_remove_item.rpc_id(Globals.SERVER_ID, item_id, count)
 	
 	inventory_updated.emit()
 #Unique inventory stuff: compare owner_id from player controler with multiplayer.get_unique_id() also from player controler
@@ -117,9 +157,53 @@ func interact_with_slot(index: int) -> void:
 		
 		held_item.item_id = temp_id
 		held_item.count = temp_count
-
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_mouse_input.rpc_id(Globals.SERVER_ID, index)
+	
 	# Update the UI
 	inventory_updated.emit()
+	
+## Drops the currently held item at the specified world position.
+## Inside inventory.gd
+func drop_held_item(drop_position: Vector2) -> void:
+	if held_item.is_empty():
+		return
+
+	if multiplayer.is_server():
+		var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+		
+		# get throw direction
+		var spawn_behavior := ItemDropEntity.SpawnBehavior.THROW_LEFT
+		if drop_position.x > player.center_point.x:
+			spawn_behavior = ItemDropEntity.SpawnBehavior.THROW_RIGHT
+		
+		ItemDropEntity.spawn_restricted(
+			player.center_point,
+			held_item.item_id,
+			held_item.count,
+			owner_id,
+			1.0,
+			spawn_behavior
+		)
+		held_item.item_id = -1
+		held_item.count = 0
+		send_inventory()
+	else:
+		send_drop_item.rpc_id(1, drop_position) 
+	
+	inventory_updated.emit()
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_drop_item(drop_position: Vector2) -> void:
+	#ensure the drop position is within a reasonable distance of the player
+	var player = ServerManager.connected_players[multiplayer.get_remote_sender_id()]
+	
+	if is_instance_valid(player) and drop_position.distance_to(player.global_position) < 500:
+		drop_held_item(drop_position)
 
 func remove_item_at(item_id: int, count: int, slot: int) -> void:
 	var item: Item = ItemDatabase.get_item(item_id)
@@ -136,9 +220,12 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 		
 		if diff <= 0:
 			stack.item_id = -1
-			count = abs(diff)
-		else:
-			count = 0
+	
+	# send to server
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_remove_item_at.rpc_id(Globals.SERVER_ID, item_id, count, slot)
 	
 	inventory_updated.emit()
 
@@ -147,19 +234,109 @@ func load_inventory() -> void:
 	
 	# if database entry not available, setup standard inventory
 	add_item(6, 1)		# wooden sword
-	add_item(7, 1) 		#wooden pickaxe
-	add_item(9, 1)		#wooden hammer
+	add_item(7, 1) 		# wooden pickaxe
+	add_item(9, 1)		# wooden hammer
+	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
-	add_item(4, 10)		# stone blocks
-	add_item(0, 30)		# wood logs
-	add_item(8, 20)		# wood blocks
+	add_item(14, 30)	# sand
+	add_item(11, 10)	# acorns
+	add_item(24, 4)		# chests
 
+#endregion
+
+#region Synchronization
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_add_item(item_id: int, amount: int) -> void:
+	add_item(item_id, amount)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_remove_item(item_id: int, amount: int) -> void:
+	remove_item(item_id, amount)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_remove_item_at(item_id: int, amount: int, slot: int) -> void:
+	remove_item_at(item_id, amount, slot)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_mouse_input(index: int) -> void:
+	interact_with_slot(index)
+
+func serialize_inventory() -> PackedByteArray:
+	# buffer: (int16 for item_id, int16 for quantity) for every slot + held_item
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(len(items) * (2 + 2) + (2 + 2))
+	
+	# held item
+	buffer.put_16(held_item.item_id)
+	buffer.put_16(held_item.count)
+	
+	# main inventory
+	for i in range(len(items)):
+		buffer.put_16(items[i].item_id)
+		buffer.put_16(items[i].count)
+	
+	return buffer.data_array
+
+func send_inventory() -> void:
+	# send to client
+	receive_inventory.rpc_id(owner_id, serialize_inventory())
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_inventory(inventory_data: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = inventory_data
+	
+	# held item
+	held_item.item_id = buffer.get_16()
+	held_item.count   = buffer.get_16()
+	
+	# main inventory
+	for i in range(len(items)):
+		items[i].item_id = buffer.get_16()
+		items[i].count   = buffer.get_16()
+	
+	# update inventory
+	inventory_updated.emit()
+
+func _load_recipes() -> void:
+	recipes.clear()
+	var path = "res://entities/player/recipes"
+	var dir = DirAccess.open(path)
+	
+	if dir:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		
+		while file_name != "":
+			if file_name.ends_with(".tres") or file_name.ends_with(".res"):
+				var recipe = load(path + "/" + file_name) as Recipe
+				if recipe:
+					recipes.append(recipe)
+			file_name = dir.get_next()
+
+# requests the server to craft a specific recipe
+func request_craft(recipe_index: int) -> void:
+	if multiplayer.is_server():
+		
+		if recipe_index >= 0 and recipe_index < recipes.size():
+			var recipe = recipes[recipe_index]
+			if CraftingManager.can_craft(recipe, self):
+				CraftingManager.craft_item(recipe, self) 
+	else:
+		send_craft_request.rpc_id(1, recipe_index)
+
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_craft_request(recipe_index: int) -> void:
+	request_craft(recipe_index)
 
 #endregion
 
 #region Selected Item
 func get_selected_item() -> ItemStack:
 	# TODO: Check item held by mouse
+	if held_item.item_id != -1:
+		return held_item
 	
 	# If no item held in mouse, return current hotbar item
 	return items[hotbar_slot]

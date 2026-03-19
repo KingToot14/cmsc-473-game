@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://256f31a8u4hv"]
+
+[ext_resource type="Texture2D" uid="uid://t5j02mwydstk" path="res://blocks/6_snow/tiles.png" id="1_y5xcv"]
+[ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_ynygy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x36km"]
+atlas = ExtResource("1_y5xcv")
+region = Rect2(0, 0, 8, 8)
+
+[resource]
+script = ExtResource("1_ynygy")
+preview_sprite = SubResource("AtlasTexture_x36km")
+break_item_id = 12
+metadata/_custom_type_script = "uid://dymp18kf28isa"

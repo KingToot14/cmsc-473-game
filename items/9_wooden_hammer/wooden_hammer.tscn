@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cbl55ji2g7o1d"]
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_twnwd"]
-[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/damage_source.gd" id="2_6au5t"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_6au5t"]
 [ext_resource type="Texture2D" uid="uid://cn4wkm6wx3ce" path="res://items/9_wooden_hammer/hammer.png" id="3_twnwd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]

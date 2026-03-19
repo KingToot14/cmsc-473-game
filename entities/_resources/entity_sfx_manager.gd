@@ -10,12 +10,11 @@ func play_sfx(sfx_name: StringName, volume := 0.0) -> void:
 		return
 	
 	# play sfx
-	#get_stream_playback().play_stream(sound_effects[sfx_name])
-	
 	var new_player := AudioStreamPlayer2D.new()
 	new_player.max_distance = max_distance
 	new_player.attenuation = attenuation
 	
+	new_player.bus = bus
 	new_player.stream = sound_effects[sfx_name]
 	new_player.volume_db = volume
 	

@@ -2,21 +2,6 @@ class_name SpawnRule
 extends Resource
 
 # --- Enums --- #
-enum Biome {
-	FOREST = 1,
-	DESERT = 2,
-	SNOW   = 4,
-	OCEAN  = 8
-}
-
-enum Layer {
-	SPACE       = 1,
-	SURFACE     = 2,
-	UNDERGROUND = 4,
-	CAVERN      = 8,
-	UNDERWORLD  = 16
-}
-
 enum TimeState {
 	DAY   = 1,
 	NIGHT = 2
@@ -37,8 +22,10 @@ enum SpawnLocation {
 
 @export var spawn_weight := 25
 
-@export var spawn_data: Dictionary = {}
-
 # --- Functions --- #
-func is_spawnable(biome: Biome, layer: Layer, time_state: TimeState) -> bool:
+func is_spawnable(biome: BiomeManager.Biome, layer: BiomeManager.Layer, time_state: TimeState) -> bool:
 	return (biome & spawn_biomes) and (layer & spawn_layers) and (time_state & spawn_times)
+
+@warning_ignore("unused_parameter")
+func do_spawn(position: Vector2) -> void:
+	return

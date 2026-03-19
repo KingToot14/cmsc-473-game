@@ -8,6 +8,8 @@ const CHUNK_AREA := CHUNK_SIZE * CHUNK_SIZE
 ## The widht and height of each tile in world coordinates
 const TILE_SIZE := 8
 
+## A bitmask that isolates the bottom 8 bits
+const MASK_EIGHT := (1 << 8) - 1
 ## A bitmask that isolates the bottom 10 bits
 const MASK_TEN := (1 << 10) - 1
 ## A bitmask that isolates the bottom 20 bits
@@ -18,6 +20,14 @@ const MASK_WALL  := ((1 << 10) - 1) << 10
 const MASK_BLOCK := ((1 << 10) - 1) << 0
 ## A bitmask that isolates the wall and block bits
 const MASK_VISUAL := MASK_BLOCK | MASK_WALL
+## a bitmask that isolates the water level
+const MASK_WATER := ((1 << 8) - 1) << 20
+
+## How often to autosave in seconds
+const AUTOSAVE_RATE := 60.0
+
+## The current time until the next autosave
+var autosave_timer := AUTOSAVE_RATE
 
 ## A flat-packed representation of the world tiles. Each integer represents
 ## a single tile in the following format:
@@ -32,10 +42,23 @@ var world_width: int
 ## [br]Read from [member Globals.world_size]
 var world_height: int
 
+## A reference of the water texture for rendering
+var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+var water_texture := ImageTexture.create_from_image(water_image)
+var water_origin: Vector2
+
+const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
+const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * 16
+
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_size_changed.connect(_update_world_size)
 	_update_world_size(Globals.world_size)
+	
+	water_image.fill(Color.BLACK)
+	
+	set_process(false)
+	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
 func _update_world_size(size: Vector2i) -> void:
 	world_width = size.x
@@ -43,6 +66,34 @@ func _update_world_size(size: Vector2i) -> void:
 
 func _idx(x: int, y: int) -> int:
 	return x + y * world_width
+
+func _process(delta: float) -> void:
+	autosave_timer -= delta
+	
+	if autosave_timer <= 0.0:
+		autosave_timer += AUTOSAVE_RATE
+		
+		# check if world name is not empty
+		if Globals.world_name.is_empty():
+			set_process(false)
+			return
+		
+		save_world()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_world()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed(&'test_input'):
+		if multiplayer.is_server():
+			save_world()
+			return
+		
+		var mouse_position := Globals.player.get_global_mouse_position()
+		var tile_position := world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
+		
+		place_water(tile_position.x, tile_position.y)
 
 #region Positions
 ## Converts local chunk coordinates to global tile coordinates.
@@ -292,6 +343,132 @@ func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt
 	
 	return row
 
+## Checks the 4 cardinal neighbors for [param target]. Returns [code]true[/code]
+## if [param target] is found, and [code]false[/code] otherwise.
+func has_block_neighbor(x: int, y: int, target: int) -> bool:
+	if TileManager.get_block(x - 1, y) == target:
+		return true
+	if TileManager.get_block(x + 1, y) == target:
+		return true
+	if TileManager.get_block(x, y - 1) == target:
+		return true
+	if TileManager.get_block(x, y + 1) == target:
+		return true
+	
+	return false
+
+#endregion
+
+#region Water
+## Sets the water level at ([param x], [param y]). [param water_level] should
+## be a value between [code]0 - 16[/code].
+func set_water_level(x: int, y: int, water_level: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# clear water level
+	var idx = _idx(x, y)
+	tiles[idx] &= ~MASK_WATER
+	tiles[idx] |= (water_level << 20)
+
+## Gets the water level at the given [param x] and [param y] position.
+func get_water_level(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get water level (20 to 27)
+	return (tiles[_idx(x, y)] >> 20) & MASK_EIGHT
+
+## Rebuilds the water texture around the player. Should be called after water updates
+## and when loading new chunks
+func build_water_texture() -> void:
+	# calculate upper point
+	var player_pos := Globals.player.center_point
+	var chunk := world_to_chunk(floori(player_pos.x), floori(player_pos.y))
+	var start_chunk = chunk - ChunkLoader.VISUAL_RANGE
+	var origin := chunk_to_tile(start_chunk.x, start_chunk.y)
+	
+	var data := PackedByteArray()
+	data.resize(WATER_WIDTH * WATER_HEIGHT)
+	
+	var idx := 0
+	var processed := 0
+	
+	# rebuild texture
+	for y in range(WATER_HEIGHT):
+		var row := (origin.y + y) * world_width
+		
+		for x in range(WATER_WIDTH):
+			data[idx] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
+			
+			idx += 1
+			processed += 1
+			
+			if processed == 2048:
+				await get_tree().process_frame
+				processed = 0
+	
+	# update texture
+	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	water_texture.update(water_image)
+	
+	water_origin = origin
+	
+	push_water_texture_update()
+
+## Updates the water texture at ([param x], [param y]) using [member tiles].
+func update_water_texture(x: int, y: int, update := true) -> void:
+	# only update in rendered range
+	if x < water_origin.x or x >= (water_origin.x + WATER_WIDTH):
+		return
+	if y < water_origin.y or y >= (water_origin.y + WATER_HEIGHT):
+		return
+	
+	# update data
+	var data: PackedByteArray = water_image.data['data']
+	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = \
+		(tiles[y * world_width + x] >> 20) & MASK_EIGHT
+	# update image and texture
+	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	water_texture.update(water_image)
+	
+	if update:
+		push_water_texture_update()
+
+## Pushes a texture update to the server. This is automatically called by
+## [method update_water_texture] by defualt, but can be called manually
+## when performing bulk updates.
+func push_water_texture_update() -> void:
+	RenderingServer.global_shader_parameter_set(
+		&"water_texture",
+		water_texture
+	)
+	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
+
+func send_water_update(water_data: PackedByteArray) -> void:
+	receive_water_update.rpc(water_data)
+
+@rpc('authority', 'call_remote', 'reliable')
+func receive_water_update(water_data: PackedByteArray) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = water_data
+	
+	# unpack data
+	var size := buffer.get_u16()
+	
+	for i in range(size):
+		# unpack position
+		var tile_x := buffer.get_u16()
+		var tile_y := buffer.get_u16()
+		
+		# water level
+		var water_level := buffer.get_u8()
+		
+		set_water_level(tile_x, tile_y, water_level)
+		update_water_texture(tile_x, tile_y)
+
 #endregion
 
 #region Safe Interactions
@@ -325,6 +502,12 @@ func destroy_block(x: int, y: int) -> bool:
 	
 	# TODO: Deal gradual damage rather than instantly destroying
 	
+	# play sfx
+	var block_id := TileManager.get_block_unsafe(x, y)
+	var block := BlockDatabase.get_block(block_id)
+	if block:
+		play_sfx(block.break_sfx, x, y, block.break_volume)
+	
 	# set tile to air
 	TileManager.set_block_unsafe(x, y, 0)
 	Globals.world_map.update_tile(x, y)
@@ -352,6 +535,12 @@ func destroy_wall(x: int, y: int) -> bool:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	
+	# play sfx
+	var wall_id := TileManager.get_wall_unsafe(x, y)
+	var wall := BlockDatabase.get_wall(wall_id)
+	if wall:
+		play_sfx(wall.break_sfx, x, y, wall.break_volume)
 	
 	# set tile to air
 	TileManager.set_wall_unsafe(x, y, 0)
@@ -402,6 +591,11 @@ func place_block(x: int, y: int, item_id: int) -> bool:
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return false
 	
+	# play sfx
+	var block := BlockDatabase.get_block(block_id)
+	if block:
+		play_sfx(block.place_sfx, x, y, block.place_volume)
+	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
 	Globals.world_map.update_tile(x, y)
@@ -438,6 +632,11 @@ func place_wall(x: int, y: int, item_id: int) -> bool:
 	# check neighboring tiles
 	if not is_wall_placement_valid(x, y):
 		return false
+	
+	# play sfx
+	var wall := BlockDatabase.get_wall(wall_id)
+	if wall:
+		play_sfx(wall.place_sfx, x, y, wall.place_volume)
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
@@ -495,6 +694,26 @@ func is_wall_placement_valid(x: int, y: int) -> bool:
 	
 	return false
 
+func place_water(x: int, y: int) -> bool:
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return false
+	if y < 0 or y >= world_height:
+		return false
+	
+	# do not process if block exists
+	if get_block_unsafe(x, y):
+		return false
+	
+	# set water level
+	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	update_water_texture(x, y)
+	
+	# sync to server
+	send_place_water.rpc_id(1, x, y)
+	
+	return true
+
 ## Attempts to destroy the block at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_destroy_block(x: int, y: int) -> void:
@@ -523,28 +742,41 @@ func send_destroy_block(x: int, y: int) -> void:
 	
 	
 	# TODO: Deal gradual damage rather than instantly destroying
+	var player_id := multiplayer.get_remote_sender_id()
+	
 	var block_id = get_block(x, y) #should grab the block id 
 	if block_id == 1 or block_id == 2: #if the block is dirt or grass
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			EntityManager.create_entity(0, drop_position, { 
-				&'item_id': 3, 
-				&'quantity': 1, 
-				}) 
+			ItemDropEntity.spawn_preferred(drop_position, 3, 1, player_id)
 				
 	if block_id == 3: #if the block is stone.
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			EntityManager.create_entity(0, drop_position, { 
-				&'item_id': 4, 
-				&'quantity': 1, 
-				})
-	TileManager.set_block_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
+			
+	if block_id == 6: # Snow
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 12, 1, player_id)
+	
+	if block_id == 7: # Ice
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
+	
+	# set block
+	set_block_unsafe(x, y, 0)
+	
+	# update neighbors
+	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x - 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x + 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x, y - 1), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.water_updater.add_to_queue(Vector2i(x, y + 1), WaterUpdater.MAX_WATER_LEVEL)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -556,7 +788,7 @@ func send_destroy_wall(x: int, y: int) -> void:
 		return
 	
 	# do not process if no wall exists
-	if not TileManager.get_wall_unsafe(x, y):
+	if not get_wall_unsafe(x, y):
 		return
 	
 	# TODO: Check player's current tool
@@ -567,23 +799,18 @@ func send_destroy_wall(x: int, y: int) -> void:
 	if wall_id == 1: #if the wall is dirt wall
 		if multiplayer.is_server(): 
 			var drop_position = tile_to_world(x,y) #grabs position for wall 
-			EntityManager.create_entity(0, drop_position, { 
-				&'item_id': 5, #drops a dirt wall
-				&'quantity': 1, 
-				}) 
+			ItemDropEntity.spawn(drop_position, 5, 1)
 	
 	# set tile to air
-	TileManager.set_wall_unsafe(x, y, 0)
-	Globals.server_map.update_tile(x, y)
+	set_wall_unsafe(x, y, 0)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to place [param block_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_place_block(x: int, y: int, item_id: int) -> void:
-	# check bounds (consume interaction)
+	# check bounds
 	if x < 0 or x >= world_width:
 		return
 	if y < 0 or y >= world_height:
@@ -625,16 +852,15 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to block
 	TileManager.set_block_unsafe(x, y, block_id)
-	Globals.server_map.update_tile(x, y)
+	TileManager.set_water_level(x, y, 0)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
 
 ## Attempts to place [param wall_id] at the given [param x] and [param y] position.
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_place_wall(x: int, y: int, item_id: int) -> void:
-	# check bounds (consume interaction)
+	# check bounds
 	if x < 0 or x >= world_width:
 		return
 	if y < 0 or y >= world_height:
@@ -665,11 +891,30 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to wall
 	TileManager.set_wall_unsafe(x, y, wall_id)
-	Globals.server_map.update_tile(x, y)
 	
 	# sync to clients
-	for player in ServerManager.connected_players.keys():
-		receive_tile_state.rpc_id(player, x, y, tiles[_idx(x, y)])
+	send_tile_update(x, y)
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_place_water(x: int, y: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if block exists
+	if get_block_unsafe(x, y):
+		return
+	
+	# set water level
+	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	
+	# add to update queue
+	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
+	
+	# sync to clients
+	send_tile_update(x, y)
 
 ## Receives a tile update from the server. Used for various tile interactions
 @rpc('authority', 'call_remote', 'reliable')
@@ -678,8 +923,40 @@ func receive_tile_state(x: int, y: int, tile: int) -> void:
 	if TileManager.tiles[_idx(x, y)] == tile:
 		return
 	
+	# update tile info
 	TileManager.tiles[_idx(x, y)] = tile
 	Globals.world_map.update_tile(x, y)
+	
+	# update water texture
+	update_water_texture(x, y)
+
+func send_tile_update(x: int, y: int) -> void:
+	# add neighbors to update queue
+	Globals.block_updater.add_to_queue(Vector2i(x, y))
+	Globals.block_updater.add_to_queue(Vector2i(x - 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x + 1, y))
+	Globals.block_updater.add_to_queue(Vector2i(x, y - 1))
+	Globals.block_updater.add_to_queue(Vector2i(x, y + 1))
+	
+	# update server map
+	Globals.server_map.update_tile(x, y)
+	
+	# sync to clients
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue
+		
+		var start := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		
+		if x < start.x or x > end.x:
+			continue
+		
+		if y < start.y or y > end.y:
+			continue
+		
+		receive_tile_state.rpc_id(player_id, x, y, tiles[_idx(x, y)])
 
 #endregion
 
@@ -689,6 +966,25 @@ func receive_tile_state(x: int, y: int, tile: int) -> void:
 func load_chunks() -> void:
 	tiles = []
 	tiles.resize(world_width * world_height)
+
+#endregion
+
+#region Sound Effects
+func play_sfx(stream: AudioStream, x: int, y: int, volume := 0.0) -> void:
+	var player := AudioStreamPlayer2D.new()
+	player.global_position = tile_to_world(x, y, true)
+	
+	player.max_distance = 832
+	player.attenuation = 3.0
+	
+	player.bus = &'Tiles'
+	player.stream = stream
+	player.volume_db = volume
+	
+	player.finished.connect(player.queue_free)
+	
+	add_child(player)
+	player.play()
 
 #endregion
 
@@ -723,42 +1019,121 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
 	var processed := 0
 	
-	var dirty_x := start_x + width
-	var dirty_y := start_y + height
-	var dirty_width := 0
-	var dirty_height := 0
+	var dirty_chunks: Dictionary[Vector2i, bool] = {}
 	
 	for y in range(height):
 		for x in range(width):
 			var tile := data[x + y * width]
 			var idx := (start_x + x) + (start_y + y) * world_width
 			
-			# only update tiles 
-			if tiles[idx] != tile:
-				# update tile
-				tiles[idx] = tile
-				
-				# shrink update region
-				dirty_x = min(dirty_x, start_x + x)
-				dirty_y = min(dirty_y, start_y + y)
-				dirty_width = max(dirty_width, start_x + x - dirty_x + 1)
-				dirty_height = start_y + y - dirty_y + 1
-				
-				# set chunk as dirty
-				@warning_ignore('integer_division')
-				Globals.world_map.chunk_states[Vector2i(
-					(start_x + x) / CHUNK_SIZE,
-					(start_y + y) / CHUNK_SIZE
-				)] = WorldTileMap.UpdateState.DIRTY
-				
-				processed += 1
+			# update tile
+			tiles[idx] = tile
 			
-			if processed >= 128:
-				processed = 0
-				await get_tree().process_frame
+			# set chunk as dirty
+			@warning_ignore('integer_division')
+			dirty_chunks[Vector2i(
+				(start_x + x) / CHUNK_SIZE,
+				(start_y + y) / CHUNK_SIZE
+			)] = true
+			
+			# update water texture
+			update_water_texture(start_x + x, start_y + y, false)
+			
+			processed += 1
+		
+		if processed >= 128:
+			processed = 0
+			await get_tree().process_frame
 	
-	# only change updated tiles
-	if dirty_width != 0 and dirty_height != 0:
-		Globals.world_map.load_region(dirty_x, dirty_y, dirty_width, dirty_height)
+	# set chunk state
+	for chunk in dirty_chunks:
+		Globals.world_map.chunk_states[chunk] = WorldTileMap.UpdateState.DIRTY
+	
+	# push water update all at once
+	push_water_texture_update()
+
+#endregion
+
+#region World Serialization
+func save_world() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	# warn if no world name is set
+	if Globals.world_name == "":
+		push_warning("[Wizbowo's Conquest] WARNING: world_name was not set, so the world has not 
+			been auto-saved")
+		return
+	
+	# make sure world folder exists
+	DirAccess.make_dir_recursive_absolute("user://world")
+	
+	# - Header - #
+	var buffer := StreamPeerBuffer.new()
+	
+	# world size
+	buffer.put_u8(Globals.world_size_key)
+	
+	# world spawn
+	buffer.put_16(Globals.world_spawn.x)
+	buffer.put_16(Globals.world_spawn.y)
+	
+	# world layers
+	buffer.put_u16(Globals.surface)
+	buffer.put_u16(Globals.underground)
+	
+	# - Tile Data - #
+	buffer.put_data(tiles.to_byte_array())
+	
+	# - Entity Data - #
+	buffer.put_data(EntityManager.get_persistent_entities())
+	
+	# - Write - #
+	var file := FileAccess.open("user://world/%s.save" % Globals.world_name, FileAccess.WRITE)
+	var compressed := buffer.data_array.compress(FileAccess.COMPRESSION_GZIP)
+	
+	print("[Wizbowo's Conquest] Compressed Save Size: %s bytes" % len(compressed))
+	
+	if file.store_buffer(compressed):
+		print("[Wizbowo's Conquest] Saved World")
+	else:
+		printerr("[Wizbowo's Conquest] ERROR: Failed to save world '%s'" % 
+			ProjectSettings.globalize_path("user://world/%s.save" % Globals.world_name))
+
+func load_world() -> bool:
+	# check if world already exists
+	if not FileAccess.file_exists("user://world/%s.save" % Globals.world_name):
+		print("[Wizbowo's Conquest] World %s does not exist, generating now" % Globals.world_name)
+		return false
+	
+	# - Header - #
+	var buffer := StreamPeerBuffer.new()
+	var data := FileAccess.get_file_as_bytes("user://world/%s.save" % Globals.world_name)
+	buffer.data_array = data.decompress_dynamic(-1, FileAccess.COMPRESSION_GZIP)
+	
+	# world size
+	Globals.world_size_key = buffer.get_u8() as Globals.WorldSizeKey
+	
+	# world spawn
+	Globals.world_spawn.x = buffer.get_16()
+	Globals.world_spawn.y = buffer.get_16()
+	
+	# world layers
+	Globals.surface     = buffer.get_u16()
+	Globals.underground = buffer.get_u16()
+	
+	# - Tile Data - #
+	var world_size := Globals.world_size.x * Globals.world_size.y
+	
+	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
+	
+	# - Entity Data - #
+	EntityManager.load_persistent_entities(buffer)
+	
+	# finishing
+	ActivationPass.new().start_pass(null)
+	print("[Wizbowo's Conquest] World Loaded!")
+	
+	return true
 
 #endregion
