@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ci48q1pyhkcn5"
-path="res://.godot/imported/hammer.png-23c1e5bef8270c88806f5d5f979f6a78.ctex"
+uid="uid://d2dcpkyltntms"
+path="res://.godot/imported/sprite.png-8f2f73e79f36ce040baecbf6f0d01dd2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/10_wooden_axe/hammer.png"
-dest_files=["res://.godot/imported/hammer.png-23c1e5bef8270c88806f5d5f979f6a78.ctex"]
+source_file="res://items/10_wooden_axe/sprite.png"
+dest_files=["res://.godot/imported/sprite.png-8f2f73e79f36ce040baecbf6f0d01dd2.ctex"]
 
 [params]
 
