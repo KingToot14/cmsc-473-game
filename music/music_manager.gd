@@ -137,21 +137,20 @@ func play_track(area: Area, variant := -1) -> void:
 	print("Is playing: ", playing)
 
 
-<<<<<<< Updated upstream
 func _on_biome_changed(new_biome: StringName) -> void:
 	match new_biome:
 		&"winter":
-			if BiomeManager.current_layer==&"surface":
+			if BiomeManager.current_layer == BiomeManager.Layer.SURFACE:
 				enter_area(Area.WINTER_DAY)
-			if BiomeManager.current_layer==&"underground":
+			if BiomeManager.current_layer == BiomeManager.Layer.UNDERGROUND:
 				enter_area(Area.UNDERGROUND)
 		&"forest":
-			if BiomeManager.current_layer==&"surface":
+			if BiomeManager.current_layer == BiomeManager.Layer.SURFACE:
 				enter_area(Area.FOREST_DAY)
 		&"cavern":
-			if BiomeManager.current_layer==&"cavern":
+			if BiomeManager.current_layer == BiomeManager.Layer.CAVERN:
 				enter_area(Area.CAVERN)
-=======
+
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	# layer overrides biome music for non-surface layers
 	match BiomeManager.current_layer:
@@ -171,19 +170,17 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 		BiomeManager.Biome.FOREST:
 			enter_area(Area.FOREST_DAY)
 
->>>>>>> Stashed changes
 
 
-
-func _on_layer_changed(new_layer: StringName) -> void:
+func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
-		&"space":
+		BiomeManager.Layer.SPACE:
 			enter_area(Area.SPACE)
-		&"surface":
+		BiomeManager.Layer.SURFACE:
 			_on_biome_changed(BiomeManager.current_biome)
-		&"underground":
+		BiomeManager.Layer.UNDERGROUND:
 			enter_area(Area.UNDERGROUND)
-		&"cavern":
+		BiomeManager.Layer.CAVERN:
 			enter_area(Area.CAVERN)
 
 
