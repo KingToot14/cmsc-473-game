@@ -63,6 +63,7 @@ var world_size := Vector2i(4200, 1200):
 			ceili(float(_size.x) / TileManager.CHUNK_SIZE),
 			ceili(float(_size.y) / TileManager.CHUNK_SIZE)
 		)
+    
 		space = _size.y * 0.10
 		
 		world_size = _size
