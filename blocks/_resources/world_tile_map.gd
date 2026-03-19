@@ -40,6 +40,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if len(queued_chunks) > 0:
 		var chunks := queued_chunks.keys()
+		var start := Time.get_ticks_usec()
 		
 		for chunk in chunks:
 			if chunk_states.get(chunk, UpdateState.UNLOADED) == UpdateState.DIRTY:
@@ -51,6 +52,10 @@ func _process(_delta: float) -> void:
 				)
 				
 				queued_chunks.erase(chunk)
+				
+				# only process for up to 4ms
+				if Time.get_ticks_usec() - start >= 4000:
+					break
 
 #region Tile Management
 func autotile_region(start_x: int, start_y: int, width: int, height: int) -> void:
@@ -133,9 +138,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 			
 			variations[index] = value
 			index += 1
-			
-			#if index % 32 == 0:
-				#await get_tree().process_frame
 		
 		# update window
 		prev = curr
@@ -152,14 +154,24 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 		for x in range(width):
 			# set blocks
 			if tile_type[index] == 0:
+				var variation := variations[index]
+				
 				blocks.set_cell(
 					Vector2i(start_x + x, start_y + y),
 					TileManager.get_block_unsafe(start_x + x, start_y + y),
-					CONNECTION_MAP.get(variations[index]) + Vector2i(0, randi_range(0, 1) * 4)
+					CONNECTION_MAP.get(variation) + Vector2i(0, randi_range(0, 1) * 4)
 				)
+				
+				# set default wall if not center tile
+				if variation != 255:
+					walls.set_cell(
+						Vector2i(start_x + x, start_y + y),
+						TileManager.get_wall_unsafe(start_x + x, start_y + y),
+						Vector2i(2, 2 + randi_range(0, 1) * 4)
+					)
 			
 			# set walls
-			if tile_type[index] == 1:
+			elif tile_type[index] == 1:
 				walls.set_cell(
 					Vector2i(start_x + x, start_y + y),
 					TileManager.get_wall_unsafe(start_x + x, start_y + y),
@@ -167,9 +179,6 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 				)
 			
 			index += 1
-			
-			#if index % 128:
-				#await get_tree().process_frame
 
 func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'
@@ -192,12 +201,6 @@ func load_region(start_x: int, start_y: int, width: int, height: int) -> void:
 				walls.erase_cell(Vector2i(start_x + x, start_y + y))
 			else:
 				walls.set_cell(Vector2i(start_x + x, start_y + y), wall, Vector2i(2, 2))
-			
-			#processed += 1
-			#
-			#if processed == 256:
-				#await get_tree().process_frame
-				#processed = 0
 
 func clear_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	var blocks: TileMapLayer = $'blocks'

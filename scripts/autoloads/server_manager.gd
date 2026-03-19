@@ -190,7 +190,7 @@ func get_player(player_id: int, must_be_finalized := true) -> PlayerController:
 		finalized_players.erase(player_id)
 		return null
 	
-	if must_be_finalized and finalized_players.get(player_id, false):
+	if must_be_finalized and not finalized_players.get(player_id, false):
 		return null
 	
 	return connected_players[player_id]

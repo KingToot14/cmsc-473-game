@@ -758,19 +758,19 @@ shader = ExtResource("24_bwdx1")
 shader_parameter/water_color = Color(0, 0, 1, 0.6)
 shader_parameter/foam_color = Color(0, 0, 1, 0.6)
 
-[sub_resource type="Resource" id="Resource_8q4fm"]
-script = ExtResource("27_2soq1")
-water_color = Color(0.14450002, 0.32087502, 0.85, 0.49019608)
-foam_color = Color(0.63750005, 0.711875, 0.85, 0.60784316)
-has_underground_color = true
-underground_water = Color(0.12920001, 0.12920001, 0.76, 0.49019608)
-underground_foam = Color(0.568, 0.6066667, 0.8, 0.60784316)
-metadata/_custom_type_script = "uid://bo71smfwf3o2c"
-
 [sub_resource type="Resource" id="Resource_2soq1"]
 script = ExtResource("27_2soq1")
-water_color = Color(0.123199984, 0.53944016, 0.88, 0.49019608)
-foam_color = Color(0.7031, 0.83081496, 0.89, 0.60784316)
+water_color = Color(0.14509805, 0.32156864, 0.8509804, 0.49019608)
+foam_color = Color(0.6392157, 0.7137255, 0.8509804, 0.60784316)
+has_underground_color = true
+underground_water = Color(0.12941177, 0.12941177, 0.7607843, 0.49019608)
+underground_foam = Color(0.5686275, 0.60784316, 0.8, 0.60784316)
+metadata/_custom_type_script = "uid://bo71smfwf3o2c"
+
+[sub_resource type="Resource" id="Resource_8q4fm"]
+script = ExtResource("27_2soq1")
+water_color = Color(0.12156863, 0.5411765, 0.8784314, 0.49019608)
+foam_color = Color(0.7019608, 0.83137256, 0.8901961, 0.60784316)
 metadata/_custom_type_script = "uid://bo71smfwf3o2c"
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
@@ -1057,9 +1057,9 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("26_vewsg")
-water_rules = Dictionary[StringName, ExtResource("27_2soq1")]({
-&"forest": SubResource("Resource_8q4fm"),
-&"winter": SubResource("Resource_2soq1")
+water_rules = Dictionary[int, ExtResource("27_2soq1")]({
+1: SubResource("Resource_2soq1"),
+4: SubResource("Resource_8q4fm")
 })
 
 [node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]

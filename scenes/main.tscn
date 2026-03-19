@@ -19,7 +19,9 @@
 [ext_resource type="Shader" uid="uid://cj52pvtlbjr0s" path="res://backgrounds/sky_shader.gdshader" id="12_muem4"]
 [ext_resource type="Script" uid="uid://cv08nwow2dr3m" path="res://blocks/_resources/water_updater.gd" id="13_0ld40"]
 [ext_resource type="Script" uid="uid://cg1xal70l3w7t" path="res://backgrounds/background_manager.gd" id="14_yc10j"]
+[ext_resource type="Script" uid="uid://dv225fof0wpvx" path="res://backgrounds/background.gd" id="15_yc10j"]
 [ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
+[ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="22_jscy8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
@@ -1154,8 +1156,11 @@ biome_backgrounds = {
 &"winter": NodePath("../background_snow")
 }
 
-[node name="background_forest" type="Node2D" parent="." unique_id=1195479764]
+[node name="background_forest" type="Node2D" parent="." unique_id=1195479764 groups=["background"]]
 y_sort_enabled = true
+script = ExtResource("15_yc10j")
+allowed_layers = 31
+allowed_biomes = 11
 
 [node name="layer_1" type="Parallax2D" parent="background_forest" unique_id=698714807]
 y_sort_enabled = true
@@ -1255,9 +1260,12 @@ texture = ExtResource("3_tbgi4")
 vframes = 5
 frame = 4
 
-[node name="background_snow" type="Node2D" parent="." unique_id=1299967546]
-visible = false
+[node name="background_snow" type="Node2D" parent="." unique_id=1299967546 groups=["background"]]
+modulate = Color(1, 1, 1, 0)
 y_sort_enabled = true
+script = ExtResource("15_yc10j")
+allowed_layers = 31
+allowed_biomes = 4
 
 [node name="layer_1" type="Parallax2D" parent="background_snow" unique_id=392378770]
 y_sort_enabled = true
@@ -1368,6 +1376,7 @@ script = ExtResource("3_jyhfs")
 
 [node name="walls" type="TileMapLayer" parent="world_tiles" unique_id=1336934811]
 z_index = 10
+tile_set = ExtResource("22_jscy8")
 occlusion_enabled = false
 rendering_quadrant_size = 8
 collision_enabled = false
