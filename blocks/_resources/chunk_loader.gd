@@ -293,8 +293,8 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 		await autotile_region(
 			center_x - VISUAL_RANGE.x,
 			center_y - VISUAL_RANGE.y,
-			center_x + VISUAL_RANGE.x,
-			center_y + VISUAL_RANGE.y
+			center_x + VISUAL_RANGE.x + 1,
+			center_y + VISUAL_RANGE.y + 1
 		)
 	
 	# build water texture

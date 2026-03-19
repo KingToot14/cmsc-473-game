@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ci48q1pyhkcn5"
-path="res://.godot/imported/hammer.png-23c1e5bef8270c88806f5d5f979f6a78.ctex"
+uid="uid://bwldpyj23vq8f"
+path="res://.godot/imported/snow_top.png-d7586517fc0e877d6304c113da4213f1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/10_wooden_axe/hammer.png"
-dest_files=["res://.godot/imported/hammer.png-23c1e5bef8270c88806f5d5f979f6a78.ctex"]
+source_file="res://entities/tile_entities/0_tree/snow_top.png"
+dest_files=["res://.godot/imported/snow_top.png-d7586517fc0e877d6304c113da4213f1.ctex"]
 
 [params]
 
