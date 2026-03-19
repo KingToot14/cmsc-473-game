@@ -13,7 +13,7 @@ const INVENTORY_SIZE := 40
 
 @export var variant := ChestVariant.NORMAL
 
-var inventory := Inventory.new(INVENTORY_SIZE)
+var inventory := Inventory.new()
 
 # --- Functions --- #
 func _ready() -> void:

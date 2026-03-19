@@ -61,7 +61,7 @@ func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: 
 			return
 		
 		# if hitbox doesn't exist, break block
-		if TileManager.destroy_block(tile_position.x, tile_position.y):
+		if TileManager.hurt_block(tile_position.x, tile_position.y, tool_power):
 			return
 	
 	if tool_type & ToolType.HAMMER:
