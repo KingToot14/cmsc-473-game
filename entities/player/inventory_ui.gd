@@ -114,6 +114,13 @@ func refresh_crafting_ui():
 		if button is CraftingButton:
 			button.update_availability(player_inv)
 
+@onready var chest_ui_node = $chest_ui # The instanced chest_ui.tscn
+
+func open_chest(chest: ChestEntity):
+	chest_ui_node.open(chest) 
+	$inventory_container.show()
+
+
 #region Cursors
 func set_is_holding(value: bool) -> void:
 	holding_item = value

@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://dpng4bs5q55s"]
+
+[ext_resource type="Script" uid="uid://lr7w51mos3tt" path="res://entities/player/chest_ui.gd" id="1_7vjkj"]
+[ext_resource type="PackedScene" uid="uid://bdbhl25tgli5b" path="res://ui/inventory/inventory_slot.tscn" id="2_jtg03"]
+
+[node name="chest_ui" type="Control" unique_id=629720307]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7vjkj")
+slot_scene = ExtResource("2_jtg03")
+
+[node name="nine_patch_rect" type="NinePatchRect" parent="." unique_id=1717000504]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="close_button" type="Button" parent="." unique_id=1955701555]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="chest_grid" type="GridContainer" parent="." unique_id=673776545]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+columns = 10

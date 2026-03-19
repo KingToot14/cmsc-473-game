@@ -17,10 +17,11 @@ var recipes: Array[Recipe] = [] #add more recipes in the inspector
 
 # --- Functions --- #
 
-func _init():
-	for i in range(INVENTORY_SLOTS):
+func _init(size: int = INVENTORY_SLOTS):
+	for i in range(size):
 		items.append(ItemStack.new(-1, 0))
-	# Load recipes immediately when the inventory is created
+	
+	# load recipes immediately when the inventory is created
 	_load_recipes()
 
 #region Inventory Management

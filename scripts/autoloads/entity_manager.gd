@@ -460,6 +460,26 @@ func get_entity(entity_id: int) -> Entity:
 	
 	return loaded_entities[entity_id].current_instance
 
+func get_tile_entity_at(world_pos: Vector2) -> TileEntity:
+	var tile_pos = TileManager.world_to_tile(world_pos.x, world_pos.y)
+	
+	for ref in loaded_entities.values():
+		# only check valid tile entities
+		if ref.is_tile_entity and is_instance_valid(ref.current_instance):
+			var entity = ref.current_instance as TileEntity
+			
+			# chests are 2x2.
+			var is_match = (
+				entity.tile_position == tile_pos or 
+				entity.tile_position + Vector2i(1, 0) == tile_pos or 
+				entity.tile_position + Vector2i(0, -1) == tile_pos or 
+				entity.tile_position + Vector2i(1, -1) == tile_pos
+			)
+			
+			if is_match:
+				return entity
+	return null
+
 #endregion
 
 #region Helper Classes

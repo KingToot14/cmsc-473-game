@@ -33,6 +33,7 @@
 [ext_resource type="Shader" uid="uid://djvncermu60ea" path="res://ui/in_game/grid_overlay.gdshader" id="24_gt4e4"]
 [ext_resource type="Script" uid="uid://dhi7ubk8umji5" path="res://blocks/_resources/water_manager.gd" id="26_vewsg"]
 [ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
+[ext_resource type="PackedScene" uid="uid://dpng4bs5q55s" path="res://entities/player/recipes/chest_ui.tscn" id="34_8q4fm"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -1229,3 +1230,5 @@ custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 theme_override_constants/h_separation = 2
 columns = 5
+
+[node name="chest_ui" parent="inventory_ui" unique_id=629720307 instance=ExtResource("34_8q4fm")]

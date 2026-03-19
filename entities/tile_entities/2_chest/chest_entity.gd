@@ -41,6 +41,9 @@ func interact_with(mouse_position: Vector2) -> bool:
 	# NOTE: the 'id' variable in this script is a unique id that is synchronized between the server
 	# and the client, so you could use this to handle opening and displaying the chest inventory.
 	print("Chest Interacted!")
+	# tells player UI to open this specific chest
+	if multiplayer.get_unique_id() == Globals.player.owner_id:
+		Globals.player.get_node("inventory_ui").open_chest(self)
 	
 	return true
 

@@ -7,14 +7,15 @@ extends Control
 
 @export var is_display_only := false
 
+var target_inventory: Inventory # if null, defaults to player
+var slot_index: int
+
 var current_item: Inventory.ItemStack
 
 var is_hotbar := false
 
 # --- Functions --- #
 func _ready() -> void:
-	# If this is a crafting slot, make sure it (and its children) ignore the mouse
-	# so the click passes through to the CraftingButton underneath!
 	if is_display_only:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		$'backing'.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -74,24 +75,41 @@ func set_selected(value: bool) -> void:
 		# update panel style
 		$'backing'.region_rect.position.x = 0.0
 
+#func _gui_input(event: InputEvent) -> void:
+	##Stop right here if it's just a visual slot
+	#if is_display_only:
+		#return
+	#if event.is_action_pressed(&"inventory_item_transfer"):
+		## If inventory not open, stop here
+		#var inventory_container = Globals.player.get_node("inventory_ui/inventory_container")
+		#if not inventory_container.visible:
+			#return 
+		#
+		#var inventory = Globals.player.my_inventory
+		## Calculate the correct index in the inventory array.
+		#var true_index = get_index()
+		#if not is_hotbar:
+			## Because the main inventory slots are in a separate GridContainer, their get_index() starts back at 0. We need to offset them by the hotbar size!
+			#true_index += 10 
+			#
+		#inventory.interact_with_slot(true_index)
+		#
+		## Tell Godot we handled this input so it doesn't click through the UI
+		#get_viewport().set_input_as_handled()
+		
+
+
 func _gui_input(event: InputEvent) -> void:
-	#Stop right here if it's just a visual slot
-	if is_display_only:
-		return
+	if is_display_only: return
+	
 	if event.is_action_pressed(&"inventory_item_transfer"):
-		# If inventory not open, stop here
-		var inventory_container = Globals.player.get_node("inventory_ui/inventory_container")
-		if not inventory_container.visible:
-			return 
+		var inv = target_inventory if target_inventory else Globals.player.my_inventory
+		var final_index = slot_index if target_inventory else get_player_index()
 		
-		var inventory = Globals.player.my_inventory
-		# Calculate the correct index in the inventory array.
-		var true_index = get_index()
-		if not is_hotbar:
-			# Because the main inventory slots are in a separate GridContainer, their get_index() starts back at 0. We need to offset them by the hotbar size!
-			true_index += 10 
-			
-		inventory.interact_with_slot(true_index)
 		
-		# Tell Godot we handled this input so it doesn't click through the UI
+		inv.interact_with_slot(final_index)
 		get_viewport().set_input_as_handled()
+
+func get_player_index() -> int:
+	var idx = get_index()
+	return idx if is_hotbar else idx + 10

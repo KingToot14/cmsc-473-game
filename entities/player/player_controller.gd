@@ -170,7 +170,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	#if event.is_action_pressed(&"crafting_toggle"):
 		var craft_container = $inventory_ui/crafting_container
 		craft_container.visible = !craft_container.visible
-	
+		
+	if event.is_action_pressed(&"chest_interact"):
+		var mouse_pos = get_global_mouse_position()
+		
+		# Check if we clicked on a tile entity (like a chest)
+		# This assumes your TileManager or EntityManager can find entities by position
+		var entity = EntityManager.get_tile_entity_at(mouse_pos)
+		
+		if entity is ChestEntity:
+			entity.interact_with(mouse_pos)
+
 #region Animation
 func _process(_delta: float) -> void:
 	# update direction
@@ -250,6 +260,19 @@ func do_swing(swing_speed := 1.0, direction := 0) -> void:
 		set_upper_animation(&'swing_right', swing_speed)
 	elif face_direction == -1:
 		set_upper_animation(&'swing_left', swing_speed)
+
+func _physics_process(delta: float) -> void:
+	if owner_id == multiplayer.get_unique_id():
+		_close_chest(delta)
+
+func _close_chest(_delta: float) -> void:
+	var chest_ui = $inventory_ui/chest_ui
+	# if the chest UI is open, check the distance
+	if chest_ui.visible and chest_ui.current_chest:
+		var dist = global_position.distance_to(chest_ui.current_chest.global_position)
+		# if the player is further than 100 pixels (or your base_range), close it
+		if dist > base_range * 16: 
+			chest_ui.close()
 
 #endregion
 
