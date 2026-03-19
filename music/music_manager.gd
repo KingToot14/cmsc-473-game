@@ -136,6 +136,7 @@ func play_track(area: Area, variant := -1) -> void:
 	play()
 	print("Is playing: ", playing)
 
+
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	# layer overrides biome music for non-surface layers
 	match BiomeManager.current_layer:
@@ -154,6 +155,7 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 			enter_area(Area.WINTER_DAY)
 		BiomeManager.Biome.FOREST:
 			enter_area(Area.FOREST_DAY)
+
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
