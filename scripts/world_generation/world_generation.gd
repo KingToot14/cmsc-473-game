@@ -24,6 +24,7 @@ var underground_high := 0
 var underground_low := 0
 
 var hill_positions: Array[Vector2i] = []
+var lake_positions: Array[Vector2i] = []
 
 var winter_on_right := false
 
@@ -67,6 +68,9 @@ func generate_world() -> void:
 	
 	await run_pass(SmallHolesPass.new())
 	
+	await run_pass(LakePass.new())
+	
+	# biomes
 	await run_pass(DirtToSnowPass.new())
 	await run_pass(StoneToIcePass.new())
 	
@@ -81,7 +85,11 @@ func generate_world() -> void:
 	await run_pass(SpawnPass.new())
 	
 	# add tiles that need updates to the queue
-	await run_pass(ActivationPass.new())
+	#await run_pass(ActivationPass.new())
+	
+	# start block updates
+	Globals.block_updater.set_physics_process(true)
+	Globals.water_updater.set_process(true)
 	
 	print("[Wizbowo's Conquest] Done Generating World")
 	
