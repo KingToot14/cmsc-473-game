@@ -1366,6 +1366,7 @@ vframes = 5
 frame = 4
 
 [node name="server_tiles" type="TileMapLayer" parent="." unique_id=1791430910]
+z_index = 50
 tile_set = ExtResource("4_tbgi4")
 physics_quadrant_size = 8
 script = ExtResource("7_o6xl0")
@@ -1378,7 +1379,6 @@ script = ExtResource("3_jyhfs")
 z_index = 10
 tile_set = ExtResource("22_jscy8")
 occlusion_enabled = false
-rendering_quadrant_size = 8
 collision_enabled = false
 navigation_enabled = false
 
@@ -1386,7 +1386,6 @@ navigation_enabled = false
 z_index = 50
 tile_set = ExtResource("4_tbgi4")
 occlusion_enabled = false
-rendering_quadrant_size = 8
 navigation_enabled = false
 
 [connection signal="pressed" from="join_ui/panel_connect/join_button" to="join_ui" method="create_client"]

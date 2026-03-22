@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cr8qvfwi7uc7y" path="res://entities/dynamic_entities/2_falling-block/falling_block_entity.gd" id="1_vsi20"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_3r1x2"]
-[ext_resource type="Texture2D" uid="uid://dok7jby27ehl1" path="res://blocks/8_sand/icons.png" id="2_sif4m"]
+[ext_resource type="TileSet" uid="uid://1kpxyo6xgju4" path="res://blocks/_resources/blocks.tres" id="3_6gcnx"]
 [ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/combat/entity_damage_source.gd" id="4_vsi20"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sif4m"]
@@ -25,8 +25,11 @@ script = ExtResource("2_3r1x2")
 root = NodePath("..")
 metadata/_custom_type_script = "uid://bsbf482xfcwg4"
 
-[node name="sprite" type="Sprite2D" parent="." unique_id=1575383839]
-texture = ExtResource("2_sif4m")
+[node name="sprite" type="TileMapLayer" parent="." unique_id=268712911]
+position = Vector2(-4, -4)
+tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0)
+tile_set = ExtResource("3_6gcnx")
+collision_enabled = false
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=850021659]
 shape = SubResource("RectangleShape2D_sif4m")
