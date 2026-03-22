@@ -69,6 +69,7 @@ func generate_world() -> void:
 	await run_pass(SmallHolesPass.new())
 	
 	await run_pass(LakePass.new())
+	await run_pass(OceanPass.new())
 	
 	# biomes
 	await run_pass(DirtToSnowPass.new())
