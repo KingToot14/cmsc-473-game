@@ -65,6 +65,7 @@ var world_size := Vector2i(4200, 1200):
 		)
 	
 		space = _size.y * 0.10
+		cavern = _size.y * 0.60
 		
 		world_size = _size
 		world_size_changed.emit(world_size)
@@ -79,6 +80,7 @@ var world_spawn: Vector2i
 var space := world_size.y * 0.10
 var surface := 0
 var underground := 0
+var cavern := world_size.y * 0.60
 
 # - TileMaps
 var server_map: ServerTileMap

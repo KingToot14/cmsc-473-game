@@ -755,8 +755,8 @@ shader_parameter/line_size = 1.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
 shader = ExtResource("24_bwdx1")
-shader_parameter/water_color = Color(0, 0, 1, 0.6)
-shader_parameter/foam_color = Color(0, 0, 1, 0.6)
+shader_parameter/water_color = Color(0.14450002, 0.4149416, 0.85, 0.49019608)
+shader_parameter/foam_color = Color(0.63750005, 0.75083333, 0.85, 0.60784316)
 
 [sub_resource type="Resource" id="Resource_2soq1"]
 script = ExtResource("27_2soq1")
@@ -771,6 +771,12 @@ metadata/_custom_type_script = "uid://bo71smfwf3o2c"
 script = ExtResource("27_2soq1")
 water_color = Color(0.12156863, 0.5411765, 0.8784314, 0.49019608)
 foam_color = Color(0.7019608, 0.83137256, 0.8901961, 0.60784316)
+metadata/_custom_type_script = "uid://bo71smfwf3o2c"
+
+[sub_resource type="Resource" id="Resource_np63p"]
+script = ExtResource("27_2soq1")
+water_color = Color(0.14450002, 0.4149416, 0.85, 0.49019608)
+foam_color = Color(0.63750005, 0.75083333, 0.85, 0.60784316)
 metadata/_custom_type_script = "uid://bo71smfwf3o2c"
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
@@ -1059,7 +1065,8 @@ mouse_filter = 2
 script = ExtResource("26_vewsg")
 water_rules = Dictionary[int, ExtResource("27_2soq1")]({
 1: SubResource("Resource_2soq1"),
-4: SubResource("Resource_8q4fm")
+4: SubResource("Resource_8q4fm"),
+8: SubResource("Resource_np63p")
 })
 
 [node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]
