@@ -11,12 +11,12 @@ func get_pass_name() -> String:
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	var world_scale := world_size.x / 4200.0
-	var lakes_to_generate := gen.rng.randi_range(floori(3 * world_scale), floori(6 * world_scale))
+	var lakes_to_generate := gen.rng.randi_range(floori(4 * world_scale), floori(6 * world_scale))
 	
 	for lake in range(lakes_to_generate):
 		var attempts := floori(world_size.x * 0.20)
-		var lake_width := gen.rng.randi_range(20, 30)
-		var lake_depth := gen.rng.randi_range(10, 20)
+		var lake_width := gen.rng.randi_range(30, 45)
+		var lake_depth := gen.rng.randi_range( 8, 16)
 		
 		for attempt in range(attempts):
 			if place_lake(gen, lake_width, lake_depth):
@@ -75,30 +75,21 @@ func place_lake(gen: WorldGeneration, lake_width: int, lake_depth: int) -> bool:
 	# dig out lake
 	for x in range(lake_x - lake_width, lake_x + lake_width):
 		for y in range(lake_y + lake_depth + 1, lake_y - SCAN_DEPTH, -1):
-			if y >= lake_y:
-				var dist := (float(x - lake_x) / lake_width) ** 2 + \
-					(float(y - lake_y) / lake_depth) ** 2
-				
-				if dist > randf_range(0.9, 1.1) and TileManager.get_block_unsafe(x, y + 1) != 0:
-					continue
-				
-				TileManager.set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+			var func_x := x - lake_x
+			var func_y := lake_y - y
 			
-			TileManager.set_block_unsafe(x, y, 0)
-			TileManager.set_wall_unsafe(x, y, 0)
-	
-	# smooth out lake
-	var index := 0
-	
-	for x in range(lake_x - lake_width - SCAN_DEPTH, lake_x + lake_width + SCAN_DEPTH):
-		for y in range(lake_y - SCAN_DEPTH, lake_y):
-			if abs(x - lake_x) > lake_width - index:
+			var water_func := floori(((lake_depth + SCAN_DEPTH) / 2.0) * \
+				(sin(((PI * func_x) / lake_width) - PI / 2.0) - 1)) + SCAN_DEPTH
+			
+			if func_y < water_func * randf_range(0.9, 1.1) and TileManager.get_block_unsafe(x, y + 1) != 0:
 				continue
 			
-			TileManager.set_block_unsafe(x, y, 0)
-			TileManager.set_wall_unsafe(x, y, 0)
-			
-			index += 1
+			if func_y >= water_func:
+				TileManager.set_block_unsafe(x, y, 0)
+				TileManager.set_wall_unsafe(x, y, 0)
+				
+				if func_y < 0:
+					TileManager.set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 	
 	# save position for later
 	gen.lake_positions.append(Vector2i(lake_x, lake_y))
