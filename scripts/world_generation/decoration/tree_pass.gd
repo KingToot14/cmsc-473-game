@@ -37,6 +37,16 @@ func perform_pass(gen: WorldGeneration) -> void:
 			x += 1
 			continue
 		
+		# check water level
+		if TileManager.get_water_level(x, y) > 0 or TileManager.get_water_level(x + 1, y) > 0:
+			x += 1
+			continue
+		
+		# check for walls
+		if TileManager.get_wall_unsafe(x, y) != 0 or TileManager.get_wall_unsafe(x + 1, y) != 0:
+			x += 1
+			continue
+		
 		match tile_left:
 			# dirt or grass
 			1, 2:

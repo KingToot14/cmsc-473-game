@@ -148,8 +148,8 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	return water_level
 
 func flow_side(x: int, y: int, water_level: int) -> int:
-	var can_flow_left_1 := TileManager.get_block(x - 1, y) == 0
-	var can_flow_right_1 := TileManager.get_block(x + 1, y) == 0
+	var can_flow_left_1 := TileManager.get_block(x - 1, y) == 0 and (x - 1) >= 0
+	var can_flow_right_1 := TileManager.get_block(x + 1, y) == 0 and (x + 1) < Globals.world_size.x
 	
 	# add an average modifier that helps settle shallow puddles
 	var puddle_mod := 0.0
@@ -161,17 +161,17 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 	if can_flow_left_1 and can_flow_right_1:
 		# only flow more than one tile if tiles already contain water
 		var can_flow_left_2 := TileManager.get_block(x - 2, y) == 0 \
-			and TileManager.get_water_level(x - 2, y) > 0
+			and TileManager.get_water_level(x - 2, y) > 0 and (x - 2) >= 0
 		var can_flow_right_2 := TileManager.get_block(x + 2, y) == 0 \
-			and TileManager.get_water_level(x + 2, y) > 0
+			and TileManager.get_water_level(x + 2, y) > 0 and (x + 2) < Globals.world_size.x
 		
 		# try to flow to next neighbors
 		if can_flow_left_2 and can_flow_right_2:
 			# only flow more than one tile if tiles already contain water
 			var can_flow_left_3 := TileManager.get_block(x - 3, y) == 0 \
-				and TileManager.get_water_level(x - 3, y) > 0
+				and TileManager.get_water_level(x - 3, y) > 0 and (x - 3) >= 0
 			var can_flow_right_3 := TileManager.get_block(x + 3, y) == 0 \
-				and TileManager.get_water_level(x + 3, y) > 0
+				and TileManager.get_water_level(x + 3, y) > 0 and (x + 3) < Globals.world_size.x
 			
 			# try to flow to next neighbors
 			if can_flow_left_3 and can_flow_right_3:

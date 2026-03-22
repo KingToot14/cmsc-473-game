@@ -58,6 +58,8 @@ func _ready() -> void:
 	
 	water_image.fill(Color.BLACK)
 	
+	load_chunks()
+	
 	set_process(false)
 	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
