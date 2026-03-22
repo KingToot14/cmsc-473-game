@@ -15,7 +15,3 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	for x in range(1, world_size.x - 1):
 		for y in range(1, world_size.y - 1):
 			Globals.block_updater.add_to_queue(Vector2i(x, y))
-	
-	# start block updates
-	Globals.block_updater.set_physics_process(true)
-	Globals.water_updater.set_process(true)
