@@ -43,12 +43,21 @@ var world_width: int
 ## [br]Read from [member Globals.world_size]
 var world_height: int
 
-## A reference of the water texture for rendering
+## A thread to handle updating the water texture asynchronously
+var water_thread := Thread.new()
+
+## A reference of the water data for rendering
+var water_data: PackedByteArray
+## A reference of the water image for rendering
 var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+## A reference of the water texture for rendering. Set from [member water_image]
 var water_texture := ImageTexture.create_from_image(water_image)
+## The top-left point where the water texture should be offset from
 var water_origin: Vector2
 
+## The width of the water texture in tiles
 const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
+## The height of the water texture in tiles
 const WATER_HEIGHT := (2 * ChunkLoader.VISUAL_RANGE.y + 1) * 16
 
 # --- Functions --- #
@@ -387,34 +396,48 @@ func get_water_level(x: int, y: int) -> int:
 ## Rebuilds the water texture around the player. Should be called after water updates
 ## and when loading new chunks
 func build_water_texture() -> void:
+	# check if thread is already running
+	if water_thread.is_started():
+		return
+	
 	# calculate upper point
 	var player_pos := Globals.player.center_point
 	var chunk := world_to_chunk(floori(player_pos.x), floori(player_pos.y))
 	var start_chunk = chunk - ChunkLoader.VISUAL_RANGE
 	var origin := chunk_to_tile(start_chunk.x, start_chunk.y)
 	
-	var data := PackedByteArray()
-	data.resize(WATER_WIDTH * WATER_HEIGHT)
+	water_thread.start(_rebuild_water_texture_internal.bind(origin))
+
+## This function should ONLY be called inside the [member water_thread].
+## This function handles the internals of updating the water texture, and
+## should not be modified from multiple places.
+func _rebuild_water_texture_internal(origin: Vector2i) -> void:
+	water_data = PackedByteArray()
+	water_data.resize(WATER_WIDTH * WATER_HEIGHT)
 	
-	var idx := 0
-	var processed := 0
+	var index := 0
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
 		var row := (origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			data[idx] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
+			water_data[index] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
 			
-			idx += 1
-			processed += 1
-			
-			if processed == 2048:
-				await get_tree().process_frame
-				processed = 0
+			index += 1
+	
+	_update_water_texture_internal.call_deferred(origin)
+
+## This function should ONLY be called from the [member water_thread].
+## This function handles the internals of updating the water texture, and
+## should not be modified from multiple places.
+func _update_water_texture_internal(origin: Vector2i) -> void:
+	# join thread
+	if water_thread.is_started():
+		water_thread.wait_to_finish()
 	
 	# update texture
-	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, water_data)
 	water_texture.update(water_image)
 	
 	water_origin = origin
