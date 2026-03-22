@@ -43,14 +43,19 @@ func check_biome(player_pos: Vector2) -> void:
 	) 
 	
 	# check layer (lower y = higher elevation)
-	if center_tile.y > Globals.underground:
+	if center_tile.y > Globals.cavern:
 		set_layer(Layer.CAVERN)
-	elif center_tile.y > Globals.surface:
+	elif center_tile.y > Globals.underground:
 		set_layer(Layer.UNDERGROUND)
 	elif center_tile.y > Globals.space:
 		set_layer(Layer.SURFACE)
 	else:
 		set_layer(Layer.SPACE)
+	
+	# check for oceans
+	if center_tile.x <= 300 + 32 or center_tile.x >= Globals.world_size.x - 300 - 32:
+		set_biome(Biome.OCEAN)
+		return
 	
 	# check biome
 	var snow_ice_count := 0

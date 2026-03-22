@@ -64,7 +64,8 @@ var world_size := Vector2i(4200, 1200):
 			ceili(float(_size.y) / TileManager.CHUNK_SIZE)
 		)
 	
-		space = _size.y * 0.10
+		space = floori(_size.y * 0.10)
+		cavern = floori(_size.y * 0.60)
 		
 		world_size = _size
 		world_size_changed.emit(world_size)
@@ -76,9 +77,10 @@ var world_chunks: Vector2i = Vector2i(
 )
 var world_spawn: Vector2i
 
-var space := world_size.y * 0.10
+var space := floori(world_size.y * 0.10)
 var surface := 0
 var underground := 0
+var cavern := floori(world_size.y * 0.60)
 
 # - TileMaps
 var server_map: ServerTileMap
