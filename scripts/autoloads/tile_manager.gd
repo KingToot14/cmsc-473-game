@@ -58,6 +58,8 @@ func _ready() -> void:
 	
 	water_image.fill(Color.BLACK)
 	
+	load_chunks()
+	
 	set_process(false)
 	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
 
@@ -995,8 +997,10 @@ func send_tile_update(x: int, y: int) -> void:
 		if not is_instance_valid(player):
 			continue
 		
-		var start := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
-		var end := Vector2i(player.center_point) - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var center_point := world_to_tile(floori(player.center_point.x), floori(player.center_point.y))
+		
+		var start := center_point - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := center_point + ChunkLoader.LOAD_RANGE * CHUNK_SIZE
 		
 		if x < start.x or x > end.x:
 			continue

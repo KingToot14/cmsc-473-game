@@ -13,7 +13,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	
 	# create surface-level rocks
 	for i in range(world_size.x * world_size.y * 0.00002):
-		var x := gen.rng.randi_range(0, world_size.x - 1)
+		var x := gen.rng.randi_range(300, world_size.x - 300)
 		var y := gen.surface_high
 		
 		# place slightly below ground
