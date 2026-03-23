@@ -82,7 +82,7 @@ var light_update_queued := false
 ## A reference of the light data for rendering
 var light_data: PackedByteArray
 ## A reference of the light image for rendering
-var light_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+var light_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_RGB8)
 ## A reference of the light texture for rendering. Set from [member light_image]
 var light_texture := ImageTexture.create_from_image(light_image)
 ## The top-left point where the light texture should be offset from
@@ -95,7 +95,7 @@ func _ready() -> void:
 	
 	water_image.fill(Color.BLACK)
 	
-	load_chunks()
+	setup_tile_arrays()
 	
 	set_process(false)
 	ServerManager.server_started.connect(func (): set_process(multiplayer.is_server()))
@@ -514,7 +514,7 @@ func build_light_texture() -> void:
 ## should not be modified from multiple places.
 func _rebuild_light_texture_internal(origin: Vector2i) -> void:
 	light_data = PackedByteArray()
-	light_data.resize(WATER_WIDTH * WATER_HEIGHT)
+	light_data.resize(WATER_WIDTH * WATER_HEIGHT * 3)
 	
 	var index := 0
 	
@@ -523,9 +523,11 @@ func _rebuild_light_texture_internal(origin: Vector2i) -> void:
 		var row := (origin.y + y) *  world_width
 		
 		for x in range(WATER_WIDTH):
-			light_data[index] = light[row + origin.x + x]
+			light_data[index + 0] = light[row + origin.x + x]
+			light_data[index + 1] = light[row + origin.x + x]
+			light_data[index + 2] = light[row + origin.x + x]
 			
-			index += 1
+			index += 3
 	
 	_update_light_texture_internal.call_deferred(origin)
 
@@ -538,7 +540,7 @@ func _update_light_texture_internal(origin: Vector2i) -> void:
 		light_thread.wait_to_finish()
 	
 	# update texture
-	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, light_data)
+	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_RGB8, light_data)
 	light_texture.update(light_image)
 	
 	light_origin = origin
@@ -560,10 +562,12 @@ func update_light_texture(x: int, y: int, update := true) -> void:
 	
 	# update data
 	var data: PackedByteArray = light_image.data['data']
-	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH] = light[y * world_width + x]
+	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 0] = light[y * world_width + x]
+	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 1] = light[y * world_width + x]
+	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 2] = light[y * world_width + x]
 	
 	# update image and texture
-	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
+	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_RGB8, data)
 	light_texture.update(light_image)
 	
 	if update:
@@ -1156,13 +1160,15 @@ func send_tile_update(x: int, y: int) -> void:
 #region Chunk Access
 ## Loads the initial tile array to match the world size using
 ## [member world_width] and [member world_height]
-func load_chunks() -> void:
+func setup_tile_arrays() -> void:
 	blocks = []
 	blocks.resize(world_width * world_height * 2)
 	walls = []
 	walls.resize(world_width * world_height * 2)
 	water = []
 	water.resize(world_width * world_height)
+	light = []
+	light.resize(world_width * world_height)
 	
 	#tiles = []
 	#tiles.resize(world_width * world_height)
@@ -1211,6 +1217,7 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 			buffer.put_u16(blocks.decode_u16(idx * 2))
 			buffer.put_u16(walls.decode_u16(idx * 2))
 			buffer.put_u8(water[idx * 1])
+			buffer.put_u8(light[idx * 1])
 	
 	return buffer.data_array.compress(FileAccess.COMPRESSION_ZSTD)
 
@@ -1233,6 +1240,7 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 			blocks.encode_u16(idx * 2, buffer.get_u16())
 			walls.encode_u16(idx * 2, buffer.get_u16())
 			water.encode_u8(idx * 1, buffer.get_u8())
+			light.encode_u8(idx * 1, buffer.get_u8())
 			#tiles[idx] = tile
 			
 			# set chunk as dirty
@@ -1259,7 +1267,7 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 	
 	# push water update all at once
 	build_water_texture()
-	#push_water_texture_update()
+	build_light_texture()
 
 #endregion
 

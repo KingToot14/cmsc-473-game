@@ -235,7 +235,15 @@ water_texture={
 "type": "sampler2D",
 "value": "res://water_test.png"
 }
+light_texture={
+"type": "sampler2D",
+"value": ""
+}
 water_offset={
+"type": "vec2",
+"value": Vector2(0, 0)
+}
+light_offset={
 "type": "vec2",
 "value": Vector2(0, 0)
 }
