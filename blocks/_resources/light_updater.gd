@@ -6,7 +6,7 @@ signal propagated()
 
 # --- Variables --- #
 const UPDATE_TIME := 0.05
-const MAX_UPDATES_PER_FRAME := 200
+const MAX_UPDATES_PER_FRAME := 300
 
 const MAX_LIGHT_LEVEL := 255
 const AIR_FALLOFF := 10
@@ -17,7 +17,7 @@ var active := false
 
 var update_timer := 0.0
 var active_tiles: Dictionary[Vector2i, bool] = {}
-var updated_tiles: Dictionary[Vector2i, bool]
+var updated_tiles: Dictionary[Vector2i, int]
 
 # --- Functions --- #
 func _ready() -> void:
@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 	
 	# process as many tiles as possible
 	while index < len(tiles):
-		var tile: Vector2i = tiles[index]
+		var tile: Vector2i = tiles[index] 
 		
 		# update counter
 		processed += 1
@@ -171,7 +171,7 @@ func send_update() -> void:
 		var data := buffer.data_array
 		data.encode_u16(0, updated)
 		
-		TileManager.send_water_update(player_id, data)
+		TileManager.send_light_update(player_id, data)
 
 #endregion
 
@@ -184,6 +184,8 @@ func propagate_all() -> void:
 		var index := 0
 		var processed := 0
 		total_runs += 1
+		
+		print(len(tiles))
 		
 		# process as many tiles as possible
 		while index < len(tiles):
@@ -198,10 +200,6 @@ func propagate_all() -> void:
 				continue
 			
 			handle_update(tile)
-			
-			if processed >= MAX_UPDATES_PER_FRAME:
-				await get_tree().process_frame
-				processed = 0
 		
 		tiles = active_tiles.keys()
 	
