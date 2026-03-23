@@ -1,5 +1,14 @@
 extends Node2D
 
+## A system to manage all tile data in the current world. Memory usage:
+## [br][code]  - Max World Size: 8400 x 2400 = 20,160,000[/code]
+## [br][code]  - Block Array: PackedByteArray = 2 * 20,160,000 =  40,320,000 MB[/code]
+## [br][code]  - Wall Array: PackedByteArray  = 2 * 20,160,000 =  40,320,000 MB[/code]
+## [br][code]  - Water Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Light Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Color Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]                                             Total = 141,120,000 MB[/code]
+
 # --- Variables --- #
 ## The width and height of each chunk in tiles
 const CHUNK_SIZE := 16
@@ -35,7 +44,12 @@ var autosave_timer := AUTOSAVE_RATE
 ## [br] - Bits 00 - 09: Block ID
 ## [br] - Bits 10 - 19: Wall ID
 ## [br] - Bits 20 - 31: Unused
-var tiles: PackedInt32Array
+#var tiles: PackedInt32Array
+
+var blocks := PackedByteArray()
+var walls := PackedByteArray()
+var water := PackedByteArray()
+
 ## The width of the game world in tiles.
 ## [br]Read from [member Globals.world_size]
 var world_width: int
@@ -162,7 +176,8 @@ func world_to_chunk(world_x: int, world_y) -> Vector2i:
 ## Use [method get_wall] if you do not know the bounds of [param x] and [param y]
 func get_wall_unsafe(x: int, y: int) -> int:
 	# get wall id (10 to 19)
-	return (tiles[_idx(x, y)] >> 10) & MASK_TEN
+	return walls.decode_u16(_idx(x, y) * 2)
+	#return (tiles[_idx(x, y)] >> 10) & MASK_TEN
 
 ## Gets the wall at the given [param x] and [param y] position.
 func get_wall(x: int, y: int) -> int:
@@ -171,14 +186,16 @@ func get_wall(x: int, y: int) -> int:
 		return 0
 	
 	# get wall id (10 to 19)
-	return (tiles[_idx(x, y)] >> 10) & MASK_TEN
+	return walls.decode_u16(_idx(x, y) * 2)
+	#return (tiles[_idx(x, y)] >> 10) & MASK_TEN
 
 ## Gets the block at the given [param x] and [param y] position.
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method get_block] if you do not know the bounds of [param x] and [param y]
 func get_block_unsafe(x: int, y: int) -> int:
 	# get block id (0 to 9)
-	return (tiles[_idx(x, y)] >> 0) & MASK_TEN
+	return blocks.decode_u16(_idx(x, y) * 2)
+	#return (tiles[_idx(x, y)] >> 0) & MASK_TEN
 
 ## Gets the block at the given [param x] and [param y] position.
 func get_block(x: int, y: int) -> int:
@@ -187,34 +204,36 @@ func get_block(x: int, y: int) -> int:
 		return 0
 	
 	# get block id (0 to 9)
-	return (tiles[_idx(x, y)] >> 0) & MASK_TEN
+	return blocks.decode_u16(_idx(x, y) * 2)
+	#return (tiles[_idx(x, y)] >> 0) & MASK_TEN
 
 ## Gets the block and wall at the given [param x] and [param y] position.
 ## [br]This is returned in the bit-packed format, so this should only be used internally
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method get_wall] if you do not know the bounds of [param x] and [param y]
-func get_visual_unsafe(x: int, y: int) -> int:
-	# get wall id (10 to 19)
-	return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
+#func get_visual_unsafe(x: int, y: int) -> int:
+	## get wall id (10 to 19)
+	#return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
 
 ## Gets the block and wall at the given [param x] and [param y] position.
 ## [br]This is returned in the bit-packed format, so this should only be used internally
-func get_visual(x: int, y: int) -> int:
-	# check bounds
-	if x < 0 or x >= world_width or y < 0 or y >= world_height:
-		return 0
-	
-	# get wall id (10 to 19)
-	return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
+#func get_visual(x: int, y: int) -> int:
+	## check bounds
+	#if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		#return 0
+	#
+	## get wall id (10 to 19)
+	#return (tiles[_idx(x, y)] >> 0) & MASK_TWENTY
 
 ## Sets the wall at the given [param x] and [param y] position to [param wall_id].
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method set_wall] if you do not know the bounds of [param x] and [param y]
 func set_wall_unsafe(x: int, y: int, wall_id: int) -> void:
 	# clear tile id
-	var idx = _idx(x, y)
-	tiles[idx] &= ~MASK_WALL
-	tiles[idx] |= (wall_id << 10)
+	walls.encode_u16(_idx(x, y) * 2, wall_id)
+	#var idx = _idx(x, y)
+	#tiles[idx] &= ~MASK_WALL
+	#tiles[idx] |= (wall_id << 10)
 
 ## Sets the wall at the given [param x] and [param y] position to [param wall_id].
 func set_wall(x: int, y: int, wall_id: int) -> void:
@@ -223,18 +242,20 @@ func set_wall(x: int, y: int, wall_id: int) -> void:
 		return
 	
 	# clear tile id
-	var idx = _idx(x, y)
-	tiles[idx] &= ~MASK_WALL
-	tiles[idx] |= (wall_id << 10)
+	walls.encode_u16(_idx(x, y) * 2, wall_id)
+	#var idx = _idx(x, y)
+	#tiles[idx] &= ~MASK_WALL
+	#tiles[idx] |= (wall_id << 10)
 
 ## Sets the block at the given [param x] and [param y] position to [param block_id].
 ## [br][br]NOTE: This method does not check bounds in order to improve performance.
 ## Use [method set_block] if you do not know the bounds of [param x] and [param y]
 func set_block_unsafe(x: int, y: int, block_id: int) -> void:
 	# clear tile id
-	var idx = _idx(x, y)
-	tiles[idx] &= ~MASK_BLOCK
-	tiles[idx] |= (block_id << 0)
+	blocks.encode_u16(_idx(x, y) * 2, block_id)
+	#var idx = _idx(x, y)
+	#tiles[idx] &= ~MASK_BLOCK
+	#tiles[idx] |= (block_id << 0)
 
 ## Sets the block at the given [param x] and [param y] position to [param block_id].
 func set_block(x: int, y: int, block_id: int) -> void:
@@ -243,9 +264,10 @@ func set_block(x: int, y: int, block_id: int) -> void:
 		return
 	
 	# clear tile id
-	var idx = _idx(x, y)
-	tiles[idx] &= ~MASK_BLOCK
-	tiles[idx] |= (block_id << 0)
+	blocks.encode_u16(_idx(x, y) * 2, block_id)
+	#var idx = _idx(x, y)
+	#tiles[idx] &= ~MASK_BLOCK
+	#tiles[idx] |= (block_id << 0)
 
 ## Returns the [param y]th row of blocks starting at [param start_x],
 ## ending at [code]start_x + width[/code]. If the row goes out of bounds in
@@ -275,7 +297,9 @@ func get_block_row(start_x: int, y: int, width: int, default := 1) -> PackedInt3
 	# fill center
 	var index := left - start_x
 	for i in range(base_index + left, base_index + right):
-		row[index] = (tiles[i] >> 0) & mask
+		row[index] = blocks.decode_u16(i * 2)
+		
+		#row[index] = (tiles[i] >> 0) & mask
 		index += 1
 	
 	# pad right
@@ -312,7 +336,8 @@ func get_wall_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32
 	# fill center
 	var index := left - start_x
 	for i in range(base_index + left, base_index + right):
-		row[index] = (tiles[i] >> 10) & mask
+		row[index] = walls.decode_u16(i * 2)
+		#row[index] = (tiles[i] >> 10) & mask
 		index += 1
 	
 	# pad right
@@ -324,39 +349,39 @@ func get_wall_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32
 ## Returns the [param y]th row of blocks and walls starting at [param start_x],
 ## ending at [code]start_x + width[/code]. If the row goes out of bounds in
 ## either direction, uses [param default] instead.
-func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
-	var world_w := world_width
-	var world_h := world_height
-	
-	var row := PackedInt32Array()
-	row.resize(width)
-	
-	# return default row if out of bounds
-	if y < 0 or y >= world_h:
-		row.fill(default)
-		return row
-	
-	var base_index := y * world_w
-	var mask := MASK_TWENTY
-	
-	var left := maxi(start_x, 0)
-	var right := mini(start_x + width, world_w)
-	
-	# pad left
-	for i in range(0, left - start_x):
-		row[i] = default
-	
-	# fill center
-	var index := left - start_x
-	for i in range(base_index + left, base_index + right):
-		row[index] = tiles[i] & mask
-		index += 1
-	
-	# pad right
-	for i in range(index, width):
-		row[i] = default
-	
-	return row
+#func get_visual_row(start_x: int, y: int, width: int, default := 1) -> PackedInt32Array:
+	#var world_w := world_width
+	#var world_h := world_height
+	#
+	#var row := PackedInt32Array()
+	#row.resize(width)
+	#
+	## return default row if out of bounds
+	#if y < 0 or y >= world_h:
+		#row.fill(default)
+		#return row
+	#
+	#var base_index := y * world_w
+	#var mask := MASK_TWENTY
+	#
+	#var left := maxi(start_x, 0)
+	#var right := mini(start_x + width, world_w)
+	#
+	## pad left
+	#for i in range(0, left - start_x):
+		#row[i] = default
+	#
+	## fill center
+	#var index := left - start_x
+	#for i in range(base_index + left, base_index + right):
+		#row[index] = tiles[i] & mask
+		#index += 1
+	#
+	## pad right
+	#for i in range(index, width):
+		#row[i] = default
+	#
+	#return row
 
 ## Checks the 4 cardinal neighbors for [param target]. Returns [code]true[/code]
 ## if [param target] is found, and [code]false[/code] otherwise.
@@ -383,9 +408,10 @@ func set_water_level(x: int, y: int, water_level: int) -> void:
 		return
 	
 	# clear water level
-	var idx = _idx(x, y)
-	tiles[idx] &= ~MASK_WATER
-	tiles[idx] |= (water_level << 20)
+	water[_idx(x, y)] = water_level
+	#var idx = _idx(x, y)
+	#tiles[idx] &= ~MASK_WATER
+	#tiles[idx] |= (water_level << 20)
 
 ## Gets the water level at the given [param x] and [param y] position.
 func get_water_level(x: int, y: int) -> int:
@@ -394,7 +420,8 @@ func get_water_level(x: int, y: int) -> int:
 		return 0
 	
 	# get water level (20 to 27)
-	return (tiles[_idx(x, y)] >> 20) & MASK_EIGHT
+	return water[_idx(x, y)]
+	#return (tiles[_idx(x, y)] >> 20) & MASK_EIGHT
 
 ## Rebuilds the water texture around the player. Should be called after water updates
 ## and when loading new chunks
@@ -426,7 +453,8 @@ func _rebuild_water_texture_internal(origin: Vector2i) -> void:
 		var row := (origin.y + y) *  world_width
 		
 		for x in range(WATER_WIDTH):
-			water_data[index] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
+			water_data[index] = water[row + origin.x + x]
+			#water_data[index] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
 			
 			index += 1
 	
@@ -463,8 +491,8 @@ func update_water_texture(x: int, y: int, update := true) -> void:
 	
 	# update data
 	var data: PackedByteArray = water_image.data['data']
-	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = \
-		(tiles[y * world_width + x] >> 20) & MASK_EIGHT
+	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = water[y * world_width + x]
+		#(tiles[y * world_width + x] >> 20) & MASK_EIGHT
 	# update image and texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
 	water_texture.update(water_image)
@@ -1007,13 +1035,18 @@ func send_place_water(x: int, y: int) -> void:
 
 ## Receives a tile update from the server. Used for various tile interactions
 @rpc('authority', 'call_remote', 'reliable')
-func receive_tile_state(x: int, y: int, tile: int) -> void:
+func receive_tile_state(x: int, y: int, block_id: int, wall_id: int) -> void:
 	# don't update unchanged tiles
-	if TileManager.tiles[_idx(x, y)] == tile:
+	#if TileManager.tiles[_idx(x, y)] == tile:
+		#return
+	var idx := _idx(x, y) * 2
+	if blocks.decode_u16(idx) == block_id and walls.decode_u16(idx) == wall_id:
 		return
 	
 	# update tile info
-	TileManager.tiles[_idx(x, y)] = tile
+	#TileManager.tiles[_idx(x, y)] = tile
+	blocks.encode_u16(idx, block_id)
+	walls.encode_u16(idx, wall_id)
 	Globals.world_map.update_tile(x, y)
 	
 	# update water texture
@@ -1047,7 +1080,8 @@ func send_tile_update(x: int, y: int) -> void:
 		if y < start.y or y > end.y:
 			continue
 		
-		receive_tile_state.rpc_id(player_id, x, y, tiles[_idx(x, y)])
+		var idx := _idx(x, y)
+		receive_tile_state.rpc_id(player_id, x, y, blocks.decode_u16(idx * 2), walls.decode_u16(idx * 2))
 
 #endregion
 
@@ -1055,8 +1089,15 @@ func send_tile_update(x: int, y: int) -> void:
 ## Loads the initial tile array to match the world size using
 ## [member world_width] and [member world_height]
 func load_chunks() -> void:
-	tiles = []
-	tiles.resize(world_width * world_height)
+	blocks = []
+	blocks.resize(world_width * world_height * 2)
+	walls = []
+	walls.resize(world_width * world_height * 2)
+	water = []
+	water.resize(world_width * world_height)
+	
+	#tiles = []
+	#tiles.resize(world_width * world_height)
 
 #endregion
 
@@ -1091,34 +1132,40 @@ func pack_chunks(start_x: int, start_y: int, width: int, height: int) -> PackedB
 		height  * TileManager.CHUNK_SIZE
 	)
 
-
 ## Packs a range of tiles into a ZSTD-compressed binary format for network sending.
 func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedByteArray:
-	var packed = PackedByteArray()
-	#var offset := 0
+	var buffer := StreamPeerBuffer.new()
 	
 	for y in range(height):
-		var x = start_x + (start_y + y) * world_width
-		
-		packed.append_array(tiles.slice(x, x + width).to_byte_array())
+		for x in range(width):
+			var idx := (start_x + x) + (start_y + y) * world_width
+			
+			buffer.put_u16(blocks.decode_u16(idx * 2))
+			buffer.put_u16(walls.decode_u16(idx * 2))
+			buffer.put_u8(water[idx * 1])
 	
-	return packed.compress(FileAccess.COMPRESSION_ZSTD)
+	return buffer.data_array.compress(FileAccess.COMPRESSION_ZSTD)
 
 ## Updates the tiles from [param start_x] and [param start_y] to [code]start_x + width[/code]
 ## and [code]start_y + height[/code].
 ## [br]Uses a dirty update system to only update changed regions.
-func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int, height: int) -> void:
+func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, height: int) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.data_array = data
 	var processed := 0
 	
 	var dirty_chunks: Dictionary[Vector2i, bool] = {}
 	
 	for y in range(height):
 		for x in range(width):
-			var tile := data[x + y * width]
+			#var tile := data[x + y * width]
 			var idx := (start_x + x) + (start_y + y) * world_width
 			
 			# update tile
-			tiles[idx] = tile
+			blocks.encode_u16(idx * 2, buffer.get_u16())
+			walls.encode_u16(idx * 2, buffer.get_u16())
+			water.encode_u8(idx * 1, buffer.get_u8())
+			#tiles[idx] = tile
 			
 			# set chunk as dirty
 			@warning_ignore('integer_division')
@@ -1135,6 +1182,8 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 		if processed >= 128:
 			processed = 0
 			await get_tree().process_frame
+		
+		#y += width
 	
 	# set chunk state
 	for chunk in dirty_chunks:
@@ -1175,7 +1224,9 @@ func save_world() -> void:
 	buffer.put_u16(Globals.underground)
 	
 	# - Tile Data - #
-	buffer.put_data(tiles.to_byte_array())
+	buffer.put_data(blocks)
+	buffer.put_data(walls)
+	buffer.put_data(water)
 	
 	# - Entity Data - #
 	buffer.put_data(EntityManager.get_persistent_entities())
@@ -1217,7 +1268,9 @@ func load_world() -> bool:
 	# - Tile Data - #
 	var world_size := Globals.world_size.x * Globals.world_size.y
 	
-	tiles = buffer.get_data(world_size * 4)[1].to_int32_array()
+	blocks = buffer.get_data(world_size * 2)[1]
+	walls = buffer.get_data(world_size * 2)[1]
+	water = buffer.get_data(world_size * 1)[1]
 	
 	# - Entity Data - #
 	EntityManager.load_persistent_entities(buffer)
