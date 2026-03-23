@@ -45,6 +45,9 @@ var world_height: int
 
 ## A thread to handle updating the water texture asynchronously
 var water_thread := Thread.new()
+## Whether or not the water texture has an update queued. This should
+## only be set when the [member water_thread] is busy.
+var water_update_queued := false
 
 ## A reference of the water data for rendering
 var water_data: PackedByteArray
@@ -398,6 +401,7 @@ func get_water_level(x: int, y: int) -> int:
 func build_water_texture() -> void:
 	# check if thread is already running
 	if water_thread.is_started():
+		water_update_queued = true
 		return
 	
 	# calculate upper point
@@ -419,7 +423,7 @@ func _rebuild_water_texture_internal(origin: Vector2i) -> void:
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
-		var row := (origin.y + y) * world_width
+		var row := (origin.y + y) *  world_width
 		
 		for x in range(WATER_WIDTH):
 			water_data[index] = (tiles[row + origin.x + x] >> 20) & MASK_EIGHT
@@ -443,6 +447,11 @@ func _update_water_texture_internal(origin: Vector2i) -> void:
 	water_origin = origin
 	
 	push_water_texture_update()
+	
+	# check if update is queued
+	if water_update_queued:
+		water_update_queued = false
+		build_water_texture()
 
 ## Updates the water texture at ([param x], [param y]) using [member tiles].
 func update_water_texture(x: int, y: int, update := true) -> void:
@@ -473,16 +482,17 @@ func push_water_texture_update() -> void:
 	)
 	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
 
-func send_water_update(water_data: PackedByteArray) -> void:
-	receive_water_update.rpc(water_data)
+func send_water_update(player_id: int, new_data: PackedByteArray) -> void:
+	receive_water_update.rpc_id(player_id, new_data)
 
 @rpc('authority', 'call_remote', 'reliable')
-func receive_water_update(water_data: PackedByteArray) -> void:
+func receive_water_update(new_data: PackedByteArray) -> void:
 	var buffer := StreamPeerBuffer.new()
-	buffer.data_array = water_data
+	buffer.data_array = new_data
 	
 	# unpack data
 	var size := buffer.get_u16()
+	var batched := size > 32
 	
 	for i in range(size):
 		# unpack position
@@ -493,7 +503,13 @@ func receive_water_update(water_data: PackedByteArray) -> void:
 		var water_level := buffer.get_u8()
 		
 		set_water_level(tile_x, tile_y, water_level)
-		update_water_texture(tile_x, tile_y)
+		if not batched:
+			update_water_texture(tile_x, tile_y, false)
+	
+	if batched:
+		build_water_texture()
+	else:
+		push_water_texture_update()
 
 #endregion
 
@@ -1112,7 +1128,7 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 			)] = true
 			
 			# update water texture
-			update_water_texture(start_x + x, start_y + y, false)
+			#update_water_texture(start_x + x, start_y + y, false)
 			
 			processed += 1
 		
@@ -1125,7 +1141,8 @@ func load_region(data: PackedInt32Array, start_x: int, start_y: int, width: int,
 		Globals.world_map.chunk_states[chunk] = WorldTileMap.UpdateState.DIRTY
 	
 	# push water update all at once
-	push_water_texture_update()
+	build_water_texture()
+	#push_water_texture_update()
 
 #endregion
 

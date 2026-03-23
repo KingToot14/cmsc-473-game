@@ -298,7 +298,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 		)
 	
 	# build water texture
-	TileManager.build_water_texture()
+	#TileManager.build_water_texture()
 	
 	# load entities
 	EntityManager.load_region.rpc_id(
