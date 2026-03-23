@@ -18,6 +18,7 @@
 [ext_resource type="Script" uid="uid://d3ecqdqfqil5d" path="res://blocks/_resources/block_updater.gd" id="12_dp3eg"]
 [ext_resource type="Shader" uid="uid://cj52pvtlbjr0s" path="res://backgrounds/sky_shader.gdshader" id="12_muem4"]
 [ext_resource type="Script" uid="uid://cv08nwow2dr3m" path="res://blocks/_resources/water_updater.gd" id="13_0ld40"]
+[ext_resource type="Script" uid="uid://cmgfdlv1ucxl7" path="res://blocks/_resources/light_updater.gd" id="14_pm3ni"]
 [ext_resource type="Script" uid="uid://cg1xal70l3w7t" path="res://backgrounds/background_manager.gd" id="14_yc10j"]
 [ext_resource type="Script" uid="uid://dv225fof0wpvx" path="res://backgrounds/background.gd" id="15_yc10j"]
 [ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
@@ -1144,6 +1145,10 @@ script = ExtResource("12_dp3eg")
 
 [node name="water_updater" type="Node" parent="." unique_id=1805500223]
 script = ExtResource("13_0ld40")
+
+[node name="light_updater" type="Node" parent="." unique_id=59721803]
+script = ExtResource("14_pm3ni")
+metadata/_custom_type_script = "uid://cmgfdlv1ucxl7"
 
 [node name="players" type="Node2D" parent="." unique_id=1430324138]
 
