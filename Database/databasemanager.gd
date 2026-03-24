@@ -17,7 +17,7 @@ func create_tables():
             password_hash TEXT
         );
 	""")
-
+	
 	db.query("""
         CREATE TABLE IF NOT EXISTS player (
             id INTEGER PRIMARY KEY,
@@ -27,15 +27,17 @@ func create_tables():
             pos_z REAL
         );
 	""")
-
+	
+	#Create table for inventory
 	db.query("""
         CREATE TABLE IF NOT EXISTS inventory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id INTEGER,
-            item_name TEXT,
+            item_id INTEGER,
             quantity INTEGER
         );
 	""")
+	
 
 # PASSWORD HASHING
 func hash_password(password: String) -> String:
@@ -136,18 +138,24 @@ func load_player(player_id: int) -> Dictionary:
 
 	return {}
 
+
+#region Inventory
 # SAVE INVENTORY (SERVER ONLY)
-func save_inventory(player_id: int, items: Array):
+func save_inventory(player_id: int, inventory_data: Array):
 	if not multiplayer.is_server():
 		return
 
+	# Clear old entries for this player to prevent duplicates
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
-	for item in items:
+	for item in inventory_data:
+		# Don't save empty slots
+		if item["id"] == -1: continue
+		
 		db.query("""
-            INSERT INTO inventory (player_id, item_name, quantity)
-            VALUES (%d, '%s', %d);
-		""" % [player_id, item["name"], item["qty"]])
+            INSERT INTO inventory (player_id, item_id, quantity)
+            VALUES (%d, %d, %d);
+		""" % [player_id, item["id"], item["qty"]])
 
 # LOAD INVENTORY (SERVER ONLY)
 func load_inventory(player_id: int) -> Array:
@@ -159,8 +167,11 @@ func load_inventory(player_id: int) -> Array:
 	var items = []
 	while db.next_row():
 		items.append({
-			"name": db.get_column("item_name"),
+			"id": db.get_column("item_id"),
 			"qty": db.get_column("quantity")
 		})
 
 	return items
+
+
+#endregion

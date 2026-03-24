@@ -356,6 +356,24 @@ func has_item(item_id: int, count := 1) -> bool:
 
 #endregion
 
+#region Database Saving
+
+# Prepares a simplified list of items for the database
+func get_save_data() -> Array:
+	var data = []
+	
+	# Include the main inventory items [cite: 30]
+	for stack in items:
+		if not stack.is_empty():
+			data.append({"id": stack.item_id, "qty": stack.count})
+	
+	if not held_item.is_empty():
+		data.append({"id": held_item.item_id, "qty": held_item.count})
+		
+	return data
+
+#endregion Database Saving
+
 # --- Classes --- #
 class ItemStack:
 	var item_id: int = -1
