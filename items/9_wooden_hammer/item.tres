@@ -1,18 +1,18 @@
-[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://ddy7horgmykm7"]
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://dkk30dx6qdl7t"]
 
-[ext_resource type="PackedScene" uid="uid://cbl55ji2g7o1d" path="res://items/9_wooden_hammer/wooden_hammer.tscn" id="1_g7yx6"]
-[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_g7yx6"]
-[ext_resource type="Texture2D" uid="uid://c07h7v5t1jaul" path="res://items/9_wooden_hammer/icon.png" id="3_g7yx6"]
+[ext_resource type="PackedScene" uid="uid://cbl55ji2g7o1d" path="res://items/27_stone_hammer/stone_hammer.tscn" id="1_g7yx6"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_s00vk"]
+[ext_resource type="Texture2D" uid="uid://c07h7v5t1jaul" path="res://items/9_wooden_hammer/icon.png" id="3_eudw1"]
 
 [resource]
-script = ExtResource("2_g7yx6")
+script = ExtResource("2_s00vk")
 tool_type = 4
 force_towards_mouse = true
 use_speed = 0.6
 default_swing_object = ExtResource("1_g7yx6")
 item_id = 9
 item_name = "Wooden Hammer"
-texture = ExtResource("3_g7yx6")
-tooltip = "Probably the sadest hammer you will ever see."
+texture = ExtResource("3_eudw1")
+tooltip = "An untrusty hammer."
 max_stack = 1
 metadata/_custom_type_script = "uid://dfkswaldm4e5a"
