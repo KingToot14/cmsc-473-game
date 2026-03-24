@@ -140,12 +140,13 @@ func load_player(player_id: int) -> Dictionary:
 
 
 #region Inventory
+
 # SAVE INVENTORY (SERVER ONLY)
 func save_inventory(player_id: int, inventory_data: Array):
 	if not multiplayer.is_server():
 		return
 
-	# Clear old entries for this player to prevent duplicates
+	#clear old entries for this player to prevent duplicates
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
 	for item in inventory_data:
