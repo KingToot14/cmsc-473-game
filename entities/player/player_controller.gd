@@ -458,7 +458,7 @@ func _on_save_timer_timeout():
 		
 	print("Auto-saving inventory for player: ", owner_id)
 	
-	# Save inventory to database using the database manager 
+	#save inventory to database using the database manager 
 	var data = my_inventory.get_save_data()
 	DatabaseManager.save_inventory(owner_id, data)
 
