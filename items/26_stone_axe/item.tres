@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://c6cmkg70km332"]
+
+[ext_resource type="PackedScene" uid="uid://cd51qmnhmiiba" path="res://items/10_wooden_axe/wooden_axe.tscn" id="1_u0flk"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_xft6i"]
+[ext_resource type="Texture2D" uid="uid://ba3rr4xhw6d5f" path="res://items/10_wooden_axe/icon.png" id="3_u0flk"]
+
+[resource]
+script = ExtResource("2_xft6i")
+tool_type = 1
+tool_power = 30
+force_towards_mouse = true
+use_speed = 0.65
+default_swing_object = ExtResource("1_u0flk")
+item_id = 26
+item_name = "Wooden Axe"
+texture = ExtResource("3_u0flk")
+tooltip = "Lumberjacks used to use these. You are not nearly as strong as one."
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"
