@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_55iyu")
 break_item_id = 22
+block_health = 60
 metadata/_custom_type_script = "uid://dymp18kf28isa"
