@@ -44,10 +44,18 @@ var walls := PackedByteArray()
 ## [br]For a safer way to access these tiles, use [method get_water_level] and
 ## [method set_water_level]
 var water := PackedByteArray()
-## A flat-packed array of all the light levels in the world.
-## [br]For a safer way to access these tiles, use [method get_light_level] and
-## [method set_light_level]
-var light := PackedByteArray()
+## A flat-packed array of all the red light levels in the world.
+## [br]For a safer way to access these tiles, use [method get_light_r] and
+## [method set_light_r]
+var light_r := PackedByteArray()
+## A flat-packed array of all the green light levels in the world.
+## [br]For a safer way to access these tiles, use [method get_light_g] and
+## [method set_light_g]
+var light_g := PackedByteArray()
+## A flat-packed array of all the blue light levels in the world.
+## [br]For a safer way to access these tiles, use [method get_light_b] and
+## [method set_light_b]
+var light_b := PackedByteArray()
 
 ## The width of the game world in tiles.
 ## [br]Read from [member Globals.world_size]
@@ -477,24 +485,88 @@ func receive_water_update(new_data: PackedByteArray) -> void:
 #endregion
 
 #region Light
-## Sets the light level at ([param x], [param y]). [param light_level] should
-## be a value between [code]0 - 16[/code].
-func set_light_level(x: int, y: int, light_level: int) -> void:
+## Sets the light color at ([param x], [param y]). The color should be pass in
+## as red, green, and blue values from [code]0 - 255[/code]
+func set_light_color(x: int, y: int, r: int, g: int, b: int) -> void:
 	# check bounds
 	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return
 	
 	# set light level
-	light[_idx(x, y)] = light_level
+	var idx := _idx(x, y)
+	
+	light_r[idx] = r
+	light_g[idx] = g
+	light_b[idx] = b
 
-## Gets the light level at the given [param x] and [param y] position.
-func get_light_level(x: int, y: int) -> int:
+
+## Sets the red light channel at ([param x], [param y]). The value should be a 
+## value from [code]0 - 255[/code]
+func set_light_r(x: int, y: int, r: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# set light level
+	light_r[_idx(x, y)] = r
+
+## Sets the green light channel at ([param x], [param y]). The value should be a 
+## value from [code]0 - 255[/code]
+func set_light_g(x: int, y: int, g: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# set light level
+	light_g[_idx(x, y)] = g
+
+## Sets the blue light channel at ([param x], [param y]). The value should be a 
+## value from [code]0 - 255[/code]
+func set_light_b(x: int, y: int, b: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# set light level
+	light_b[_idx(x, y)] = b
+
+## Gets the light color at the given [param x] and [param y] position.
+func get_light_color(x: int, y: int) -> Color:
 	# check bounds
 	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return 0
 	
 	# get light level
-	return light[_idx(x, y)]
+	var idx := _idx(x, y)
+	
+	return Color.from_rgba8(light_r[idx], light_g[idx], light_b[idx])
+
+## Gets the red light channel at the given [param x] and [param y] position.
+func get_light_r(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get light level
+	return light_r[_idx(x, y)]
+
+## Gets the green light channel at the given [param x] and [param y] position.
+func get_light_g(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get light level
+	return light_g[_idx(x, y)]
+
+## Gets the blue light channel at the given [param x] and [param y] position.
+func get_light_b(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get light level
+	return light_b[_idx(x, y)]
 
 ## Rebuilds the light texture around the player. Should be called after light updates
 ## and when loading new chunks
@@ -523,12 +595,14 @@ func _rebuild_light_texture_internal(origin: Vector2i) -> void:
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
-		var row := (origin.y + y) *  world_width
+		var row := (origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			light_data[index + 0] = light[row + origin.x + x]
-			light_data[index + 1] = light[row + origin.x + x]
-			light_data[index + 2] = light[row + origin.x + x]
+			var idx := row + origin.x + x
+			
+			light_data[index + 0] = light_r[idx]
+			light_data[index + 1] = light_g[idx]
+			light_data[index + 2] = light_b[idx]
 			
 			index += 3
 	
@@ -565,9 +639,12 @@ func update_light_texture(x: int, y: int, update := true) -> void:
 	
 	# update data
 	var data: PackedByteArray = light_image.data['data']
-	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 0] = light[y * world_width + x]
-	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 1] = light[y * world_width + x]
-	data[(x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH + 2] = light[y * world_width + x]
+	var base_index := (x - light_origin.x) + (y - light_origin.y) * WATER_WIDTH
+	var data_index := y * world_width + x
+	
+	data[base_index + 0] = light_r[data_index]
+	data[base_index + 1] = light_g[data_index]
+	data[base_index + 2] = light_b[data_index]
 	
 	# update image and texture
 	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_RGB8, data)
@@ -604,9 +681,11 @@ func receive_light_update(new_data: PackedByteArray) -> void:
 		var tile_y := buffer.get_u16()
 		
 		# light level
-		var light_level := buffer.get_u8()
+		var r := buffer.get_u8()
+		var g := buffer.get_u8()
+		var b := buffer.get_u8()
 		
-		set_light_level(tile_x, tile_y, light_level)
+		set_light_color(tile_x, tile_y, r, g, b)
 		if not batched:
 			update_light_texture(tile_x, tile_y, false)
 	
@@ -1228,11 +1307,13 @@ func setup_tile_arrays() -> void:
 	walls.resize(world_width * world_height * 2)
 	water = []
 	water.resize(world_width * world_height)
-	light = []
-	light.resize(world_width * world_height)
 	
-	#tiles = []
-	#tiles.resize(world_width * world_height)
+	light_r = []
+	light_g = []
+	light_b = []
+	light_r.resize(world_width * world_height)
+	light_g.resize(world_width * world_height)
+	light_b.resize(world_width * world_height)
 
 #endregion
 
@@ -1278,7 +1359,10 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 			buffer.put_u16(blocks.decode_u16(idx * 2))
 			buffer.put_u16(walls.decode_u16(idx * 2))
 			buffer.put_u8(water[idx * 1])
-			buffer.put_u8(light[idx * 1])
+			
+			buffer.put_u8(light_r[idx * 1])
+			buffer.put_u8(light_g[idx * 1])
+			buffer.put_u8(light_b[idx * 1])
 	
 	return buffer.data_array.compress(FileAccess.COMPRESSION_ZSTD)
 
@@ -1301,8 +1385,10 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 			blocks.encode_u16(idx * 2, buffer.get_u16())
 			walls.encode_u16(idx * 2, buffer.get_u16())
 			water.encode_u8(idx * 1, buffer.get_u8())
-			light.encode_u8(idx * 1, buffer.get_u8())
-			#tiles[idx] = tile
+			
+			light_r.encode_u8(idx * 1, buffer.get_u8())
+			light_g.encode_u8(idx * 1, buffer.get_u8())
+			light_b.encode_u8(idx * 1, buffer.get_u8())
 			
 			# set chunk as dirty
 			@warning_ignore('integer_division')
@@ -1310,9 +1396,6 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 				(start_x + x) / CHUNK_SIZE,
 				(start_y + y) / CHUNK_SIZE
 			)] = true
-			
-			# update water texture
-			#update_water_texture(start_x + x, start_y + y, false)
 			
 			processed += 1
 		
@@ -1364,7 +1447,10 @@ func save_world() -> void:
 	buffer.put_data(blocks)
 	buffer.put_data(walls)
 	buffer.put_data(water)
-	buffer.put_data(light)
+	
+	buffer.put_data(light_r)
+	buffer.put_data(light_g)
+	buffer.put_data(light_b)
 	
 	# - Entity Data - #
 	buffer.put_data(EntityManager.get_persistent_entities())
@@ -1409,7 +1495,10 @@ func load_world() -> bool:
 	blocks = buffer.get_data(world_size * 2)[1]
 	walls = buffer.get_data(world_size * 2)[1]
 	water = buffer.get_data(world_size * 1)[1]
-	light = buffer.get_data(world_size * 1)[1]
+	
+	light_r = buffer.get_data(world_size * 1)[1]
+	light_g = buffer.get_data(world_size * 1)[1]
+	light_b = buffer.get_data(world_size * 1)[1]
 	
 	# - Entity Data - #
 	EntityManager.load_persistent_entities(buffer)
