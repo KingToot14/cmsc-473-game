@@ -10,9 +10,8 @@ const MAX_UPDATES_PER_FRAME := 300
 
 const MAX_LIGHT_LEVEL := 255
 const AIR_FALLOFF := 16
-const BLOCK_FALLOFF := 32
+const BLOCK_FALLOFF := 40
 const WALL_FALLOFF := 16
-const WATER_FALLOFF := 16
 
 var active := false
 
@@ -58,8 +57,7 @@ func update_region(start_x: int, start_y: int, width: int, height: int) -> void:
 			
 			# check for surface-level empty tiles
 			if wy < Globals.underground and \
-				TileManager.get_block(wx, wy) == 0 and TileManager.get_wall(wx, wy) == 0 and \
-				TileManager.get_water_level(wx, wy) < 200:
+				TileManager.get_block(wx, wy) == 0 and TileManager.get_wall(wx, wy) == 0:
 				
 				TileManager.set_light_level(wx, wy, MAX_LIGHT_LEVEL)
 				queue[Vector2i(wx, wy)] = true
@@ -93,8 +91,6 @@ func spread_to(pos: Vector2i, light_level: int) -> void:
 		
 		if TileManager.get_wall(pos.x, pos.y) != 0:
 			light_level -= WALL_FALLOFF
-		if TileManager.get_water_level(pos.x, pos.y) > 200:
-			light_level -= WATER_FALLOFF
 	else:
 		light_level -= BLOCK_FALLOFF
 	
@@ -117,8 +113,6 @@ func spread_to_queue(queue: Dictionary[Vector2i, bool], pos: Vector2i, light_lev
 		
 		if TileManager.get_wall(pos.x, pos.y) != 0:
 			light_level -= WALL_FALLOFF
-		if TileManager.get_water_level(pos.x, pos.y) > 200:
-			light_level -= WATER_FALLOFF
 	else:
 		light_level -= BLOCK_FALLOFF
 	
