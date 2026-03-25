@@ -16,8 +16,14 @@ func perform_pass(_gen: WorldGeneration) -> void:
 			if TileManager.get_block_unsafe(x, y) != 0 or TileManager.get_wall_unsafe(x, y) != 0:
 				break
 			
-			TileManager.set_light_level(x, y, LightUpdater.MAX_LIGHT_LEVEL)
-			Globals.light_updater.add_to_queue(Vector2i(x, y), LightUpdater.MAX_LIGHT_LEVEL)
+			TileManager.set_light_r(x, y, LightUpdater.MAX_LIGHT_LEVEL)
+			TileManager.set_light_g(x, y, LightUpdater.MAX_LIGHT_LEVEL)
+			TileManager.set_light_b(x, y, LightUpdater.MAX_LIGHT_LEVEL)
+			
+			Globals.light_updater.add_to_queue(
+				Vector2i(x, y),
+				LightUpdater.MAX_LIGHT_LEVEL, LightUpdater.MAX_LIGHT_LEVEL, LightUpdater.MAX_LIGHT_LEVEL
+			)
 	
 	Globals.light_updater.propagate_all()
 	
