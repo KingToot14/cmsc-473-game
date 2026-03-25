@@ -7,6 +7,7 @@ var walls: Dictionary[int, BlockInfo] = {}
 # --- Functions --- #
 func _ready() -> void:
 	load_blocks()
+	load_walls()
 
 func load_blocks() -> void:
 	var base_path := "res://blocks/"

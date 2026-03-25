@@ -2,7 +2,7 @@ shader_type canvas_item;
 render_mode blend_mul;
 
 // --- Uniforms --- //
-global uniform sampler2D light_texture: filter_nearest;
+global uniform sampler2D light_texture: filter_linear;
 global uniform vec2 light_offset;
 
 varying vec2 world_position;

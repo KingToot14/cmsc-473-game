@@ -13,7 +13,7 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	
 	for x in range(0, world_size.x):
 		for y in range(0, world_size.y):
-			if TileManager.get_block_unsafe(x, y) != 0 and TileManager.get_wall_unsafe(x, y) != 0:
+			if TileManager.get_block_unsafe(x, y) != 0 or TileManager.get_wall_unsafe(x, y) != 0:
 				break
 			
 			TileManager.set_light_level(x, y, LightUpdater.MAX_LIGHT_LEVEL)
