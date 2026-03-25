@@ -964,6 +964,9 @@ func send_destroy_block(x: int, y: int) -> void:
 	Globals.water_updater.add_to_queue(Vector2i(x, y - 1), WaterUpdater.MAX_WATER_LEVEL)
 	Globals.water_updater.add_to_queue(Vector2i(x, y + 1), WaterUpdater.MAX_WATER_LEVEL)
 	
+	# update lighting
+	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
+	
 	# sync to clients
 	send_tile_update(x, y)
 
@@ -992,6 +995,9 @@ func send_destroy_wall(x: int, y: int) -> void:
 	
 	# set tile to air
 	set_wall_unsafe(x, y, 0)
+	
+	# update lighting
+	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -1043,6 +1049,9 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	set_block_unsafe(x, y, block_id)
 	set_water_level(x, y, 0)
 	
+	# update lighting
+	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
+	
 	# sync to clients
 	send_tile_update(x, y)
 
@@ -1080,6 +1089,9 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to wall
 	set_wall_unsafe(x, y, wall_id)
+	
+	# update lighting
+	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -1303,6 +1315,7 @@ func save_world() -> void:
 	buffer.put_data(blocks)
 	buffer.put_data(walls)
 	buffer.put_data(water)
+	buffer.put_data(light)
 	
 	# - Entity Data - #
 	buffer.put_data(EntityManager.get_persistent_entities())
@@ -1347,12 +1360,18 @@ func load_world() -> bool:
 	blocks = buffer.get_data(world_size * 2)[1]
 	walls = buffer.get_data(world_size * 2)[1]
 	water = buffer.get_data(world_size * 1)[1]
+	light = buffer.get_data(world_size * 1)[1]
 	
 	# - Entity Data - #
 	EntityManager.load_persistent_entities(buffer)
 	
 	# finishing
 	ActivationPass.new().start_pass(null)
+	
+	Globals.block_updater.set_physics_process(true)
+	Globals.water_updater.set_active()
+	Globals.light_updater.set_active()
+	
 	print("[Wizbowo's Conquest] World Loaded!")
 	
 	return true

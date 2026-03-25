@@ -540,7 +540,6 @@ func settle_all() -> void:
 	
 	while len(tiles) > 0 and total_runs < 100:
 		var index := 0
-		var processed := 0
 		total_runs += 1
 		
 		# process as many tiles as possible
@@ -548,7 +547,6 @@ func settle_all() -> void:
 			var tile: Vector2i = tiles[index]
 			
 			# update counter
-			processed += 1
 			index += 1
 			
 			# make sure tile still exists
@@ -556,10 +554,6 @@ func settle_all() -> void:
 				continue
 			
 			handle_update(tile)
-			
-			if processed >= MAX_UPDATES_PER_FRAME:
-				await get_tree().process_frame
-				processed = 0
 		
 		tiles = active_tiles.keys()
 	
