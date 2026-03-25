@@ -144,7 +144,7 @@ func _input(event: InputEvent) -> void:
 		var mouse_position := Globals.player.get_global_mouse_position()
 		var tile_position := world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 		
-		place_water(tile_position.x, tile_position.y)
+		Globals.light_updater.add_point_light.rpc_id(Globals.SERVER_ID, tile_position, Color.WHITE)
 
 #region Positions
 ## Converts local chunk coordinates to global tile coordinates.
