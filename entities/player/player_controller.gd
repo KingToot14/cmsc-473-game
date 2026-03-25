@@ -159,6 +159,9 @@ func _ready() -> void:
 		
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
+	
+	if multiplayer.is_server():
+		setup_save_timer()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if owner_id != multiplayer.get_unique_id():
@@ -437,6 +440,27 @@ func remove_interest(entity_id: int) -> void:
 	interested_entities.erase(entity_id)
 
 #endregion
+
+#region Saving Stuff to Database
+
+func setup_save_timer():
+	var timer = Timer.new()
+	timer.name = "SaveTimer"
+	timer.wait_time = 300.0 # 5 minutes
+	timer.autostart = true
+	timer.timeout.connect(_on_save_timer_timeout)
+	add_child(timer)
+
+#currently only saves inventory stuff
+func _on_save_timer_timeout():
+	if not multiplayer.is_server():
+		return
+		
+	print("Auto-saving inventory for player: ", owner_id)
+	
+	#save inventory to database using the database manager 
+	var data = my_inventory.get_save_data()
+	DatabaseManager.save_inventory(owner_id, data)
 
 #region Helper Functions
 ## Returns whether or not [param point] is in range of this player.

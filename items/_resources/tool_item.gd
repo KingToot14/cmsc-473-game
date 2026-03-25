@@ -66,5 +66,5 @@ func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: 
 	
 	if tool_type & ToolType.HAMMER:
 		# destroy wall if hammer
-		if TileManager.destroy_wall(tile_position.x, tile_position.y):
+		if TileManager.hurt_wall(tile_position.x, tile_position.y, tool_power):
 			return

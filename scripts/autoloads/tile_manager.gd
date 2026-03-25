@@ -16,8 +16,11 @@ const CHUNK_SIZE := 16
 const CHUNK_AREA := CHUNK_SIZE * CHUNK_SIZE
 ## The widht and height of each tile in world coordinates
 const TILE_SIZE := 8
+
 ## Stores health for tiles that have been damaged
-var tile_damaged: Dictionary = {} #uses the coordinates for key
+var block_damaged: Dictionary = {} #uses the coordinates for key
+## Stores health for tiles that have been damaged
+var wall_damaged: Dictionary = {} #uses the coordinates for key
 
 ## How often to autosave in seconds
 const AUTOSAVE_RATE := 60.0
@@ -614,9 +617,8 @@ func receive_light_update(new_data: PackedByteArray) -> void:
 
 #endregion
 
-#region Safe Interactions
-func get_block_health(block_id: int): #takes block id
-	var block = BlockDatabase.get_block(block_id)
+func get_health(id: int): #takes block / wall id
+	var block = BlockDatabase.get_block(id)
 	if block is BlockInfo: #makes sure its pulling block info
 		return block.block_health #should return the variable for block health in block info NOT in item.
 	else: 
@@ -645,21 +647,23 @@ func hurt_block(x: int, y:int, tool_power: int):
 		return true
 	
 	var block_id := get_block(x, y)
-	var max_health = get_block_health(block_id)
+	var max_health = get_health(block_id)
 	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
 	
-	if not tile_damaged.has(key):
-		tile_damaged[key] = max_health
+	if not block_damaged.has(key):
+		block_damaged[key] = max_health
 		## damage should work only at the value for the dictionary
 
-	tile_damaged[key] -= tool_power
+	block_damaged[key] -= tool_power
 
 
-	if tile_damaged[key] <= 0:
+	if block_damaged[key] <= 0:
 		# block is destroyed — clean up and let destroy_block handle the rest
-		tile_damaged.erase(key)
+		block_damaged.erase(key)
 		destroy_block(x, y)
+		
+		
 	
 ## Attempts to destroy the block at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is
@@ -706,6 +710,46 @@ func destroy_block(x: int, y: int) -> bool:
 	
 	return true
 
+
+func hurt_wall(x: int, y:int, tool_power: int):
+		# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return true
+	if y < 0 or y >= world_height:
+		return true
+	
+	# do not process if no block exists
+	if not TileManager.get_wall_unsafe(x, y):
+		return false
+		
+	# check for reserved tiles using physics query
+	var direct_space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = RectangleShape2D.new()
+	query.shape.size = Vector2(8.0, 8.0)
+	query.transform.origin = tile_to_world(x, y, true)
+	query.collision_mask = 0b01000000	# Only collides with Tile layer
+	
+	if not direct_space.intersect_shape(query, 1).is_empty():
+		return true
+	
+	var wall_id := get_wall(x, y)
+	var max_health = get_health(wall_id)
+	print(max_health)
+	var key := Vector2i(x, y) #key for the dictionary is the position of the block
+	
+	
+	if not wall_damaged.has(key):
+		wall_damaged[key] = max_health
+		## damage should work only at the value for the dictionary
+
+	wall_damaged[key] -= tool_power
+
+
+	if wall_damaged[key] <= 0:
+		# wall is destroyed — let destroy_wall handle the rest
+		wall_damaged.erase(key)
+		destroy_wall(x, y)
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is
 ## only [code]false[/code] when there is no wall at the given position.
@@ -953,6 +997,11 @@ func send_destroy_block(x: int, y: int) -> void:
 		if multiplayer.is_server():
 			var drop_position = tile_to_world(x, y)
 			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
+			
+	if block_id == 10: # Copper
+		if multiplayer.is_server():
+			var drop_position = tile_to_world(x, y)
+			ItemDropEntity.spawn_preferred(drop_position, 16, 1, player_id)
 	
 	# set block
 	set_block_unsafe(x, y, 0)
