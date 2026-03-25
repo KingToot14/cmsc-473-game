@@ -241,6 +241,7 @@ func load_inventory() -> void:
 	add_item(14, 30)	# sand
 	add_item(11, 10)	# acorns
 	add_item(24, 4)		# chests
+	add_item(28, 20)	# torches
 
 #endregion
 

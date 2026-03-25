@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://dphj682n3xm2b"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_rck80"]
+[ext_resource type="Texture2D" uid="uid://cdxpqiqlkpk4w" path="res://entities/tile_entities/3_torch/normal.png" id="2_5sb36"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_etvkf"]
+atlas = ExtResource("2_5sb36")
+region = Rect2(16, 0, 8, 8)
+margin = Rect2(8, 8, 16, 16)
+
+[resource]
+script = ExtResource("1_rck80")
+tile_type = 2
+tile_id = 3
+tile_variant = &"normal"
+use_speed = 0.25
+item_name = "Torch"
+texture = SubResource("AtlasTexture_etvkf")
+tooltip = "A simple torch"
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

@@ -175,6 +175,7 @@ func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
 func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	# set ids
 	entity.id = curr_id
+	entity.name = "entity_%s" % curr_id
 	entity.registry_id = registry_id
 	curr_id += 1
 	
