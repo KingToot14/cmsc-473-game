@@ -42,7 +42,7 @@ func setup_variant() -> void:
 			
 			# add light
 			if multiplayer and multiplayer.is_server():
-				Globals.light_updater.add_point_light(tile_position, Color.WHITE)
+				Globals.light_updater.add_point_light(tile_position, Color.html("#ffd9b3"))
 
 func spawn_item() -> void:
 	var world_position := TileManager.tile_to_world(tile_position.x, tile_position.y, true)
