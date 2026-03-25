@@ -88,6 +88,7 @@ var world_map: WorldTileMap
 
 var block_updater: BlockUpdater
 var water_updater: WaterUpdater
+var light_updater: LightUpdater
 
 # - Player Interactions
 var hovered_hitbox: TileEntityHitbox

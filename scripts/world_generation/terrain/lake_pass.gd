@@ -81,7 +81,8 @@ func place_lake(gen: WorldGeneration, lake_width: int, lake_depth: int) -> bool:
 			var water_func := floori(((lake_depth + SCAN_DEPTH) / 2.0) * \
 				(sin(((PI * func_x) / lake_width) - PI / 2.0) - 1)) + SCAN_DEPTH
 			
-			if func_y < water_func * randf_range(0.9, 1.1) and TileManager.get_block_unsafe(x, y + 1) != 0:
+			if func_y < water_func * gen.rng.randf_range(0.9, 1.1) and \
+				TileManager.get_block_unsafe(x, y + 1) != 0:
 				continue
 			
 			if func_y >= water_func:

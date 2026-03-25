@@ -481,19 +481,48 @@ func send_update() -> void:
 	if update_size == 0:
 		return
 	
-	# build buffer
-	var buffer := StreamPeerBuffer.new()
-	buffer.resize(1 + update_size * 5)
-	
-	buffer.put_u16(update_size)
-	
-	for tile: Vector2i in updated_tiles:
-		buffer.put_u16(tile.x)
-		buffer.put_u16(tile.y)
+	# send relavent data to players
+	for player_id in ServerManager.connected_players.keys():
+		# get bounding box
+		var player := ServerManager.get_player(player_id)
 		
-		buffer.put_u8(updated_tiles[tile])
-	
-	TileManager.send_water_update(buffer.data_array)
+		if not player:
+			continue
+		
+		var center := TileManager.world_to_tile(
+			floori(player.center_point.x),
+			floori(player.center_point.y)
+		)
+		var start := center - ChunkLoader.VISUAL_RANGE * TileManager.CHUNK_SIZE
+		var end   := center + ChunkLoader.VISUAL_RANGE * TileManager.CHUNK_SIZE
+		
+		# build buffer
+		var buffer := StreamPeerBuffer.new()
+		
+		# update size placeholer
+		var updated := 0
+		buffer.put_u16(0)
+		
+		for tile: Vector2i in updated_tiles:
+			if tile.x < start.x or tile.x > end.x or tile.y < start.y or tile.y > end.y:
+				continue
+			
+			updated += 1
+			
+			buffer.put_u16(tile.x)
+			buffer.put_u16(tile.y)
+			
+			buffer.put_u8(updated_tiles[tile])
+		
+		# only send data if necessary
+		if updated == 0:
+			continue
+		
+		# set update size
+		var data := buffer.data_array
+		data.encode_u16(0, updated)
+		
+		TileManager.send_water_update(player_id, data)
 
 #endregion
 
@@ -511,7 +540,6 @@ func settle_all() -> void:
 	
 	while len(tiles) > 0 and total_runs < 100:
 		var index := 0
-		var processed := 0
 		total_runs += 1
 		
 		# process as many tiles as possible
@@ -519,7 +547,6 @@ func settle_all() -> void:
 			var tile: Vector2i = tiles[index]
 			
 			# update counter
-			processed += 1
 			index += 1
 			
 			# make sure tile still exists
@@ -527,10 +554,6 @@ func settle_all() -> void:
 				continue
 			
 			handle_update(tile)
-			
-			if processed >= MAX_UPDATES_PER_FRAME:
-				await get_tree().process_frame
-				processed = 0
 		
 		tiles = active_tiles.keys()
 	
