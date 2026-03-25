@@ -142,6 +142,7 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	
 	# setup default parameters
 	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	match tile_variant:
 		&'normal':

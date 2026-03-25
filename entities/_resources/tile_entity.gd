@@ -2,10 +2,7 @@ class_name TileEntity
 extends Entity
 
 # --- Variables --- #
-var tile_position: Vector2i:
-	set(_pos):
-		tile_position = _pos
-		global_position = TileManager.tile_to_world(_pos.x, _pos.y, false)
+var tile_position: Vector2i
 
 # --- Functions --- #
 func update_preview(tile_pos: Vector2i) -> void:
@@ -19,6 +16,12 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	id = buffer.get_u32()
 	
 	super(buffer)
+	
+	# set tile position
+	tile_position = TileManager.world_to_tile(
+		floori(global_position.x),
+		floori(global_position.y)
+	)
 
 #endregion
 

@@ -57,10 +57,22 @@ func remove_from_queue(position: Vector2i, r := -1, g := -1, b := -1) -> void:
 
 #region Point Lights
 @rpc('any_peer', 'call_remote', 'reliable')
+func toggle_point_light(pos: Vector2i, color: Color) -> void:
+	if pos in point_lights:
+		remove_point_light(pos)
+	else:
+		add_point_light(pos, color)
+
 func add_point_light(pos: Vector2i, color: Color) -> void:
 	point_lights[pos] = color
 	
 	update_region(pos.x - 16, pos.y - 16, 33, 33)
+
+func remove_point_light(pos: Vector2i) -> void:
+	if pos in point_lights:
+		point_lights.erase(pos)
+		
+		update_region(pos.x - 16, pos.y - 16, 33, 33)
 
 #endregion
 

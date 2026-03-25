@@ -147,6 +147,7 @@ static func create(tile_pos: Vector2i, _tile_variant := &'') -> void:
 	
 	# setup default parameters
 	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	entity.branch_seed = randi()
 	entity.variant = get_variant(tile_pos) as TreeEntity.TreeVariant
