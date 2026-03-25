@@ -102,8 +102,7 @@ func load_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -
 	entity.deserialize_spawn_data(buffer)
 	
 	# set id and name
-	entity.id = spawn_id
-	entity.name = "entity_%s" % spawn_id
+	entity.set_entity_id(spawn_id, registry_id)
 	
 	# store entity reference
 	if not ref:
@@ -143,8 +142,7 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	entity.deserialize_spawn_data(buffer)
 	
 	# set id and name
-	entity.id = spawn_id
-	entity.name = "entity_%s" % spawn_id
+	entity.set_entity_id(spawn_id, registry_id)
 	
 	# store entity reference
 	if not ref:
@@ -173,10 +171,10 @@ func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
 
 #region Data Persistence
 func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	
 	# set ids
-	entity.id = curr_id
-	entity.name = "entity_%s" % curr_id
-	entity.registry_id = registry_id
+	entity.set_entity_id(curr_id, registry_id)
 	curr_id += 1
 	
 	# create new reference
@@ -196,7 +194,6 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	anchored_entities[chunk].append(entity.id)
 	
 	# attempt to load instantly
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
 	# if no entities exist, just store data for now

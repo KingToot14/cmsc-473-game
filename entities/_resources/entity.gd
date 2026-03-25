@@ -54,6 +54,11 @@ func _ready() -> void:
 		set_process(false)
 		set_physics_process(false)
 
+func set_entity_id(spawn_id: int, reg_id: int) -> void:
+	id = spawn_id
+	registry_id = reg_id
+	name = "entity_%s" % id
+
 func calculate_chunk() -> void:
 	current_chunk = TileManager.world_to_chunk(floori(position.x), floori(position.y))
 

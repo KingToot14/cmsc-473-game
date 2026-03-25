@@ -25,7 +25,11 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		hp.died.connect(_on_death)
-		Globals.light_updater.add_point_light(tile_position, Color.WHITE)
+
+func set_entity_id(spawn_id: int, reg_id: int) -> void:
+	super(spawn_id, reg_id)
+	
+	setup_variant()
 
 #region Variants
 func setup_variant() -> void:
@@ -35,20 +39,26 @@ func setup_variant() -> void:
 		TorchVariant.NORMAL:
 			# set sprite
 			pass
+			
+			# add light
+			if multiplayer and multiplayer.is_server():
+				Globals.light_updater.add_point_light(tile_position, Color.WHITE)
 
 func spawn_item() -> void:
+	var world_position := TileManager.tile_to_world(tile_position.x, tile_position.y, true)
+	
 	match variant:
 		TorchVariant.NORMAL:
 			if breaking_player == -1 or breaking_player not in ServerManager.connected_players:
-				ItemDropEntity.spawn(tile_position, 28, 1)
+				ItemDropEntity.spawn(world_position, 28, 1)
 			else:
-				ItemDropEntity.spawn_preferred(tile_position, 28, 1, breaking_player)
+				ItemDropEntity.spawn_preferred(world_position, 28, 1, breaking_player)
 
 #endregion
 
 #region Interactions
 func interact_with(_mouse_position: Vector2) -> bool:
-	_handle_interaction.rpc_id(Globals.SERVER_ID)
+	hp.take_damage(10, DamageSource.DamageSourceType.PLAYER)
 	
 	return true
 
@@ -65,15 +75,9 @@ func break_place(_mouse_position: Vector2) -> bool:
 	if not item.tool_type & ToolItem.ToolType.PICKAXE:
 		return false
 	
-	_handle_interaction.rpc_id(Globals.SERVER_ID)
+	hp.take_damage(10, DamageSource.DamageSourceType.PLAYER)
 	
 	return true
-
-@rpc('any_peer', 'call_remote', 'reliable')
-func _handle_interaction() -> void:
-	breaking_player = multiplayer.get_remote_sender_id()
-	
-	kill()
 
 #endregion
 
@@ -114,8 +118,6 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# variant
 	variant = buffer.get_u16() as TorchVariant
-	
-	setup_variant()
 
 #endregion
 
@@ -134,12 +136,11 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	
 	# setup default parameters
 	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	match tile_variant:
 		&'normal':
 			entity.variant = TorchVariant.NORMAL
-	
-	entity.setup_variant()
 	
 	EntityManager.store_tile_entity(3, entity)
 	
