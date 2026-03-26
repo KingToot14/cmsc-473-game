@@ -51,7 +51,7 @@ func place_hill(gen: WorldGeneration, hill_x: int) -> bool:
 	var pos := Vector2(hill_x, hill_y + offset / 2.0)
 	
 	var speed_x := gen.rng.randf_range(-1.0, 1.0)
-	var speed_y := gen.rng.randf_range(-3.0, -1.5)
+	var speed_y := gen.rng.randf_range(-3.0, -2.0)
 	
 	while radius > 0 and offset > 0:
 		var radius_mod := gen.rng.randf_range(0.80, 1.20)
@@ -82,6 +82,6 @@ func place_hill(gen: WorldGeneration, hill_x: int) -> bool:
 		speed_y += gen.rng.randf_range(-0.5, 0.5)
 		
 		speed_x = clampf(speed_x, -0.5, 0.5)
-		speed_y = clampf(speed_y, -3, -1.5)
+		speed_y = clampf(speed_y, -3, -2.0)
 	
 	return true
