@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Recipe" format=3 uid="uid://dch6hd4qyb1h4"]
+
+[ext_resource type="Script" uid="uid://b3c7ex2vgl4bc" path="res://entities/player/recipe.gd" id="1_04bpn"]
+
+[resource]
+script = ExtResource("1_04bpn")
+result_item_id = 29
+ingredients = Dictionary[int, int]({
+0: 10,
+4: 20
+})
+metadata/_custom_type_script = "uid://b3c7ex2vgl4bc"
