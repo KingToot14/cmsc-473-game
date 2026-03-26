@@ -20,6 +20,10 @@ func perform_pass(gen: WorldGeneration) -> void:
 		if x > world_size.x * 0.45 and x < world_size.x * 0.55 and y < gen.surface_low + 20:
 			y += 20
 		
+		# limit holes near the edges of the world
+		if x < 350 or x > world_size.x - 350:
+			y += 80
+		
 		var size := gen.rng.randi_range(2, 5)
 		var steps := gen.rng.randi_range(2, 20)
 		
@@ -33,6 +37,10 @@ func perform_pass(gen: WorldGeneration) -> void:
 		# limit holes near center of world
 		if x > world_size.x * 0.45 and x < world_size.x * 0.55 and y < gen.surface_low + 20:
 			y += 20
+		
+		# limit holes near the edges of the world
+		if x < 350 or x > world_size.x - 350:
+			y += 80
 		
 		var size := gen.rng.randi_range(8, 15)
 		var steps := gen.rng.randi_range(7, 30)
