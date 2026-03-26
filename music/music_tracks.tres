@@ -8,6 +8,7 @@
 [ext_resource type="AudioStream" uid="uid://cc8njp2f3jypt" path="res://music/winter/winter_day_1.ogg" id="4_c42op"]
 [ext_resource type="AudioStream" uid="uid://chtl36vn5bmf6" path="res://music/winter/winter_day_2.ogg" id="5_0lotu"]
 [ext_resource type="AudioStream" uid="uid://cxf17abqmj4rd" path="res://music/Caves/Deep Cave 1.ogg" id="5_608l7"]
+[ext_resource type="AudioStream" uid="uid://qn15aa2geb2" path="res://music/Ocean/Ocean 1.ogg" id="6_ka0ab"]
 [ext_resource type="AudioStream" uid="uid://cju2wa8tckd0c" path="res://music/forest/Day Overworld.ogg" id="6_nyelv"]
 [ext_resource type="AudioStream" uid="uid://ci2nyvb3i2om7" path="res://music/forest/Surface Track.ogg" id="7_0lotu"]
 [ext_resource type="AudioStream" uid="uid://c7ymwcuue8ukx" path="res://music/forest/Night Track.ogg" id="8_cdg3t"]
@@ -15,7 +16,7 @@
 [ext_resource type="AudioStream" uid="uid://o5rlr7cehmqb" path="res://music/forest/Day 5.ogg" id="10_cdg3t"]
 
 [resource]
-clip_count = 13
+clip_count = 14
 clip_0/name = &"Title"
 clip_0/stream = ExtResource("1_mx5f5")
 clip_0/auto_advance = 0
@@ -55,3 +56,6 @@ clip_11/auto_advance = 0
 clip_12/name = &"Deep Cave 1"
 clip_12/stream = ExtResource("5_608l7")
 clip_12/auto_advance = 0
+clip_13/name = &"Ocean 1"
+clip_13/stream = ExtResource("6_ka0ab")
+clip_13/auto_advance = 0
