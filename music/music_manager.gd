@@ -11,6 +11,8 @@ enum Area {
 	CAVERN,
 	DUNGEON,
 	SPACE,
+	OCEAN_DAY,
+	OCEAN_NIGHT,
 }
 
 # --- Variables --- #
@@ -48,6 +50,13 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/Space/Space 2.ogg",
 		"res://music/Space/Space 3.ogg",
 	],
+	Area.OCEAN_DAY: [
+		#"res://music/ocean/ocean_day_1.ogg",
+		#"res://music/ocean/ocean_day_2.ogg",
+		#"res://music/ocean/ocean_day_3.ogg",
+		"res://music/Ocean/Ocean 1.ogg",
+	],
+	Area.OCEAN_NIGHT: [],
 }
 
 # Areas that use a shuffled queue instead of random selection
@@ -55,11 +64,14 @@ const QUEUED_AREAS: Array[Area] = [
 	Area.FOREST_DAY,
 	Area.FOREST_NIGHT,
 	Area.SPACE,
+	Area.OCEAN_DAY,
+	Area.OCEAN_NIGHT,
 ]
 
 # The track to always play first when entering a queued area.
 const AREA_INTRO_TRACKS: Dictionary[Area, String] = {
 	Area.FOREST_DAY: "res://music/forest/forest_day_2.ogg",
+	Area.OCEAN_DAY: "res://music/Ocean/Ocean 1.ogg",
 }
 
 var _track_queues: Dictionary[Area, Array] = {}
@@ -130,6 +142,10 @@ func play_track(area: Area, variant := -1) -> void:
 
 	print("Loading path: ", path)
 	var new_stream: AudioStreamOggVorbis = load(path)
+	if new_stream == null:
+		push_error("MusicManager: failed to load track: " + path)
+		return
+
 	new_stream.loop = AREA_TRACKS[area].size() == 1
 
 	stream = new_stream
@@ -155,6 +171,8 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 			enter_area(Area.WINTER_DAY)
 		BiomeManager.Biome.FOREST:
 			enter_area(Area.FOREST_DAY)
+		BiomeManager.Biome.OCEAN:
+			enter_area(Area.OCEAN_DAY)
 
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
@@ -171,6 +189,8 @@ func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 
 ## Switches to a new area, resetting the queue so the intro plays again.
 func enter_area(area: Area) -> void:
+	if area == _current_area:
+		return
 	reset_area(area)
 	play_track(area)
 
