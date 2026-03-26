@@ -7,13 +7,13 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
 size = Vector2(10, 16)
 
-[node name="wooden_pickaxe" type="Node2D" unique_id=123055615]
+[node name="stone_pickaxe" type="Node2D" unique_id=123055615]
 script = ExtResource("1_tn3w8")
 metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
 
 [node name="damage_source" type="Area2D" parent="." unique_id=791205798]
 script = ExtResource("2_qmkir")
-damage = 10
+damage = 15
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
 position = Vector2(14, 0)

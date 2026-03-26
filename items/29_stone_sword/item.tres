@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://by4mlj6t7iyu8"]
+
+[ext_resource type="PackedScene" uid="uid://b865cn5jbl3q0" path="res://items/6_wooden_sword/wooden_sword.tscn" id="1_rhy6g"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_n4ly7"]
+[ext_resource type="Texture2D" uid="uid://3s43ng6hg0t4" path="res://items/6_wooden_sword/icon.png" id="3_ycprb"]
+
+[resource]
+script = ExtResource("2_n4ly7")
+force_towards_mouse = true
+use_speed = 0.45
+default_swing_object = ExtResource("1_rhy6g")
+item_name = "Wooden Sword"
+texture = ExtResource("3_ycprb")
+tooltip = "A simple wooden sword"
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
