@@ -8,11 +8,18 @@ enum ReplaceMode {
 	BOTH = ADD_NEW | REPLACE
 }
 
+enum ReplaceLayer {
+	BLOCK = 1,
+	WALL = 2,
+	LIQUID = 4
+}
+
 # --- Variables --- #
 var size := 0.0
 var steps := 0.0
 var replace_tile := 0
 var replace_mode := ReplaceMode.REPLACE
+var replace_layer := ReplaceLayer.BLOCK
 
 var position := Vector2.ZERO
 var direction := Vector2.ZERO
@@ -58,6 +65,11 @@ func set_restricted_tiles(tiles: Array[int]) -> TileRunner:
 
 func set_replace_mode(mode: ReplaceMode) -> TileRunner:
 	replace_mode = mode
+	
+	return self
+
+func set_replace_layer(layer: ReplaceLayer) -> TileRunner:
+	replace_layer = layer
 	
 	return self
 
@@ -120,7 +132,13 @@ func start(gen: WorldGeneration) -> void:
 				if requires_solid_below and TileManager.get_block_unsafe(x, y + 1) == 0:
 					continue
 				
-				TileManager.set_block_unsafe(x, y, replace_tile)
+				match replace_layer:
+					ReplaceLayer.BLOCK:
+						TileManager.set_block_unsafe(x, y, replace_tile)
+					ReplaceLayer.WALL:
+						TileManager.set_wall_unsafe(x, y, replace_tile)
+					ReplaceLayer.LIQUID:
+						TileManager.set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 		
 		# move towards direction
 		position += direction

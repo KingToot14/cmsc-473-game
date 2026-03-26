@@ -61,10 +61,13 @@ func generate_world() -> void:
 	await run_pass(TerrainPass.new())
 	await run_pass(DirtWallPass.new())
 	
+	await run_pass(HillPass.new())
+	
 	await run_pass(RocksInDirtPass.new())
 	await run_pass(DirtInRocksPass.new())
 	
 	await run_pass(SmallHolesPass.new())
+	await run_pass(CavePass.new())
 	
 	await run_pass(SandPatchPass.new())
 	await run_pass(ClayPatchPass.new())
