@@ -535,28 +535,119 @@ func set_active() -> void:
 
 #region Settling
 func settle_all() -> void:
-	var tiles := active_tiles.keys()
-	var total_runs := 0
+	var world_size := Globals.world_size
 	
-	while len(tiles) > 0 and total_runs < 100:
-		var index := 0
-		total_runs += 1
-		
-		# process as many tiles as possible
-		while index < len(tiles):
-			var tile: Vector2i = tiles[index]
-			
-			# update counter
-			index += 1
-			
-			# make sure tile still exists
-			if tile not in active_tiles:
-				continue
-			
-			handle_update(tile)
-		
-		tiles = active_tiles.keys()
+	# loop from bottom of the world to the top
+	for y in range(world_size.y - 3, 3, -1):
+		for x in range(3, world_size.x - 3):
+			var water_level := TileManager.get_water_level(x, y)
+			if water_level > 0:
+				settle_tile(x, y, water_level)
 	
 	settled.emit()
+
+func settle_tile(x: int, y: int, water_level: int) -> void:
+	var world_size := Globals.world_size
+	
+	# clear water level
+	TileManager.set_water_level(x, y, 0)
+	
+	var ever_moved := false
+	
+	while true:
+		var down_tile := TileManager.get_block_unsafe(x, y + 1)
+		var down_level := TileManager.get_water_level(x, y + 1)
+		
+		#var curr_moved := false
+		
+		# find non-empty tile
+		while y < world_size.y - 3 and down_level == 0 and down_tile == 0:
+			ever_moved = true
+			#curr_moved = true
+			
+			y += 1
+			down_tile = TileManager.get_block_unsafe(x, y + 1)
+		
+		# initialize spread
+		var dir := -1
+		var dist := 0
+		var applied_dir := -1
+		var applied_dist := 0
+		
+		var touching_left := false
+		var touching_right := false
+		var should_loop := true
+		
+		while true:
+			# keep spreading while empty
+			if TileManager.get_water_level(x + dist * dir, y) == 0:
+				applied_dir = dir
+				applied_dist = dist
+			
+			# check bounds
+			if dir == -1 and x + dist * dir < 3:
+				touching_left = true
+			elif dir == 1 and x + dist * dir > world_size.x - 3:
+				touching_right = true
+			
+			down_tile = TileManager.get_block_unsafe(x + dist * dir, y + 1)
+			down_level = TileManager.get_water_level(x + dist * dir, y + 1)
+			
+			# try to spread down
+			if down_tile == 0 and down_level > 0 and down_tile < MAX_WATER_LEVEL:
+				var diff := MAX_WATER_LEVEL - down_level
+				diff = mini(diff, water_level)
+				
+				# spread water
+				down_level += diff
+				water_level -= diff
+				
+				TileManager.set_water_level(x + dist * dir, y, down_level)
+				
+				# stop if no liquid remains
+				if water_level == 0:
+					should_loop = false
+					break
+			
+			# try to spread around
+			if y > water_level - 3 or down_level != 0 || down_tile != 0:
+				var next_tile := TileManager.get_block_unsafe(x + (dist + 1) * dir, y)
+				var next_level := TileManager.get_water_level(x + (dist + 1) * dir, y)
+				
+				# check if next tile has liquid
+				if next_level != 0 and (ever_moved or dir != 1) or next_tile != 0:
+					if dir == 1:
+						touching_right = true
+					else:
+						touching_left = true
+				
+				# check if we have touched both edges
+				if not (touching_left and touching_right):
+					if touching_right:
+						dir = -1
+						dist += 1
+					elif touching_left:
+						if dir == 1:
+							dist += 1
+						
+						dir = 1
+					else:
+						if dir == 1:
+							dist += 1
+						
+						dir = -dir
+				else:
+					should_loop = false
+					break
+		
+		x += applied_dist * applied_dir
+		
+		if water_level != 0 and should_loop:
+			y += 1
+		else:
+			break
+	
+	# set final position
+	TileManager.set_water_level(x, y, water_level)
 
 #endregion
