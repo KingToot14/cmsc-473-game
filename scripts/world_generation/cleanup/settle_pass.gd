@@ -15,9 +15,9 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	pass
 	
 	# settle water
-	for x in range(4, world_size.x - 4):
-		for y in range(4, world_size.y - 4):
-			Globals.water_updater.add_to_queue(Vector2i(x, y))
+	#for x in range(4, world_size.x - 4):
+		#for y in range(4, world_size.y - 4):
+			#Globals.water_updater.add_to_queue(Vector2i(x, y))
 	
 	Globals.water_updater.settle_all()
 	

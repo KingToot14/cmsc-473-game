@@ -397,7 +397,8 @@ func _rebuild_water_texture_internal(origin: Vector2i) -> void:
 		var row := (origin.y + y) *  world_width
 		
 		for x in range(WATER_WIDTH):
-			water_data[index] = water[row + origin.x + x]
+			if y < world_height and origin.x + x < world_width:
+				water_data[index] = water[row + origin.x + x]
 			
 			index += 1
 	
