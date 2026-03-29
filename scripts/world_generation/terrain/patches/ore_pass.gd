@@ -14,8 +14,8 @@ func get_pass_name() -> String:
 	return "Ore-der Up"
 
 func perform_pass(gen: WorldGeneration) -> void:
-	var world_slice := floori((Globals.world_size.x - gen.underground_high) / 5.0)
-	var start := gen.underground_high
+	var world_slice := floori((Globals.world_size.x - gen.underground_line) / 5.0)
+	var start := gen.underground_line
 	
 	# 1: 0.00016 + 0.00008 + 0.00002 + 0.00000 = 0.00026
 	

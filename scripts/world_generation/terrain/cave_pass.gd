@@ -14,7 +14,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# dirt layer caves
 	for i in range(world_size.x * world_size.y * 0.00003):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
-		var y := gen.rng.randi_range(gen.surface_low, gen.underground_low)
+		var y := gen.rng.randi_range(gen.underground_line, gen.cavern_line)
 		
 		# limit holes near center of world
 		if x > world_size.x * 0.45 and x < world_size.x * 0.55 and y < gen.surface_low + 20:
@@ -35,7 +35,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# rock layer caves
 	for i in range(world_size.x * world_size.y * 0.00013):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
-		var y := gen.rng.randi_range(gen.underground_low, world_size.y)
+		var y := gen.rng.randi_range(gen.cavern_line, world_size.y)
 		
 		var size := gen.rng.randi_range(6, 20)
 		var steps := gen.rng.randi_range(50, 300)
