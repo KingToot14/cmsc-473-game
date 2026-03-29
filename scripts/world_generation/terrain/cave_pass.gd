@@ -44,3 +44,101 @@ func perform_pass(gen: WorldGeneration) -> void:
 			TileRunner.new(size, steps, x, y, 0).set_replace_layer(TileRunner.ReplaceLayer.LIQUID).start(gen)
 		else:
 			TileRunner.new(size, steps, x, y, 0).start(gen)
+	
+	# surface-level caves (small)
+	for i in range(world_size.x * 0.002):
+		var x := gen.rng.randi_range(320, world_size.x - 320)
+		
+		# limit holes near center of world
+		while x > world_size.x * 0.45 and x < world_size.x * 0.55:
+			x = gen.rng.randi_range(320, world_size.x - 320)
+		
+		var y := 0
+		
+		# snap to bottom of the world
+		while TileManager.get_block_unsafe(x, y) == 0:
+			y += 1
+		
+		var size := gen.rng.randi_range(3, 6)
+		var steps := gen.rng.randi_range(5, 50)
+		
+		var dir := Vector2(gen.rng.randf_range(-1.0, 1.0), 1.0)
+		
+		TileRunner.new(size, steps, x, y, 0).set_direction(dir.x, dir.y).start(gen)
+	
+	# surface-level caves (medium)
+	for i in range(world_size.x * 0.0007):
+		var x := gen.rng.randi_range(320, world_size.x - 320)
+		
+		# limit holes near center of world
+		while x > world_size.x * 0.43 and x < world_size.x * 0.57:
+			x = gen.rng.randi_range(320, world_size.x - 320)
+		
+		var y := 0
+		
+		# snap to bottom of the world
+		while TileManager.get_block_unsafe(x, y) == 0:
+			y += 1
+		
+		var size := gen.rng.randi_range(10, 15)
+		var steps := gen.rng.randi_range(50, 130)
+		
+		var dir := Vector2(gen.rng.randf_range(-1.0, 1.0), 1.0)
+		
+		TileRunner.new(size, steps, x, y, 0).set_direction(dir.x, dir.y).start(gen)
+	
+	# surface-level caves (large)
+	for i in range(world_size.x * 0.0003):
+		var x := gen.rng.randi_range(320, world_size.x - 320)
+		
+		# limit holes near center of world
+		while x > world_size.x * 0.40 and x < world_size.x * 0.60:
+			x = gen.rng.randi_range(320, world_size.x - 320)
+		
+		var y := 0
+		
+		# snap to bottom of the world
+		while TileManager.get_block_unsafe(x, y) == 0:
+			y += 1
+		
+		TileRunner.new(
+			gen.rng.randi_range(12, 25),
+			gen.rng.randi_range(150, 500),
+			x, y, 0) \
+		.set_direction(gen.rng.randf_range(-1.0, 1.0), 4.0) \
+		.start(gen)
+		
+		TileRunner.new(
+			gen.rng.randi_range(8, 17),
+			gen.rng.randi_range(60, 200),
+			x, y, 0) \
+		.set_direction(gen.rng.randf_range(-1.0, 1.0), 2.0) \
+		.start(gen)
+		
+		TileRunner.new(
+			gen.rng.randi_range(5, 13),
+			gen.rng.randi_range(40, 170),
+			x, y, 0) \
+		.set_direction(gen.rng.randf_range(-1.0, 1.0), 2.0) \
+		.start(gen)
+	
+	# surface-level caves (extra)
+	for i in range(world_size.x * 0.0004):
+		var x := gen.rng.randi_range(320, world_size.x - 320)
+		
+		# limit holes near center of world
+		while x > world_size.x * 0.40 and x < world_size.x * 0.60:
+			x = gen.rng.randi_range(320, world_size.x - 320)
+		
+		var y := 0
+		
+		# snap to bottom of the world
+		while TileManager.get_block_unsafe(x, y) == 0:
+			y += 1
+		
+		var size := gen.rng.randi_range(7, 12)
+		var steps := gen.rng.randi_range(150, 250)
+		
+		var dir := Vector2(gen.rng.randf_range(-1.0, 1.0), 1.0)
+		
+		TileRunner.new(size, steps, x, y, 0).set_direction(dir.x, dir.y).start(gen)
