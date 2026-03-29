@@ -1074,6 +1074,7 @@ water_rules = Dictionary[int, ExtResource("27_2soq1")]({
 })
 
 [node name="light_overlay" type="ColorRect" parent="." unique_id=281056726]
+visible = false
 show_behind_parent = true
 z_index = 50
 material = SubResource("ShaderMaterial_np63p")
