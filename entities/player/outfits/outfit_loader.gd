@@ -23,11 +23,6 @@ var curr_outfit: BaseOutfit
 func _ready() -> void:
 	curr_outfit = default_outfit
 	randomize_outfit()
-	
-	# for testing, equip wooden armor
-	load_armor(&'wooden', BodySection.HEAD)
-	load_armor(&'wooden', BodySection.BODY)
-	load_armor(&'wooden', BodySection.LEGS)
 
 func randomize_outfit() -> void:
 	set_skin_tone(skin_tones.pick_random())
