@@ -18,9 +18,14 @@ func perform_pass(gen: WorldGeneration) -> void:
 	
 	for x in range(start_x, end_x):
 		for y in range(world_size.y):
+			# overwrite dirt blocks
 			var block = TileManager.get_block_unsafe(x, y)
 			
 			if block in [1, 2, 8, 9]: 
 				TileManager.set_block_unsafe(x, y, 6)
+			
+			# overwrite dirt walls
+			if TileManager.get_wall_unsafe(x, y) == 1:
+				TileManager.set_wall_unsafe(x, y, 3)
 	
 	exit_pass() # Signals completion to world_generation.gd [cite: 1]
