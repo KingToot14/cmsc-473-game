@@ -24,7 +24,14 @@
 [ext_resource type="Texture2D" uid="uid://gxgy5dl8u6d2" path="res://entities/player/outfits/skin/head.png" id="12_eyb6c"]
 [ext_resource type="Texture2D" uid="uid://bk6a7np6mnsvp" path="res://entities/player/outfits/skin/arm_front.png" id="13_221hk"]
 [ext_resource type="Shader" uid="uid://cuqmsufylkilr" path="res://entities/player/outfits/outfit_color_swap.gdshader" id="14_221hk"]
+[ext_resource type="Script" uid="uid://bci072jni5tp" path="res://entities/player/outfits/armor_set.gd" id="17_np63p"]
 [ext_resource type="Script" uid="uid://l6p3pmifxbxu" path="res://entities/player/outfits/frame_copy.gd" id="17_t1t22"]
+[ext_resource type="Texture2D" uid="uid://bmv5teugif5g1" path="res://entities/player/outfits/wooden_armor/arm_back.png" id="18_qwspa"]
+[ext_resource type="Texture2D" uid="uid://b8tduw70ybgwk" path="res://entities/player/outfits/wooden_armor/arm_front.png" id="19_r633c"]
+[ext_resource type="Texture2D" uid="uid://4rdutqfjijlq" path="res://entities/player/outfits/wooden_armor/body.png" id="20_pacje"]
+[ext_resource type="Texture2D" uid="uid://bm7hwcqnab4sa" path="res://entities/player/outfits/wooden_armor/head.png" id="21_2h0qb"]
+[ext_resource type="Texture2D" uid="uid://decpabfxufwxb" path="res://entities/player/outfits/wooden_armor/leg_back.png" id="22_mmk7k"]
+[ext_resource type="Texture2D" uid="uid://dncyv5crvikna" path="res://entities/player/outfits/wooden_armor/leg_front.png" id="23_g3pa7"]
 [ext_resource type="PackedScene" uid="uid://ctyqglpej7nkw" path="res://entities/player/crafting_button.tscn" id="23_ghoj8"]
 [ext_resource type="Script" uid="uid://c4mplevoxulnq" path="res://entities/player/inventory_slot.gd" id="23_t1t22"]
 [ext_resource type="Script" uid="uid://cj5k0hwfnaogw" path="res://ui/in_game/mouse_manager.gd" id="24_24ehl"]
@@ -747,6 +754,20 @@ shader = ExtResource("14_221hk")
 shader_parameter/primary_color = Color(0.90588236, 0.70980394, 0.5803922, 1)
 shader_parameter/secondary_color = Color(1, 1, 1, 1)
 
+[sub_resource type="Resource" id="Resource_0eo6o"]
+script = ExtResource("17_np63p")
+metadata/_custom_type_script = "uid://bci072jni5tp"
+
+[sub_resource type="Resource" id="Resource_ttr27"]
+script = ExtResource("17_np63p")
+arm_back_sprite = ExtResource("18_qwspa")
+leg_back_sprite = ExtResource("22_mmk7k")
+body_sprite = ExtResource("20_pacje")
+leg_front_sprite = ExtResource("23_g3pa7")
+head_sprite = ExtResource("21_2h0qb")
+arm_front_sprite = ExtResource("19_r633c")
+metadata/_custom_type_script = "uid://bci072jni5tp"
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vewsg"]
 shader = ExtResource("24_gt4e4")
 shader_parameter/mouse_range = 8.0
@@ -889,6 +910,10 @@ skin_material = SubResource("ShaderMaterial_3wlsy")
 outfit_material = SubResource("ShaderMaterial_ghoj8")
 default_outfit = ExtResource("9_we0b7")
 skin_tones = Array[Color]([Color(0.99215686, 0.89411765, 0.80784315, 1), Color(0.90588236, 0.70980394, 0.5803922, 1), Color(0.7058824, 0.5254902, 0.39607844, 1), Color(0.99215686, 0.89411765, 0.8784314, 1), Color(0.9843137, 0.74509805, 0.73333335, 1), Color(0.4862745, 0.34117648, 0.27450982, 1)])
+armor_sets = Dictionary[StringName, ExtResource("17_np63p")]({
+&"none": SubResource("Resource_0eo6o"),
+&"wooden": SubResource("Resource_ttr27")
+})
 metadata/_custom_type_script = "uid://c01fup0uojudj"
 
 [node name="arm_back_skin" type="Sprite2D" parent="outfit" unique_id=449727972 node_paths=PackedStringArray("target")]
@@ -908,6 +933,13 @@ vframes = 5
 
 [node name="arm_back_detail" type="Sprite2D" parent="outfit" unique_id=396328366 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../arm_back_outfit")
+
+[node name="arm_back_armor" type="Sprite2D" parent="outfit" unique_id=1582933062 node_paths=PackedStringArray("target")]
 position = Vector2(0, -12)
 hframes = 8
 vframes = 5
@@ -937,6 +969,13 @@ vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_back_outfit")
 
+[node name="leg_back_armor" type="Sprite2D" parent="outfit" unique_id=224697735 node_paths=PackedStringArray("target")]
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../leg_back_outfit")
+
 [node name="body_skin" type="Sprite2D" parent="outfit" unique_id=1040195879 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
@@ -954,6 +993,13 @@ vframes = 5
 
 [node name="body_detail" type="Sprite2D" parent="outfit" unique_id=1193895573 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../body_outfit")
+
+[node name="body_armor" type="Sprite2D" parent="outfit" unique_id=540096870 node_paths=PackedStringArray("target")]
 position = Vector2(0, -12)
 hframes = 8
 vframes = 5
@@ -983,6 +1029,13 @@ vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../leg_front_outfit")
 
+[node name="leg_front_armor" type="Sprite2D" parent="outfit" unique_id=1995195533 node_paths=PackedStringArray("target")]
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../leg_front_outfit")
+
 [node name="head_skin" type="Sprite2D" parent="outfit" unique_id=621156139 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_3wlsy")
 position = Vector2(0, -12)
@@ -1000,6 +1053,13 @@ vframes = 5
 
 [node name="head_detail" type="Sprite2D" parent="outfit" unique_id=88793196 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../head_outfit")
+
+[node name="head_armor" type="Sprite2D" parent="outfit" unique_id=950909424 node_paths=PackedStringArray("target")]
 position = Vector2(0, -12)
 hframes = 8
 vframes = 5
@@ -1028,6 +1088,13 @@ vframes = 5
 
 [node name="arm_front_detail" type="Sprite2D" parent="outfit" unique_id=325483749 node_paths=PackedStringArray("target")]
 material = SubResource("ShaderMaterial_ghoj8")
+position = Vector2(0, -12)
+hframes = 8
+vframes = 5
+script = ExtResource("17_t1t22")
+target = NodePath("../arm_front_outfit")
+
+[node name="arm_front_armor" type="Sprite2D" parent="outfit" unique_id=253627410 node_paths=PackedStringArray("target")]
 position = Vector2(0, -12)
 hframes = 8
 vframes = 5
