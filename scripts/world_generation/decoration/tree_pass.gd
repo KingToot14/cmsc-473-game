@@ -16,7 +16,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	while x < world_size.x - 300:
 		var y := 0
 		
-		while y < gen.underground_high and TileManager.get_block_unsafe(x, y + 1) == 0:
+		while y < gen.underground_line and TileManager.get_block_unsafe(x, y + 1) == 0:
 			y += 1
 		
 		# only place on blocks

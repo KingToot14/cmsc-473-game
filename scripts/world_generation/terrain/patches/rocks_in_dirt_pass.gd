@@ -43,7 +43,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# create tiny rocks
 	for i in range(world_size.x * world_size.y * 0.0045):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
-		var y := gen.rng.randi_range(gen.surface_low, gen.underground_low)
+		var y := gen.rng.randi_range(gen.surface_low, gen.cavern_line)
 		var size := gen.rng.randi_range(2, 7)
 		var steps := gen.rng.randi_range(2, 23)
 		

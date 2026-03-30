@@ -1089,12 +1089,6 @@ offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("26_vewsg")
-water_rules = Dictionary[int, ExtResource("27_2soq1")]({
-1: SubResource("Resource_2soq1"),
-4: SubResource("Resource_8q4fm"),
-8: SubResource("Resource_np63p")
-})
 
 [node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]
 self_modulate = Color(1, 1, 1, 0.7058824)

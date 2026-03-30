@@ -65,7 +65,6 @@ var world_size := Vector2i(4200, 1200):
 		)
 	
 		space = floori(_size.y * 0.10)
-		cavern = floori(_size.y * 0.60)
 		
 		world_size = _size
 		world_size_changed.emit(world_size)
@@ -80,7 +79,7 @@ var world_spawn: Vector2i
 var space := floori(world_size.y * 0.10)
 var surface := 0
 var underground := 0
-var cavern := floori(world_size.y * 0.60)
+var cavern := 0
 
 # - TileMaps
 var server_map: ServerTileMap
@@ -141,6 +140,11 @@ func _ready() -> void:
 	config.add_property(^':underground')
 	config.property_set_replication_mode(
 		^':underground',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	config.add_property(^':cavern')
+	config.property_set_replication_mode(
+		^':cavern',
 		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
 	)
 	

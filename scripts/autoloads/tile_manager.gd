@@ -1443,6 +1443,7 @@ func save_world() -> void:
 	# world layers
 	buffer.put_u16(Globals.surface)
 	buffer.put_u16(Globals.underground)
+	buffer.put_u16(Globals.cavern)
 	
 	# - Tile Data - #
 	buffer.put_data(blocks)
@@ -1489,6 +1490,7 @@ func load_world() -> bool:
 	# world layers
 	Globals.surface     = buffer.get_u16()
 	Globals.underground = buffer.get_u16()
+	Globals.cavern      = buffer.get_u16()
 	
 	# - Tile Data - #
 	var world_size := Globals.world_size.x * Globals.world_size.y
