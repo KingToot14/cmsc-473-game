@@ -2,12 +2,14 @@ extends Node2D
 
 ## A system to manage all tile data in the current world. Memory usage:
 ## [br][code]  - Max World Size: 8400 x 2400 = 20,160,000[/code]
-## [br][code]  - Block Array: PackedByteArray = 2 * 20,160,000 =  40,320,000 MB[/code]
-## [br][code]  - Wall Array: PackedByteArray  = 2 * 20,160,000 =  40,320,000 MB[/code]
-## [br][code]  - Water Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
-## [br][code]  - Light Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
-## [br][code]  - Color Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
-## [br][code]                                             Total = 141,120,000 MB[/code]
+## [br][code]  - Block Array: PackedByteArray       = 2 * 20,160,000 =  40,320,000 MB[/code]
+## [br][code]  - Wall Array: PackedByteArray        = 2 * 20,160,000 =  40,320,000 MB[/code]
+## [br][code]  - Water Array: PackedByteArray       = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Sky Light Array: PackedByteArray   = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Light Red Array: PackedByteArray   = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Light Green Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Light Blue Array: PackedByteArray  = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]                                                  Total = 181,440,000 MB[/code]
 
 # --- Variables --- #
 ## The width and height of each chunk in tiles
@@ -44,6 +46,10 @@ var walls := PackedByteArray()
 ## [br]For a safer way to access these tiles, use [method get_water_level] and
 ## [method set_water_level]
 var water := PackedByteArray()
+## A flat-packed array of all the sky light levels in the world.
+## [br]For a safer way to access these tiles, use [method get_light_sky] and
+## [method set_light_r]
+var light_sky := PackedByteArray()
 ## A flat-packed array of all the red light levels in the world.
 ## [br]For a safer way to access these tiles, use [method get_light_r] and
 ## [method set_light_r]
@@ -89,6 +95,13 @@ var light_thread := Thread.new()
 ## Whether or not the light texture has an update queued. This should
 ## only be set when the [member light_thread] is busy.
 var light_update_queued := false
+
+## A reference of the sky light data for rendering
+var sky_data: PackedByteArray
+## A reference of the sky light image for rendering
+var sky_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+## A reference of the sky light texture for rendering. Set from [member sky_image]
+var sky_texture := ImageTexture.create_from_image(sky_image)
 
 ## A reference of the light data for rendering
 var light_data: PackedByteArray
@@ -500,6 +513,15 @@ func set_light_color(x: int, y: int, r: int, g: int, b: int) -> void:
 	light_g[idx] = g
 	light_b[idx] = b
 
+## Sets the sky light at ([param x], [param y]). The value should be a 
+## value from [code]0 - 255[/code]
+func set_light_sky(x: int, y: int, sky: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# set light level
+	light_sky[_idx(x, y)] = sky
 
 ## Sets the red light channel at ([param x], [param y]). The value should be a 
 ## value from [code]0 - 255[/code]
@@ -541,6 +563,15 @@ func get_light_color(x: int, y: int) -> Color:
 	var idx := _idx(x, y)
 	
 	return Color.from_rgba8(light_r[idx], light_g[idx], light_b[idx])
+
+## Gets the sky light at the given [param x] and [param y] position.
+func get_light_sky(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get light level
+	return light_sky[_idx(x, y)]
 
 ## Gets the red light channel at the given [param x] and [param y] position.
 func get_light_r(x: int, y: int) -> int:
@@ -589,6 +620,8 @@ func build_light_texture() -> void:
 ## This function handles the internals of updating the light texture, and
 ## should not be modified from multiple places.
 func _rebuild_light_texture_internal(origin: Vector2i) -> void:
+	sky_data = PackedByteArray()
+	sky_data.resize(WATER_WIDTH * WATER_HEIGHT)
 	light_data = PackedByteArray()
 	light_data.resize(WATER_WIDTH * WATER_HEIGHT * 3)
 	
@@ -601,11 +634,13 @@ func _rebuild_light_texture_internal(origin: Vector2i) -> void:
 		for x in range(WATER_WIDTH):
 			var idx := row + origin.x + x
 			
-			light_data[index + 0] = light_r[idx]
-			light_data[index + 1] = light_g[idx]
-			light_data[index + 2] = light_b[idx]
+			sky_data[index] = light_sky[idx]
 			
-			index += 3
+			light_data[(index * 3) + 0] = light_r[idx]
+			light_data[(index * 3) + 1] = light_g[idx]
+			light_data[(index * 3) + 2] = light_b[idx]
+			
+			index += 1
 	
 	_update_light_texture_internal.call_deferred(origin)
 
@@ -618,6 +653,9 @@ func _update_light_texture_internal(origin: Vector2i) -> void:
 		light_thread.wait_to_finish()
 	
 	# update texture
+	sky_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, sky_data)
+	sky_texture.update(sky_image)
+	
 	light_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_RGB8, light_data)
 	light_texture.update(light_image)
 	
@@ -661,6 +699,10 @@ func push_light_texture_update() -> void:
 	RenderingServer.global_shader_parameter_set(
 		&"light_texture",
 		light_texture
+	)
+	RenderingServer.global_shader_parameter_set(
+		&"sky_texture",
+		sky_texture
 	)
 	RenderingServer.global_shader_parameter_set(&"light_offset", light_origin)
 
@@ -1309,9 +1351,13 @@ func setup_tile_arrays() -> void:
 	water = []
 	water.resize(world_width * world_height)
 	
+	light_sky = []
+	light_r.resize(world_width * world_height)
+	
 	light_r = []
 	light_g = []
 	light_b = []
+	light_sky.resize(world_width * world_height)
 	light_r.resize(world_width * world_height)
 	light_g.resize(world_width * world_height)
 	light_b.resize(world_width * world_height)
@@ -1361,6 +1407,7 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 			buffer.put_u16(walls.decode_u16(idx * 2))
 			buffer.put_u8(water[idx * 1])
 			
+			buffer.put_u8(light_sky[idx * 1])
 			buffer.put_u8(light_r[idx * 1])
 			buffer.put_u8(light_g[idx * 1])
 			buffer.put_u8(light_b[idx * 1])
@@ -1387,6 +1434,7 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 			walls.encode_u16(idx * 2, buffer.get_u16())
 			water.encode_u8(idx * 1, buffer.get_u8())
 			
+			light_sky.encode_u8(idx * 1, buffer.get_u8())
 			light_r.encode_u8(idx * 1, buffer.get_u8())
 			light_g.encode_u8(idx * 1, buffer.get_u8())
 			light_b.encode_u8(idx * 1, buffer.get_u8())
@@ -1450,6 +1498,7 @@ func save_world() -> void:
 	buffer.put_data(walls)
 	buffer.put_data(water)
 	
+	buffer.put_data(light_sky)
 	buffer.put_data(light_r)
 	buffer.put_data(light_g)
 	buffer.put_data(light_b)
@@ -1499,6 +1548,7 @@ func load_world() -> bool:
 	walls = buffer.get_data(world_size * 2)[1]
 	water = buffer.get_data(world_size * 1)[1]
 	
+	light_sky = buffer.get_data(world_size * 1)[1]
 	light_r = buffer.get_data(world_size * 1)[1]
 	light_g = buffer.get_data(world_size * 1)[1]
 	light_b = buffer.get_data(world_size * 1)[1]

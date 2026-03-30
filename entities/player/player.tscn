@@ -803,6 +803,7 @@ metadata/_custom_type_script = "uid://bo71smfwf3o2c"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_np63p"]
 shader = ExtResource("28_8q4fm")
+shader_parameter/sky_color = Color(1, 1, 1, 1)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 25

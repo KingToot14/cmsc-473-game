@@ -258,7 +258,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	var center_y = start_y + height / 2
 	
 	data = data.decompress(
-		width * height * TileManager.CHUNK_AREA * (2 + 2 + 1 + 3),
+		width * height * TileManager.CHUNK_AREA * (2 + 2 + 1 + 1 + 3),
 		FileAccess.COMPRESSION_ZSTD
 	)
 	

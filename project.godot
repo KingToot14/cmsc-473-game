@@ -247,3 +247,7 @@ light_offset={
 "type": "vec2",
 "value": Vector2(0, 0)
 }
+sky_texture={
+"type": "sampler2D",
+"value": ""
+}
