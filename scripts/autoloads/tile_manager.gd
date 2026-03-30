@@ -724,10 +724,12 @@ func receive_light_update(new_data: PackedByteArray) -> void:
 		var tile_y := buffer.get_u16()
 		
 		# light level
+		var sky := buffer.get_u8()
 		var r := buffer.get_u8()
 		var g := buffer.get_u8()
 		var b := buffer.get_u8()
 		
+		set_light_sky(tile_x, tile_y, sky)
 		set_light_color(tile_x, tile_y, r, g, b)
 		if not batched:
 			update_light_texture(tile_x, tile_y, false)

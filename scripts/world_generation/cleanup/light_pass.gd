@@ -18,10 +18,7 @@ func perform_pass(_gen: WorldGeneration) -> void:
 			
 			TileManager.set_light_sky(x, y, LightUpdater.MAX_LIGHT_LEVEL)
 			
-			Globals.light_updater.add_to_queue(
-				Vector2i(x, y),
-				LightUpdater.MAX_LIGHT_LEVEL, LightUpdater.MAX_LIGHT_LEVEL, LightUpdater.MAX_LIGHT_LEVEL
-			)
+			Globals.light_updater.add_to_queue(Vector2i(x, y), LightUpdater.MAX_LIGHT_LEVEL)
 	
 	Globals.light_updater.propagate_all()
 	

@@ -17,7 +17,7 @@ var active := false
 
 var update_timer := 0.0
 var active_tiles: Dictionary[Vector2i, bool] = {}
-var updated_tiles: Dictionary[Vector2i, Color]
+var updated_tiles: Dictionary[Vector2i, int]
 
 var point_lights: Dictionary[Vector2i, Color] = {}
 
@@ -26,32 +26,24 @@ func _ready() -> void:
 	Globals.light_updater = self
 
 #region Queue Management
-func add_to_queue(position: Vector2i, r := -1, g := -1, b := -1) -> void:
-	if r == -1:
-		r = TileManager.get_light_r(position.x, position.y)
-	if g == -1:
-		g = TileManager.get_light_g(position.x, position.y)
-	if b == -1:
-		b = TileManager.get_light_b(position.x, position.y)
+func add_to_queue(position: Vector2i, sky := -1) -> void:
+	if sky == -1:
+		sky = TileManager.get_light_sky(position.x, position.y)
 	
-	if not active and r == 0 and g == 0 and b == 0:
+	if not active and sky == 0:
 		return
 	
 	active_tiles[position] = true
 	
-	queue_update(position.x, position.y, r, g, b)
+	queue_update(position.x, position.y, sky)
 
-func remove_from_queue(position: Vector2i, r := -1, g := -1, b := -1) -> void:
+func remove_from_queue(position: Vector2i, sky := -1) -> void:
 	active_tiles.erase(position)
 	
-	if r == -1:
-		r = TileManager.get_light_r(position.x, position.y)
-	if g == -1:
-		g = TileManager.get_light_g(position.x, position.y)
-	if b == -1:
-		b = TileManager.get_light_b(position.x, position.y)
+	if sky == -1:
+		sky = TileManager.get_light_sky(position.x, position.y)
 	
-	queue_update(position.x, position.y, r, g, b)
+	queue_update(position.x, position.y, sky)
 
 #endregion
 
@@ -128,11 +120,12 @@ func update_region(start_x: int, start_y: int, width: int, height: int) -> void:
 		queue[Vector2i(bx, by)] = true
 	
 	propagate_region_single(buffer_sky, sky_queue, start_x, start_y, width, height)
-	
 	propagate_region(
 		buffer_r, buffer_g, buffer_b, queue,
 		start_x, start_y, width, height
 	)
+	
+	send_region_update(start_x, start_y, start_x + width, start_y + height)
 
 func handle_update(pos: Vector2i) -> void:
 	var sky := TileManager.get_light_sky(pos.x, pos.y)
@@ -225,11 +218,11 @@ func spread_to_queue_single(
 #endregion
 
 #region Updating
-func queue_update(x: int, y: int, r: int, g: int, b: int) -> void:
+func queue_update(x: int, y: int, sky: int) -> void:
 	if not active:
 		return
 	
-	updated_tiles[Vector2i(x, y)] = Color.from_rgba8(r, g, b)
+	updated_tiles[Vector2i(x, y)] = sky
 
 func send_update() -> void:
 	var update_size := len(updated_tiles)
@@ -268,9 +261,9 @@ func send_update() -> void:
 			buffer.put_u16(tile.x)
 			buffer.put_u16(tile.y)
 			
-			buffer.put_u8(updated_tiles[tile].r8)
-			buffer.put_u8(updated_tiles[tile].g8)
-			buffer.put_u8(updated_tiles[tile].b8)
+			buffer.put_u8(updated_tiles[tile])
+			buffer.put_u8(updated_tiles[tile])
+			buffer.put_u8(updated_tiles[tile])
 		
 		# only send data if necessary
 		if updated == 0:
@@ -321,6 +314,7 @@ func send_region_update(start_x: int, start_y: int, end_x: int, end_y: int) -> v
 				buffer.put_u16(x)
 				buffer.put_u16(y)
 				
+				buffer.put_u8(TileManager.get_light_sky(x, y))
 				buffer.put_u8(TileManager.get_light_r(x, y))
 				buffer.put_u8(TileManager.get_light_g(x, y))
 				buffer.put_u8(TileManager.get_light_b(x, y))
@@ -408,7 +402,7 @@ func propagate_region(
 			TileManager.set_light_b(start_x + x, start_y + y, buffer_b[idx])
 	
 	# send update
-	send_region_update(start_x, start_y, start_x + width, start_y + height)
+	#send_region_update(start_x, start_y, start_x + width, start_y + height)
 
 func propagate_region_single(
 		buffer: PackedByteArray,
@@ -447,6 +441,6 @@ func propagate_region_single(
 			TileManager.set_light_sky(start_x + x, start_y + y, buffer[idx])
 	
 	# send update
-	send_region_update(start_x, start_y, start_x + width, start_y + height)
+	#send_region_update(start_x, start_y, start_x + width, start_y + height)
 
 #endregion
