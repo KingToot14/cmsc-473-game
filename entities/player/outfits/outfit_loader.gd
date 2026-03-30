@@ -1,6 +1,13 @@
 class_name OutfitLoader
 extends Node2D
 
+# --- Enums --- #
+enum BodySection {
+	HEAD,
+	BODY,
+	LEGS
+}
+
 # --- Variables --- #
 @export var skin_material: ShaderMaterial
 @export var outfit_material: ShaderMaterial
@@ -8,6 +15,9 @@ extends Node2D
 var curr_outfit: BaseOutfit
 
 @export var skin_tones: Array[Color] = []
+
+@export_group("Equipment")
+@export var armor_sets: Dictionary[StringName, ArmorSet]
 
 # --- Functions --- #
 func _ready() -> void:
@@ -70,3 +80,20 @@ func load_outfit_lower(outfit: BaseOutfit, primary_color: Color, secondary_color
 	# set shaders
 	outfit_material.set_shader_parameter(&'primary_color', primary_color)
 	outfit_material.set_shader_parameter(&'secondary_color', secondary_color)
+
+func load_armor(armor_name: StringName, section: BodySection) -> void:
+	var armor: ArmorSet = armor_sets.get(armor_name, armor_sets[&'none'])
+	
+	if not armor:
+		return
+	
+	match section:
+		BodySection.HEAD:
+			$'head_armor'.texture = armor.head_sprite
+		BodySection.BODY:
+			$'arm_back_armor'.texture = armor.arm_back_sprite
+			$'body_armor'.texture = armor.body_sprite
+			$'arm_front_armor'.texture = armor.arm_front_sprite
+		BodySection.LEGS:
+			$'leg_back_armor'.texture = armor.leg_back_sprite
+			$'leg_front_armor'.texture = armor.leg_front_sprite
