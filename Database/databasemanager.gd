@@ -150,7 +150,6 @@ func save_inventory(player_id: int, inventory_data: Array):
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
 	for item in inventory_data:
-		# Don't save empty slots
 		if item["id"] == -1: continue
 		
 		db.query("""

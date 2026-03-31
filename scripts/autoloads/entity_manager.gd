@@ -143,7 +143,7 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	
 	# set id and name
 	entity.set_entity_id(spawn_id, registry_id)
-	
+	entity.name = "entity_%s" % entity.id
 	# store entity reference
 	if not ref:
 		ref = EntityReference.new()
@@ -175,6 +175,7 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	
 	# set ids
 	entity.set_entity_id(curr_id, registry_id)
+	entity.name = "entity_%s" % entity.id
 	curr_id += 1
 	
 	# create new reference
