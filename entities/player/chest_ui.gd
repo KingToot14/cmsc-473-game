@@ -13,12 +13,16 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 		
-	# close the chest if you right click outside its UI
-	if event.is_action_pressed("chest_interact"):
-		var mouse_pos = get_global_mouse_position()
-		if not get_global_rect().has_point(mouse_pos):
+	# close the chest if you press "e" or tab
+	if event.is_action_pressed("interact") or event.is_action_pressed("inventory_toggle"):
+		close_chest()
+		get_viewport().set_input_as_handled()
+
+func _process(delta: float) -> void:
+	if visible and current_chest:
+		# if the chest was destroyed or is marked for deletion, close the UI.
+		if not is_instance_valid(current_chest) or current_chest.is_queued_for_deletion():
 			close_chest()
-			get_viewport().set_input_as_handled()
 
 func open_chest(chest: ChestEntity) -> void:
 	if current_chest == chest:
@@ -53,7 +57,11 @@ func close_chest() -> void:
 			
 		if current_chest.inventory.inventory_updated.is_connected(refresh_ui):
 			current_chest.inventory.inventory_updated.disconnect(refresh_ui)
-			
+	
+	if Globals.player:
+		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
+		if player_inv_ui:
+			player_inv_ui.hide()
 	current_chest = null
 
 func refresh_ui() -> void:
