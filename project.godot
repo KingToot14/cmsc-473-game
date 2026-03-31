@@ -40,6 +40,7 @@ ItemDatabase="*uid://bmdvy4d1xjyp3"
 DatabaseManager="*uid://lrme4ahma8q3"
 BlockDatabase="*uid://b21pv7qr3jic3"
 BiomeManager="*uid://cgql53i2vhk0c"
+DaytimeManager="*uid://mwn8lucf2stn"
 
 [display]
 
