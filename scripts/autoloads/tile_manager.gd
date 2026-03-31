@@ -1495,6 +1495,9 @@ func save_world() -> void:
 	buffer.put_u16(Globals.underground)
 	buffer.put_u16(Globals.cavern)
 	
+	# daytime offset
+	buffer.put_float(DaytimeManager.curr_time)
+	
 	# - Tile Data - #
 	buffer.put_data(blocks)
 	buffer.put_data(walls)
@@ -1542,6 +1545,9 @@ func load_world() -> bool:
 	Globals.surface     = buffer.get_u16()
 	Globals.underground = buffer.get_u16()
 	Globals.cavern      = buffer.get_u16()
+	
+	# daytime offset
+	DaytimeManager.daytime_offset = buffer.get_float()
 	
 	# - Tile Data - #
 	var world_size := Globals.world_size.x * Globals.world_size.y

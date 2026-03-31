@@ -40,6 +40,8 @@ var curr_minute: int:
 		# snap to intervals of 15 minutes
 		return floori(float(minutes) / daytime_minute_intervals) * daytime_minute_intervals
 
+var _internal_hour := -1
+
 # --- Functions --- #
 func _ready() -> void:
 	# add node for synchronization
