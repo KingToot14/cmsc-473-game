@@ -42,8 +42,13 @@ region = Rect2(0, 32, 88, 16)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dp3eg"]
 shader = ExtResource("12_muem4")
-shader_parameter/top_color = Color(0.23921569, 0.5254902, 0.8784314, 1)
+shader_parameter/top_color = Color(0.15300001, 0.46665025, 0.85, 1)
 shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vxglm"]
+shader = ExtResource("12_muem4")
+shader_parameter/top_color = Color(0.27600002, 0.70533323, 0.92, 1)
+shader_parameter/bottom_color = Color(0.6336, 0.8594666, 0.88, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2wyq8"]
 shader = ExtResource("12_muem4")
@@ -1290,7 +1295,7 @@ repeat_size = Vector2(960, 0)
 repeat_times = 3
 
 [node name="sky" type="ColorRect" parent="background_snow/layer_1" unique_id=35379983]
-material = SubResource("ShaderMaterial_dp3eg")
+material = SubResource("ShaderMaterial_vxglm")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
