@@ -16,6 +16,7 @@ enum TorchVariant {
 
 # --- Variables --- #
 @export var variant: TorchVariant
+@export var variant_sprites: Dictionary[TorchVariant, Texture2D] = {}
 
 var breaking_player := -1
 
@@ -33,16 +34,25 @@ func set_entity_id(spawn_id: int, reg_id: int) -> void:
 
 #region Variants
 func setup_variant() -> void:
-	var info := EntityManager.tile_entity_registry[3]
-	
 	match variant:
 		TorchVariant.NORMAL:
 			# set sprite
-			pass
+			$'sprite'.texture = variant_sprites[TorchVariant.NORMAL]
 			
 			# add light
 			if multiplayer and multiplayer.is_server():
 				Globals.light_updater.add_point_light(tile_position, Color.html("#ffd9b3"))
+	
+	# set variant
+	match get_anchor_type(tile_position):
+		TorchEntity.AnchorType.BOTTOM:
+			$'sprite'.frame = 0
+		TorchEntity.AnchorType.LEFT:
+			$'sprite'.frame = 1
+		TorchEntity.AnchorType.RIGHT:
+			$'sprite'.frame = 3
+		_:
+			$'sprite'.frame = 2
 
 func spawn_item() -> void:
 	var world_position := TileManager.tile_to_world(tile_position.x, tile_position.y, true)

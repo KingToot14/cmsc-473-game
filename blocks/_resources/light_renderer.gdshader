@@ -3,7 +3,10 @@ render_mode blend_mul;
 
 // --- Uniforms --- //
 global uniform sampler2D light_texture: filter_linear;
+global uniform sampler2D sky_texture: filter_linear;
 global uniform vec2 light_offset;
+
+uniform vec4 sky_color: source_color = vec4(1.0);
 
 varying vec2 world_position;
 
@@ -18,5 +21,8 @@ void fragment() {
 	
 	vec2 tex_size = vec2(textureSize(light_texture, 0));
 	
-	COLOR *= texture(light_texture, tile_position / tex_size);
+	vec4 color = texture(light_texture, tile_position / tex_size) + 
+		sky_color * texture(sky_texture, tile_position / tex_size).r;
+	
+	COLOR *= color;
 }

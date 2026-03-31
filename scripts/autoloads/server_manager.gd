@@ -165,6 +165,11 @@ func create_player(id: int) -> void:
 	if gen.generating:
 		await gen.done_generating
 	
+	# don't re-spawn players
+	if id in connected_players:
+		print("[Wizbowo's Conquest] Player '%s' already joined" % id)
+		return
+	
 	# setup player
 	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
 	player.name = "player_%s" % id

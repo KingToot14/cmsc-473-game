@@ -16,6 +16,9 @@ y_sort_enabled = true
 collision_layer = 32
 collision_mask = 0
 script = ExtResource("1_gik4x")
+variant_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("2_6cvlj")
+})
 always_snapshot = false
 interpolator = NodePath("entity_interpolator")
 hp = NodePath("hp")
