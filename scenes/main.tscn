@@ -26,6 +26,8 @@
 [ext_resource type="Texture2D" uid="uid://cwkprymttpv1w" path="res://backgrounds/underground/ice.png" id="21_og1vs"]
 [ext_resource type="Texture2D" uid="uid://dxenfadrgn5ar" path="res://backgrounds/cavern/background.png" id="22_2wyq8"]
 [ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="22_jscy8"]
+[ext_resource type="Texture2D" uid="uid://baq1hd7pnexsp" path="res://backgrounds/space/background.png" id="23_vxglm"]
+[ext_resource type="Texture2D" uid="uid://cd4s7fx0bf7nd" path="res://backgrounds/ocean/background.png" id="24_2f3dj"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
@@ -41,7 +43,34 @@ region = Rect2(0, 32, 88, 16)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dp3eg"]
 shader = ExtResource("12_muem4")
-shader_parameter/top_color = Color(0.23921569, 0.5254902, 0.8784314, 1)
+shader_parameter/top_color = Color(0.15300001, 0.46665025, 0.85, 1)
+shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vxglm"]
+shader = ExtResource("12_muem4")
+shader_parameter/top_color = Color(0.27600002, 0.70533323, 0.92, 1)
+shader_parameter/bottom_color = Color(0.6336, 0.8594666, 0.88, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2wyq8"]
+shader = ExtResource("12_muem4")
+shader_parameter/top_color = Color(0, 0, 0, 1)
+shader_parameter/bottom_color = Color(0.058479976, 0.030600002, 0.17, 1)
+
+[sub_resource type="Shader" id="Shader_2f3dj"]
+code = "shader_type canvas_item;
+
+// --- Uniforms --- //
+uniform vec4 top_color: source_color = vec4(1.0);
+uniform vec4 bottom_color: source_color = vec4(1.0);
+
+// --- Functions --- //
+void fragment() {
+	COLOR = mix(top_color, bottom_color, UV.y);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2f3dj"]
+shader = SubResource("Shader_2f3dj")
+shader_parameter/top_color = Color(0.15300001, 0.46665025, 0.85, 1)
 shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
 
 [node name="main" type="Node2D" unique_id=1976494311]
@@ -1168,8 +1197,8 @@ biome_backgrounds = {
 [node name="background_forest" type="Node2D" parent="." unique_id=1195479764 groups=["background"]]
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
-allowed_layers = 3
-allowed_biomes = 11
+allowed_layers = 2
+allowed_biomes = 3
 
 [node name="layer_1" type="Parallax2D" parent="background_forest" unique_id=698714807]
 y_sort_enabled = true
@@ -1273,7 +1302,7 @@ frame = 4
 modulate = Color(1, 1, 1, 0)
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
-allowed_layers = 3
+allowed_layers = 2
 allowed_biomes = 4
 
 [node name="layer_1" type="Parallax2D" parent="background_snow" unique_id=392378770]
@@ -1284,7 +1313,7 @@ repeat_size = Vector2(960, 0)
 repeat_times = 3
 
 [node name="sky" type="ColorRect" parent="background_snow/layer_1" unique_id=35379983]
-material = SubResource("ShaderMaterial_dp3eg")
+material = SubResource("ShaderMaterial_vxglm")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1457,6 +1486,138 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("22_2wyq8")
 stretch_mode = 1
+
+[node name="background_space" type="Node2D" parent="." unique_id=2053949859 groups=["background"]]
+modulate = Color(1, 1, 1, 0)
+y_sort_enabled = true
+script = ExtResource("15_yc10j")
+allowed_layers = 1
+allowed_biomes = 15
+
+[node name="layer_1" type="Parallax2D" parent="background_space" unique_id=655713986]
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sky" type="ColorRect" parent="background_space/layer_1" unique_id=2123116992]
+material = SubResource("ShaderMaterial_2wyq8")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="layer_2" type="Parallax2D" parent="background_space" unique_id=1132181367]
+z_index = 1
+y_sort_enabled = true
+scroll_scale = Vector2(0.005, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_space/layer_2" unique_id=633396421]
+texture = ExtResource("23_vxglm")
+vframes = 4
+frame = 1
+
+[node name="layer_3" type="Parallax2D" parent="background_space" unique_id=751735643]
+z_index = 2
+y_sort_enabled = true
+scroll_scale = Vector2(0.01, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_space/layer_3" unique_id=843626969]
+texture = ExtResource("23_vxglm")
+vframes = 4
+frame = 2
+
+[node name="layer_4" type="Parallax2D" parent="background_space" unique_id=1424306489]
+z_index = 3
+y_sort_enabled = true
+scroll_scale = Vector2(0.02, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_space/layer_4" unique_id=2011118381]
+texture = ExtResource("23_vxglm")
+vframes = 4
+frame = 3
+
+[node name="background_ocean" type="Node2D" parent="." unique_id=409583597 groups=["background"]]
+modulate = Color(1, 1, 1, 0)
+y_sort_enabled = true
+script = ExtResource("15_yc10j")
+allowed_layers = 2
+allowed_biomes = 8
+
+[node name="layer_1" type="Parallax2D" parent="background_ocean" unique_id=918325459]
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sky" type="ColorRect" parent="background_ocean/layer_1" unique_id=1324510537]
+material = SubResource("ShaderMaterial_2f3dj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="layer_2" type="Parallax2D" parent="background_ocean" unique_id=343062773]
+z_index = 1
+y_sort_enabled = true
+scroll_scale = Vector2(0.05, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_ocean/layer_2" unique_id=136770025]
+texture = ExtResource("24_2f3dj")
+vframes = 3
+frame = 1
+
+[node name="layer_3" type="Parallax2D" parent="background_ocean" unique_id=379162224]
+z_index = 2
+y_sort_enabled = true
+scroll_scale = Vector2(0.1, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_ocean/layer_3" unique_id=2145320336]
+texture = ExtResource("24_2f3dj")
+vframes = 3
+frame = 2
+
+[node name="layer_4" type="Parallax2D" parent="background_ocean" unique_id=997398659]
+visible = false
+z_index = 3
+y_sort_enabled = true
+scroll_scale = Vector2(0.15, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_ocean/layer_4" unique_id=118492546]
+texture = ExtResource("24_2f3dj")
+vframes = 3
 
 [node name="server_tiles" type="TileMapLayer" parent="." unique_id=1791430910]
 z_index = 50
