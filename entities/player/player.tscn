@@ -1103,6 +1103,7 @@ script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
 
 [node name="grid_overlay" type="ColorRect" parent="." unique_id=691634126]
+visible = false
 show_behind_parent = true
 z_index = 50
 material = SubResource("ShaderMaterial_vewsg")
@@ -1119,6 +1120,7 @@ mouse_filter = 2
 color = Color(1, 1, 1, 0.3137255)
 
 [node name="water_overlay" type="ColorRect" parent="." unique_id=48487235]
+visible = false
 show_behind_parent = true
 z_index = 10
 material = SubResource("ShaderMaterial_24ehl")
@@ -1142,6 +1144,7 @@ water_rules = Dictionary[int, ExtResource("27_2soq1")]({
 })
 
 [node name="light_overlay" type="ColorRect" parent="." unique_id=281056726]
+visible = false
 show_behind_parent = true
 z_index = 50
 material = SubResource("ShaderMaterial_np63p")

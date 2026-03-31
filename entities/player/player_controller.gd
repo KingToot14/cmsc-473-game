@@ -422,9 +422,13 @@ func done_initial_load() -> void:
 		Globals.set_game_state(Globals.GameState.IN_GAME)
 	
 	# only change music for the local client
-	# TODO: Move to BiomeManager when implemented
 	if owner_id == multiplayer.get_unique_id():
 		enter_biome(Globals.music.Area.FOREST_DAY)
+		
+		# enable shaders
+		$'grid_overlay'.show()
+		$'water_overlay'.show()
+		$'light_overlay'.show()
 
 #endregion
 
