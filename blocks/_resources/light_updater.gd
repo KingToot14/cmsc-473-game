@@ -82,23 +82,23 @@ func update_region(start_x: int, start_y: int, width: int, height: int) -> void:
 	buffer_b.resize((width + 32) * (height + 32))
 	
 	# re-seed sky
-	for y in range(height):
-		for x in range(width):
-			var wx = start_x + x
-			var wy = start_y + y
+	for y in range(height + 32):
+		for x in range(width + 32):
+			var wx = start_x + x - 16
+			var wy = start_y + y - 16
 			
 			# check for surface-level empty tiles
 			if wy < Globals.underground and \
 				TileManager.get_block(wx, wy) == 0 and TileManager.get_wall(wx, wy) == 0:
 				
-				var bx := x + 16
-				var by := y + 16
+				var bx := x
+				var by := y
 				
 				buffer_sky[bx + by * (width + 32)] = MAX_LIGHT_LEVEL
 				
 				sky_queue[Vector2i(bx, by)] = true
 			else:
-				buffer_sky[(x + 16) + (y + 16) * (width + 32)] = 0
+				buffer_sky[x + y * (width + 32)] = 0
 	
 	# re-seed relevant point lights
 	for pos: Vector2i in point_lights:
