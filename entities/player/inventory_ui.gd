@@ -59,6 +59,10 @@ func setup_ui(player_inventory: Inventory):
 	for i in range(player_inventory.items.size()):
 		var new_slot: InventorySlot = slot_scene.instantiate()
 		
+		# Assign our new reusable variables so the slot knows who it belongs to
+		new_slot.target_inventory = player_inventory
+		new_slot.slot_index = i
+		
 		# connect signal to update cursor
 		new_slot.mouse_entered.connect(_on_slot_mouse_entered.bind(player_inventory, i))
 		new_slot.mouse_exited.connect(_on_slot_mouse_exited.bind(player_inventory, i))

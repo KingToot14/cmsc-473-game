@@ -15,12 +15,12 @@ var owner_id := 0
 
 var recipes: Array[Recipe] = [] #add more recipes in the inspector
 
+
 # --- Functions --- #
 
 func _init():
 	for i in range(INVENTORY_SLOTS):
 		items.append(ItemStack.new(-1, 0))
-	# Load recipes immediately when the inventory is created
 	_load_recipes()
 
 #region Inventory Management
@@ -72,7 +72,7 @@ func add_item(item_id: int, amount: int) -> int:
 	else:
 		send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
 	
-	return amount # Return leftovers if full
+	return amount # return leftovers if full
 
 func remove_item(item_id: int, count: int) -> void:
 	if count <= 0:
@@ -87,7 +87,7 @@ func remove_item(item_id: int, count: int) -> void:
 		if count <= 0:
 			break
 		
-		# If this stack contains the item, remove as much as we can
+		# if this stack contains the item, remove as much as we can
 		if not stack.is_empty() and stack.item_id == item_id:
 			var diff = stack.count - count
 			stack.count = max(stack.count - count, 0)
@@ -105,17 +105,17 @@ func remove_item(item_id: int, count: int) -> void:
 		send_remove_item.rpc_id(Globals.SERVER_ID, item_id, count)
 	
 	inventory_updated.emit()
-#Unique inventory stuff: compare owner_id from player controler with multiplayer.get_unique_id() also from player controler
+
 
 # Logic to handle picking up/swapping items at a specific slot
 func interact_with_slot(index: int) -> void:
 	var slot_item = items[index]
 	
-	# If both are empty, do nothing
+	# if both are empty, do nothing
 	if held_item.is_empty() and slot_item.is_empty():
 		return
 		
-	# Pick up (Mouse empty, Slot full)
+	# pick up (mouse empty, slot full)
 	if held_item.is_empty() and not slot_item.is_empty():
 		held_item.item_id = slot_item.item_id
 		held_item.count = slot_item.count
@@ -123,7 +123,7 @@ func interact_with_slot(index: int) -> void:
 		slot_item.item_id = -1
 		slot_item.count = 0
 		
-	# Place (Mouse full, Slot empty)
+	# place (mouse full, slot empty)
 	elif not held_item.is_empty() and slot_item.is_empty():
 		slot_item.item_id = held_item.item_id
 		slot_item.count = held_item.count
@@ -131,23 +131,23 @@ func interact_with_slot(index: int) -> void:
 		held_item.item_id = -1
 		held_item.count = 0
 		
-	# Merge (Both full, SAME item ID)
+	# merge (both full, same item ID)
 	elif not held_item.is_empty() and not slot_item.is_empty() and held_item.item_id == slot_item.item_id:
 		var item_data: Item = ItemDatabase.get_item(slot_item.item_id)
 		var max_stack = item_data.max_stack
 		var space_left = max_stack - slot_item.count
-		# If there is room in the slot, pour items in from the held stack
+		# if there is room in the slot, pour items in from the held stack
 		if space_left > 0:
 			var amount_to_move = min(space_left, held_item.count)
 			slot_item.count += amount_to_move
 			held_item.count -= amount_to_move
 			
-			# If we emptied the held stack, clear it
+			# if we emptied the held stack, clear it
 			if held_item.count <= 0:
 				held_item.item_id = -1
 				held_item.count = 0
 				
-	# Swap (Both full, DIFFERENT item IDs)
+	# swap (both full, different item IDs)
 	elif not held_item.is_empty() and not slot_item.is_empty() and held_item.item_id != slot_item.item_id:
 		var temp_id = slot_item.item_id
 		var temp_count = slot_item.count
@@ -164,7 +164,7 @@ func interact_with_slot(index: int) -> void:
 	else:
 		send_mouse_input.rpc_id(Globals.SERVER_ID, index)
 	
-	# Update the UI
+	# update the UI
 	inventory_updated.emit()
 	
 ## Drops the currently held item at the specified world position.
@@ -213,7 +213,7 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 	
 	var stack := items[slot]
 	
-	# If this stack contains the item, remove as much as we can
+	# if this stack contains the item, remove as much as we can
 	if not stack.is_empty() and stack.item_id == item_id:
 		var diff = stack.count - count
 		stack.count = max(stack.count - count, 0)
@@ -238,10 +238,12 @@ func load_inventory() -> void:
 	add_item(9, 1)		# wooden hammer
 	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
+	add_item(4, 30)		# stone
 	add_item(14, 30)	# sand
 	add_item(11, 10)	# acorns
 	add_item(24, 4)		# chests
 	add_item(28, 20)	# torches
+
 
 #endregion
 
@@ -339,7 +341,7 @@ func get_selected_item() -> ItemStack:
 	if held_item.item_id != -1:
 		return held_item
 	
-	# If no item held in mouse, return current hotbar item
+	# if no item held in mouse, return current hotbar item
 	return items[hotbar_slot]
 
 func has_item(item_id: int, count := 1) -> bool:
@@ -374,6 +376,72 @@ func get_save_data() -> Array:
 	return data
 
 #endregion Database Saving
+
+#region External Interaction
+func interact_with_external_slot(index: int, player_inv: Inventory) -> void:
+	var slot_item = items[index]
+	var player_held = player_inv.held_item
+	
+	# if both are empty, do nothing
+	if player_held.is_empty() and slot_item.is_empty():
+		return
+		
+	# pick up (mouse empty, slot full)
+	if player_held.is_empty() and not slot_item.is_empty():
+		player_held.item_id = slot_item.item_id
+		player_held.count = slot_item.count
+		slot_item.item_id = -1
+		slot_item.count = 0
+		
+	# place (mouse full, slot empty)
+	elif not player_held.is_empty() and slot_item.is_empty():
+		slot_item.item_id = player_held.item_id
+		slot_item.count = player_held.count
+		player_held.item_id = -1
+		player_held.count = 0
+		
+	# merge (both full, same item ID)
+	elif not player_held.is_empty() and not slot_item.is_empty() and player_held.item_id == slot_item.item_id:
+		var item_data: Item = ItemDatabase.get_item(slot_item.item_id)
+		var space_left = item_data.max_stack - slot_item.count
+		
+		if space_left > 0:
+			var amount_to_move = min(space_left, player_held.count)
+			slot_item.count += amount_to_move
+			player_held.count -= amount_to_move
+			
+			if player_held.count <= 0:
+				player_held.item_id = -1
+				player_held.count = 0
+				
+	# swap (both full, different item IDs)
+	elif not player_held.is_empty() and not slot_item.is_empty() and player_held.item_id != slot_item.item_id:
+		var temp_id = slot_item.item_id
+		var temp_count = slot_item.count
+		slot_item.item_id = player_held.item_id
+		slot_item.count = player_held.count
+		player_held.item_id = temp_id
+		player_held.count = temp_count
+	
+	# send to server for syncing
+	if multiplayer.is_server():
+		send_inventory()
+		player_inv.send_inventory()
+	else:
+		send_external_mouse_input.rpc_id(Globals.SERVER_ID, index, player_inv.owner_id)
+	
+	# update both UIs
+	inventory_updated.emit()
+	player_inv.inventory_updated.emit()
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_external_mouse_input(index: int, player_id: int) -> void:
+	var player = ServerManager.connected_players.get(player_id)
+	if player:
+		interact_with_external_slot(index, player.my_inventory)
+#endregion
+
+
 
 # --- Classes --- #
 class ItemStack:

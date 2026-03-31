@@ -11,6 +11,9 @@ var current_item: Inventory.ItemStack
 
 var is_hotbar := false
 
+var target_inventory: Inventory
+var slot_index: int
+
 # --- Functions --- #
 func _ready() -> void:
 	# If this is a crafting slot, make sure it (and its children) ignore the mouse
@@ -75,23 +78,18 @@ func set_selected(value: bool) -> void:
 		$'backing'.region_rect.position.x = 0.0
 
 func _gui_input(event: InputEvent) -> void:
-	#Stop right here if it's just a visual slot
 	if is_display_only:
 		return
+		
+	# Handle standard item transfer (Left/Right clicks as defined in your Input Map)
 	if event.is_action_pressed(&"inventory_item_transfer"):
-		# If inventory not open, stop here
-		var inventory_container = Globals.player.get_node("inventory_ui/inventory_container")
-		if not inventory_container.visible:
-			return 
-		
-		var inventory = Globals.player.my_inventory
-		# Calculate the correct index in the inventory array.
-		var true_index = get_index()
-		if not is_hotbar:
-			# Because the main inventory slots are in a separate GridContainer, their get_index() starts back at 0. We need to offset them by the hotbar size!
-			true_index += 10 
+		if not target_inventory or not Globals.player:
+			return
 			
-		inventory.interact_with_slot(true_index)
-		
-		# Tell Godot we handled this input so it doesn't click through the UI
+		# If interacting with an external inventory (like a chest), use the player's held item
+		if target_inventory != Globals.player.my_inventory:
+			target_inventory.interact_with_external_slot(slot_index, Globals.player.my_inventory)
+		else:
+			target_inventory.interact_with_slot(slot_index)
+			
 		get_viewport().set_input_as_handled()
