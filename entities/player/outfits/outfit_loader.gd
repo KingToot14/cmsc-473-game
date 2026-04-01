@@ -81,6 +81,7 @@ func load_outfit_lower(outfit: BaseOutfit, primary_color: Color, secondary_color
 	outfit_material.set_shader_parameter(&'primary_color', primary_color)
 	outfit_material.set_shader_parameter(&'secondary_color', secondary_color)
 
+#loads sprite for armor
 func load_armor(armor_name: StringName, section: BodySection) -> void:
 	var armor: ArmorSet = armor_sets.get(armor_name, armor_sets[&'none'])
 	
