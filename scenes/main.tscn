@@ -43,7 +43,7 @@ region = Rect2(0, 32, 88, 16)
 
 [sub_resource type="Gradient" id="Gradient_2f3dj"]
 offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
-colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -53,7 +53,7 @@ width = 960
 
 [sub_resource type="Gradient" id="Gradient_fv21b"]
 offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
-colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -67,8 +67,8 @@ shader_parameter/top_gradient = SubResource("GradientTexture1D_tel4y")
 shader_parameter/bottom_gradient = SubResource("GradientTexture1D_yq6so")
 
 [sub_resource type="Gradient" id="Gradient_yq6so"]
-offsets = PackedFloat32Array(0.5)
-colors = PackedColorArray(0.6313726, 0.85882354, 0.8784314, 1)
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -77,8 +77,8 @@ gradient = SubResource("Gradient_yq6so")
 width = 960
 
 [sub_resource type="Gradient" id="Gradient_tel4y"]
-offsets = PackedFloat32Array(0.5)
-colors = PackedColorArray(0.27450982, 0.7058824, 0.92156863, 1)
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -117,8 +117,8 @@ shader_parameter/top_gradient = SubResource("GradientTexture1D_j8jky")
 shader_parameter/bottom_gradient = SubResource("GradientTexture1D_5q0nq")
 
 [sub_resource type="Gradient" id="Gradient_5q0nq"]
-offsets = PackedFloat32Array(0.5)
-colors = PackedColorArray(0.48235294, 0.79607844, 0.8784314, 1)
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -127,8 +127,8 @@ gradient = SubResource("Gradient_5q0nq")
 width = 960
 
 [sub_resource type="Gradient" id="Gradient_j8jky"]
-offsets = PackedFloat32Array(0.5)
-colors = PackedColorArray(0.15294118, 0.46666667, 0.8509804, 1)
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -1283,7 +1283,6 @@ anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -1388,7 +1387,6 @@ anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -1643,7 +1641,6 @@ anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
