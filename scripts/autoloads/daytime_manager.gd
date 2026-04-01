@@ -6,7 +6,7 @@ extends Node
 # --- Variables --- #
 ## How much [member NetworkTIme.time] should be offset for this world. This
 ## should only be modified during world loading.
-var daytime_offset := 0.0
+var daytime_offset := daytime_time / 2.0	# start at noon
 ## How many seconds are in each day
 var daytime_time := (60.0 * 24.0) / 24.0	# 24 minutes for whole cycle
 ## How many hours are in each day (should divide [member daytime_time] nicely).
