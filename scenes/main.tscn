@@ -21,7 +21,10 @@
 [ext_resource type="Script" uid="uid://cmgfdlv1ucxl7" path="res://blocks/_resources/light_updater.gd" id="14_pm3ni"]
 [ext_resource type="Script" uid="uid://cg1xal70l3w7t" path="res://backgrounds/background_manager.gd" id="14_yc10j"]
 [ext_resource type="Script" uid="uid://dv225fof0wpvx" path="res://backgrounds/background.gd" id="15_yc10j"]
+[ext_resource type="Script" uid="uid://chnsv5dvluyew" path="res://backgrounds/sun_manager.gd" id="15_yq6so"]
 [ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
+[ext_resource type="Texture2D" uid="uid://dwm1xlhokand7" path="res://backgrounds/general/moon.png" id="17_fv21b"]
+[ext_resource type="Shader" uid="uid://cgoowa8oi6rmb" path="res://backgrounds/general/sun_ring.gdshader" id="17_tel4y"]
 [ext_resource type="Texture2D" uid="uid://bdfh714clqtbv" path="res://backgrounds/underground/forest.png" id="20_y6deb"]
 [ext_resource type="Texture2D" uid="uid://cwkprymttpv1w" path="res://backgrounds/underground/ice.png" id="21_og1vs"]
 [ext_resource type="Texture2D" uid="uid://dxenfadrgn5ar" path="res://backgrounds/cavern/background.png" id="22_2wyq8"]
@@ -41,37 +44,111 @@ region = Rect2(0, 16, 88, 16)
 atlas = ExtResource("5_ya4ey")
 region = Rect2(0, 32, 88, 16)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qkpxi"]
+shader = ExtResource("17_tel4y")
+shader_parameter/texture_size = Vector2(48, 48)
+shader_parameter/solid_size = 8.0
+shader_parameter/decay_size = 16.0
+
+[sub_resource type="Gradient" id="Gradient_2f3dj"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_yq6so"]
+gradient = SubResource("Gradient_2f3dj")
+width = 960
+
+[sub_resource type="Gradient" id="Gradient_fv21b"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_tel4y"]
+gradient = SubResource("Gradient_fv21b")
+width = 960
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dp3eg"]
 shader = ExtResource("12_muem4")
-shader_parameter/top_color = Color(0.15300001, 0.46665025, 0.85, 1)
-shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
+shader_parameter/top_gradient = SubResource("GradientTexture1D_tel4y")
+shader_parameter/bottom_gradient = SubResource("GradientTexture1D_yq6so")
+
+[sub_resource type="Gradient" id="Gradient_yq6so"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.6313726, 0.85882354, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_fv21b"]
+gradient = SubResource("Gradient_yq6so")
+width = 960
+
+[sub_resource type="Gradient" id="Gradient_tel4y"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.27450982, 0.7058824, 0.92156863, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_qkpxi"]
+gradient = SubResource("Gradient_tel4y")
+width = 960
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vxglm"]
 shader = ExtResource("12_muem4")
-shader_parameter/top_color = Color(0.27600002, 0.70533323, 0.92, 1)
-shader_parameter/bottom_color = Color(0.6336, 0.8594666, 0.88, 1)
+shader_parameter/top_gradient = SubResource("GradientTexture1D_qkpxi")
+shader_parameter/bottom_gradient = SubResource("GradientTexture1D_fv21b")
+
+[sub_resource type="Gradient" id="Gradient_qkpxi"]
+offsets = PackedFloat32Array(0.5)
+colors = PackedColorArray(0.05882353, 0.03137255, 0.16862746, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_5q0nq"]
+gradient = SubResource("Gradient_qkpxi")
+width = 960
+
+[sub_resource type="Gradient" id="Gradient_dgi5k"]
+offsets = PackedFloat32Array(0.5)
+colors = PackedColorArray(0, 0, 0, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_j8jky"]
+gradient = SubResource("Gradient_dgi5k")
+width = 960
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2wyq8"]
 shader = ExtResource("12_muem4")
-shader_parameter/top_color = Color(0, 0, 0, 1)
-shader_parameter/bottom_color = Color(0.058479976, 0.030600002, 0.17, 1)
+shader_parameter/top_gradient = SubResource("GradientTexture1D_j8jky")
+shader_parameter/bottom_gradient = SubResource("GradientTexture1D_5q0nq")
 
-[sub_resource type="Shader" id="Shader_2f3dj"]
-code = "shader_type canvas_item;
+[sub_resource type="Gradient" id="Gradient_5q0nq"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.03137255, 0.07058824, 0.27058825, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.8784314, 0.73333335, 0, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.48235294, 0.79607844, 0.8784314, 1, 0.88, 0.73333335, 0, 1, 0.03137255, 0.07058824, 0.27058825, 1, 0.0324, 0.07199997, 0.27, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
 
-// --- Uniforms --- //
-uniform vec4 top_color: source_color = vec4(1.0);
-uniform vec4 bottom_color: source_color = vec4(1.0);
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dgi5k"]
+gradient = SubResource("Gradient_5q0nq")
+width = 960
 
-// --- Functions --- //
-void fragment() {
-	COLOR = mix(top_color, bottom_color, UV.y);
-}"
+[sub_resource type="Gradient" id="Gradient_j8jky"]
+offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1)
+metadata/_snap_enabled = true
+metadata/_snap_count = 12
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_2f3dj"]
-shader = SubResource("Shader_2f3dj")
-shader_parameter/top_color = Color(0.15300001, 0.46665025, 0.85, 1)
-shader_parameter/bottom_color = Color(0.48235294, 0.79607844, 0.8784314, 1)
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_kmb1v"]
+gradient = SubResource("Gradient_j8jky")
+width = 960
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fuf3a"]
+shader = ExtResource("12_muem4")
+shader_parameter/top_gradient = SubResource("GradientTexture1D_kmb1v")
+shader_parameter/bottom_gradient = SubResource("GradientTexture1D_dgi5k")
 
 [node name="main" type="Node2D" unique_id=1976494311]
 
@@ -1194,6 +1271,129 @@ biome_backgrounds = {
 &"winter": NodePath("../background_snow")
 }
 
+[node name="sun_layer" type="Parallax2D" parent="." unique_id=90862361]
+z_index = 1
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(240, 800)
+
+[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863 node_paths=PackedStringArray("bodies")]
+script = ExtResource("15_yq6so")
+bodies = [NodePath("sun"), NodePath("moon"), NodePath("sun2"), NodePath("moon2"), NodePath("sun3"), NodePath("moon3")]
+radius = 900
+metadata/_custom_type_script = "uid://chnsv5dvluyew"
+
+[node name="sun" type="Node2D" parent="sun_layer/sun_manager" unique_id=1479755055]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun" unique_id=1333782652]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
+
+[node name="sun2" type="Node2D" parent="sun_layer/sun_manager" unique_id=78816418]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun2" unique_id=2047912300]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
+
+[node name="sun3" type="Node2D" parent="sun_layer/sun_manager" unique_id=689702747]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun3" unique_id=2053898730]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
+
+[node name="moon" type="Node2D" parent="sun_layer/sun_manager" unique_id=1260691271]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon" unique_id=1586078895]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon" unique_id=504245363]
+texture = ExtResource("17_fv21b")
+
+[node name="moon2" type="Node2D" parent="sun_layer/sun_manager" unique_id=1147496407]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon2" unique_id=1229266892]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon2" unique_id=120868309]
+texture = ExtResource("17_fv21b")
+
+[node name="moon3" type="Node2D" parent="sun_layer/sun_manager" unique_id=2040643463]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon3" unique_id=833675783]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon3" unique_id=1662067774]
+texture = ExtResource("17_fv21b")
+
 [node name="background_forest" type="Node2D" parent="." unique_id=1195479764 groups=["background"]]
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
@@ -1215,13 +1415,12 @@ anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_forest" unique_id=1081296847]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1234,7 +1433,7 @@ vframes = 5
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_forest" unique_id=694896544]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.075, 0)
 scroll_offset = Vector2(0, 135)
@@ -1260,7 +1459,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_4" type="Parallax2D" parent="background_forest" unique_id=878093720]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.125, 0)
 scroll_offset = Vector2(0, 135)
@@ -1286,7 +1485,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_5" type="Parallax2D" parent="background_forest" unique_id=809503557]
-z_index = 4
+z_index = 10
 y_sort_enabled = true
 scroll_scale = Vector2(0.2, 0)
 scroll_offset = Vector2(0, 135)
@@ -1320,13 +1519,12 @@ anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_snow" unique_id=2146955307]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1339,7 +1537,7 @@ vframes = 5
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_snow" unique_id=53369859]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.075, 0)
 scroll_offset = Vector2(0, 135)
@@ -1365,7 +1563,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_4" type="Parallax2D" parent="background_snow" unique_id=878408690]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.125, 0)
 scroll_offset = Vector2(0, 135)
@@ -1391,7 +1589,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_5" type="Parallax2D" parent="background_snow" unique_id=174230143]
-z_index = 4
+z_index = 10
 y_sort_enabled = true
 scroll_scale = Vector2(0.2, 0)
 scroll_offset = Vector2(0, 135)
@@ -1515,7 +1713,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_space" unique_id=1132181367]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.005, 0)
 scroll_offset = Vector2(0, 135)
@@ -1528,7 +1726,7 @@ vframes = 4
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_space" unique_id=751735643]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.01, 0)
 scroll_offset = Vector2(0, 135)
@@ -1541,7 +1739,7 @@ vframes = 4
 frame = 2
 
 [node name="layer_4" type="Parallax2D" parent="background_space" unique_id=1424306489]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.02, 0)
 scroll_offset = Vector2(0, 135)
@@ -1568,20 +1766,19 @@ repeat_size = Vector2(960, 0)
 repeat_times = 3
 
 [node name="sky" type="ColorRect" parent="background_ocean/layer_1" unique_id=1324510537]
-material = SubResource("ShaderMaterial_2f3dj")
+material = SubResource("ShaderMaterial_fuf3a")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -480.0
 offset_top = -270.0
 offset_right = 480.0
-offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_ocean" unique_id=343062773]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1594,7 +1791,7 @@ vframes = 3
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_ocean" unique_id=379162224]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.1, 0)
 scroll_offset = Vector2(0, 135)
@@ -1608,7 +1805,7 @@ frame = 2
 
 [node name="layer_4" type="Parallax2D" parent="background_ocean" unique_id=997398659]
 visible = false
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.15, 0)
 scroll_offset = Vector2(0, 135)

@@ -35,6 +35,9 @@ func _on_layer_changed(layer: BiomeManager.Layer) -> void:
 	transition_to_water(water_rules.get(current_biome))
 
 func transition_to_water(water_rule: WaterRule) -> void:
+	if OS.has_feature('dedicated_server'):
+		return
+	
 	var water_color := water_rule.water_color
 	var foam_color  := water_rule.foam_color
 	
