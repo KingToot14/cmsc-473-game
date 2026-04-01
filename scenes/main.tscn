@@ -21,7 +21,9 @@
 [ext_resource type="Script" uid="uid://cmgfdlv1ucxl7" path="res://blocks/_resources/light_updater.gd" id="14_pm3ni"]
 [ext_resource type="Script" uid="uid://cg1xal70l3w7t" path="res://backgrounds/background_manager.gd" id="14_yc10j"]
 [ext_resource type="Script" uid="uid://dv225fof0wpvx" path="res://backgrounds/background.gd" id="15_yc10j"]
+[ext_resource type="Script" uid="uid://chnsv5dvluyew" path="res://backgrounds/sun_manager.gd" id="15_yq6so"]
 [ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
+[ext_resource type="Texture2D" uid="uid://dwm1xlhokand7" path="res://backgrounds/general/moon.png" id="17_fv21b"]
 [ext_resource type="Texture2D" uid="uid://bdfh714clqtbv" path="res://backgrounds/underground/forest.png" id="20_y6deb"]
 [ext_resource type="Texture2D" uid="uid://cwkprymttpv1w" path="res://backgrounds/underground/ice.png" id="21_og1vs"]
 [ext_resource type="Texture2D" uid="uid://dxenfadrgn5ar" path="res://backgrounds/cavern/background.png" id="22_2wyq8"]
@@ -128,7 +130,7 @@ width = 960
 
 [sub_resource type="Gradient" id="Gradient_j8jky"]
 offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
-colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.012000003, 0.020999994, 0.12, 1)
+colors = PackedColorArray(0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.082352936, 0.24313724, 0.48627448, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.15294118, 0.46666667, 0.8509804, 1, 0.5595835, 0.15300001, 0.85, 1, 0.011764706, 0.019607844, 0.12156863, 1, 0.011764706, 0.019607844, 0.12156863, 1)
 metadata/_snap_enabled = true
 metadata/_snap_count = 12
 
@@ -1262,6 +1264,52 @@ biome_backgrounds = {
 &"winter": NodePath("../background_snow")
 }
 
+[node name="sun_layer" type="Parallax2D" parent="." unique_id=90862361]
+z_index = 1
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(240, 800)
+
+[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863 node_paths=PackedStringArray("bodies")]
+script = ExtResource("15_yq6so")
+bodies = [NodePath("sun"), NodePath("moon"), NodePath("sun2"), NodePath("moon2"), NodePath("sun3"), NodePath("moon3")]
+radius = 900
+metadata/_custom_type_script = "uid://chnsv5dvluyew"
+
+[node name="sun" type="Node2D" parent="sun_layer/sun_manager" unique_id=1479755055]
+position = Vector2(0, -650)
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun" unique_id=701981653]
+modulate = Color(1, 1, 0, 1)
+texture = ExtResource("17_fv21b")
+
+[node name="sun2" type="Node2D" parent="sun_layer/sun_manager" unique_id=78816418]
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun2" unique_id=1755387023]
+modulate = Color(1, 1, 0, 1)
+texture = ExtResource("17_fv21b")
+
+[node name="sun3" type="Node2D" parent="sun_layer/sun_manager" unique_id=689702747]
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun3" unique_id=543276474]
+modulate = Color(1, 1, 0, 1)
+texture = ExtResource("17_fv21b")
+
+[node name="moon" type="Node2D" parent="sun_layer/sun_manager" unique_id=1260691271]
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon" unique_id=504245363]
+texture = ExtResource("17_fv21b")
+
+[node name="moon2" type="Node2D" parent="sun_layer/sun_manager" unique_id=1147496407]
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon2" unique_id=120868309]
+texture = ExtResource("17_fv21b")
+
+[node name="moon3" type="Node2D" parent="sun_layer/sun_manager" unique_id=2040643463]
+
+[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon3" unique_id=1662067774]
+texture = ExtResource("17_fv21b")
+
 [node name="background_forest" type="Node2D" parent="." unique_id=1195479764 groups=["background"]]
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
@@ -1288,7 +1336,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_forest" unique_id=1081296847]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1301,7 +1349,7 @@ vframes = 5
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_forest" unique_id=694896544]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.075, 0)
 scroll_offset = Vector2(0, 135)
@@ -1327,7 +1375,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_4" type="Parallax2D" parent="background_forest" unique_id=878093720]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.125, 0)
 scroll_offset = Vector2(0, 135)
@@ -1353,7 +1401,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_5" type="Parallax2D" parent="background_forest" unique_id=809503557]
-z_index = 4
+z_index = 10
 y_sort_enabled = true
 scroll_scale = Vector2(0.2, 0)
 scroll_offset = Vector2(0, 135)
@@ -1392,7 +1440,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_snow" unique_id=2146955307]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1405,7 +1453,7 @@ vframes = 5
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_snow" unique_id=53369859]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.075, 0)
 scroll_offset = Vector2(0, 135)
@@ -1431,7 +1479,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_4" type="Parallax2D" parent="background_snow" unique_id=878408690]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.125, 0)
 scroll_offset = Vector2(0, 135)
@@ -1457,7 +1505,7 @@ mouse_filter = 2
 color = Color(0.23921569, 0.5254902, 0.8784314, 0.11764706)
 
 [node name="layer_5" type="Parallax2D" parent="background_snow" unique_id=174230143]
-z_index = 4
+z_index = 10
 y_sort_enabled = true
 scroll_scale = Vector2(0.2, 0)
 scroll_offset = Vector2(0, 135)
@@ -1581,7 +1629,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_space" unique_id=1132181367]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.005, 0)
 scroll_offset = Vector2(0, 135)
@@ -1594,7 +1642,7 @@ vframes = 4
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_space" unique_id=751735643]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.01, 0)
 scroll_offset = Vector2(0, 135)
@@ -1607,7 +1655,7 @@ vframes = 4
 frame = 2
 
 [node name="layer_4" type="Parallax2D" parent="background_space" unique_id=1424306489]
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.02, 0)
 scroll_offset = Vector2(0, 135)
@@ -1646,7 +1694,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="layer_2" type="Parallax2D" parent="background_ocean" unique_id=343062773]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 scroll_scale = Vector2(0.05, 0)
 scroll_offset = Vector2(0, 135)
@@ -1659,7 +1707,7 @@ vframes = 3
 frame = 1
 
 [node name="layer_3" type="Parallax2D" parent="background_ocean" unique_id=379162224]
-z_index = 2
+z_index = 4
 y_sort_enabled = true
 scroll_scale = Vector2(0.1, 0)
 scroll_offset = Vector2(0, 135)
@@ -1673,7 +1721,7 @@ frame = 2
 
 [node name="layer_4" type="Parallax2D" parent="background_ocean" unique_id=997398659]
 visible = false
-z_index = 3
+z_index = 6
 y_sort_enabled = true
 scroll_scale = Vector2(0.15, 0)
 scroll_offset = Vector2(0, 135)
