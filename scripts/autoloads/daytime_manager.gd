@@ -62,6 +62,14 @@ func _ready() -> void:
 	
 	sync.replication_config = config
 	add_child(sync)
+	
+	# disable processing on dedicated servers
+	if OS.has_feature('dedicated_server'):
+		set_process(false)
+
+func _process(_delta: float) -> void:
+	# update shader global
+	RenderingServer.global_shader_parameter_set(&"current_time", curr_time_percent)
 
 ## Returns whether or not the game is currently "day" (between
 ## 7:00 and 19:00)

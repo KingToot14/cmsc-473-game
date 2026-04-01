@@ -257,3 +257,7 @@ sky_texture={
 "type": "sampler2D",
 "value": ""
 }
+current_time={
+"type": "float",
+"value": 0.5
+}
