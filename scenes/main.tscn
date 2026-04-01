@@ -24,6 +24,7 @@
 [ext_resource type="Script" uid="uid://chnsv5dvluyew" path="res://backgrounds/sun_manager.gd" id="15_yq6so"]
 [ext_resource type="Texture2D" uid="uid://dpxfx4lnymbsy" path="res://backgrounds/snow/background.png" id="16_gqmmt"]
 [ext_resource type="Texture2D" uid="uid://dwm1xlhokand7" path="res://backgrounds/general/moon.png" id="17_fv21b"]
+[ext_resource type="Shader" uid="uid://cgoowa8oi6rmb" path="res://backgrounds/general/sun_ring.gdshader" id="17_tel4y"]
 [ext_resource type="Texture2D" uid="uid://bdfh714clqtbv" path="res://backgrounds/underground/forest.png" id="20_y6deb"]
 [ext_resource type="Texture2D" uid="uid://cwkprymttpv1w" path="res://backgrounds/underground/ice.png" id="21_og1vs"]
 [ext_resource type="Texture2D" uid="uid://dxenfadrgn5ar" path="res://backgrounds/cavern/background.png" id="22_2wyq8"]
@@ -42,6 +43,12 @@ region = Rect2(0, 16, 88, 16)
 [sub_resource type="AtlasTexture" id="AtlasTexture_trceg"]
 atlas = ExtResource("5_ya4ey")
 region = Rect2(0, 32, 88, 16)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qkpxi"]
+shader = ExtResource("17_tel4y")
+shader_parameter/texture_size = Vector2(48, 48)
+shader_parameter/solid_size = 8.0
+shader_parameter/decay_size = 16.0
 
 [sub_resource type="Gradient" id="Gradient_2f3dj"]
 offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
@@ -1277,35 +1284,112 @@ radius = 900
 metadata/_custom_type_script = "uid://chnsv5dvluyew"
 
 [node name="sun" type="Node2D" parent="sun_layer/sun_manager" unique_id=1479755055]
-position = Vector2(0, -650)
 
-[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun" unique_id=701981653]
-modulate = Color(1, 1, 0, 1)
-texture = ExtResource("17_fv21b")
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun" unique_id=1333782652]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
 
 [node name="sun2" type="Node2D" parent="sun_layer/sun_manager" unique_id=78816418]
 
-[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun2" unique_id=1755387023]
-modulate = Color(1, 1, 0, 1)
-texture = ExtResource("17_fv21b")
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun2" unique_id=2047912300]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
 
 [node name="sun3" type="Node2D" parent="sun_layer/sun_manager" unique_id=689702747]
 
-[node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/sun3" unique_id=543276474]
-modulate = Color(1, 1, 0, 1)
-texture = ExtResource("17_fv21b")
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/sun3" unique_id=2053898730]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 0.5, 1)
 
 [node name="moon" type="Node2D" parent="sun_layer/sun_manager" unique_id=1260691271]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon" unique_id=1586078895]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
 
 [node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon" unique_id=504245363]
 texture = ExtResource("17_fv21b")
 
 [node name="moon2" type="Node2D" parent="sun_layer/sun_manager" unique_id=1147496407]
 
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon2" unique_id=1229266892]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
+
 [node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon2" unique_id=120868309]
 texture = ExtResource("17_fv21b")
 
 [node name="moon3" type="Node2D" parent="sun_layer/sun_manager" unique_id=2040643463]
+
+[node name="glow" type="ColorRect" parent="sun_layer/sun_manager/moon3" unique_id=833675783]
+material = SubResource("ShaderMaterial_qkpxi")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.6862745)
 
 [node name="sprite" type="Sprite2D" parent="sun_layer/sun_manager/moon3" unique_id=1662067774]
 texture = ExtResource("17_fv21b")
