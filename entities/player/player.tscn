@@ -42,6 +42,7 @@
 [ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
 [ext_resource type="Shader" uid="uid://dx7x5jlhrdcwk" path="res://blocks/_resources/light_renderer.gdshader" id="28_8q4fm"]
 [ext_resource type="Script" uid="uid://dxrcqdbm8wdgn" path="res://entities/player/chest_ui.gd" id="35_np63p"]
+[ext_resource type="Script" uid="uid://c3boyhcbly2e4" path="res://entities/player/armor.gd" id="43_pacje"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -1345,3 +1346,10 @@ slot_scene = ExtResource("9_bectd")
 [node name="chest_grid" type="GridContainer" parent="inventory_ui/chest_container" unique_id=934500129]
 layout_mode = 2
 columns = 10
+
+[node name="armor_container" type="Control" parent="inventory_ui" unique_id=1122037029]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("43_pacje")
