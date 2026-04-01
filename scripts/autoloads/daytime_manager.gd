@@ -40,8 +40,6 @@ var curr_minute: int:
 		# snap to intervals of 15 minutes
 		return floori(float(minutes) / daytime_minute_intervals) * daytime_minute_intervals
 
-var _internal_hour := -1
-
 # --- Functions --- #
 func _ready() -> void:
 	# add node for synchronization
@@ -64,3 +62,9 @@ func _ready() -> void:
 	
 	sync.replication_config = config
 	add_child(sync)
+
+## Returns whether or not the game is currently "day" (between
+## 7:00 and 19:00)
+func is_day() -> bool:
+	var hour := curr_hour
+	return hour >= 7 and hour <= 19
