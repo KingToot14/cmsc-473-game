@@ -170,14 +170,19 @@ func send_inventory_update() -> void:
 	
 	var buffer := StreamPeerBuffer.new()
 	buffer.resize(4 + 4 + 2 + 2 + len(inventory_data)) 
+	
 	# entity id
 	buffer.put_u32(id)
+	
 	# time
 	buffer.put_float(NetworkTime.time)
+	
 	# action id
 	buffer.put_u16(SYNC_ACTION)
+	
 	# inventory size
 	buffer.put_u16(len(inventory_data))
+	
 	# inventory
 	buffer.put_data(inventory_data)
 	
