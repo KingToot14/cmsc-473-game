@@ -4,4 +4,10 @@
 
 [resource]
 script = ExtResource("1_2x3i0")
+result_item_id = 28
+result_amount = 3
+ingredients = Dictionary[int, int]({
+0: 1,
+2: 1
+})
 metadata/_custom_type_script = "uid://b3c7ex2vgl4bc"
