@@ -1360,6 +1360,7 @@ layout_mode = 2
 columns = 10
 
 [node name="armor_container" type="VBoxContainer" parent="inventory_ui" unique_id=2128181671]
+visible = false
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
