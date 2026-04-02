@@ -744,12 +744,35 @@ func receive_light_update(new_data: PackedByteArray) -> void:
 
 #endregion
 
-func get_health(id: int): #takes block / wall id
+func get_wall_health(id: int): #takes wall id
+	var wall = BlockDatabase.get_wall(id)
+	if wall is BlockInfo: #makes sure its pulling block info
+		return wall.block_health #should return the variable for block health in block info NOT in item.
+	else: 
+		return -1 #this should not happen
+		
+func get_break_wall_id(id: int): #takes wall id
+	var wall = BlockDatabase.get_wall(id)
+	if wall is BlockInfo: #makes sure its pulling block info
+		return wall.break_item_id #should return the variable for wall item to drop in block info NOT in item.
+	else: 
+		return -1 #this should not happen
+
+func get_block_health(id: int): #takes block id
 	var block = BlockDatabase.get_block(id)
 	if block is BlockInfo: #makes sure its pulling block info
 		return block.block_health #should return the variable for block health in block info NOT in item.
 	else: 
 		return -1 #this should not happen
+
+func get_break_block_id(id: int): #takes block id
+	var block = BlockDatabase.get_block(id)
+	if block is BlockInfo: #makes sure its pulling block info
+		return block.break_item_id #should return the variable for block item to drop in block info NOT in item.
+	else: 
+		return -1 #this should not happen
+		
+
 
 func hurt_block(x: int, y:int, tool_power: int):
 		# check bounds (consume interaction)
@@ -773,8 +796,27 @@ func hurt_block(x: int, y:int, tool_power: int):
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return true
 	
+	var block_id := get_block(x, y)
+	var max_health = get_block_health(block_id)
+	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
-	send_hurt_block.rpc_id(1, x, y, tool_power)
+	
+	if not block_damaged.has(key):
+		block_damaged[key] = max_health
+		## damage should work only at the value for the dictionary
+
+	block_damaged[key] -= tool_power
+
+
+	if block_damaged[key] <= 0:
+		# block is destroyed
+		block_damaged.erase(key) #deletes the entry in block_damaged
+		var block := BlockDatabase.get_block(block_id) #grabs the block
+		if block:
+			play_sfx(block.break_sfx, x, y, block.break_volume) #plays block break sound.
+		send_destroy_block.rpc_id(1, x, y) #tells the server to destroy the block
+	else:
+		send_hurt_block.rpc_id(1, x, y, tool_power)
 	return true
 		
 		
@@ -792,27 +834,13 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 	
 	if not ServerManager.is_player_finalized(multiplayer.get_remote_sender_id()):
 		return
-		
-	var block_id := get_block(x, y)
-	var max_health = get_health(block_id)
-	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
+	return
 	
-	if not block_damaged.has(key):
-		block_damaged[key] = max_health
-		## damage should work only at the value for the dictionary
 
-	block_damaged[key] -= tool_power
+	# sends the damage state to all nearby clients
 
-
-	if block_damaged[key] <= 0:
-		# block is destroyed
-		block_damaged.erase(key)
-		send_destroy_block(x, y)
-	else:
-		# sends the damage state to all nearby clients
-
-		broadcast_block_damage(x, y)
+	broadcast_block_damage(x, y)
 
 	
 
@@ -910,7 +938,7 @@ func hurt_wall(x: int, y:int, tool_power: int):
 		return true
 	
 	var wall_id := get_wall(x, y)
-	var max_health = get_health(wall_id)
+	var max_health = get_wall_health(wall_id)
 	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
 	
@@ -1148,39 +1176,19 @@ func send_destroy_block(x: int, y: int) -> void:
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return
 	
-	# TODO: Check player's current tool and radius
-	
-	
-	# TODO: Deal gradual damage rather than instantly destroying
+
 	var player_id := multiplayer.get_remote_sender_id()
 	
-	var block_id = get_block(x, y) #should grab the block id 
-	if block_id == 1 or block_id == 2: #if the block is dirt or grass
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn_preferred(drop_position, 3, 1, player_id)
-				
-	if block_id == 3: #if the block is stone.
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for tile 
-			ItemDropEntity.spawn_preferred(drop_position, 4, 1, player_id)
-			
-	if block_id == 6: # Snow
-		if multiplayer.is_server():
-			var drop_position = tile_to_world(x, y)
-			ItemDropEntity.spawn_preferred(drop_position, 12, 1, player_id)
+	var block_id := get_block(x, y) #should grab the block id 
 	
-	if block_id == 7: # Ice
-		if multiplayer.is_server():
-			var drop_position = tile_to_world(x, y)
-			ItemDropEntity.spawn_preferred(drop_position, 13, 1, player_id)
-			
-	if block_id == 10: # Copper
-		if multiplayer.is_server():
-			var drop_position = tile_to_world(x, y)
-			ItemDropEntity.spawn_preferred(drop_position, 16, 1, player_id)
+	var drop_item = get_break_block_id(block_id) #grabs the item that should be dropped from BlockInfo
+	if multiplayer.is_server():
+		var drop_position = tile_to_world(x,y) #grabs position for tile 
+		ItemDropEntity.spawn_preferred(drop_position, drop_item, 1, player_id)
+		#drops the correct item according to the block_id and info from BlockInfo
 	
-	# set block
+	
+	# set tile to air
 	set_block_unsafe(x, y, 0)
 	
 	# update neighbors
@@ -1204,26 +1212,25 @@ func send_destroy_wall(x: int, y: int) -> void:
 		return
 	if y < 0 or y >= world_height:
 		return
-	
+	var player_id := multiplayer.get_remote_sender_id()
 	# do not process if no wall exists
 	if not get_wall_unsafe(x, y):
 		return
 	
-	# TODO: Check player's current tool
-	
-	
-	# TODO: Deal gradual damage rather than instantly destroying
 	var wall_id = get_wall(x,y)
-	if wall_id == 1: #if the wall is dirt wall
-		if multiplayer.is_server(): 
-			var drop_position = tile_to_world(x,y) #grabs position for wall 
-			ItemDropEntity.spawn(drop_position, 5, 1)
+	
+	var drop_item = get_break_wall_id(wall_id) #grabs the item that should be dropped from BlockInfo
+	if multiplayer.is_server():
+		var drop_position = tile_to_world(x,y) #grabs position for tile 
+		ItemDropEntity.spawn_preferred(drop_position, drop_item, 1, player_id)
+		#drops the correct item according to the wall_id and info from BlockInfo
 	
 	# set tile to air
 	set_wall_unsafe(x, y, 0)
 	
 	# update lighting
 	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
+	"res://walls/1_dirt_wall/info.tres"
 	
 	# sync to clients
 	send_tile_update(x, y)
