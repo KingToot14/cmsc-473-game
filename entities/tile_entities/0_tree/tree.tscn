@@ -17,6 +17,7 @@ size = Vector2(14, 6)
 
 [node name="tree" type="CharacterBody2D" unique_id=1280563612 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
+y_sort_enabled = true
 collision_layer = 64
 collision_mask = 0
 script = ExtResource("1_h6ae8")
@@ -45,9 +46,10 @@ tile_map_data = PackedByteArray("AAAAAPH/AAACAAAAAAAAAPL/AAACAAAAAAAAAPP/AAACAAE
 tile_set = ExtResource("2_54gn5")
 
 [node name="tree_top" type="Sprite2D" parent="." unique_id=544785585]
-visible = false
+z_index = 1
 position = Vector2(8, -128)
 texture = ExtResource("3_ered6")
+hframes = 3
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1854764789]
 visible = false
