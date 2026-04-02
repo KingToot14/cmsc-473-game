@@ -194,7 +194,7 @@ func interact_with_armor_slot(index: int) -> void:
 			
 		print("6. ITEM APPROVED! SWAPPING NOW.")
 
-	# Standard swap logic (handles place, pickup, and swap)
+	# handles place, pickup, and swap
 	var temp_id = slot_item.item_id
 	var temp_count = slot_item.count
 	
