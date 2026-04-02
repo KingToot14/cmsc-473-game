@@ -93,7 +93,7 @@ func setup_ui(player_inventory: Inventory):
 		var new_armor_slot = armor_slot_scene.instantiate()
 		new_armor_slot.target_inventory = player_inventory
 		new_armor_slot.slot_index = i # 0: Head, 1: Body, 2: Legs
-		new_armor_slot.expected_type = i as ArmorItem.ArmorType 
+		new_armor_slot.expected_type = i
 		
 		# Hook up hover effects
 		new_armor_slot.mouse_entered.connect(_on_armor_slot_mouse_entered.bind(player_inventory, i)) 

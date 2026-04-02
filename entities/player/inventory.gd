@@ -177,13 +177,22 @@ func interact_with_slot(index: int) -> void:
 
 #armor interaction
 func interact_with_armor_slot(index: int) -> void:
+	print("4. INVENTORY FUNCTION TRIGGERED. Slot index: ", index)
 	var slot_item = armor_items[index]
 	
-	# If we are holding something, check if it's the correct armor type
 	if not held_item.is_empty():
+		print("5. PLAYER IS HOLDING AN ITEM. ID: ", held_item.item_id)
 		var item_data = ItemDatabase.get_item(held_item.item_id)
-		if not item_data is ArmorItem or item_data.armor_type != index:
-			return # Reject the placement: Not armor, or wrong slot type
+		
+		if not item_data is ArmorItem:
+			print("6. REJECTED: Database says this is NOT an ArmorItem!")
+			return 
+			
+		if item_data.armor_type != index:
+			print("6. REJECTED: Wrong slot type!")
+			return 
+			
+		print("6. ITEM APPROVED! SWAPPING NOW.")
 
 	# Standard swap logic (handles place, pickup, and swap)
 	var temp_id = slot_item.item_id
