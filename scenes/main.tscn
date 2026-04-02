@@ -1263,6 +1263,7 @@ metadata/_custom_type_script = "uid://cmgfdlv1ucxl7"
 [node name="players" type="Node2D" parent="." unique_id=1430324138]
 
 [node name="entities" type="Node2D" parent="." unique_id=2069981181]
+y_sort_enabled = true
 
 [node name="background_manager" type="Node" parent="." unique_id=200435995 node_paths=PackedStringArray("biome_backgrounds")]
 script = ExtResource("14_yc10j")

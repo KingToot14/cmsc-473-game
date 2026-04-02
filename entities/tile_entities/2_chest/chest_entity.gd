@@ -22,6 +22,7 @@ func _ready() -> void:
 	inventory.name = "inventory"
 	add_child(inventory) 
 	inventory.inventory_updated.connect(send_inventory_update)
+	inventory.inventory_updated.connect(EntityManager.update_entity_data.bind(self))
 	if multiplayer.is_server():
 		hp.died.connect(_on_death)
 
@@ -170,14 +171,19 @@ func send_inventory_update() -> void:
 	
 	var buffer := StreamPeerBuffer.new()
 	buffer.resize(4 + 4 + 2 + 2 + len(inventory_data)) 
+	
 	# entity id
 	buffer.put_u32(id)
+	
 	# time
 	buffer.put_float(NetworkTime.time)
+	
 	# action id
 	buffer.put_u16(SYNC_ACTION)
+	
 	# inventory size
 	buffer.put_u16(len(inventory_data))
+	
 	# inventory
 	buffer.put_data(inventory_data)
 	

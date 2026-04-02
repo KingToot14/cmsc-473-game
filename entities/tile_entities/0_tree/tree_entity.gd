@@ -104,6 +104,9 @@ func setup_entity() -> void:
 	tree_top.position.y = -(height + 2) * 8.0
 	tree_top.show()
 	
+	# select random variant
+	tree_top.frame = rng.randi_range(0, 2)
+	
 	# hitbox
 	$'shape'.position.y = -(height * 4.0)
 	$'hitbox'.position.y = -(height * 4.0)
