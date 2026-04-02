@@ -280,6 +280,9 @@ func load_inventory() -> void:
 	add_item(11, 10)	# acorns
 	add_item(24, 4)		# chests
 	add_item(28, 20)	# torches
+	add_item(46, 1)
+	add_item(47, 1)
+	add_item(48, 1)
 
 
 #endregion
