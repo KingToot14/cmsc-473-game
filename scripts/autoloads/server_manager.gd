@@ -34,7 +34,7 @@ func _ready() -> void:
 		# TODO: Add world loading + deletion
 		if not world_name.strip_edges().is_empty():
 			if delete_mode:
-				print("[Wizbowo's Conquest] Deleting world '%s' (Not implemented)" % world_name)
+				print("[Wizbowo's Conquest] Deleting world '%s'" % world_name)
 				
 				if FileAccess.file_exists("user://world/%s" % world_name):
 					OS.move_to_trash(ProjectSettings.globalize_path("user://world/%s" % world_name))
@@ -42,7 +42,7 @@ func _ready() -> void:
 				get_tree().quit()
 				return
 			else:
-				print("[Wizbowo's Conquest] Loading world '%s' (Not implemented)" % world_name)
+				print("[Wizbowo's Conquest] Loading world '%s'" % world_name)
 				world_loaded = TileManager.load_world()
 		elif delete_mode:
 			printerr("[Wizbowo's Conquest] Must specify world name to delete")

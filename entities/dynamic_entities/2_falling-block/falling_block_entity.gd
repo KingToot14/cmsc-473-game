@@ -38,7 +38,6 @@ func _physics_process(delta: float) -> void:
 		while TileManager.get_block(tile_position.x, tile_position.y) != 0:
 			tile_position.y -= 1
 		
-		print("Landing: ", tile_position)
 		landed = true
 		
 		TileManager.set_block(tile_position.x, tile_position.y, block_id)
