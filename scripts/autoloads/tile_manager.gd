@@ -468,6 +468,9 @@ func push_water_texture_update() -> void:
 	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
 
 func send_water_update(player_id: int, new_data: PackedByteArray) -> void:
+	if player_id == Globals.SERVER_ID:
+		return
+	
 	receive_water_update.rpc_id(player_id, new_data)
 
 @rpc('authority', 'call_remote', 'reliable')

@@ -22,7 +22,8 @@ var curr_outfit: BaseOutfit
 # --- Functions --- #
 func _ready() -> void:
 	curr_outfit = default_outfit
-	randomize_outfit()
+	if not OS.has_feature("dedicated_server"):
+		randomize_outfit()
 
 func randomize_outfit() -> void:
 	set_skin_tone(skin_tones.pick_random())
