@@ -13,7 +13,7 @@ size = Vector2(8, 8)
 [node name="torch" type="CharacterBody2D" unique_id=273698235 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
 y_sort_enabled = true
-collision_layer = 32
+collision_layer = 64
 collision_mask = 0
 script = ExtResource("1_gik4x")
 variant_sprites = Dictionary[int, Texture2D]({
