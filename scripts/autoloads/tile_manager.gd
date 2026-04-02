@@ -770,6 +770,26 @@ func hurt_block(x: int, y:int, tool_power: int):
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return true
 	
+	
+	send_hurt_block.rpc_id(1, x, y, tool_power)
+	return true
+		
+		
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_hurt_block(x: int, y:int, tool_power:int):
+		# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if no block exists
+	if not get_block_unsafe(x, y):
+		return
+	
+	if not ServerManager.is_player_finalized(multiplayer.get_remote_sender_id()):
+		return
+		
 	var block_id := get_block(x, y)
 	var max_health = get_health(block_id)
 	var key := Vector2i(x, y) #key for the dictionary is the position of the block
@@ -783,11 +803,40 @@ func hurt_block(x: int, y:int, tool_power: int):
 
 
 	if block_damaged[key] <= 0:
-		# block is destroyed — clean up and let destroy_block handle the rest
+		# block is destroyed
 		block_damaged.erase(key)
-		destroy_block(x, y)
+		send_destroy_block(x, y)
+	else:
+		# sends the damage state to all nearby clients
+
+		broadcast_block_damage(x, y)
+
+	
+
+func broadcast_block_damage(x: int, y: int):
+	# sync to clients
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue #this skips any players who disconnected
+			
+		#checks to see if players have loaded the chunk.
+		var center_point := world_to_tile(floori(player.center_point.x), floori(player.center_point.y))
+		var start := center_point - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := center_point + ChunkLoader.LOAD_RANGE * CHUNK_SIZE
 		
+		if x < start.x or x > end.x:
+			continue
 		
+		if y < start.y or y > end.y:
+			continue
+		#makes all players in range get the block damage.
+		receive_block_damage.rpc_id(player_id, x, y, block_damaged[Vector2i(x, y)])
+	
+@rpc('authority', 'call_remote', 'reliable')
+func receive_block_damage(x:int, y:int, block_health:int) -> void:
+	block_damaged[Vector2i(x, y)] = block_health
+	
 	
 ## Attempts to destroy the block at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is
@@ -812,6 +861,7 @@ func destroy_block(x: int, y: int) -> bool:
 	query.collision_mask = 0b01000000	# Only collides with Tile layer
 	
 	if not direct_space.intersect_shape(query, 1).is_empty():
+
 		return true
 	
 	# TODO: Check player's current tool
@@ -831,7 +881,6 @@ func destroy_block(x: int, y: int) -> bool:
 	
 	# sync to server
 	send_destroy_block.rpc_id(1, x, y)
-	
 	return true
 
 
@@ -859,7 +908,6 @@ func hurt_wall(x: int, y:int, tool_power: int):
 	
 	var wall_id := get_wall(x, y)
 	var max_health = get_health(wall_id)
-	print(max_health)
 	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
 	
@@ -874,6 +922,8 @@ func hurt_wall(x: int, y:int, tool_power: int):
 		# wall is destroyed — let destroy_wall handle the rest
 		wall_damaged.erase(key)
 		destroy_wall(x, y)
+		
+
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is
 ## only [code]false[/code] when there is no wall at the given position.
