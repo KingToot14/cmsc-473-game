@@ -35,7 +35,6 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
-visible = false
 position = Vector2(8, 1)
 shape = SubResource("RectangleShape2D_jvdps")
 

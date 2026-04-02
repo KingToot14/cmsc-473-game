@@ -110,5 +110,5 @@ func _on_inventory_changed() -> void:
 		return
 	
 	# otherwise update current item
-	current_item = ItemDatabase.get_item(item_stack.item_id)
+	current_item = ItemDatabase.get_item(item_stack.item_id).duplicate()
 	current_item.handle_selected_start()
