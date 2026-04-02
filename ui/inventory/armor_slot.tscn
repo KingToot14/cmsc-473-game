@@ -2,6 +2,12 @@
 
 [ext_resource type="Script" uid="uid://c7ir0dwaxp0h8" path="res://entities/player/armor_slot.gd" id="1_ymmqy"]
 [ext_resource type="Texture2D" uid="uid://dj1w8xyu7mrg4" path="res://ui/inventory/inventory_slot.png" id="2_tdg5t"]
+[ext_resource type="Texture2D" uid="uid://b2aaudp0fpo04" path="res://ui/inventory/equipment_slots.png" id="3_tdg5t"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pek41"]
+resource_local_to_scene = true
+atlas = ExtResource("3_tdg5t")
+region = Rect2(0, 0, 16, 16)
 
 [node name="inventory_slot" type="Control" unique_id=93855827 groups=["hotbar_slot"]]
 custom_minimum_size = Vector2(18, 18)
@@ -9,6 +15,7 @@ layout_mode = 3
 anchors_preset = 0
 mouse_filter = 1
 script = ExtResource("1_ymmqy")
+slot_atlas = SubResource("AtlasTexture_pek41")
 
 [node name="backing" type="NinePatchRect" parent="." unique_id=244000415]
 layout_mode = 1
@@ -31,6 +38,15 @@ patch_margin_left = 2
 patch_margin_top = 2
 patch_margin_right = 2
 patch_margin_bottom = 2
+
+[node name="icon" type="TextureRect" parent="." unique_id=1207147993]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 17.0
+offset_bottom = 17.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_pek41")
 
 [node name="item" type="TextureRect" parent="." unique_id=135320033]
 layout_mode = 1
