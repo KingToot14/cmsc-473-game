@@ -204,6 +204,7 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 		# make sure entity is setup
 		var buffer := StreamPeerBuffer.new()
 		buffer.data_array = ref.spawn_data
+		
 		entity.deserialize_spawn_data(buffer)
 		
 		ref.current_instance = entity

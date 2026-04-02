@@ -22,6 +22,7 @@ func _ready() -> void:
 	inventory.name = "inventory"
 	add_child(inventory) 
 	inventory.inventory_updated.connect(send_inventory_update)
+	inventory.inventory_updated.connect(EntityManager.update_entity_data.bind(self))
 	if multiplayer.is_server():
 		hp.died.connect(_on_death)
 
