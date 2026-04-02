@@ -162,6 +162,9 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		setup_save_timer()
+	
+	#connect armor signal
+	my_inventory.armor_updated.connect(_on_armor_updated)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if owner_id != multiplayer.get_unique_id():
@@ -169,10 +172,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed(&"inventory_toggle"):
 		var inv_container = $inventory_ui/inventory_container
-		inv_container.visible = !inv_container.visible
-	#if event.is_action_pressed(&"crafting_toggle"):
 		var craft_container = $inventory_ui/crafting_container
+		var armor_container = $inventory_ui/armor_container
+		
+		inv_container.visible = !inv_container.visible
 		craft_container.visible = !craft_container.visible
+		armor_container.visible = !armor_container.visible
 	
 #region Animation
 func _process(_delta: float) -> void:
@@ -475,4 +480,38 @@ func is_point_in_range(point: Vector2, range_modifier := 0) -> bool:
 	
 	return point.distance_to(center_point) <= player_range
 
+#endregion
+
+#region Armor
+func _on_armor_updated(slot_index: int) -> void:
+	recalculate_defense()
+	update_armor_visuals(slot_index)
+
+func recalculate_defense() -> void:
+	var total_defense = 0
+	for stack in my_inventory.armor_items:
+		if not stack.is_empty():
+			var item_data = ItemDatabase.get_item(stack.item_id) as ArmorItem
+			if item_data:
+				total_defense += item_data.defense
+	
+	defense = total_defense #this updates your exported defense variable
+
+func update_armor_visuals(slot_index: int) -> void:
+	var stack = my_inventory.armor_items[slot_index]
+	var equip_name = &'none'
+	
+	if not stack.is_empty():
+		var item_data = ItemDatabase.get_item(stack.item_id) as ArmorItem
+		if item_data:
+			equip_name = item_data.armor_name
+	
+	#map the inventory slot index to the OutfitLoader BodySection enum
+	var section: OutfitLoader.BodySection
+	if slot_index == 0: section = OutfitLoader.BodySection.HEAD
+	elif slot_index == 1: section = OutfitLoader.BodySection.BODY
+	else: section = OutfitLoader.BodySection.LEGS
+	
+	#make sure your OutfitLoader node is accessible via $'outfit_loader'
+	$'outfit'.load_armor(equip_name, section)
 #endregion

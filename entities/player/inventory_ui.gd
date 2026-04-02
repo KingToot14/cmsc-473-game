@@ -19,6 +19,9 @@ const HOTBAR_SIZE = 10
 var holding_item := false
 var hovered_slot := -1
 
+@export var armor_slot_scene: PackedScene # Drag your new armor_slot.tscn here in the inspector
+@onready var armor_grid = $"../armor_container/armor_grid"
+
 # --- Functions --- #
 
 func _input(event: InputEvent) -> void:
@@ -80,6 +83,25 @@ func setup_ui(player_inventory: Inventory):
 	hotbar_grid.get_child(0).set_selected(true)
 	#setup the crafting menu
 	setup_crafting_ui()
+	
+	# Clear old armor slots
+	for child in armor_grid.get_children():
+		child.free()
+		
+	# Create the 3 Armor Slots
+	for i in range(3):
+		var new_armor_slot = armor_slot_scene.instantiate()
+		new_armor_slot.target_inventory = player_inventory
+		new_armor_slot.slot_index = i # 0: Head, 1: Body, 2: Legs
+		new_armor_slot.expected_type = i as ArmorItem.ArmorType 
+		
+		# Hook up hover effects
+		new_armor_slot.mouse_entered.connect(_on_armor_slot_mouse_entered.bind(player_inventory, i)) 
+		new_armor_slot.mouse_exited.connect(_on_slot_mouse_exited.bind(player_inventory, i))
+		
+		armor_grid.add_child(new_armor_slot)
+		new_armor_slot.update_slot(player_inventory.armor_items[i])
+	
 	player_inventory.inventory_updated.connect(refresh_ui.bind(player_inventory))
 	refresh_ui(player_inventory)
 
@@ -104,12 +126,30 @@ func refresh_ui(player_inventory: Inventory):
 	for i in range(player_inventory.items.size()):
 		all_slots[i].update_slot(player_inventory.items[i])
 	
+	# NEW: Update the armor slots
+	var armor_slots = armor_grid.get_children()
+	for i in range(player_inventory.armor_items.size()):
+		if i < armor_slots.size():
+			armor_slots[i].update_slot(player_inventory.armor_items[i])
+	
 	for button in crafting_buttons_container.get_children():
 		if button is CraftingButton:
 			button.update_availability(player_inventory)
 	
 	# update cursors
 	set_is_holding(player_inventory.held_item.item_id != -1)
+
+func _on_armor_slot_mouse_entered(inventory: Inventory, index: int) -> void:
+	hovered_slot = index
+	
+	if not holding_item:
+		# check the ARMOR array, not the main items array
+		if inventory.armor_items[index].item_id == -1:
+			Globals.set_cursor(Globals.CursorType.ARROW)
+		else:
+			Globals.set_cursor(Globals.CursorType.HAND_OPEN)
+		
+		Globals.mouse.cursor_locked = true
 
 func refresh_crafting_ui():
 	var player_inv = Globals.player.my_inventory

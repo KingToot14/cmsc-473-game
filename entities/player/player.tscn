@@ -42,7 +42,7 @@
 [ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
 [ext_resource type="Shader" uid="uid://dx7x5jlhrdcwk" path="res://blocks/_resources/light_renderer.gdshader" id="28_8q4fm"]
 [ext_resource type="Script" uid="uid://dxrcqdbm8wdgn" path="res://entities/player/chest_ui.gd" id="35_np63p"]
-[ext_resource type="Script" uid="uid://c3boyhcbly2e4" path="res://entities/player/armor.gd" id="43_pacje"]
+[ext_resource type="PackedScene" uid="uid://ff25uaoxac3r" path="res://ui/inventory/armor_slot.tscn" id="40_pacje"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -1214,6 +1214,7 @@ mouse_filter = 1
 script = ExtResource("8_bectd")
 slot_scene = ExtResource("9_bectd")
 crafting_button_scene = ExtResource("23_ghoj8")
+armor_slot_scene = ExtResource("40_pacje")
 
 [node name="inventory_grid" type="HFlowContainer" parent="inventory_ui/inventory_container" unique_id=1654172708]
 layout_mode = 1
@@ -1358,9 +1359,15 @@ slot_scene = ExtResource("9_bectd")
 layout_mode = 2
 columns = 10
 
-[node name="armor_container" type="Control" parent="inventory_ui" unique_id=1122037029]
-layout_mode = 3
-anchors_preset = 0
+[node name="armor_container" type="VBoxContainer" parent="inventory_ui" unique_id=2128181671]
+visible = false
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
 offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("43_pacje")
+offset_bottom = 20.0
+grow_vertical = 2
+
+[node name="armor_grid" type="HBoxContainer" parent="inventory_ui/armor_container" unique_id=1513509542]
+layout_mode = 2

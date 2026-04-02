@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ArmorItem" format=3 uid="uid://dxkme1ktm27ir"]
+
+[ext_resource type="Script" uid="uid://c3boyhcbly2e4" path="res://entities/player/armor.gd" id="1_vnslo"]
+
+[resource]
+script = ExtResource("1_vnslo")
+defense = 10
+armor_name = &"wooden"
+item_id = 46
+item_name = "Wooden Helmet"
+max_stack = 1

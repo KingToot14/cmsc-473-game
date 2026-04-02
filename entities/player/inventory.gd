@@ -15,6 +15,12 @@ var owner_id := 0
 
 var recipes: Array[Recipe] = [] #add more recipes in the inspector
 
+#Armor Stuff
+signal armor_updated(slot_index: int) # 0: Head, 1: Body, 2: Legs
+
+# Holds Head, Body, and Legs respectively
+var armor_items: Array[ItemStack] = [ItemStack.new(-1, 0), ItemStack.new(-1, 0), ItemStack.new(-1, 0)]
+
 
 # --- Functions --- #
 
@@ -24,6 +30,7 @@ func _init():
 	_load_recipes()
 
 #region Inventory Management
+
 func add_item(item_id: int, amount: int) -> int:
 	if amount <= 0:
 		return 0
@@ -167,6 +174,36 @@ func interact_with_slot(index: int) -> void:
 	# update the UI
 	inventory_updated.emit()
 	
+
+#armor interaction
+func interact_with_armor_slot(index: int) -> void:
+	var slot_item = armor_items[index]
+	
+	# If we are holding something, check if it's the correct armor type
+	if not held_item.is_empty():
+		var item_data = ItemDatabase.get_item(held_item.item_id)
+		if not item_data is ArmorItem or item_data.armor_type != index:
+			return # Reject the placement: Not armor, or wrong slot type
+
+	# Standard swap logic (handles place, pickup, and swap)
+	var temp_id = slot_item.item_id
+	var temp_count = slot_item.count
+	
+	slot_item.item_id = held_item.item_id
+	slot_item.count = held_item.count
+	
+	held_item.item_id = temp_id
+	held_item.count = temp_count
+	
+	if multiplayer.is_server():
+		send_inventory()
+	else:
+		send_armor_input.rpc_id(Globals.SERVER_ID, index)
+	
+	armor_updated.emit(index)
+	inventory_updated.emit()
+
+
 ## Drops the currently held item at the specified world position.
 ## Inside inventory.gd
 func drop_held_item(drop_position: Vector2) -> void:
@@ -265,9 +302,10 @@ func send_mouse_input(index: int) -> void:
 	interact_with_slot(index)
 
 func serialize_inventory() -> PackedByteArray:
-	# buffer: (int16 for item_id, int16 for quantity) for every slot + held_item
+	# buffer: (int16 for item_id, int16 for quantity) for every slot + held_item + armor_items
 	var buffer := StreamPeerBuffer.new()
-	buffer.resize(len(items) * (2 + 2) + (2 + 2))
+	# held item (4) + main items (len * 4) + armor items (3 * 4)
+	buffer.resize(len(items) * 4 + 4 + len(armor_items) * 4)
 	
 	# held item
 	buffer.put_16(held_item.item_id)
@@ -277,6 +315,11 @@ func serialize_inventory() -> PackedByteArray:
 	for i in range(len(items)):
 		buffer.put_16(items[i].item_id)
 		buffer.put_16(items[i].count)
+		
+	# armor inventory
+	for i in range(len(armor_items)):
+		buffer.put_16(armor_items[i].item_id)
+		buffer.put_16(armor_items[i].count)
 	
 	return buffer.data_array
 
@@ -297,9 +340,18 @@ func receive_inventory(inventory_data: PackedByteArray) -> void:
 	for i in range(len(items)):
 		items[i].item_id = buffer.get_16()
 		items[i].count   = buffer.get_16()
+		
+	# armor inventory
+	for i in range(len(armor_items)):
+		armor_items[i].item_id = buffer.get_16()
+		armor_items[i].count   = buffer.get_16()
 	
 	# update inventory
 	inventory_updated.emit()
+	
+	# Tell the player controller to update visuals/stats for all 3 armor slots
+	for i in range(3):
+		armor_updated.emit(i)
 
 func _load_recipes() -> void:
 	recipes.clear()
@@ -333,6 +385,12 @@ func request_craft(recipe_index: int) -> void:
 func send_craft_request(recipe_index: int) -> void:
 	request_craft(recipe_index)
 
+#Armor sync
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_armor_input(index: int) -> void:
+	interact_with_armor_slot(index)
+
+
 #endregion
 
 #region Selected Item
@@ -361,17 +419,27 @@ func has_item(item_id: int, count := 1) -> bool:
 
 #region Database Saving
 
-#prepares a simplified list of items for the database
-func get_save_data() -> Array:
-	var data = []
+func get_save_data() -> Dictionary:
+	var data = {
+		"main_inventory": [],
+		"held_item": null,
+		"armor_inventory": []
+	}
 	
-	#include the main inventory items
-	for stack in items:
+	# include the main inventory items, storing their index so they stay in place
+	for i in range(len(items)):
+		var stack = items[i]
 		if not stack.is_empty():
-			data.append({"id": stack.item_id, "qty": stack.count})
+			data["main_inventory"].append({"index": i, "id": stack.item_id, "qty": stack.count})
 	
 	if not held_item.is_empty():
-		data.append({"id": held_item.item_id, "qty": held_item.count})
+		data["held_item"] = {"id": held_item.item_id, "qty": held_item.count}
+		
+	# include armor items
+	for i in range(len(armor_items)):
+		var stack = armor_items[i]
+		if not stack.is_empty():
+			data["armor_inventory"].append({"index": i, "id": stack.item_id, "qty": stack.count})
 		
 	return data
 
