@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ArmorSet" format=3 uid="uid://ct3norwl85pib"]
+
+[ext_resource type="Script" uid="uid://bci072jni5tp" path="res://entities/player/outfits/armor_set.gd" id="1_5ygp7"]
+
+[resource]
+script = ExtResource("1_5ygp7")
+metadata/_custom_type_script = "uid://bci072jni5tp"
