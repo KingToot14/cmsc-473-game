@@ -10,7 +10,8 @@ enum TreeVariant {
 # --- Variables --- #
 const HP_UPDATE_ACTION := 16
 
-const APPLE_DROP_ODDS := 0.10
+const APPLE_DROP_ODDS := 0.01
+const ACORN_DROP_ODDS := 0.10
 
 @export var top_variants: Dictionary[TreeVariant, Texture2D] = {}
 
@@ -207,6 +208,14 @@ func _on_layer_death(pool_id: int) -> void:
 		
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
 		
+		var wood_id := 0
+		
+		match variant:
+			TreeVariant.FOREST:
+				wood_id = 0
+			TreeVariant.WINTER:
+				wood_id = 54
+		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
 			var item_pos := base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
@@ -217,7 +226,7 @@ func _on_layer_death(pool_id: int) -> void:
 				floori(item_pos.y)
 			)
 			
-			ItemDropEntity.spawn(item_pos, 0, rng.randi_range(1, 2))
+			ItemDropEntity.spawn(item_pos, wood_id, rng.randi_range(1, 2))
 			
 			# consistent with seed
 			if rng.randf() < APPLE_DROP_ODDS:
@@ -230,6 +239,20 @@ func _on_layer_death(pool_id: int) -> void:
 				)
 				
 				ItemDropEntity.spawn(apple_pos, 1, rng.randi_range(1, 2))
+				#rng.randi_range(0, 1) determines left or right side of the tree
+				#-(y + pool_id + 2)) determines what y value
+			
+			# consistent with seed
+			if rng.randf() < ACORN_DROP_ODDS:
+				var acorn_pos := base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+				
+				# convert from tile position to world position
+				acorn_pos = TileManager.tile_to_world(
+					floori(acorn_pos.x),
+					floori(acorn_pos.y)
+				)
+				
+				ItemDropEntity.spawn(acorn_pos, 11, rng.randi_range(1, 2))
 				#rng.randi_range(0, 1) determines left or right side of the tree
 				#-(y + pool_id + 2)) determines what y value
 	
