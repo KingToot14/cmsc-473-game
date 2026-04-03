@@ -15,11 +15,11 @@ func load_items() -> void:
 		var id_str := folder.split("_")[0]
 		if not id_str.is_valid_int():
 			continue
-
+		
 		var id := int(id_str)
 		var item_path := base_path.path_join(folder).path_join("item.tres")
 		
-		if FileAccess.file_exists(item_path):
+		if FileAccess.file_exists(item_path) or FileAccess.file_exists(item_path + ".remap"):
 			items[id] = load(item_path)
 			items[id].item_id = id
 
