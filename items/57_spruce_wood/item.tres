@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://78lkmbet7lgw"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_o1tt7"]
+[ext_resource type="Texture2D" uid="uid://dvg1do2ahklm1" path="res://blocks/22_palm_wood/icon.png" id="2_o1tt7"]
+
+[resource]
+script = ExtResource("1_o1tt7")
+tile_id = 22
+use_speed = 0.25
+item_name = "Palm Wood"
+texture = ExtResource("2_o1tt7")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

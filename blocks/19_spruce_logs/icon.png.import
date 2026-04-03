@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1mcff2snpsvy"
-path="res://.godot/imported/icons.png-8013933c42ee378ccb96a9145ceae93c.ctex"
+uid="uid://cl75bjmdoyeer"
+path="res://.godot/imported/icon.png-640acb93bf84d9dc87abad7ca89b939a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://blocks/3_stone/icons.png"
-dest_files=["res://.godot/imported/icons.png-8013933c42ee378ccb96a9145ceae93c.ctex"]
+source_file="res://blocks/19_spruce_logs/icon.png"
+dest_files=["res://.godot/imported/icon.png-640acb93bf84d9dc87abad7ca89b939a.ctex"]
 
 [params]
 
