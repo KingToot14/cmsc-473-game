@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://r30sy2lkf7dq"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_0r4nh"]
+[ext_resource type="Texture2D" uid="uid://0vwc367ysjjg" path="res://walls/2_stone_wall/icon.png" id="2_0r4nh"]
+
+[resource]
+script = ExtResource("1_0r4nh")
+tile_type = 1
+tile_id = 2
+use_speed = 0.25
+item_name = "Stone Wall"
+texture = ExtResource("2_0r4nh")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

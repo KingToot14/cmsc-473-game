@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://ke0vlvmlcjn3"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_g0llr"]
+[ext_resource type="Texture2D" uid="uid://dm3siopiwf56w" path="res://walls/7_oak_wood_wall/icon.png" id="2_g0llr"]
+
+[resource]
+script = ExtResource("1_g0llr")
+tile_type = 1
+tile_id = 7
+use_speed = 0.25
+item_name = "Oak Wood Wall"
+texture = ExtResource("2_g0llr")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
