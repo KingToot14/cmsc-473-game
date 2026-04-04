@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://duq6l6mu2qbt7"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_einc8"]
+[ext_resource type="Texture2D" uid="uid://s8p6jjxrt1vc" path="res://blocks/16_basalt/icons.png" id="2_einc8"]
+
+[resource]
+script = ExtResource("1_einc8")
+tile_id = 16
+use_speed = 0.25
+item_name = "Basalt"
+texture = ExtResource("2_einc8")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
