@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://cj4mtahy6gpfl"]
 
-[ext_resource type="PackedScene" uid="uid://cuplg84yd21bp" path="res://items/7_wooden_pickaxe/wooden_pickaxe.tscn" id="1_40e6m"]
+[ext_resource type="PackedScene" uid="uid://ci3irl5r5um3" path="res://items/25_stone_pickaxe/stone_pickaxe.tscn" id="1_40e6m"]
 [ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_j1wdc"]
-[ext_resource type="Texture2D" uid="uid://d2sfpawv0ktvf" path="res://items/7_wooden_pickaxe/icon.png" id="3_agj5e"]
+[ext_resource type="Texture2D" uid="uid://bf5gmjuiqj3oa" path="res://items/25_stone_pickaxe/icon.png" id="3_40e6m"]
 
 [resource]
 script = ExtResource("2_j1wdc")
@@ -13,7 +13,7 @@ use_speed = 0.55
 default_swing_object = ExtResource("1_40e6m")
 item_id = 25
 item_name = "Stone Pickaxe"
-texture = ExtResource("3_agj5e")
+texture = ExtResource("3_40e6m")
 tooltip = "Sticks and Stones break blocks and bones."
 max_stack = 1
 metadata/_custom_type_script = "uid://dfkswaldm4e5a"
