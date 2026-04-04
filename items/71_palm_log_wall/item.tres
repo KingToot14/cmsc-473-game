@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://gfdtg8vsfohu"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_cwkja"]
+[ext_resource type="Texture2D" uid="uid://4yrx35r6tiw0" path="res://walls/15_palm_log_wall/icon.png" id="2_cwkja"]
+
+[resource]
+script = ExtResource("1_cwkja")
+tile_type = 1
+tile_id = 15
+use_speed = 0.25
+item_name = "Palm Log Wall"
+texture = ExtResource("2_cwkja")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
