@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_ufu2i"]
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_p53d2"]
-[ext_resource type="Texture2D" uid="uid://cn4wkm6wx3ce" path="res://items/9_wooden_hammer/hammer.png" id="3_5alf0"]
+[ext_resource type="Texture2D" uid="uid://lxd8byqmonwd" path="res://items/27_stone_hammer/sprite.png" id="3_ufu2i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
 size = Vector2(9, 12)
@@ -22,4 +22,4 @@ shape = SubResource("RectangleShape2D_w0180")
 [node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
 position = Vector2(8, 0)
 rotation = 0.7853982
-texture = ExtResource("3_5alf0")
+texture = ExtResource("3_ufu2i")
