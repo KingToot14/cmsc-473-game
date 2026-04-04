@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bungv2yxusg36"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_nc2xh"]
+[ext_resource type="Texture2D" uid="uid://dp56v0cqqeabv" path="res://walls/5_sand_wall/icon.png" id="2_nc2xh"]
+
+[resource]
+script = ExtResource("1_nc2xh")
+tile_type = 1
+tile_id = 5
+use_speed = 0.25
+item_name = "Sand Wall"
+texture = ExtResource("2_nc2xh")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

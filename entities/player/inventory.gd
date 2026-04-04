@@ -21,9 +21,7 @@ signal armor_updated(slot_index: int) # 0: Head, 1: Body, 2: Legs
 # Holds Head, Body, and Legs respectively
 var armor_items: Array[ItemStack] = [ItemStack.new(-1, 0), ItemStack.new(-1, 0), ItemStack.new(-1, 0)]
 
-
 # --- Functions --- #
-
 func _init():
 	for i in range(INVENTORY_SLOTS):
 		items.append(ItemStack.new(-1, 0))
@@ -366,7 +364,7 @@ func _load_recipes() -> void:
 	
 	if dir:
 		dir.list_dir_begin()
-		var file_name = dir.get_next()
+		var file_name = dir.get_next().trim_suffix(".remap")
 		
 		while file_name != "":
 			if file_name.ends_with(".tres") or file_name.ends_with(".res"):

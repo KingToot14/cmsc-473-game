@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://dyfklgtidu11o"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_geolh"]
+[ext_resource type="Texture2D" uid="uid://crd2nyv1jgk4a" path="res://walls/9_stone_slab_wall/icon.png" id="2_0a2lk"]
+
+[resource]
+script = ExtResource("1_geolh")
+tile_type = 1
+tile_id = 9
+use_speed = 0.25
+item_name = "Stone Slab Wall"
+texture = ExtResource("2_0a2lk")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

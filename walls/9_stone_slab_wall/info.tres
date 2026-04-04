@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://cvx3njhrqk2h2"]
+
+[ext_resource type="Texture2D" uid="uid://dkrp05q150qve" path="res://walls/9_stone_slab_wall/tiles.png" id="1_fyren"]
+[ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_pth4e"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8va8x"]
+atlas = ExtResource("1_fyren")
+region = Rect2(0, 0, 8, 8)
+
+[resource]
+script = ExtResource("1_pth4e")
+preview_sprite = SubResource("AtlasTexture_8va8x")
+break_item_id = 65
+metadata/_custom_type_script = "uid://dymp18kf28isa"
