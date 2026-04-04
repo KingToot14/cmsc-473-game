@@ -84,10 +84,18 @@ func do_swing(player: PlayerController, mouse_position: Vector2, swing_object: N
 	
 	# play animation
 	var direction := 0
+	
 	if force_towards_mouse:
 		if (mouse_position.x - player.center_point.x) > 0.0:
 			direction = 1
+			object.scale.y = 1.0
 		else:
 			direction = -1
+			object.scale.y = -1.0
+	else:
+		if player.face_direction == 1:
+			object.scale.y = 1.0
+		else:
+			object.scale.y = -1.0
 	
 	player.do_swing(BASE_SWING_SPEED / use_speed, direction)
