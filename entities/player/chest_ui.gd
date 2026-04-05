@@ -18,7 +18,7 @@ func _input(event: InputEvent) -> void:
 		close_chest()
 		get_viewport().set_input_as_handled()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if visible and current_chest:
 		# if the chest was destroyed or is marked for deletion, close the UI.
 		if not is_instance_valid(current_chest) or current_chest.is_queued_for_deletion():
@@ -29,7 +29,7 @@ func open_chest(chest: ChestEntity) -> void:
 		return
 	if current_chest:
 		close_chest()
-		
+	
 	current_chest = chest
 	show()
 	

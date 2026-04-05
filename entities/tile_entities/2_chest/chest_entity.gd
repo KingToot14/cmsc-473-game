@@ -3,15 +3,21 @@ extends TileEntity
 
 # --- Enums --- #
 enum ChestVariant {
-	NORMAL
+	NORMAL,
+	OAK,
+	SPRUCE,
+	PALM
 }
 
 # --- Variables --- #
 const SYNC_ACTION := 16
+const OPEN_STATE_ACTION := 17
 
 const INVENTORY_SIZE := 40
 
-@export var variant := ChestVariant.NORMAL
+@export var variant_sprites: Dictionary[ChestVariant, Texture2D] = {}
+
+var variant := ChestVariant.NORMAL
 
 var inventory := Inventory.new()
 var in_use_by := 0
@@ -28,7 +34,7 @@ func _ready() -> void:
 
 #region Sprite
 func setup_variant() -> void:
-	var info := EntityManager.tile_entity_registry[2]
+	$'sprite'.texture = variant_sprites[variant]
 	
 	match variant:
 		ChestVariant.NORMAL:
@@ -64,17 +70,19 @@ func interact_with(mouse_position: Vector2) -> bool:
 	
 	return true
 
-
 @rpc('any_peer', 'call_remote', 'reliable')
 func request_open_chest() -> void:
 	# get the ID of the player asking
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: # host clicked on it
 		sender_id = 1 
-		
+	
 	# if the chest is free, or if the person asking already owns the lock
 	if in_use_by == 0 or in_use_by == sender_id:
 		in_use_by = sender_id
+		
+		# update open state
+		send_open_state(true)
 		
 		# tell that specific player to open their UI
 		if sender_id == 1:
@@ -88,6 +96,7 @@ func request_open_chest() -> void:
 func open_chest_client() -> void:
 	# this only runs on the client who got permission
 	var chest_ui = Globals.player.get_node_or_null("inventory_ui/chest_container")
+	
 	if chest_ui:
 		chest_ui.open_chest(self)
 		Globals.player.get_node("inventory_ui/inventory_container").show() 
@@ -98,12 +107,15 @@ func release_chest() -> void:
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0:
 		sender_id = 1
-		
+	
 	# only the player who locked it is allowed to unlock it
 	if in_use_by == sender_id:
 		in_use_by = 0
+		
+		# update open state
+		send_open_state(false)
 
-func break_place(mouse_position: Vector2) -> bool:
+func break_place(_mouse_position: Vector2) -> bool:
 	if is_dead:
 		return false
 	# check held item
@@ -165,6 +177,37 @@ func handle_action(action_info: PackedByteArray) -> void:
 		SYNC_ACTION:
 			var inventory_size := buffer.get_u16()
 			inventory.receive_inventory(buffer.get_data(inventory_size)[1])
+		OPEN_STATE_ACTION:
+			var is_open := buffer.get_u8() == 1
+			
+			if is_open:
+				$'sprite'.frame = 1
+			else:
+				$'sprite'.frame = 0
+
+func send_open_state(is_open: bool) -> void:
+	var inventory_data := inventory.serialize_inventory()
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 4 + 2 + 2 + len(inventory_data)) 
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
+	
+	# action id
+	buffer.put_u16(OPEN_STATE_ACTION)
+	
+	# state
+	buffer.put_u8(1 if is_open else 0)
+	
+	for player_id in interested_players.keys():
+		if player_id not in ServerManager.connected_players:
+			continue
+		
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 func send_inventory_update() -> void:
 	var inventory_data := inventory.serialize_inventory()
@@ -188,7 +231,7 @@ func send_inventory_update() -> void:
 	buffer.put_data(inventory_data)
 	
 	for player_id in interested_players.keys():
-		if not ServerManager.get_player(player_id):
+		if player_id not in ServerManager.connected_players:
 			continue
 		
 		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
@@ -255,6 +298,12 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	match tile_variant:
 		&'normal':
 			entity.variant = ChestVariant.NORMAL
+		&'oak':
+			entity.variant = ChestVariant.OAK
+		&'spruce':
+			entity.variant = ChestVariant.SPRUCE
+		&'palm':
+			entity.variant = ChestVariant.PALM
 	
 	entity.setup_variant()
 	

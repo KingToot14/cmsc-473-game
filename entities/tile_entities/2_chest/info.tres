@@ -5,6 +5,9 @@
 [ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_jwoj7"]
 [ext_resource type="Script" uid="uid://cg0bss5y65hdm" path="res://entities/tile_entities/2_chest/chest_entity.gd" id="2_ymjkn"]
 [ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="3_ymjkn"]
+[ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="4_qwrgw"]
+[ext_resource type="Texture2D" uid="uid://cfd7e5rpyelrs" path="res://entities/tile_entities/2_chest/spruce.png" id="5_c7dr0"]
+[ext_resource type="Texture2D" uid="uid://6obavjw8et52" path="res://entities/tile_entities/2_chest/palm.png" id="6_r47gp"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jrxia"]
 atlas = ExtResource("3_ymjkn")
@@ -17,11 +20,26 @@ load_path = "res://.godot/imported/tiles.png-6f6eb22f95356abfdada98b66ca84c48.ct
 atlas = SubResource("CompressedTexture2D_ymjkn")
 region = Rect2(0, 0, 16, 0)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_byw3l"]
+atlas = ExtResource("4_qwrgw")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0228c"]
+atlas = ExtResource("5_c7dr0")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_imlmp"]
+atlas = ExtResource("6_r47gp")
+region = Rect2(0, 0, 16, 0)
+
 [resource]
 script = ExtResource("1_6fyex")
 preview_sprite = SubResource("AtlasTexture_jrxia")
 preview_sprite_variants = Dictionary[StringName, Texture2D]({
-&"normal": SubResource("AtlasTexture_h5elx")
+&"normal": SubResource("AtlasTexture_h5elx"),
+&"oak": SubResource("AtlasTexture_byw3l"),
+&"palm": SubResource("AtlasTexture_imlmp"),
+&"spruce": SubResource("AtlasTexture_0228c")
 })
 preview_sprite_offset = Vector2(8, 4)
 entity_scene = ExtResource("1_wx5g3")
