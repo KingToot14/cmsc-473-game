@@ -12,7 +12,7 @@ region = Rect2(16, 0, 8, 0)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
 resource_local_to_scene = true
-size = Vector2(4, 26)
+size = Vector2(7.5, 25.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jmcbd"]
 resource_local_to_scene = true
@@ -23,12 +23,15 @@ z_index = 15
 collision_layer = 64
 collision_mask = 0
 script = ExtResource("1_jmcbd")
+variant_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("2_jmcbd")
+})
 interpolator = NodePath("entity_interpolator")
 hp = NodePath("hp")
 metadata/_custom_type_script = "uid://cii0ynend042e"
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=846430157]
-position = Vector2(4, -5)
+position = Vector2(4, -4)
 texture = SubResource("AtlasTexture_wdhe3")
 
 [node name="entity_interpolator" type="Node" parent="." unique_id=646767752 node_paths=PackedStringArray("root")]
@@ -42,11 +45,12 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
-position = Vector2(4, -5)
+visible = false
+position = Vector2(4, -4)
 shape = SubResource("RectangleShape2D_jvdps")
 
 [node name="hitbox" type="Area2D" parent="." unique_id=1111801398 node_paths=PackedStringArray("entity")]
-position = Vector2(4, -5)
+position = Vector2(4, -4)
 collision_layer = 64
 collision_mask = 65
 script = ExtResource("5_xmckm")
@@ -57,10 +61,9 @@ visible = false
 shape = SubResource("RectangleShape2D_jvdps")
 
 [node name="blocker" type="StaticBody2D" parent="." unique_id=1945283874]
-position = Vector2(4, -5)
+position = Vector2(4, -4)
 collision_layer = 97
 collision_mask = 30
 
 [node name="shape" type="CollisionShape2D" parent="blocker" unique_id=1572725270]
-visible = false
 shape = SubResource("RectangleShape2D_jmcbd")

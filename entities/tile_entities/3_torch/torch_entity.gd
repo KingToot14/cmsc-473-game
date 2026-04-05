@@ -18,8 +18,6 @@ enum TorchVariant {
 @export var variant: TorchVariant
 @export var variant_sprites: Dictionary[TorchVariant, Texture2D] = {}
 
-var breaking_player := -1
-
 # --- Functions --- #
 func _ready() -> void:
 	super()
@@ -59,10 +57,7 @@ func spawn_item() -> void:
 	
 	match variant:
 		TorchVariant.NORMAL:
-			if breaking_player == -1 or breaking_player not in ServerManager.connected_players:
-				ItemDropEntity.spawn(world_position, 28, 1)
-			else:
-				ItemDropEntity.spawn_preferred(world_position, 28, 1, breaking_player)
+			ItemDropEntity.spawn(world_position, 28, 1)
 
 #endregion
 
