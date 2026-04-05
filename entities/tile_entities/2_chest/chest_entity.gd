@@ -266,6 +266,12 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 ## [method get_collision_grid] to check for collision and 
 ## [method get_variant] to make sure the ground beneath is valid.
 static func is_placement_valid(tile_pos: Vector2i) -> bool:
+	 # make sure bottom tiles are filled
+	if TileManager.get_block(tile_pos.x + 0, tile_pos.y + 1) == 0:
+		return false
+	if TileManager.get_block(tile_pos.x + 1, tile_pos.y + 1) == 0:
+		return false
+	
 	# make sure collision grid is null
 	var collision_grid := get_collision_grid(tile_pos)
 	

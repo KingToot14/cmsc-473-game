@@ -8,7 +8,7 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rtt1u"]
 resource_local_to_scene = true
-size = Vector2(8, 8)
+size = Vector2(7.5, 7.5)
 
 [node name="torch" type="CharacterBody2D" unique_id=273698235 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
@@ -41,7 +41,6 @@ max_hp = 1
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=718470920]
-visible = false
 position = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_rtt1u")
 

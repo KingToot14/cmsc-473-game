@@ -8,7 +8,7 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
 resource_local_to_scene = true
-size = Vector2(14, 14)
+size = Vector2(13.5, 13.5)
 
 [node name="chest" type="CharacterBody2D" unique_id=1877535798 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
