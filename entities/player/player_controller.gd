@@ -327,6 +327,10 @@ func apply_input(delta: float) -> void:
 	else:
 		base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
 	
+	# try to drop through platforms
+	if is_on_floor() and $'input_sync'.input_direction.y > 0.0:
+		position.y += 1.0
+	
 	# check free cam
 	if $'input_sync'.input_free_cam:
 		if not free_cam_pressed:

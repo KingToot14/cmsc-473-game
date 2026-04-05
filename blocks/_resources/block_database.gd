@@ -19,7 +19,7 @@ func load_blocks() -> void:
 		var id_str := folder.split("_")[0]
 		if not id_str.is_valid_int():
 			continue
-
+		
 		var id := int(id_str)
 		var item_path := base_path.path_join(folder).path_join("info.tres")
 		

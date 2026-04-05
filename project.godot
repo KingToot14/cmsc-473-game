@@ -219,6 +219,7 @@ chest_interact={
 2d_physics/layer_5="enemy_projectile"
 2d_physics/layer_6="neutral"
 2d_physics/layer_7="tile"
+2d_physics/layer_8="platform"
 
 [physics]
 
