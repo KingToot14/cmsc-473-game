@@ -276,11 +276,9 @@ func load_inventory() -> void:
 	add_item(9, 1)		# wooden hammer
 	add_item(10, 1)		# wooden axe
 	add_item(3, 30)		# dirt blocks
-	add_item(4, 30)		# stone
-	add_item(14, 30)	# sand
-	add_item(11, 10)	# acorns
 	add_item(24, 4)		# chests
 	add_item(28, 20)	# torches
+	add_item(74, 10)	# oak doors
 	add_item(46, 1)		# wooden helmet
 	add_item(48, 1)		# wooden chestplate
 	add_item(47, 1)		# wooden leggings
