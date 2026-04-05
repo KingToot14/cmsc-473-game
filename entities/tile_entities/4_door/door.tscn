@@ -12,11 +12,11 @@ region = Rect2(16, 0, 8, 0)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
 resource_local_to_scene = true
-size = Vector2(7.5, 25.5)
+size = Vector2(7.5, 23.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jmcbd"]
 resource_local_to_scene = true
-size = Vector2(4, 26)
+size = Vector2(4, 24)
 
 [node name="door" type="CharacterBody2D" unique_id=1968035677 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15

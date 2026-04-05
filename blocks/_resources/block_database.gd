@@ -14,6 +14,8 @@ var _max_wall_id := 0
 ## Whether or not a block id is "solid". Index into the array with the
 ## [code]block_id[/code].
 var is_solid: Array[bool] = []
+## The auto-tiling method to use for this tile.
+var tiling_mode: Array[BlockInfo.TilingMode] = []
 
 # --- Functions --- #
 func _ready() -> void:
@@ -22,14 +24,19 @@ func _ready() -> void:
 	
 	# load block properties
 	is_solid.resize(_max_block_id + 1)
+	tiling_mode.resize(_max_block_id + 1)
 	
 	for id in range(_max_block_id + 1):
 		var info := get_block(id)
 		if not info:
 			continue
 		
+		# is_solid
 		if info.is_solid:
 			is_solid[id] = true
+		
+		# tiling mode
+		tiling_mode[id] = info.tiling_mode
 
 func load_blocks() -> void:
 	var base_path := "res://blocks/"

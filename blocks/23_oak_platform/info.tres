@@ -12,4 +12,5 @@ script = ExtResource("1_ei6ht")
 preview_sprite = SubResource("AtlasTexture_61abe")
 break_item_id = 89
 is_solid = false
+tiling_mode = 1
 metadata/_custom_type_script = "uid://dymp18kf28isa"
