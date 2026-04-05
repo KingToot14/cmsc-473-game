@@ -18,6 +18,7 @@ var open_sprite := AtlasTexture.new()
 var close_sprite := AtlasTexture.new()
 
 var is_open := false
+var door_state := 0
 
 # --- Functions --- #
 #region Variants
@@ -45,7 +46,7 @@ func spawn_item() -> void:
 #endregion
 
 #region Actions
-func send_action_door_state(door_state: int) -> void:
+func send_action_door_state(state: int) -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.resize(4 + 4 + 2)
 	
@@ -59,8 +60,13 @@ func send_action_door_state(door_state: int) -> void:
 	buffer.put_u16(DOOR_STATE_ACTION)
 	
 	# door state
+	door_state = state
 	buffer.put_u8(door_state)
 	
+	# update data
+	EntityManager.update_entity_data(self)
+	
+	# send to clients
 	for player_id in interested_players.keys():
 		if player_id not in ServerManager.connected_players:
 			continue
@@ -80,43 +86,46 @@ func handle_action(action_info: PackedByteArray) -> void:
 	match action_id:
 		DOOR_STATE_ACTION:
 			# door state
-			var door_state := buffer.get_u8()
-			
-			if door_state == 0:
-				$'blocker'.process_mode = Node.PROCESS_MODE_INHERIT
-				$'sprite'.texture = close_sprite
-				$'sprite'.flip_h = false
-				$'sprite'.position.x = 4
-				
-				$'shape'.position.x = 4
-				$'shape'.shape.size = Vector2(7.5, 25.5)
-				$'hitbox'.position.x = 4
-				
-				is_open = false
-			elif door_state == 1:
-				# open door left
-				$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
-				$'sprite'.texture = open_sprite
-				$'sprite'.flip_h = false
-				$'sprite'.position.x = 0
-				
-				$'shape'.position.x = 0
-				$'shape'.shape.size = Vector2(15.5, 25.5)
-				$'hitbox'.position.x = 0
-				
-				is_open = true
-			elif door_state == 2:
-				# open door right
-				$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
-				$'sprite'.texture = open_sprite
-				$'sprite'.flip_h = true
-				$'sprite'.position.x = 8
-				
-				$'shape'.position.x = 8
-				$'shape'.shape.size = Vector2(15.5, 25.5)
-				$'hitbox'.position.x = 8
-				
-				is_open = true
+			set_door_state(buffer.get_u8())
+
+func set_door_state(state: int) -> void:
+	door_state = state
+	
+	if door_state == 0:
+		$'blocker'.process_mode = Node.PROCESS_MODE_INHERIT
+		$'sprite'.texture = close_sprite
+		$'sprite'.flip_h = false
+		$'sprite'.position.x = 4
+		
+		$'shape'.position.x = 4
+		$'shape'.shape.size = Vector2(7.5, 25.5)
+		$'hitbox'.position.x = 4
+		
+		is_open = false
+	elif door_state == 1:
+		# open door left
+		$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
+		$'sprite'.texture = open_sprite
+		$'sprite'.flip_h = false
+		$'sprite'.position.x = 0
+		
+		$'shape'.position.x = 0
+		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'hitbox'.position.x = 0
+		
+		is_open = true
+	elif door_state == 2:
+		# open door right
+		$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
+		$'sprite'.texture = open_sprite
+		$'sprite'.flip_h = true
+		$'sprite'.position.x = 8
+		
+		$'shape'.position.x = 8
+		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'hitbox'.position.x = 8
+		
+		is_open = true
 
 #endregion
 
@@ -224,6 +233,9 @@ func serialize_spawn_data() -> PackedByteArray:
 	# variant
 	buffer.put_u16(variant)
 	
+	# door state
+	buffer.put_u8(door_state)
+	
 	return buffer.data_array
 
 func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
@@ -232,6 +244,9 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# variant
 	variant = buffer.get_u16() as DoorVariant
+	
+	# door state
+	set_door_state(buffer.get_u8())
 	
 	setup_variant()
 
