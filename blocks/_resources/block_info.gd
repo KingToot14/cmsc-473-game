@@ -22,7 +22,13 @@ extends Resource
 @export var place_sfx: AudioStream
 ## Determines the volume of [member place_sfx] in decibels.
 @export var place_volume: float
+## How much health this tile has
 @export var block_health := 50
+
+@export_group("Block Properties")
+## Whether or not this tiles is considered "solid". Non-solid tiles do not
+## have standard auto-tiling logic
+@export var is_solid := true
 
 # --- Functions --- #
 func setup_placement_preview(mouse_position: Vector2) -> void:

@@ -66,6 +66,9 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	tile_type.resize(width * height)
 	var index := 0
 	
+	# block info
+	var is_solid := BlockDatabase.is_solid
+	
 	# clamp bounds
 	start_x = maxi(start_x, 0)
 	start_y = maxi(start_y, 0)
@@ -98,23 +101,23 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 			
 			if block != 0:
 				# tile block
-				if prev_blocks[x] > 0:
+				if is_solid[prev_blocks[x]]:
 					value += 1
-				if curr_blocks[x - 1] > 0:
+				if is_solid[curr_blocks[x - 1]]:
 					value += 2
-				if curr_blocks[x + 1] > 0:
+				if is_solid[curr_blocks[x + 1]]:
 					value += 4
-				if next_blocks[x] > 0:
+				if is_solid[next_blocks[x]]:
 					value += 8
 				
 				# diagonal neighbors
-				if value & 1 and value & 2 and prev_blocks[x - 1] > 0:
+				if value & 1 and value & 2 and is_solid[prev_blocks[x - 1]]:
 					value += 16
-				if value & 1 and value & 4 and prev_blocks[x + 1] > 0:
+				if value & 1 and value & 4 and is_solid[prev_blocks[x + 1]]:
 					value += 32
-				if value & 8 and value & 2 and next_blocks[x - 1] > 0:
+				if value & 8 and value & 2 and is_solid[next_blocks[x - 1]]:
 					value += 64
-				if value & 8 and value & 4 and next_blocks[x + 1] > 0:
+				if value & 8 and value & 4 and is_solid[next_blocks[x + 1]]:
 					value += 128
 				
 				tile_type[index] = 0
