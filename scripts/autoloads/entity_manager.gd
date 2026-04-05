@@ -159,13 +159,13 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	entity.scan_interest()
 
 @rpc('any_peer', 'call_remote', 'reliable')
-func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
+func create_tile_entity(entity_id: int, tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	var info: EntityInfo = tile_entity_registry.get(entity_id)
 	
 	if not info:
 		return
 	
-	info.entity_script.create(tile_pos)
+	info.entity_script.create(tile_pos, tile_variant)
 
 #endregion
 

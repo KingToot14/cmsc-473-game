@@ -98,7 +98,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 4
 		
 		$'shape'.position.x = 4
-		$'shape'.shape.size = Vector2(7.5, 25.5)
+		$'shape'.shape.size = Vector2(7.5, 23.0)
 		$'hitbox'.position.x = 4
 		
 		is_open = false
@@ -110,7 +110,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 0
 		
 		$'shape'.position.x = 0
-		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'shape'.shape.size = Vector2(15.5, 23.0)
 		$'hitbox'.position.x = 0
 		
 		is_open = true
@@ -122,7 +122,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 8
 		
 		$'shape'.position.x = 8
-		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'shape'.shape.size = Vector2(15.5, 23.0)
 		$'hitbox'.position.x = 8
 		
 		is_open = true
@@ -270,8 +270,12 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	match tile_variant:
-		&'OAK':
+		&'oak':
 			entity.variant = DoorVariant.OAK
+		&'spruce':
+			entity.variant = DoorVariant.SPRUCE
+		&'palm':
+			entity.variant = DoorVariant.PALM
 	
 	entity.setup_variant()
 	

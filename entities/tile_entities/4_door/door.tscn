@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://cii0ynend042e" path="res://entities/tile_entities/4_door/door_entity.gd" id="1_jmcbd"]
 [ext_resource type="Texture2D" uid="uid://biwienhtabto1" path="res://entities/tile_entities/4_door/oak.png" id="2_jmcbd"]
+[ext_resource type="Texture2D" uid="uid://hpnsa8eo0hjr" path="res://entities/tile_entities/4_door/spruce.png" id="3_wdhe3"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_x25le"]
+[ext_resource type="Texture2D" uid="uid://c0wivqgbwkueh" path="res://entities/tile_entities/4_door/palm.png" id="4_0hfcv"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="4_jefng"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="5_xmckm"]
 
@@ -12,11 +14,11 @@ region = Rect2(16, 0, 8, 0)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
 resource_local_to_scene = true
-size = Vector2(7.5, 23.5)
+size = Vector2(7.5, 23)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jmcbd"]
 resource_local_to_scene = true
-size = Vector2(4, 24)
+size = Vector2(4, 23)
 
 [node name="door" type="CharacterBody2D" unique_id=1968035677 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
@@ -24,7 +26,9 @@ collision_layer = 64
 collision_mask = 0
 script = ExtResource("1_jmcbd")
 variant_sprites = Dictionary[int, Texture2D]({
-0: ExtResource("2_jmcbd")
+0: ExtResource("2_jmcbd"),
+1: ExtResource("3_wdhe3"),
+2: ExtResource("4_0hfcv")
 })
 interpolator = NodePath("entity_interpolator")
 hp = NodePath("hp")
@@ -45,7 +49,6 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
-visible = false
 position = Vector2(4, -4)
 shape = SubResource("RectangleShape2D_jvdps")
 
@@ -57,7 +60,6 @@ script = ExtResource("5_xmckm")
 entity = NodePath("..")
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=621062776]
-visible = false
 shape = SubResource("RectangleShape2D_jvdps")
 
 [node name="blocker" type="StaticBody2D" parent="." unique_id=1945283874]

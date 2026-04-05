@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkrw800w11o1n"
-path="res://.godot/imported/icon.png-b75c410d1917688b92c7c929c3ff02b2.ctex"
+uid="uid://c0wivqgbwkueh"
+path="res://.godot/imported/palm.png-68b17407f5f0fa01326e6dcf0ea7cdc3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/74_oak_door/icon.png"
-dest_files=["res://.godot/imported/icon.png-b75c410d1917688b92c7c929c3ff02b2.ctex"]
+source_file="res://entities/tile_entities/4_door/palm.png"
+dest_files=["res://.godot/imported/palm.png-68b17407f5f0fa01326e6dcf0ea7cdc3.ctex"]
 
 [params]
 
