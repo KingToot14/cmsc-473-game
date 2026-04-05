@@ -9,7 +9,7 @@ enum UpdateState {
 }
 
 # --- Variables --- #
-const CONNECTION_MAP = {
+const CONNECTION_MAP: Dictionary[int, Vector2i] = {
 	  0: Vector2i(0, 0),   4: Vector2i(1, 0),   6: Vector2i(2, 0),    2: Vector2i(3, 0),
 	 12: Vector2i(4, 0),  10: Vector2i(5, 0),  13: Vector2i(6, 0),   14: Vector2i(7, 0),
 	 47: Vector2i(8, 0), 143: Vector2i(9, 0),  95: Vector2i(10, 0),  63: Vector2i(11, 0),
@@ -25,6 +25,18 @@ const CONNECTION_MAP = {
 	  1: Vector2i(0, 3),  37: Vector2i(1, 3),  55: Vector2i(2, 3),   19: Vector2i(3, 3),
 	 39: Vector2i(4, 3),  27: Vector2i(5, 3),  23: Vector2i(6, 3),   75: Vector2i(7, 3),
 	223: Vector2i(8, 3), 239: Vector2i(9, 3), 15: Vector2i(10, 3)
+}
+
+const PLATFORM_MAP: Dictionary[int, Vector2i] = {
+	0: Vector2i(0, 0), #   X
+	1: Vector2i(1, 0), # - X
+	2: Vector2i(2, 0), # x X
+	3: Vector2i(0, 1), #   X -
+	4: Vector2i(1, 1), # - X -
+	5: Vector2i(2, 1), # x X -
+	6: Vector2i(0, 2), #   X x
+	7: Vector2i(1, 2), # - X x
+	8: Vector2i(2, 2)  # x X x
 }
 
 var chunk_states: Dictionary[Vector2i, UpdateState] = {}
@@ -66,6 +78,10 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	tile_type.resize(width * height)
 	var index := 0
 	
+	# block info
+	var is_solid := BlockDatabase.is_solid
+	var tiling_mode := BlockDatabase.tiling_mode
+	
 	# clamp bounds
 	start_x = maxi(start_x, 0)
 	start_y = maxi(start_y, 0)
@@ -97,27 +113,50 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 				continue
 			
 			if block != 0:
-				# tile block
-				if prev_blocks[x] > 0:
-					value += 1
-				if curr_blocks[x - 1] > 0:
-					value += 2
-				if curr_blocks[x + 1] > 0:
-					value += 4
-				if next_blocks[x] > 0:
-					value += 8
-				
-				# diagonal neighbors
-				if value & 1 and value & 2 and prev_blocks[x - 1] > 0:
-					value += 16
-				if value & 1 and value & 4 and prev_blocks[x + 1] > 0:
-					value += 32
-				if value & 8 and value & 2 and next_blocks[x - 1] > 0:
-					value += 64
-				if value & 8 and value & 4 and next_blocks[x + 1] > 0:
-					value += 128
-				
-				tile_type[index] = 0
+				match tiling_mode[block]:
+					BlockInfo.TilingMode.BLOCK:
+						# tile block
+						if is_solid[prev_blocks[x]]:
+							value += 1
+						if is_solid[curr_blocks[x - 1]]:
+							value += 2
+						if is_solid[curr_blocks[x + 1]]:
+							value += 4
+						if is_solid[next_blocks[x]]:
+							value += 8
+						
+						# diagonal neighbors
+						if value & 1 and value & 2 and is_solid[prev_blocks[x - 1]]:
+							value += 16
+						if value & 1 and value & 4 and is_solid[prev_blocks[x + 1]]:
+							value += 32
+						if value & 8 and value & 2 and is_solid[next_blocks[x - 1]]:
+							value += 64
+						if value & 8 and value & 4 and is_solid[next_blocks[x + 1]]:
+							value += 128
+						
+						tile_type[index] = 0
+					BlockInfo.TilingMode.PLATFORM:
+						# only check horizontal neighbors
+						#if curr_blocks[x - 1] > 0:
+							#value += 2
+						#if curr_blocks[x + 1] > 0:
+							#value += 4
+						
+						var left_state := 0
+						var right_state := 0
+						
+						var left_block := curr_blocks[x - 1]
+						var right_block := curr_blocks[x + 1]
+						
+						if left_block > 0:
+							left_state = 2 if is_solid[left_block] else 1
+						if right_block > 0:
+							right_state = 2 if is_solid[right_block] else 1
+						
+						value = left_state + right_state * 3
+						
+						tile_type[index] = 2
 			elif wall != 0:
 				# tile wall
 				if prev_walls[x] > 0:
@@ -162,30 +201,45 @@ func autotile_region(start_x: int, start_y: int, width: int, height: int) -> voi
 	for y in range(height):
 		for x in range(width):
 			# set blocks
-			if tile_type[index] == 0:
-				var variation := variations[index]
-				
-				blocks.set_cell(
-					Vector2i(start_x + x, start_y + y),
-					TileManager.get_block_unsafe(start_x + x, start_y + y),
-					CONNECTION_MAP.get(variation) + Vector2i(0, randi_range(0, 1) * 4)
-				)
-				
-				# set default wall if not center tile
-				if variation != 255:
+			match tile_type[index]:
+				0:
+					var variation := variations[index]
+					
+					blocks.set_cell(
+						Vector2i(start_x + x, start_y + y),
+						TileManager.get_block_unsafe(start_x + x, start_y + y),
+						CONNECTION_MAP.get(variation) + Vector2i(0, randi_range(0, 1) * 4)
+					)
+					
+					# set default wall if not center tile
+					if variation != 255:
+						walls.set_cell(
+							Vector2i(start_x + x, start_y + y),
+							TileManager.get_wall_unsafe(start_x + x, start_y + y),
+							Vector2i(2, 2 + randi_range(0, 1) * 4)
+						)
+				# set walls
+				1:
+					walls.set_cell(
+						Vector2i(start_x + x, start_y + y),
+						TileManager.get_wall_unsafe(start_x + x, start_y + y),
+						CONNECTION_MAP.get(variations[index]) + Vector2i(0, randi_range(0, 1) * 4)
+					)
+				# set platforms
+				2:
+					var variation := variations[index]
+					
+					blocks.set_cell(
+						Vector2i(start_x + x, start_y + y),
+						TileManager.get_block_unsafe(start_x + x, start_y + y),
+						PLATFORM_MAP.get(variation) + Vector2i(randi_range(0, 1) * 3, 0)
+					)
+					
 					walls.set_cell(
 						Vector2i(start_x + x, start_y + y),
 						TileManager.get_wall_unsafe(start_x + x, start_y + y),
 						Vector2i(2, 2 + randi_range(0, 1) * 4)
 					)
-			
-			# set walls
-			elif tile_type[index] == 1:
-				walls.set_cell(
-					Vector2i(start_x + x, start_y + y),
-					TileManager.get_wall_unsafe(start_x + x, start_y + y),
-					CONNECTION_MAP.get(variations[index]) + Vector2i(0, randi_range(0, 1) * 4)
-				)
 			
 			index += 1
 
