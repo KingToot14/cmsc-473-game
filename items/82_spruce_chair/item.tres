@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://wujp1suyiu5a"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_feyux"]
+[ext_resource type="Texture2D" uid="uid://bd2elpwi5022l" path="res://entities/tile_entities/7_chair/spruce_icon.png" id="2_feyux"]
+
+[resource]
+script = ExtResource("1_feyux")
+tile_type = 2
+tile_id = 7
+tile_variant = &"spruce"
+use_speed = 0.25
+item_name = "Spruce Chair"
+texture = ExtResource("2_feyux")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
