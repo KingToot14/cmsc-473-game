@@ -673,7 +673,7 @@ func set_active() -> void:
 #endregion
 
 #region Settling
-func settle_all() -> void:
+func settle_all(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# loop from bottom of the world to the top
@@ -682,7 +682,7 @@ func settle_all() -> void:
 			var liquid_level := TileManager.get_liquid_level(x, y)
 			
 			if liquid_level > SETTLE_SIGNIFICANCE:
-				settle_tile(x, y, liquid_level)
+				settle_tile(gen, x, y, liquid_level)
 	
 	# add all non-surface water tiles to the update queue
 	active_tiles = {}
@@ -729,7 +729,7 @@ func settle_all() -> void:
 	
 	settled.emit()
 
-func settle_tile(x: int, y: int, liquid_level: int) -> void:
+func settle_tile(gen: WorldGeneration, x: int, y: int, liquid_level: int) -> void:
 	var world_size := Globals.world_size
 	var type := TileManager.get_liquid_type(x, y)
 	
@@ -742,16 +742,20 @@ func settle_tile(x: int, y: int, liquid_level: int) -> void:
 		var down_tile := TileManager.get_block_unsafe(x, y + 1)
 		var down_level := TileManager.get_liquid_level(x, y + 1)
 		
-		#var curr_moved := false
+		var curr_moved := false
 		
 		# find non-empty tile
 		while y < world_size.y - 3 and down_level == 0 and down_tile == 0:
 			ever_moved = true
-			#curr_moved = true
+			curr_moved = true
 			
 			y += 1
 			down_tile = TileManager.get_block_unsafe(x, y + 1)
 			down_level = TileManager.get_liquid_level(x, y + 1)
+		
+		# convert to lava under the lava line
+		if curr_moved and y > gen.lava_line:
+			type = LAVA_TYPE
 		
 		# initialize spread
 		var dir := -1

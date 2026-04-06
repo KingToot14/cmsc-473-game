@@ -23,6 +23,8 @@ var surface_low := 0
 var underground_line := 0
 var cavern_line := 0
 
+var lava_line := 0
+
 var hill_positions: Array[Vector2i] = []
 var lake_positions: Array[Vector2i] = []
 
