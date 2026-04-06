@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://54iuai70fa1p"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_ua8hb"]
+[ext_resource type="Texture2D" uid="uid://c6mxw24qmvfas" path="res://blocks/24_spruce_platform/icon.png" id="2_ua8hb"]
+
+[resource]
+script = ExtResource("1_ua8hb")
+tile_id = 24
+use_speed = 0.25
+item_name = "Spruce Platform"
+texture = ExtResource("2_ua8hb")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
