@@ -25,12 +25,12 @@ var in_use_by := 0
 # --- Functions --- #
 func _ready() -> void:
 	super()
+	
 	inventory.name = "inventory"
 	add_child(inventory) 
+	
 	inventory.inventory_updated.connect(send_inventory_update)
 	inventory.inventory_updated.connect(EntityManager.update_entity_data.bind(self))
-	if multiplayer.is_server():
-		hp.died.connect(_on_death)
 
 #region Sprite
 func setup_variant() -> void:
@@ -42,18 +42,44 @@ func setup_variant() -> void:
 
 #endregion
 
+#region Lifecycle
+func spawn_item() -> void:
+	# Add a slight offset to center the dropped items on the 2x2 chest
+	var drop_pos = global_position + Vector2(8, 8) 
+	
+	# 1. Drop the chest item itself (Item ID 24)
+	match variant:
+		ChestVariant.NORMAL:
+			ItemDropEntity.spawn(drop_pos, 24, 1)
+		ChestVariant.OAK:
+			ItemDropEntity.spawn(drop_pos, 73, 1)
+		ChestVariant.SPRUCE:
+			ItemDropEntity.spawn(drop_pos, 78, 1)
+		ChestVariant.PALM:
+			ItemDropEntity.spawn(drop_pos, 83, 1)
+	
+	# 2. Drop everything inside the chest
+	for stack in inventory.items:
+		if not stack.is_empty():
+			ItemDropEntity.spawn(drop_pos, stack.item_id, stack.count)
+			
+	# 3. Tell the server AND all clients to delete the chest visuals!
+	destroy_chest.rpc()
+
+#endregion
+
 #region Interaction
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact"):
-		var mouse_pos = get_global_mouse_position()
-		var chest_size_pixels = TileManager.TILE_SIZE * 2
-		var chest_size = Vector2(chest_size_pixels, chest_size_pixels)
-		var top_left_corner = global_position - Vector2(0, TileManager.TILE_SIZE)
-		var click_rect = Rect2(top_left_corner, chest_size)
-		
-		if click_rect.has_point(mouse_pos):
-			if interact_with(mouse_pos):
-				get_viewport().set_input_as_handled()
+#func _unhandled_input(event: InputEvent) -> void:
+	#if event.is_action_pressed("interact"):
+		#var mouse_pos = get_global_mouse_position()
+		#var chest_size_pixels = TileManager.TILE_SIZE * 2
+		#var chest_size = Vector2(chest_size_pixels, chest_size_pixels)
+		#var top_left_corner = global_position - Vector2(0, TileManager.TILE_SIZE)
+		#var click_rect = Rect2(top_left_corner, chest_size)
+		#
+		#if click_rect.has_point(mouse_pos):
+			#if interact_with(mouse_pos):
+				#get_viewport().set_input_as_handled()
 
 func interact_with(mouse_position: Vector2) -> bool:
 	if is_dead:
@@ -114,49 +140,6 @@ func release_chest() -> void:
 		
 		# update open state
 		send_open_state(false)
-
-func break_place(_mouse_position: Vector2) -> bool:
-	if is_dead:
-		return false
-	# check held item
-	var item_stack := Globals.player.my_inventory.get_selected_item()
-	var item := ItemDatabase.get_item(item_stack.item_id)
-	
-	# make sure item is a tool
-	if not item or item is not ToolItem:
-		return false
-	
-	# make sure tool is an axe (since it's a wooden chest)
-	if not item.tool_type & ToolItem.ToolType.AXE:
-		return false
-	
-	# deal damage based on the axe's power
-	hp.take_damage(item.tool_power, DamageSource.DamageSourceType.PLAYER)
-	
-	return true
-
-func _on_death() -> void:
-	if is_dead:
-		return
-	
-	kill()
-	
-	if multiplayer.is_server():
-		EntityManager.clear_entity_data(self)
-		
-		# Add a slight offset to center the dropped items on the 2x2 chest
-		var drop_pos = global_position + Vector2(16, 16) 
-		
-		# 1. Drop the chest item itself (Item ID 24)
-		ItemDropEntity.spawn(drop_pos, 24, 1)
-		
-		# 2. Drop everything inside the chest
-		for stack in inventory.items:
-			if not stack.is_empty():
-				ItemDropEntity.spawn(drop_pos, stack.item_id, stack.count)
-				
-		# 3. Tell the server AND all clients to delete the chest visuals!
-		destroy_chest.rpc()
 
 # This RPC forces the node to delete itself on every single player's screen
 @rpc('authority', 'call_local', 'reliable')

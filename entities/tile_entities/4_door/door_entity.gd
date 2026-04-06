@@ -27,14 +27,6 @@ func setup_variant() -> void:
 	open_sprite.region = Rect2i(0, 0, 16, 26)
 	close_sprite.atlas = variant_sprites[variant]
 	close_sprite.region = Rect2i(16, 0, 8, 26)
-	
-	match variant:
-		DoorVariant.OAK:
-			pass
-		DoorVariant.SPRUCE:
-			pass
-		DoorVariant.PALM:
-			pass
 
 func spawn_item() -> void:
 	var world_position := TileManager.tile_to_world(tile_position.x, tile_position.y, true)
@@ -42,6 +34,10 @@ func spawn_item() -> void:
 	match variant:
 		DoorVariant.OAK:
 			ItemDropEntity.spawn(world_position, 74, 1)
+		DoorVariant.SPRUCE:
+			ItemDropEntity.spawn(world_position, 79, 1)
+		DoorVariant.PALM:
+			ItemDropEntity.spawn(world_position, 84, 1)
 
 #endregion
 
@@ -199,23 +195,6 @@ func interact_with(_mouse_position: Vector2) -> bool:
 		open_door.rpc_id(Globals.SERVER_ID, 1)
 	else:
 		open_door.rpc_id(Globals.SERVER_ID, -1)
-	
-	return true
-
-func break_place(_mouse_position: Vector2) -> bool:
-	# check held item
-	var item_stack := Globals.player.my_inventory.get_selected_item()
-	var item := ItemDatabase.get_item(item_stack.item_id)
-	
-	# make sure item is a tool
-	if not item or item is not ToolItem:
-		return false
-	
-	# make sure tool is an axe
-	if not item.tool_type & ToolItem.ToolType.PICKAXE:
-		return false
-	
-	hp.take_damage(item.tool_power, DamageSource.DamageSourceType.PLAYER)
 	
 	return true
 

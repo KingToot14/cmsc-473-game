@@ -19,12 +19,6 @@ enum TorchVariant {
 @export var variant_sprites: Dictionary[TorchVariant, Texture2D] = {}
 
 # --- Functions --- #
-func _ready() -> void:
-	super()
-	
-	if multiplayer.is_server():
-		hp.died.connect(_on_death)
-
 func set_entity_id(spawn_id: int, reg_id: int) -> void:
 	super(spawn_id, reg_id)
 	
@@ -67,38 +61,12 @@ func interact_with(_mouse_position: Vector2) -> bool:
 	
 	return true
 
-func break_place(_mouse_position: Vector2) -> bool:
-	# check held item
-	var item_stack := Globals.player.my_inventory.get_selected_item()
-	var item := ItemDatabase.get_item(item_stack.item_id)
-	
-	# make sure item is a tool
-	if not item or item is not ToolItem:
-		return false
-	
-	# make sure tool is an axe
-	if not item.tool_type & ToolItem.ToolType.PICKAXE:
-		return false
-	
-	hp.take_damage(10, DamageSource.DamageSourceType.PLAYER)
-	
-	return true
-
-#endregion
-
-#region Lifecycle
 func _on_death() -> void:
-	if is_dead:
-		return
-	
-	kill()
+	super()
 	
 	if multiplayer.is_server():
 		# remove light
 		Globals.light_updater.remove_point_light(tile_position)
-		
-		# spawn item
-		spawn_item()
 
 #endregion
 

@@ -199,7 +199,7 @@ func _on_layer_death(pool_id: int) -> void:
 		kill()
 		
 		if multiplayer.is_server():
-			EntityManager.clear_entity_data(self)
+			EntityManager.erase_entity(self)
 	
 	# server spawns items
 	if multiplayer and multiplayer.is_server():

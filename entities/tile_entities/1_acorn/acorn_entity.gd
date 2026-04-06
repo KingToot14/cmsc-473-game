@@ -56,7 +56,7 @@ func grow_to_tree() -> void:
 	kill()
 		
 	if multiplayer.is_server():
-		EntityManager.clear_entity_data(self)
+		EntityManager.erase_entity(self)
 
 #endregion
 
