@@ -75,9 +75,25 @@ func _physics_process(delta: float) -> void:
 		floori(global_position.y - 0.5)
 	)
 	
-	in_water = \
-		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0 or \
-		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0
+	in_water = (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > 0 or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > 0
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	)
+	
+	# check for lava
+	var in_lava := (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) == WaterUpdater.LAVA_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) == WaterUpdater.LAVA_TYPE
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > 16 or
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > 16
+	)
+	
+	if in_lava:
+		hp.take_damage(1, DamageSource.DamageSourceType.WORLD)
 	
 	get_travel_direction(delta)
 	try_jump(delta)
