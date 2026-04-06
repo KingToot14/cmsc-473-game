@@ -91,7 +91,8 @@ func place_lake(gen: WorldGeneration, lake_width: int, lake_depth: int) -> bool:
 				
 				if func_y < 0:
 					TileManager.set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
-	
+					TileManager.set_liquid_type(x, y, WaterUpdater.WATER_TYPE)
+
 	# save position for later
 	gen.lake_positions.append(Vector2i(lake_x, lake_y))
 	

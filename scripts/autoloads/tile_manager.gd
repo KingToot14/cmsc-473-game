@@ -87,6 +87,13 @@ var water_data: PackedByteArray
 var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
 ## A reference of the water texture for rendering. Set from [member water_image]
 var water_texture := ImageTexture.create_from_image(water_image)
+## A reference of the lava data for rendering
+var lava_data: PackedByteArray
+## A reference of the liquid image for rendering
+var lava_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
+## A reference of the lava texture for rendering. Set from [member lava_image]
+var lava_texture := ImageTexture.create_from_image(lava_image)
+
 ## The top-left point where the liquid texture should be offset from
 var liquid_origin: Vector2
 
@@ -162,7 +169,7 @@ func _input(event: InputEvent) -> void:
 		var mouse_position := Globals.player.get_global_mouse_position()
 		var tile_position := world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
 		
-		Globals.light_updater.toggle_point_light.rpc_id(Globals.SERVER_ID, tile_position, Color.WHITE)
+		place_lava(tile_position.x, tile_position.y)
 
 #region Positions
 ## Converts local chunk coordinates to global tile coordinates.
@@ -387,6 +394,25 @@ func get_liquid_level(x: int, y: int) -> int:
 	# get liquid level
 	return liquid[_idx(x, y)]
 
+## Sets the liquid type at ([param x], [param y]). [param liquid_type] should
+## be a value between [code]0 - 16[/code].
+func set_liquid_type(x: int, y: int, type: int) -> void:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return
+	
+	# set liquid type
+	liquid_type[_idx(x, y)] = type
+
+## Gets the liquid type at the given [param x] and [param y] position.
+func get_liquid_type(x: int, y: int) -> int:
+	# check bounds
+	if x < 0 or x >= world_width or y < 0 or y >= world_height:
+		return 0
+	
+	# get liquid type
+	return liquid_type[_idx(x, y)]
+
 ## Rebuilds the liquid texture around the player. Should be called after liquid updates
 ## and when loading new chunks
 func build_liquid_texture() -> void:
@@ -409,6 +435,8 @@ func build_liquid_texture() -> void:
 func _rebuild_liquid_texture_internal(origin: Vector2i) -> void:
 	water_data = PackedByteArray()
 	water_data.resize(WATER_WIDTH * WATER_HEIGHT)
+	lava_data = PackedByteArray()
+	lava_data.resize(WATER_WIDTH * WATER_HEIGHT)
 	
 	var index := 0
 	
@@ -418,7 +446,12 @@ func _rebuild_liquid_texture_internal(origin: Vector2i) -> void:
 		
 		for x in range(WATER_WIDTH):
 			if y < world_height and origin.x + x < world_width:
-				water_data[index] = liquid[row + origin.x + x]
+				var type := liquid_type[row + origin.x + x]
+				
+				if type == WaterUpdater.WATER_TYPE:
+					water_data[index] = liquid[row + origin.x + x]
+				elif type == WaterUpdater.LAVA_TYPE:
+					lava_data[index] = liquid[row + origin.x + x]
 			
 			index += 1
 	
@@ -435,6 +468,8 @@ func _update_liquid_texture_internal(origin: Vector2i) -> void:
 	# update texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, water_data)
 	water_texture.update(water_image)
+	lava_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, lava_data)
+	lava_texture.update(lava_image)
 	
 	liquid_origin = origin
 	
@@ -454,12 +489,21 @@ func update_liquid_texture(x: int, y: int, update := true) -> void:
 		return
 	
 	# update data
-	var data: PackedByteArray = water_image.data['data']
-	data[(x - liquid_origin.x) + (y - liquid_origin.y) * WATER_WIDTH] = liquid[y * world_width + x]
+	var idx := (x - liquid_origin.x) + (y - liquid_origin.y) * WATER_WIDTH
+	var type := liquid_type[y * world_width + x]
 	
-	# update image and texture
-	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
-	water_texture.update(water_image)
+	if type == WaterUpdater.WATER_TYPE:
+		water_data[idx] = liquid[y * world_width + x]
+		
+		# update image and texture
+		water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, water_data)
+		water_texture.update(water_image)
+	elif type == WaterUpdater.LAVA_TYPE:
+		lava_data[idx] = liquid[y * world_width + x]
+		
+		# update image and texture
+		lava_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, lava_data)
+		lava_texture.update(lava_image)
 	
 	if update:
 		push_liquid_texture_update()
@@ -468,10 +512,8 @@ func update_liquid_texture(x: int, y: int, update := true) -> void:
 ## [method update_liquid_texture] by defualt, but can be called manually
 ## when performing bulk updates.
 func push_liquid_texture_update() -> void:
-	RenderingServer.global_shader_parameter_set(
-		&"water_texture",
-		water_texture
-	)
+	RenderingServer.global_shader_parameter_set(&"water_texture", water_texture)
+	RenderingServer.global_shader_parameter_set(&"lava_texture", lava_texture)
 	RenderingServer.global_shader_parameter_set(&"water_offset", liquid_origin)
 
 func send_liquid_update(player_id: int, new_data: PackedByteArray) -> void:
@@ -488,6 +530,7 @@ func receive_liquid_update(new_data: PackedByteArray) -> void:
 	# unpack data
 	var size := buffer.get_u16()
 	var batched := size > 32
+	batched = true
 	
 	for i in range(size):
 		# unpack position
@@ -496,8 +539,10 @@ func receive_liquid_update(new_data: PackedByteArray) -> void:
 		
 		# liquid level
 		var liquid_level := buffer.get_u8()
+		var type := buffer.get_u8()
 		
 		set_liquid_level(tile_x, tile_y, liquid_level)
+		set_liquid_type(tile_x, tile_y, type)
 		if not batched:
 			update_liquid_texture(tile_x, tile_y, false)
 	
@@ -1152,10 +1197,32 @@ func place_water(x: int, y: int) -> bool:
 	
 	# set water level
 	set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	set_liquid_type(x, y, WaterUpdater.WATER_TYPE)
 	update_liquid_texture(x, y)
 	
 	# sync to server
-	send_place_liquid.rpc_id(1, x, y)
+	send_place_liquid.rpc_id(1, x, y, WaterUpdater.WATER_TYPE)
+	
+	return true
+
+func place_lava(x: int, y: int) -> bool:
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return false
+	if y < 0 or y >= world_height:
+		return false
+	
+	# do not process if block exists
+	if get_block_unsafe(x, y):
+		return false
+	
+	# set lava level
+	set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	set_liquid_type(x, y, WaterUpdater.LAVA_TYPE)
+	update_liquid_texture(x, y)
+	
+	# sync to server
+	send_place_liquid.rpc_id(1, x, y, WaterUpdater.LAVA_TYPE)
 	
 	return true
 
@@ -1337,7 +1404,7 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	send_tile_update(x, y)
 
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_liquid(x: int, y: int) -> void:
+func send_place_liquid(x: int, y: int, type: int) -> void:
 	# check bounds
 	if x < 0 or x >= world_width:
 		return
@@ -1350,6 +1417,7 @@ func send_place_liquid(x: int, y: int) -> void:
 	
 	# set liquid level
 	set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	set_liquid_type(x, y, type)
 	
 	# add to update queue
 	Globals.liquid_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
@@ -1359,18 +1427,18 @@ func send_place_liquid(x: int, y: int) -> void:
 
 ## Receives a tile update from the server. Used for various tile interactions
 @rpc('authority', 'call_remote', 'reliable')
-func receive_tile_state(x: int, y: int, block_id: int, wall_id: int) -> void:
+func receive_tile_state(x: int, y: int, block_id: int, wall_id: int, liquid_level: int, type: int) -> void:
 	# don't update unchanged tiles
-	#if tiles[_idx(x, y)] == tile:
-		#return
-	var idx := _idx(x, y) * 2
-	if blocks.decode_u16(idx) == block_id and walls.decode_u16(idx) == wall_id:
+	var idx := _idx(x, y)
+	if blocks.decode_u16(idx * 2) == block_id and walls.decode_u16(idx * 2) == wall_id and \
+		liquid[idx] == liquid_level and liquid_type[idx] == type:
 		return
 	
 	# update tile info
-	#tiles[_idx(x, y)] = tile
-	blocks.encode_u16(idx, block_id)
-	walls.encode_u16(idx, wall_id)
+	blocks.encode_u16(idx * 2, block_id)
+	walls.encode_u16(idx * 2, wall_id)
+	liquid.encode_u8(idx, liquid_level)
+	liquid_type.encode_u8(idx, type)
 	Globals.world_map.update_tile(x, y)
 	
 	# update liquid texture
@@ -1405,7 +1473,10 @@ func send_tile_update(x: int, y: int) -> void:
 			continue
 		
 		var idx := _idx(x, y)
-		receive_tile_state.rpc_id(player_id, x, y, blocks.decode_u16(idx * 2), walls.decode_u16(idx * 2))
+		receive_tile_state.rpc_id(
+			player_id, x, y,
+			blocks.decode_u16(idx * 2), walls.decode_u16(idx * 2), liquid[idx], liquid_type[idx]
+		)
 
 #endregion
 

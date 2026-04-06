@@ -76,8 +76,8 @@ func _physics_process(delta: float) -> void:
 	)
 	
 	in_water = \
-		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0 or \
-		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0 or \
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL / 2.0
 	
 	get_travel_direction(delta)
 	try_jump(delta)

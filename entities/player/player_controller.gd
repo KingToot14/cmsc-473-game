@@ -437,6 +437,7 @@ func done_initial_load() -> void:
 		# enable shaders
 		$'grid_overlay'.show()
 		$'water_overlay'.show()
+		$'lava_overlay'.show()
 		$'light_overlay'.show()
 
 #endregion
