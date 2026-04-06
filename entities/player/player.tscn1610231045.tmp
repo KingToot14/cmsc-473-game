@@ -1160,7 +1160,6 @@ water_rules = Dictionary[int, ExtResource("27_2soq1")]({
 })
 
 [node name="lava_overlay" type="ColorRect" parent="." unique_id=745821424]
-visible = false
 show_behind_parent = true
 z_index = 10
 material = SubResource("ShaderMaterial_mmk7k")

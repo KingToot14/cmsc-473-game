@@ -13,6 +13,9 @@ const MAX_WATER_LEVEL := 255
 
 const SETTLE_SIGNIFICANCE := 2
 
+const WATER_TYPE := 0
+const LAVA_TYPE := 0
+
 var active := false
 
 var update_timer := 0.0
@@ -21,7 +24,7 @@ var updated_tiles: Dictionary[Vector2i, int]
 
 # --- Functions --- #
 func _ready() -> void:
-	Globals.water_updater = self
+	Globals.liquid_updater = self
 	
 	set_process(false)
 
@@ -44,7 +47,6 @@ func _process(delta: float) -> void:
 		var tile: Vector2i = tiles[index]
 		
 		# update counter
-		processed += 1
 		index += 1
 		
 		# make sure tile still exists
@@ -52,6 +54,9 @@ func _process(delta: float) -> void:
 			continue
 		
 		handle_update(tile)
+		
+		# update processed
+		processed += 1
 		
 		if processed >= MAX_UPDATES_PER_FRAME:
 			await get_tree().process_frame
@@ -66,7 +71,7 @@ func _process(delta: float) -> void:
 #region Queue Management
 func add_to_queue(position: Vector2i, water_level := -1) -> void:
 	if water_level == -1:
-		water_level = TileManager.get_water_level(position.x, position.y)
+		water_level = TileManager.get_liquid_level(position.x, position.y)
 	
 	if not active and water_level == 0:
 		return
@@ -79,7 +84,7 @@ func remove_from_queue(position: Vector2i, water_level := -1) -> void:
 	active_tiles.erase(position)
 	
 	if water_level == -1:
-		water_level = TileManager.get_water_level(position.x, position.y)
+		water_level = TileManager.get_liquid_level(position.x, position.y)
 	
 	queue_update(position.x, position.y, water_level)
 
@@ -87,12 +92,12 @@ func remove_from_queue(position: Vector2i, water_level := -1) -> void:
 
 #region Simulation
 func handle_update(position: Vector2i) -> void:
-	var water_level := TileManager.get_water_level(position.x, position.y)
+	var water_level := TileManager.get_liquid_level(position.x, position.y)
 	var start_level := water_level
 	
 	# remove dry tiles
 	if water_level <= 0:
-		TileManager.set_water_level(position.x, position.y, 0)
+		TileManager.set_liquid_level(position.x, position.y, 0)
 		remove_from_queue(position, water_level)
 		return
 	
@@ -104,7 +109,7 @@ func handle_update(position: Vector2i) -> void:
 	if water_level > 0:
 		water_level = flow_side(position.x, position.y, water_level)
 	else:
-		TileManager.set_water_level(position.x, position.y, 0)
+		TileManager.set_liquid_level(position.x, position.y, 0)
 		remove_from_queue(position, water_level)
 		return
 	
@@ -114,7 +119,7 @@ func handle_update(position: Vector2i) -> void:
 		
 		if active_tiles[position] <= 0:
 			if water_level <= SETTLE_SIGNIFICANCE:
-				TileManager.set_water_level(position.x, position.y, 0)
+				TileManager.set_liquid_level(position.x, position.y, 0)
 			
 			remove_from_queue(position, water_level)
 
@@ -124,7 +129,7 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 		return water_level
 	
 	# move as much as possible
-	var bottom_water_level := TileManager.get_water_level(x, y + 1)
+	var bottom_water_level := TileManager.get_liquid_level(x, y + 1)
 	var available_space := MAX_WATER_LEVEL - bottom_water_level
 	
 	# move as much as possible (limited by space or water level)
@@ -137,8 +142,8 @@ func flow_down(x: int, y: int, water_level: int) -> int:
 	bottom_water_level += diff
 	
 	# update water level
-	TileManager.set_water_level(x, y, water_level)
-	TileManager.set_water_level(x, y + 1, bottom_water_level)
+	TileManager.set_liquid_level(x, y, water_level)
+	TileManager.set_liquid_level(x, y + 1, bottom_water_level)
 	
 	# queue updates
 	add_to_queue(Vector2i(x, y), water_level)
@@ -165,27 +170,27 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 	if can_flow_left_1 and can_flow_right_1:
 		# only flow more than one tile if tiles already contain water
 		var can_flow_left_2 := TileManager.get_block(x - 2, y) == 0 \
-			and TileManager.get_water_level(x - 2, y) > 0 and (x - 2) >= 0
+			and TileManager.get_liquid_level(x - 2, y) > 0 and (x - 2) >= 0
 		var can_flow_right_2 := TileManager.get_block(x + 2, y) == 0 \
-			and TileManager.get_water_level(x + 2, y) > 0 and (x + 2) < Globals.world_size.x
+			and TileManager.get_liquid_level(x + 2, y) > 0 and (x + 2) < Globals.world_size.x
 		
 		# try to flow to next neighbors
 		if can_flow_left_2 and can_flow_right_2:
 			# only flow more than one tile if tiles already contain water
 			var can_flow_left_3 := TileManager.get_block(x - 3, y) == 0 \
-				and TileManager.get_water_level(x - 3, y) > 0 and (x - 3) >= 0
+				and TileManager.get_liquid_level(x - 3, y) > 0 and (x - 3) >= 0
 			var can_flow_right_3 := TileManager.get_block(x + 3, y) == 0 \
-				and TileManager.get_water_level(x + 3, y) > 0 and (x + 3) < Globals.world_size.x
+				and TileManager.get_liquid_level(x + 3, y) > 0 and (x + 3) < Globals.world_size.x
 			
 			# try to flow to next neighbors
 			if can_flow_left_3 and can_flow_right_3:
 				# fetch water levels
-				var water_level_left_1  := TileManager.get_water_level(x - 1, y)
-				var water_level_left_2  := TileManager.get_water_level(x - 2, y)
-				var water_level_left_3  := TileManager.get_water_level(x - 3, y)
-				var water_level_right_1 := TileManager.get_water_level(x + 1, y)
-				var water_level_right_2 := TileManager.get_water_level(x + 2, y)
-				var water_level_right_3 := TileManager.get_water_level(x + 3, y)
+				var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
+				var water_level_left_2  := TileManager.get_liquid_level(x - 2, y)
+				var water_level_left_3  := TileManager.get_liquid_level(x - 3, y)
+				var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
+				var water_level_right_2 := TileManager.get_liquid_level(x + 2, y)
+				var water_level_right_3 := TileManager.get_liquid_level(x + 3, y)
 				
 				var average := roundi((
 					water_level +
@@ -201,58 +206,58 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				# update water levels
 				if water_level != average:
 					var diff := absi(water_level - average)
-					TileManager.set_water_level(x, y, average)
+					TileManager.set_liquid_level(x, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x, y), water_level)
 				
 				if water_level_left_1 != average:
 					var diff := absi(water_level_left_1 - average)
-					TileManager.set_water_level(x - 1, y, average)
+					TileManager.set_liquid_level(x - 1, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 				
 				if water_level_left_2 != average:
 					var diff := absi(water_level_left_2 - average)
-					TileManager.set_water_level(x - 2, y, average)
+					TileManager.set_liquid_level(x - 2, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x - 2, y), water_level_left_2)
 				
 				if water_level_left_3 != average:
 					var diff := absi(water_level_left_3 - average)
-					TileManager.set_water_level(x - 3, y, average)
+					TileManager.set_liquid_level(x - 3, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x - 3, y), water_level_left_3)
 				
 				if water_level_right_1 != average:
 					var diff := absi(water_level_right_1 - average)
-					TileManager.set_water_level(x + 1, y, average)
+					TileManager.set_liquid_level(x + 1, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x + 1, y), water_level_right_1)
 				
 				if water_level_right_2 != average:
 					var diff := absi(water_level_right_2 - average)
-					TileManager.set_water_level(x + 2, y, average)
+					TileManager.set_liquid_level(x + 2, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x + 2, y), water_level_right_2)
 				
 				if water_level_right_3 != average:
 					var diff := absi(water_level_right_3 - average)
-					TileManager.set_water_level(x + 3, y, average)
+					TileManager.set_liquid_level(x + 3, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x + 3, y), water_level_right_3)
 			else:
 				# fetch water levels
-				var water_level_left_1  := TileManager.get_water_level(x - 1, y)
-				var water_level_left_2  := TileManager.get_water_level(x - 2, y)
-				var water_level_right_1 := TileManager.get_water_level(x + 1, y)
-				var water_level_right_2 := TileManager.get_water_level(x + 2, y)
+				var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
+				var water_level_left_2  := TileManager.get_liquid_level(x - 2, y)
+				var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
+				var water_level_right_2 := TileManager.get_liquid_level(x + 2, y)
 				
 				var average := roundi((
 					water_level +
@@ -266,43 +271,43 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 				# update water levels
 				if water_level != average:
 					var diff := absi(water_level - average)
-					TileManager.set_water_level(x, y, average)
+					TileManager.set_liquid_level(x, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x, y), water_level)
 				
 				if water_level_left_1 != average:
 					var diff := absi(water_level_left_1 - average)
-					TileManager.set_water_level(x - 1, y, average)
+					TileManager.set_liquid_level(x - 1, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 				
 				if water_level_left_2 != average:
 					var diff := absi(water_level_left_2 - average)
-					TileManager.set_water_level(x - 2, y, average)
+					TileManager.set_liquid_level(x - 2, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x - 2, y), water_level_left_2)
 				
 				if water_level_right_1 != average:
 					var diff := absi(water_level_right_1 - average)
-					TileManager.set_water_level(x + 1, y, average)
+					TileManager.set_liquid_level(x + 1, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x + 1, y), water_level_right_1)
 				
 				if water_level_right_2 != average:
 					var diff := absi(water_level_right_2 - average)
-					TileManager.set_water_level(x + 2, y, average)
+					TileManager.set_liquid_level(x + 2, y, average)
 					
 					if diff > settle_mod:
 						add_to_queue(Vector2i(x + 2, y), water_level_right_2)
 		elif can_flow_left_2:
 			# fetch water levels
-			var water_level_left_1  := TileManager.get_water_level(x - 1, y)
-			var water_level_left_2  := TileManager.get_water_level(x - 2, y)
-			var water_level_right_1 := TileManager.get_water_level(x + 1, y)
+			var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
+			var water_level_left_2  := TileManager.get_liquid_level(x - 2, y)
+			var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
 			
 			var average := roundi((
 				water_level +
@@ -315,36 +320,36 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 			# update water levels
 			if water_level != average:
 				var diff := absi(water_level - average)
-				TileManager.set_water_level(x, y, average)
+				TileManager.set_liquid_level(x, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x, y), water_level)
 			
 			if water_level_left_1 != average:
 				var diff := absi(water_level_left_1 - average)
-				TileManager.set_water_level(x - 1, y, average)
+				TileManager.set_liquid_level(x - 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 			
 			if water_level_left_2 != average:
 				var diff := absi(water_level_left_2 - average)
-				TileManager.set_water_level(x - 2, y, average)
+				TileManager.set_liquid_level(x - 2, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x - 2, y), water_level_left_2)
 			
 			if water_level_right_1 != average:
 				var diff := absi(water_level_right_1 - average)
-				TileManager.set_water_level(x + 1, y, average)
+				TileManager.set_liquid_level(x + 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x + 1, y), water_level_right_1)
 		elif can_flow_right_2:
 			# fetch water levels
-			var water_level_left_1  := TileManager.get_water_level(x - 1, y)
-			var water_level_right_1 := TileManager.get_water_level(x + 1, y)
-			var water_level_right_2 := TileManager.get_water_level(x + 2, y)
+			var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
+			var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
+			var water_level_right_2 := TileManager.get_liquid_level(x + 2, y)
 			
 			var average := roundi((
 				water_level +
@@ -357,35 +362,35 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 			# update water levels
 			if water_level != average:
 				var diff := absi(water_level - average)
-				TileManager.set_water_level(x, y, average)
+				TileManager.set_liquid_level(x, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x, y), water_level)
 			
 			if water_level_left_1 != average:
 				var diff := absi(water_level_left_1 - average)
-				TileManager.set_water_level(x - 1, y, average)
+				TileManager.set_liquid_level(x - 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 			
 			if water_level_right_1 != average:
 				var diff := absi(water_level_right_1 - average)
-				TileManager.set_water_level(x + 1, y, average)
+				TileManager.set_liquid_level(x + 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x + 1, y), water_level_right_1)
 			
 			if water_level_right_2 != average:
 				var diff := absi(water_level_right_2 - average)
-				TileManager.set_water_level(x + 2, y, average)
+				TileManager.set_liquid_level(x + 2, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x + 2, y), water_level_right_2)
 		else:
 			# fetch water levels
-			var water_level_left_1  := TileManager.get_water_level(x - 1, y)
-			var water_level_right_1 := TileManager.get_water_level(x + 1, y)
+			var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
+			var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
 			
 			var average := roundi((
 				water_level +
@@ -397,27 +402,27 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 			# update water levels
 			if water_level != average:
 				var diff := absi(water_level - average)
-				TileManager.set_water_level(x, y, average)
+				TileManager.set_liquid_level(x, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x, y), water_level)
 			
 			if water_level_left_1 != average:
 				var diff := absi(water_level_left_1 - average)
-				TileManager.set_water_level(x - 1, y, average)
+				TileManager.set_liquid_level(x - 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 			
 			if water_level_right_1 != average:
 				var diff := absi(water_level_right_1 - average)
-				TileManager.set_water_level(x + 1, y, average)
+				TileManager.set_liquid_level(x + 1, y, average)
 				
 				if diff > settle_mod:
 					add_to_queue(Vector2i(x + 1, y), water_level_right_1)
 	elif can_flow_left_1:
 		# fetch water levels
-		var water_level_left_1  := TileManager.get_water_level(x - 1, y)
+		var water_level_left_1  := TileManager.get_liquid_level(x - 1, y)
 		
 		var average := roundi((
 			water_level +
@@ -428,20 +433,20 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 		# update water levels
 		if water_level != average:
 			var diff := absi(water_level - average)
-			TileManager.set_water_level(x, y, average)
+			TileManager.set_liquid_level(x, y, average)
 			
 			if diff > settle_mod:
 				add_to_queue(Vector2i(x, y), water_level)
 		
 		if water_level_left_1 != average:
 			var diff := absi(water_level_left_1 - average)
-			TileManager.set_water_level(x - 1, y, average)
+			TileManager.set_liquid_level(x - 1, y, average)
 			
 			if diff > settle_mod:
 				add_to_queue(Vector2i(x - 1, y), water_level_left_1)
 	elif can_flow_right_1:
 		# fetch water levels
-		var water_level_right_1 := TileManager.get_water_level(x + 1, y)
+		var water_level_right_1 := TileManager.get_liquid_level(x + 1, y)
 		
 		var average := roundi((
 			water_level +
@@ -452,14 +457,14 @@ func flow_side(x: int, y: int, water_level: int) -> int:
 		# update water levels
 		if water_level != average:
 			var diff := absi(water_level - average)
-			TileManager.set_water_level(x, y, average)
+			TileManager.set_liquid_level(x, y, average)
 			
 			if diff > settle_mod:
 				add_to_queue(Vector2i(x, y), water_level)
 		
 		if water_level_right_1 != average:
 			var diff := absi(water_level_right_1 - average)
-			TileManager.set_water_level(x + 1, y, average)
+			TileManager.set_liquid_level(x + 1, y, average)
 			
 			if diff > settle_mod:
 				add_to_queue(Vector2i(x + 1, y), water_level_right_1)
@@ -540,7 +545,7 @@ func settle_all() -> void:
 	# loop from bottom of the world to the top
 	for y in range(world_size.y - 3, 3, -1):
 		for x in range(3, world_size.x - 3):
-			var water_level := TileManager.get_water_level(x, y)
+			var water_level := TileManager.get_liquid_level(x, y)
 			
 			if water_level > SETTLE_SIGNIFICANCE:
 				settle_tile(x, y, water_level)
@@ -550,9 +555,9 @@ func settle_all() -> void:
 	
 	for y in range(3, world_size.y - 3):
 		for x in range(3, world_size.x - 3):
-			var water_level := TileManager.get_water_level(x, y)
-			var top_level := TileManager.get_water_level(x, y - 1)
-			var bottom_level := TileManager.get_water_level(x, y + 1)
+			var water_level := TileManager.get_liquid_level(x, y)
+			var top_level := TileManager.get_liquid_level(x, y - 1)
+			var bottom_level := TileManager.get_liquid_level(x, y + 1)
 			
 			if water_level == 0:
 				continue
@@ -594,13 +599,13 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 	var world_size := Globals.world_size
 	
 	# clear water level
-	TileManager.set_water_level(x, y, 0)
+	TileManager.set_liquid_level(x, y, 0)
 	
 	var ever_moved := false
 	
 	while true:
 		var down_tile := TileManager.get_block_unsafe(x, y + 1)
-		var down_level := TileManager.get_water_level(x, y + 1)
+		var down_level := TileManager.get_liquid_level(x, y + 1)
 		
 		#var curr_moved := false
 		
@@ -611,7 +616,7 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 			
 			y += 1
 			down_tile = TileManager.get_block_unsafe(x, y + 1)
-			down_level = TileManager.get_water_level(x, y + 1)
+			down_level = TileManager.get_liquid_level(x, y + 1)
 		
 		# initialize spread
 		var dir := -1
@@ -625,7 +630,7 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 		
 		while true:
 			# keep spreading while empty
-			if TileManager.get_water_level(x + dist * dir, y) == 0:
+			if TileManager.get_liquid_level(x + dist * dir, y) == 0:
 				applied_dir = dir
 				applied_dist = dist
 			
@@ -636,7 +641,7 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 				touching_right = true
 			
 			down_tile = TileManager.get_block_unsafe(x + dist * dir, y + 1)
-			down_level = TileManager.get_water_level(x + dist * dir, y + 1)
+			down_level = TileManager.get_liquid_level(x + dist * dir, y + 1)
 			
 			# try to spread down
 			if down_tile == 0 and down_level > 0 and down_level < MAX_WATER_LEVEL:
@@ -647,7 +652,7 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 				down_level += diff
 				water_level -= diff
 				
-				TileManager.set_water_level(x + dist * dir, y + 1, down_level)
+				TileManager.set_liquid_level(x + dist * dir, y + 1, down_level)
 				
 				# stop if no liquid remains
 				if water_level == 0:
@@ -657,7 +662,7 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 			# try to spread around
 			if y > world_size.y - 3 or down_level != 0 or down_tile != 0:
 				var next_tile := TileManager.get_block_unsafe(x + (dist + 1) * dir, y)
-				var next_level := TileManager.get_water_level(x + (dist + 1) * dir, y)
+				var next_level := TileManager.get_liquid_level(x + (dist + 1) * dir, y)
 				
 				# check if next tile has liquid
 				if next_level != 0 and (ever_moved or dir != 1) or next_tile != 0:
@@ -695,6 +700,6 @@ func settle_tile(x: int, y: int, water_level: int) -> void:
 			break
 	
 	# set final position
-	TileManager.set_water_level(x, y, water_level)
+	TileManager.set_liquid_level(x, y, water_level)
 
 #endregion

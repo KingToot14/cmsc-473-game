@@ -4,12 +4,13 @@ extends Node2D
 ## [br][code]  - Max World Size: 8400 x 2400 = 20,160,000[/code]
 ## [br][code]  - Block Array: PackedByteArray       = 2 * 20,160,000 =  40,320,000 MB[/code]
 ## [br][code]  - Wall Array: PackedByteArray        = 2 * 20,160,000 =  40,320,000 MB[/code]
-## [br][code]  - Water Array: PackedByteArray       = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Liquid Array: PackedByteArray      = 1 * 20,160,000 =  20,160,000 MB[/code]
+## [br][code]  - Liquid Type Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
 ## [br][code]  - Sky Light Array: PackedByteArray   = 1 * 20,160,000 =  20,160,000 MB[/code]
 ## [br][code]  - Light Red Array: PackedByteArray   = 1 * 20,160,000 =  20,160,000 MB[/code]
 ## [br][code]  - Light Green Array: PackedByteArray = 1 * 20,160,000 =  20,160,000 MB[/code]
 ## [br][code]  - Light Blue Array: PackedByteArray  = 1 * 20,160,000 =  20,160,000 MB[/code]
-## [br][code]                                                  Total = 181,440,000 MB[/code]
+## [br][code]                                                  Total = 201,600,000 MB[/code]
 
 # --- Variables --- #
 ## The width and height of each chunk in tiles
@@ -42,10 +43,14 @@ var blocks := PackedByteArray()
 ## [br]For a safer way to access these tiles, use [method get_wall] and
 ## [method set_wall]
 var walls := PackedByteArray()
-## A flat-packed array of all the water levels in the world.
+## A flat-packed array of all the liquid levels in the world.
 ## [br]For a safer way to access these tiles, use [method get_water_level] and
-## [method set_water_level]
-var water := PackedByteArray()
+## [method set_water_level] (for water tiles)
+var liquid := PackedByteArray()
+## A flat-packed array of all the liquid types in the world.
+## [br]For a safer way to access these tiles, use [method get_liquid_type] and
+## [method set_liquid_type]
+var liquid_type := PackedByteArray()
 ## A flat-packed array of all the sky light levels in the world.
 ## [br]For a safer way to access these tiles, use [method get_light_sky] and
 ## [method set_light_r]
@@ -70,20 +75,20 @@ var world_width: int
 ## [br]Read from [member Globals.world_size]
 var world_height: int
 
-## A thread to handle updating the water texture asynchronously
-var water_thread := Thread.new()
-## Whether or not the water texture has an update queued. This should
-## only be set when the [member water_thread] is busy.
-var water_update_queued := false
+## A thread to handle updating the liquid texture asynchronously
+var liquid_thread := Thread.new()
+## Whether or not the liquid texture has an update queued. This should
+## only be set when the [member liquid_thread] is busy.
+var liquid_update_queued := false
 
 ## A reference of the water data for rendering
 var water_data: PackedByteArray
-## A reference of the water image for rendering
+## A reference of the liquid image for rendering
 var water_image := Image.create_empty(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8)
 ## A reference of the water texture for rendering. Set from [member water_image]
 var water_texture := ImageTexture.create_from_image(water_image)
-## The top-left point where the water texture should be offset from
-var water_origin: Vector2
+## The top-left point where the liquid texture should be offset from
+var liquid_origin: Vector2
 
 ## The width of the water texture in tiles
 const WATER_WIDTH := (2 * ChunkLoader.VISUAL_RANGE.x + 1) * 16
@@ -361,31 +366,33 @@ func has_block_neighbor(x: int, y: int, target: int) -> bool:
 #endregion
 
 #region Water
-## Sets the water level at ([param x], [param y]). [param water_level] should
+## Sets the liquid level at ([param x], [param y]). [param liquid_level] should
 ## be a value between [code]0 - 16[/code].
-func set_water_level(x: int, y: int, water_level: int) -> void:
+func set_liquid_level(x: int, y: int, liquid_level: int) -> void:
 	# check bounds
 	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return
 	
-	# set water level
-	water[_idx(x, y)] = water_level
+	# set liquid level
+	var idx := _idx(x, y)
+	
+	liquid[_idx(x, y)] = liquid_level
 
-## Gets the water level at the given [param x] and [param y] position.
-func get_water_level(x: int, y: int) -> int:
+## Gets the liquid level at the given [param x] and [param y] position.
+func get_liquid_level(x: int, y: int) -> int:
 	# check bounds
 	if x < 0 or x >= world_width or y < 0 or y >= world_height:
 		return 0
 	
-	# get water level
-	return water[_idx(x, y)]
+	# get liquid level
+	return liquid[_idx(x, y)]
 
-## Rebuilds the water texture around the player. Should be called after water updates
+## Rebuilds the liquid texture around the player. Should be called after liquid updates
 ## and when loading new chunks
-func build_water_texture() -> void:
+func build_liquid_texture() -> void:
 	# check if thread is already running
-	if water_thread.is_started():
-		water_update_queued = true
+	if liquid_thread.is_started():
+		liquid_update_queued = true
 		return
 	
 	# calculate upper point
@@ -394,12 +401,12 @@ func build_water_texture() -> void:
 	var start_chunk = chunk - ChunkLoader.VISUAL_RANGE
 	var origin := chunk_to_tile(start_chunk.x, start_chunk.y)
 	
-	water_thread.start(_rebuild_water_texture_internal.bind(origin))
+	liquid_thread.start(_rebuild_liquid_texture_internal.bind(origin))
 
-## This function should ONLY be called inside the [member water_thread].
-## This function handles the internals of updating the water texture, and
+## This function should ONLY be called inside the [member liquid_thread].
+## This function handles the internals of updating the liquid texture, and
 ## should not be modified from multiple places.
-func _rebuild_water_texture_internal(origin: Vector2i) -> void:
+func _rebuild_liquid_texture_internal(origin: Vector2i) -> void:
 	water_data = PackedByteArray()
 	water_data.resize(WATER_WIDTH * WATER_HEIGHT)
 	
@@ -411,70 +418,70 @@ func _rebuild_water_texture_internal(origin: Vector2i) -> void:
 		
 		for x in range(WATER_WIDTH):
 			if y < world_height and origin.x + x < world_width:
-				water_data[index] = water[row + origin.x + x]
+				water_data[index] = liquid[row + origin.x + x]
 			
 			index += 1
 	
-	_update_water_texture_internal.call_deferred(origin)
+	_update_liquid_texture_internal.call_deferred(origin)
 
-## This function should ONLY be called from the [member water_thread].
-## This function handles the internals of updating the water texture, and
+## This function should ONLY be called from the [member liquid_thread].
+## This function handles the internals of updating the liquid texture, and
 ## should not be modified from multiple places.
-func _update_water_texture_internal(origin: Vector2i) -> void:
+func _update_liquid_texture_internal(origin: Vector2i) -> void:
 	# join thread
-	if water_thread.is_started():
-		water_thread.wait_to_finish()
+	if liquid_thread.is_started():
+		liquid_thread.wait_to_finish()
 	
 	# update texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, water_data)
 	water_texture.update(water_image)
 	
-	water_origin = origin
+	liquid_origin = origin
 	
-	push_water_texture_update()
+	push_liquid_texture_update()
 	
 	# check if update is queued
-	if water_update_queued:
-		water_update_queued = false
-		build_water_texture()
+	if liquid_update_queued:
+		liquid_update_queued = false
+		build_liquid_texture()
 
-## Updates the water texture at ([param x], [param y]) using [member tiles].
-func update_water_texture(x: int, y: int, update := true) -> void:
+## Updates the liquid texture at ([param x], [param y]) using [member tiles].
+func update_liquid_texture(x: int, y: int, update := true) -> void:
 	# only update in rendered range
-	if x < water_origin.x or x >= (water_origin.x + WATER_WIDTH):
+	if x < liquid_origin.x or x >= (liquid_origin.x + WATER_WIDTH):
 		return
-	if y < water_origin.y or y >= (water_origin.y + WATER_HEIGHT):
+	if y < liquid_origin.y or y >= (liquid_origin.y + WATER_HEIGHT):
 		return
 	
 	# update data
 	var data: PackedByteArray = water_image.data['data']
-	data[(x - water_origin.x) + (y - water_origin.y) * WATER_WIDTH] = water[y * world_width + x]
+	data[(x - liquid_origin.x) + (y - liquid_origin.y) * WATER_WIDTH] = liquid[y * world_width + x]
 	
 	# update image and texture
 	water_image.set_data(WATER_WIDTH, WATER_HEIGHT, false, Image.FORMAT_R8, data)
 	water_texture.update(water_image)
 	
 	if update:
-		push_water_texture_update()
+		push_liquid_texture_update()
 
 ## Pushes a texture update to the server. This is automatically called by
-## [method update_water_texture] by defualt, but can be called manually
+## [method update_liquid_texture] by defualt, but can be called manually
 ## when performing bulk updates.
-func push_water_texture_update() -> void:
+func push_liquid_texture_update() -> void:
 	RenderingServer.global_shader_parameter_set(
 		&"water_texture",
 		water_texture
 	)
-	RenderingServer.global_shader_parameter_set(&"water_offset", water_origin)
+	RenderingServer.global_shader_parameter_set(&"water_offset", liquid_origin)
 
-func send_water_update(player_id: int, new_data: PackedByteArray) -> void:
+func send_liquid_update(player_id: int, new_data: PackedByteArray) -> void:
 	if player_id == Globals.SERVER_ID:
 		return
 	
-	receive_water_update.rpc_id(player_id, new_data)
+	receive_liquid_update.rpc_id(player_id, new_data)
 
 @rpc('authority', 'call_remote', 'reliable')
-func receive_water_update(new_data: PackedByteArray) -> void:
+func receive_liquid_update(new_data: PackedByteArray) -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.data_array = new_data
 	
@@ -487,17 +494,17 @@ func receive_water_update(new_data: PackedByteArray) -> void:
 		var tile_x := buffer.get_u16()
 		var tile_y := buffer.get_u16()
 		
-		# water level
-		var water_level := buffer.get_u8()
+		# liquid level
+		var liquid_level := buffer.get_u8()
 		
-		set_water_level(tile_x, tile_y, water_level)
+		set_liquid_level(tile_x, tile_y, liquid_level)
 		if not batched:
-			update_water_texture(tile_x, tile_y, false)
+			update_liquid_texture(tile_x, tile_y, false)
 	
 	if batched:
-		build_water_texture()
+		build_liquid_texture()
 	else:
-		push_water_texture_update()
+		push_liquid_texture_update()
 
 #endregion
 
@@ -1144,11 +1151,11 @@ func place_water(x: int, y: int) -> bool:
 		return false
 	
 	# set water level
-	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
-	update_water_texture(x, y)
+	set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	update_liquid_texture(x, y)
 	
 	# sync to server
-	send_place_water.rpc_id(1, x, y)
+	send_place_liquid.rpc_id(1, x, y)
 	
 	return true
 
@@ -1192,11 +1199,11 @@ func send_destroy_block(x: int, y: int) -> void:
 	set_block_unsafe(x, y, 0)
 	
 	# update neighbors
-	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
-	Globals.water_updater.add_to_queue(Vector2i(x - 1, y), WaterUpdater.MAX_WATER_LEVEL)
-	Globals.water_updater.add_to_queue(Vector2i(x + 1, y), WaterUpdater.MAX_WATER_LEVEL)
-	Globals.water_updater.add_to_queue(Vector2i(x, y - 1), WaterUpdater.MAX_WATER_LEVEL)
-	Globals.water_updater.add_to_queue(Vector2i(x, y + 1), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x - 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x + 1, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x, y - 1), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x, y + 1), WaterUpdater.MAX_WATER_LEVEL)
 	
 	# update lighting
 	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
@@ -1280,7 +1287,7 @@ func send_place_block(x: int, y: int, item_id: int) -> void:
 	
 	# set tile to block
 	set_block_unsafe(x, y, block_id)
-	set_water_level(x, y, 0)
+	set_liquid_level(x, y, 0)
 	
 	# update lighting
 	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
@@ -1330,7 +1337,7 @@ func send_place_wall(x: int, y: int, item_id: int) -> void:
 	send_tile_update(x, y)
 
 @rpc('any_peer', 'call_remote', 'reliable')
-func send_place_water(x: int, y: int) -> void:
+func send_place_liquid(x: int, y: int) -> void:
 	# check bounds
 	if x < 0 or x >= world_width:
 		return
@@ -1341,11 +1348,11 @@ func send_place_water(x: int, y: int) -> void:
 	if get_block_unsafe(x, y):
 		return
 	
-	# set water level
-	set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+	# set liquid level
+	set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
 	
 	# add to update queue
-	Globals.water_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
+	Globals.liquid_updater.add_to_queue(Vector2i(x, y), WaterUpdater.MAX_WATER_LEVEL)
 	
 	# sync to clients
 	send_tile_update(x, y)
@@ -1366,8 +1373,8 @@ func receive_tile_state(x: int, y: int, block_id: int, wall_id: int) -> void:
 	walls.encode_u16(idx, wall_id)
 	Globals.world_map.update_tile(x, y)
 	
-	# update water texture
-	update_water_texture(x, y)
+	# update liquid texture
+	update_liquid_texture(x, y)
 
 func send_tile_update(x: int, y: int) -> void:
 	# add neighbors to update queue
@@ -1410,8 +1417,10 @@ func setup_tile_arrays() -> void:
 	blocks.resize(world_width * world_height * 2)
 	walls = []
 	walls.resize(world_width * world_height * 2)
-	water = []
-	water.resize(world_width * world_height)
+	liquid = []
+	liquid.resize(world_width * world_height)
+	liquid_type = []
+	liquid_type.resize(world_width * world_height)
 	
 	light_sky = []
 	light_r.resize(world_width * world_height)
@@ -1467,7 +1476,8 @@ func pack_region(start_x: int, start_y: int, width: int, height: int) -> PackedB
 			
 			buffer.put_u16(blocks.decode_u16(idx * 2))
 			buffer.put_u16(walls.decode_u16(idx * 2))
-			buffer.put_u8(water[idx * 1])
+			buffer.put_u8(liquid[idx * 1])
+			buffer.put_u8(liquid_type[idx * 1])
 			
 			buffer.put_u8(light_sky[idx * 1])
 			buffer.put_u8(light_r[idx * 1])
@@ -1494,7 +1504,8 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 			# update tile
 			blocks.encode_u16(idx * 2, buffer.get_u16())
 			walls.encode_u16(idx * 2, buffer.get_u16())
-			water.encode_u8(idx * 1, buffer.get_u8())
+			liquid.encode_u8(idx * 1, buffer.get_u8())
+			liquid_type.encode_u8(idx * 1, buffer.get_u8())
 			
 			light_sky.encode_u8(idx * 1, buffer.get_u8())
 			light_r.encode_u8(idx * 1, buffer.get_u8())
@@ -1521,7 +1532,7 @@ func load_region(data: PackedByteArray, start_x: int, start_y: int, width: int, 
 		Globals.world_map.chunk_states[chunk] = WorldTileMap.UpdateState.DIRTY
 	
 	# push water update all at once
-	build_water_texture()
+	build_liquid_texture()
 	build_light_texture()
 
 #endregion
@@ -1561,7 +1572,8 @@ func save_world() -> void:
 	# - Tile Data - #
 	buffer.put_data(blocks)
 	buffer.put_data(walls)
-	buffer.put_data(water)
+	buffer.put_data(liquid)
+	buffer.put_data(liquid_type)
 	
 	buffer.put_data(light_sky)
 	buffer.put_data(light_r)
@@ -1614,7 +1626,8 @@ func load_world() -> bool:
 	
 	blocks = buffer.get_data(world_size * 2)[1]
 	walls = buffer.get_data(world_size * 2)[1]
-	water = buffer.get_data(world_size * 1)[1]
+	liquid = buffer.get_data(world_size * 1)[1]
+	liquid_type = buffer.get_data(world_size * 1)[1]
 	
 	light_sky = buffer.get_data(world_size * 1)[1]
 	light_r = buffer.get_data(world_size * 1)[1]
@@ -1628,7 +1641,7 @@ func load_world() -> bool:
 	ActivationPass.new().start_pass(null)
 	
 	Globals.block_updater.set_physics_process(true)
-	Globals.water_updater.set_active()
+	Globals.liquid_updater.set_active()
 	Globals.light_updater.set_active()
 	
 	print("[Wizbowo's Conquest] World Loaded!")
