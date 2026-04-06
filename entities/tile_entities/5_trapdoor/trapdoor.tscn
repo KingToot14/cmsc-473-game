@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://ctht5lalx3bpl"]
+
+[ext_resource type="Script" uid="uid://bb0rkth4nd6kt" path="res://entities/tile_entities/5_trapdoor/trapdoor_entity.gd" id="1_uodnq"]
+[ext_resource type="Texture2D" uid="uid://bp7m8iuyusc04" path="res://entities/tile_entities/5_trapdoor/spruce.png" id="3_uodnq"]
+[ext_resource type="Texture2D" uid="uid://3hnavdplblhj" path="res://entities/tile_entities/5_trapdoor/palm.png" id="4_ekox5"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="5_0yjsx"]
+[ext_resource type="Texture2D" uid="uid://bxc6r4i6rpn12" path="res://entities/tile_entities/5_trapdoor/oak.png" id="5_ekox5"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="6_6u8o6"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="7_r4t47"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ekox5"]
+atlas = ExtResource("5_ekox5")
+region = Rect2(0, 16, 0, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
+resource_local_to_scene = true
+size = Vector2(15.5, 3.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jmcbd"]
+resource_local_to_scene = true
+size = Vector2(16, 4)
+
+[node name="trapdoor" type="CharacterBody2D" unique_id=1968035677 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
+collision_layer = 64
+collision_mask = 0
+script = ExtResource("1_uodnq")
+variant_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("5_ekox5"),
+1: ExtResource("3_uodnq"),
+2: ExtResource("4_ekox5")
+})
+interpolator = NodePath("entity_interpolator")
+hp = NodePath("hp")
+metadata/_custom_type_script = "uid://cii0ynend042e"
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=846430157]
+position = Vector2(8, 4)
+texture = SubResource("AtlasTexture_ekox5")
+
+[node name="entity_interpolator" type="Node" parent="." unique_id=646767752 node_paths=PackedStringArray("root")]
+script = ExtResource("5_0yjsx")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="hp" type="Node" parent="." unique_id=622851920 node_paths=PackedStringArray("entity")]
+script = ExtResource("6_6u8o6")
+entity = NodePath("..")
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
+visible = false
+position = Vector2(8, 4)
+shape = SubResource("RectangleShape2D_jvdps")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=1111801398 node_paths=PackedStringArray("entity")]
+position = Vector2(8, 4)
+collision_layer = 64
+collision_mask = 65
+script = ExtResource("7_r4t47")
+entity = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=621062776]
+shape = SubResource("RectangleShape2D_jvdps")
+
+[node name="blocker" type="StaticBody2D" parent="." unique_id=1945283874]
+position = Vector2(8, 4)
+collision_layer = 97
+collision_mask = 30
+
+[node name="shape" type="CollisionShape2D" parent="blocker" unique_id=1572725270]
+shape = SubResource("RectangleShape2D_jmcbd")

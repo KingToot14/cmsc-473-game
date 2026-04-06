@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://cii0ynend042e" path="res://entities/tile_entities/4_door/door_entity.gd" id="2_3lrqo"]
 [ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="2_ootr7"]
 [ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="3_3lrqo"]
+[ext_resource type="Texture2D" uid="uid://hpnsa8eo0hjr" path="res://entities/tile_entities/4_door/spruce.png" id="4_k64g3"]
+[ext_resource type="Texture2D" uid="uid://c0wivqgbwkueh" path="res://entities/tile_entities/4_door/palm.png" id="5_bs85e"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k64g3"]
 atlas = ExtResource("1_oey8i")
@@ -14,14 +16,24 @@ region = Rect2(16, 0, 8, 0)
 atlas = ExtResource("1_oey8i")
 region = Rect2(16, 0, 8, 0)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_bs85e"]
+atlas = ExtResource("4_k64g3")
+region = Rect2(16, 0, 8, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ayy40"]
+atlas = ExtResource("5_bs85e")
+region = Rect2(16, 0, 8, 0)
+
 [resource]
 script = ExtResource("2_ootr7")
 preview_sprite = SubResource("AtlasTexture_k64g3")
 preview_sprite_variants = Dictionary[StringName, Texture2D]({
-&"oak": SubResource("AtlasTexture_oey8i")
+&"oak": SubResource("AtlasTexture_oey8i"),
+&"palm": SubResource("AtlasTexture_ayy40"),
+&"spruce": SubResource("AtlasTexture_bs85e")
 })
-preview_position_offset = Vector2(0, 0)
-preview_sprite_offset = Vector2(4, -6)
+preview_position_offset = Vector2(0, 8)
+preview_sprite_offset = Vector2(4, -4)
 entity_scene = ExtResource("1_ootr7")
 entity_script = ExtResource("2_3lrqo")
 metadata/_custom_type_script = "uid://bnvse52ucpibv"

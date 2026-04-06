@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://beoq0at5vktkr"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_jmpmf"]
+[ext_resource type="Texture2D" uid="uid://ciwquy6a7csrr" path="res://entities/tile_entities/7_chair/palm_icon.png" id="2_jmpmf"]
+
+[resource]
+script = ExtResource("1_jmpmf")
+tile_type = 2
+tile_id = 7
+tile_variant = &"palm"
+use_speed = 0.25
+item_name = "Palm Chair"
+texture = ExtResource("2_jmpmf")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

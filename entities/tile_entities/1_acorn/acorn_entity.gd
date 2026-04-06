@@ -56,7 +56,7 @@ func grow_to_tree() -> void:
 	kill()
 		
 	if multiplayer.is_server():
-		EntityManager.clear_entity_data(self)
+		EntityManager.erase_entity(self)
 
 #endregion
 
@@ -133,7 +133,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 ## [code]AcornEntity.rpc_id(Globals.SERVER_ID, tile_pos)[/code]
 ## when calling from a client.
 @rpc('any_peer', 'call_local', 'reliable')
-static func create(tile_pos: Vector2i, _tile_variant := &'') -> void:
+static func create(tile_pos: Vector2i, _tile_variant := &'normal') -> void:
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(1).entity_scene
 	if not entity_scene:

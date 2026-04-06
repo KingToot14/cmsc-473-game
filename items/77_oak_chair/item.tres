@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://db7w0q2my8ftb"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_mx8al"]
+[ext_resource type="Texture2D" uid="uid://bmjbdopdy3dwd" path="res://entities/tile_entities/7_chair/oak_icon.png" id="2_mx8al"]
+
+[resource]
+script = ExtResource("1_mx8al")
+tile_type = 2
+tile_id = 7
+tile_variant = &"oak"
+use_speed = 0.25
+item_name = "Oak Chair"
+texture = ExtResource("2_mx8al")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

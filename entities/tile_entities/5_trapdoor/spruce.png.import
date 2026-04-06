@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkrw800w11o1n"
-path="res://.godot/imported/icon.png-b75c410d1917688b92c7c929c3ff02b2.ctex"
+uid="uid://bp7m8iuyusc04"
+path="res://.godot/imported/spruce.png-74e9c58b347d83ebaccc139909bcd409.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/74_oak_door/icon.png"
-dest_files=["res://.godot/imported/icon.png-b75c410d1917688b92c7c929c3ff02b2.ctex"]
+source_file="res://entities/tile_entities/5_trapdoor/spruce.png"
+dest_files=["res://.godot/imported/spruce.png-74e9c58b347d83ebaccc139909bcd409.ctex"]
 
 [params]
 

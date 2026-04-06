@@ -3,15 +3,21 @@ extends TileEntity
 
 # --- Enums --- #
 enum ChestVariant {
-	NORMAL
+	NORMAL,
+	OAK,
+	SPRUCE,
+	PALM
 }
 
 # --- Variables --- #
 const SYNC_ACTION := 16
+const OPEN_STATE_ACTION := 17
 
 const INVENTORY_SIZE := 40
 
-@export var variant := ChestVariant.NORMAL
+@export var variant_sprites: Dictionary[ChestVariant, Texture2D] = {}
+
+var variant := ChestVariant.NORMAL
 
 var inventory := Inventory.new()
 var in_use_by := 0
@@ -19,16 +25,16 @@ var in_use_by := 0
 # --- Functions --- #
 func _ready() -> void:
 	super()
+	
 	inventory.name = "inventory"
 	add_child(inventory) 
+	
 	inventory.inventory_updated.connect(send_inventory_update)
 	inventory.inventory_updated.connect(EntityManager.update_entity_data.bind(self))
-	if multiplayer.is_server():
-		hp.died.connect(_on_death)
 
 #region Sprite
 func setup_variant() -> void:
-	var info := EntityManager.tile_entity_registry[2]
+	$'sprite'.texture = variant_sprites[variant]
 	
 	match variant:
 		ChestVariant.NORMAL:
@@ -36,19 +42,33 @@ func setup_variant() -> void:
 
 #endregion
 
-#region Interaction
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact"):
-		var mouse_pos = get_global_mouse_position()
-		var chest_size_pixels = TileManager.TILE_SIZE * 2
-		var chest_size = Vector2(chest_size_pixels, chest_size_pixels)
-		var top_left_corner = global_position - Vector2(0, TileManager.TILE_SIZE)
-		var click_rect = Rect2(top_left_corner, chest_size)
-		
-		if click_rect.has_point(mouse_pos):
-			if interact_with(mouse_pos):
-				get_viewport().set_input_as_handled()
+#region Lifecycle
+func spawn_item() -> void:
+	# Add a slight offset to center the dropped items on the 2x2 chest
+	var drop_pos = global_position + Vector2(8, 8) 
+	
+	# 1. Drop the chest item itself (Item ID 24)
+	match variant:
+		ChestVariant.NORMAL:
+			ItemDropEntity.spawn(drop_pos, 24, 1)
+		ChestVariant.OAK:
+			ItemDropEntity.spawn(drop_pos, 73, 1)
+		ChestVariant.SPRUCE:
+			ItemDropEntity.spawn(drop_pos, 78, 1)
+		ChestVariant.PALM:
+			ItemDropEntity.spawn(drop_pos, 83, 1)
+	
+	# 2. Drop everything inside the chest
+	for stack in inventory.items:
+		if not stack.is_empty():
+			ItemDropEntity.spawn(drop_pos, stack.item_id, stack.count)
+			
+	# 3. Tell the server AND all clients to delete the chest visuals!
+	destroy_chest.rpc()
 
+#endregion
+
+#region Interaction
 func interact_with(mouse_position: Vector2) -> bool:
 	if is_dead:
 		return false
@@ -64,17 +84,19 @@ func interact_with(mouse_position: Vector2) -> bool:
 	
 	return true
 
-
 @rpc('any_peer', 'call_remote', 'reliable')
 func request_open_chest() -> void:
 	# get the ID of the player asking
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: # host clicked on it
 		sender_id = 1 
-		
+	
 	# if the chest is free, or if the person asking already owns the lock
 	if in_use_by == 0 or in_use_by == sender_id:
 		in_use_by = sender_id
+		
+		# update open state
+		send_open_state(true)
 		
 		# tell that specific player to open their UI
 		if sender_id == 1:
@@ -88,6 +110,7 @@ func request_open_chest() -> void:
 func open_chest_client() -> void:
 	# this only runs on the client who got permission
 	var chest_ui = Globals.player.get_node_or_null("inventory_ui/chest_container")
+	
 	if chest_ui:
 		chest_ui.open_chest(self)
 		Globals.player.get_node("inventory_ui/inventory_container").show() 
@@ -98,53 +121,13 @@ func release_chest() -> void:
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0:
 		sender_id = 1
-		
+	
 	# only the player who locked it is allowed to unlock it
 	if in_use_by == sender_id:
 		in_use_by = 0
-
-func break_place(mouse_position: Vector2) -> bool:
-	if is_dead:
-		return false
-	# check held item
-	var item_stack := Globals.player.my_inventory.get_selected_item()
-	var item := ItemDatabase.get_item(item_stack.item_id)
-	
-	# make sure item is a tool
-	if not item or item is not ToolItem:
-		return false
-	
-	# make sure tool is an axe (since it's a wooden chest)
-	if not item.tool_type & ToolItem.ToolType.AXE:
-		return false
-	
-	# deal damage based on the axe's power
-	hp.take_damage(item.tool_power, DamageSource.DamageSourceType.PLAYER)
-	
-	return true
-
-func _on_death() -> void:
-	if is_dead:
-		return
-	
-	kill()
-	
-	if multiplayer.is_server():
-		EntityManager.clear_entity_data(self)
 		
-		# Add a slight offset to center the dropped items on the 2x2 chest
-		var drop_pos = global_position + Vector2(16, 16) 
-		
-		# 1. Drop the chest item itself (Item ID 24)
-		ItemDropEntity.spawn(drop_pos, 24, 1)
-		
-		# 2. Drop everything inside the chest
-		for stack in inventory.items:
-			if not stack.is_empty():
-				ItemDropEntity.spawn(drop_pos, stack.item_id, stack.count)
-				
-		# 3. Tell the server AND all clients to delete the chest visuals!
-		destroy_chest.rpc()
+		# update open state
+		send_open_state(false)
 
 # This RPC forces the node to delete itself on every single player's screen
 @rpc('authority', 'call_local', 'reliable')
@@ -165,6 +148,37 @@ func handle_action(action_info: PackedByteArray) -> void:
 		SYNC_ACTION:
 			var inventory_size := buffer.get_u16()
 			inventory.receive_inventory(buffer.get_data(inventory_size)[1])
+		OPEN_STATE_ACTION:
+			var is_open := buffer.get_u8() == 1
+			
+			if is_open:
+				$'sprite'.frame = 1
+			else:
+				$'sprite'.frame = 0
+
+func send_open_state(is_open: bool) -> void:
+	var inventory_data := inventory.serialize_inventory()
+	
+	var buffer := StreamPeerBuffer.new()
+	buffer.resize(4 + 4 + 2 + 2 + len(inventory_data)) 
+	
+	# entity id
+	buffer.put_u32(id)
+	
+	# time
+	buffer.put_float(NetworkTime.time)
+	
+	# action id
+	buffer.put_u16(OPEN_STATE_ACTION)
+	
+	# state
+	buffer.put_u8(1 if is_open else 0)
+	
+	for player_id in interested_players.keys():
+		if player_id not in ServerManager.connected_players:
+			continue
+		
+		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
 
 func send_inventory_update() -> void:
 	var inventory_data := inventory.serialize_inventory()
@@ -188,7 +202,7 @@ func send_inventory_update() -> void:
 	buffer.put_data(inventory_data)
 	
 	for player_id in interested_players.keys():
-		if not ServerManager.get_player(player_id):
+		if player_id not in ServerManager.connected_players:
 			continue
 		
 		Globals.entity_sync.queue_action.rpc_id(player_id, buffer.data_array)
@@ -255,6 +269,12 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	match tile_variant:
 		&'normal':
 			entity.variant = ChestVariant.NORMAL
+		&'oak':
+			entity.variant = ChestVariant.OAK
+		&'spruce':
+			entity.variant = ChestVariant.SPRUCE
+		&'palm':
+			entity.variant = ChestVariant.PALM
 	
 	entity.setup_variant()
 	

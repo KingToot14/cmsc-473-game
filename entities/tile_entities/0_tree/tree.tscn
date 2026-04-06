@@ -25,6 +25,7 @@ top_variants = Dictionary[int, Texture2D]({
 0: ExtResource("3_ered6"),
 1: ExtResource("3_4vy6n")
 })
+use_standard_damage = false
 always_snapshot = false
 interpolator = NodePath("snapshot_interpolator")
 counts_towards_spawn_cap = false

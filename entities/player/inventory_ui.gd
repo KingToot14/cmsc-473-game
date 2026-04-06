@@ -23,7 +23,6 @@ var hovered_slot := -1
 @onready var armor_grid = $"../armor_container/armor_grid"
 
 # --- Functions --- #
-
 func _input(event: InputEvent) -> void:
 	# check for hotbar inputs
 	for i in range(len(HOTBAR_INPUTS)):

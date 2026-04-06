@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="TileEntityInfo" format=3 uid="uid://bc8suisc7bdh0"]
+
+[ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="1_0vxj6"]
+[ext_resource type="Texture2D" uid="uid://bxc6r4i6rpn12" path="res://entities/tile_entities/5_trapdoor/oak.png" id="1_77hpq"]
+[ext_resource type="PackedScene" uid="uid://ctht5lalx3bpl" path="res://entities/tile_entities/5_trapdoor/trapdoor.tscn" id="1_g2mn7"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_77hpq"]
+[ext_resource type="Script" uid="uid://bb0rkth4nd6kt" path="res://entities/tile_entities/5_trapdoor/trapdoor_entity.gd" id="2_622r3"]
+[ext_resource type="Texture2D" uid="uid://bp7m8iuyusc04" path="res://entities/tile_entities/5_trapdoor/spruce.png" id="2_ski22"]
+[ext_resource type="Texture2D" uid="uid://3hnavdplblhj" path="res://entities/tile_entities/5_trapdoor/palm.png" id="3_hjs1e"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ekox5"]
+atlas = ExtResource("1_77hpq")
+region = Rect2(0, 16, 0, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2mn7"]
+atlas = ExtResource("2_ski22")
+region = Rect2(0, 16, 0, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_622r3"]
+atlas = ExtResource("3_hjs1e")
+region = Rect2(0, 16, 0, 8)
+
+[resource]
+script = ExtResource("1_0vxj6")
+preview_sprite = SubResource("AtlasTexture_ekox5")
+preview_sprite_variants = Dictionary[StringName, Texture2D]({
+&"oak": SubResource("AtlasTexture_ekox5"),
+&"palm": SubResource("AtlasTexture_622r3"),
+&"spruce": SubResource("AtlasTexture_g2mn7")
+})
+preview_sprite_offset = Vector2(8, 4)
+entity_scene = ExtResource("1_g2mn7")
+entity_script = ExtResource("2_622r3")
+metadata/_custom_type_script = "uid://bnvse52ucpibv"

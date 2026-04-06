@@ -27,14 +27,6 @@ func setup_variant() -> void:
 	open_sprite.region = Rect2i(0, 0, 16, 26)
 	close_sprite.atlas = variant_sprites[variant]
 	close_sprite.region = Rect2i(16, 0, 8, 26)
-	
-	match variant:
-		DoorVariant.OAK:
-			pass
-		DoorVariant.SPRUCE:
-			pass
-		DoorVariant.PALM:
-			pass
 
 func spawn_item() -> void:
 	var world_position := TileManager.tile_to_world(tile_position.x, tile_position.y, true)
@@ -42,6 +34,10 @@ func spawn_item() -> void:
 	match variant:
 		DoorVariant.OAK:
 			ItemDropEntity.spawn(world_position, 74, 1)
+		DoorVariant.SPRUCE:
+			ItemDropEntity.spawn(world_position, 79, 1)
+		DoorVariant.PALM:
+			ItemDropEntity.spawn(world_position, 84, 1)
 
 #endregion
 
@@ -98,7 +94,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 4
 		
 		$'shape'.position.x = 4
-		$'shape'.shape.size = Vector2(7.5, 25.5)
+		$'shape'.shape.size = Vector2(7.5, 23.0)
 		$'hitbox'.position.x = 4
 		
 		is_open = false
@@ -110,7 +106,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 0
 		
 		$'shape'.position.x = 0
-		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'shape'.shape.size = Vector2(15.5, 23.0)
 		$'hitbox'.position.x = 0
 		
 		is_open = true
@@ -122,7 +118,7 @@ func set_door_state(state: int) -> void:
 		$'sprite'.position.x = 8
 		
 		$'shape'.position.x = 8
-		$'shape'.shape.size = Vector2(15.5, 25.5)
+		$'shape'.shape.size = Vector2(15.5, 23.0)
 		$'hitbox'.position.x = 8
 		
 		is_open = true
@@ -202,23 +198,6 @@ func interact_with(_mouse_position: Vector2) -> bool:
 	
 	return true
 
-func break_place(_mouse_position: Vector2) -> bool:
-	# check held item
-	var item_stack := Globals.player.my_inventory.get_selected_item()
-	var item := ItemDatabase.get_item(item_stack.item_id)
-	
-	# make sure item is a tool
-	if not item or item is not ToolItem:
-		return false
-	
-	# make sure tool is an axe
-	if not item.tool_type & ToolItem.ToolType.PICKAXE:
-		return false
-	
-	hp.take_damage(item.tool_power, DamageSource.DamageSourceType.PLAYER)
-	
-	return true
-
 #endregion
 
 #region Serialization
@@ -270,8 +249,12 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	match tile_variant:
-		&'OAK':
+		&'oak':
 			entity.variant = DoorVariant.OAK
+		&'spruce':
+			entity.variant = DoorVariant.SPRUCE
+		&'palm':
+			entity.variant = DoorVariant.PALM
 	
 	entity.setup_variant()
 	
