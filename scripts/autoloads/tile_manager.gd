@@ -529,8 +529,6 @@ func receive_liquid_update(new_data: PackedByteArray) -> void:
 	
 	# unpack data
 	var size := buffer.get_u16()
-	var batched := size > 32
-	batched = true
 	
 	for i in range(size):
 		# unpack position
@@ -543,13 +541,8 @@ func receive_liquid_update(new_data: PackedByteArray) -> void:
 		
 		set_liquid_level(tile_x, tile_y, liquid_level)
 		set_liquid_type(tile_x, tile_y, type)
-		if not batched:
-			update_liquid_texture(tile_x, tile_y, false)
 	
-	if batched:
-		build_liquid_texture()
-	else:
-		push_liquid_texture_update()
+	build_liquid_texture()
 
 #endregion
 

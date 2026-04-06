@@ -131,9 +131,11 @@ func handle_liquid_interaction(x: int, y: int, liquid_state: int) -> void:
 	match liquid_state:
 		WATER_TYPE + LAVA_TYPE:
 			# set block to obsidian
-			TileManager.set_block(x, y, 94)
+			TileManager.set_block(x, y, 28)
 			TileManager.set_liquid_level(x, y, 0)
 			TileManager.set_liquid_type(x, y, 0)
+			
+			TileManager.send_tile_update(x, y)
 
 func flow_down(x: int, y: int, liquid_level: int, liquid_type: int) -> int:
 	# check if tile below is solid
@@ -149,12 +151,12 @@ func flow_down(x: int, y: int, liquid_level: int, liquid_type: int) -> int:
 		var new_level := liquid_level - 16
 		
 		if new_level <= 0:
-			TileManager.set_water_level(x, y, 0)
-			TileManager.set_water_type(x, y, 0)
+			TileManager.set_liquid_level(x, y, 0)
+			TileManager.set_liquid_type(x, y, 0)
 			
 			remove_from_queue(Vector2i(x, y), 0)
 		else:
-			TileManager.set_water_level(x, y, new_level)
+			TileManager.set_liquid_level(x, y, new_level)
 			
 			add_to_queue(Vector2i(x, y), liquid_level)
 		
@@ -729,6 +731,7 @@ func settle_all() -> void:
 
 func settle_tile(x: int, y: int, liquid_level: int) -> void:
 	var world_size := Globals.world_size
+	var type := TileManager.get_liquid_type(x, y)
 	
 	# clear water level
 	TileManager.set_liquid_level(x, y, 0)
@@ -774,9 +777,12 @@ func settle_tile(x: int, y: int, liquid_level: int) -> void:
 			
 			down_tile = TileManager.get_block_unsafe(x + dist * dir, y + 1)
 			down_level = TileManager.get_liquid_level(x + dist * dir, y + 1)
+			var down_type := TileManager.get_liquid_type(x + dist * dir, y + 1)
 			
 			# try to spread down
-			if down_tile == 0 and down_level > 0 and down_level < MAX_WATER_LEVEL:
+			if down_tile == 0 and down_level > 0 and down_level < MAX_WATER_LEVEL and (
+				down_type == 0 or down_type == type
+			):
 				var diff := MAX_WATER_LEVEL - down_level
 				diff = mini(diff, liquid_level)
 				
@@ -833,5 +839,6 @@ func settle_tile(x: int, y: int, liquid_level: int) -> void:
 	
 	# set final position
 	TileManager.set_liquid_level(x, y, liquid_level)
+	TileManager.set_liquid_type(x, y, type)
 
 #endregion
