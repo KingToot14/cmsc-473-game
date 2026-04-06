@@ -38,7 +38,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 			continue
 		
 		# check water level
-		if TileManager.get_water_level(x, y) > 0 or TileManager.get_water_level(x + 1, y) > 0:
+		if TileManager.get_liquid_level(x, y) > 0 or TileManager.get_liquid_level(x + 1, y) > 0:
 			x += 1
 			continue
 		

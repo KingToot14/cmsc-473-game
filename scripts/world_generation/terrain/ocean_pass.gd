@@ -29,7 +29,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 			if is_water(x, y):
 				TileManager.set_block_unsafe(x, y, 0)
 				TileManager.set_wall_unsafe(x, y, 0)
-				TileManager.set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+				TileManager.set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+				TileManager.set_liquid_type(x, y, WaterUpdater.WATER_TYPE)
 			elif is_sand(x, y):
 				TileManager.set_block_unsafe(x, y, 8)
 	
@@ -45,7 +46,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 			if is_water(x, y):
 				TileManager.set_block_unsafe(world_size.x - x - 1, y, 0)
 				TileManager.set_wall_unsafe(world_size.x - x - 1, y, 0)
-				TileManager.set_water_level(world_size.x - x - 1, y, WaterUpdater.MAX_WATER_LEVEL)
+				TileManager.set_liquid_level(world_size.x - x - 1, y, WaterUpdater.MAX_WATER_LEVEL)
+				TileManager.set_liquid_type(world_size.x - x - 1, y, WaterUpdater.WATER_TYPE)
 			elif is_sand(x, y):
 				TileManager.set_block_unsafe(world_size.x - x - 1, y, 8)
 

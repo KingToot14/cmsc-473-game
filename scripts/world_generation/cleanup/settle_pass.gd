@@ -15,6 +15,6 @@ func perform_pass(_gen: WorldGeneration) -> void:
 	pass
 	
 	# settle water
-	Globals.water_updater.settle_all()
+	Globals.liquid_updater.settle_all()
 	
-	await Globals.water_updater.settled
+	await Globals.liquid_updater.settled

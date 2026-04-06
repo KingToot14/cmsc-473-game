@@ -288,14 +288,26 @@ func apply_input(delta: float) -> void:
 		floori(global_position.y)
 	)
 	
-	var in_water := \
-		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
-		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	# check if feet is underwater
+	var in_water := (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > WaterUpdater.WATER_TYPE
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	)
 	
 	# check if head is under water
-	var head_in_water := \
-		TileManager.get_water_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
-		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	var head_in_water := (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > WaterUpdater.WATER_TYPE
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	)
+	
+	# check if any tile is touching lava
+	check_lava(tile_pos)
 	
 	# start drowning
 	if head_in_water and not multiplayer.is_server():
@@ -401,6 +413,15 @@ func apply_input(delta: float) -> void:
 		) - Vector2(4, 4)
 	)
 
+func check_lava(tile_pos: Vector2i) -> void:
+	for x in range(2):
+		for y in range(3):
+			# check if lava
+			if TileManager.get_liquid_type(tile_pos.x + x, tile_pos.y - y):
+				if TileManager.get_liquid_level(tile_pos.x + x, tile_pos.y - y) > 32:
+					hp.take_damage(1, DamageSource.DamageSourceType.WORLD)
+					return
+
 ## Force an [method is_on_floor] update since NetFox can have some issues when running
 ## rollbacks and detecting the floor.
 func update_is_on_floor() -> void:
@@ -437,6 +458,8 @@ func done_initial_load() -> void:
 		# enable shaders
 		$'grid_overlay'.show()
 		$'water_overlay'.show()
+		$'lava_overlay'.show()
+		$'glow_holder/lava_glow'.show()
 		$'light_overlay'.show()
 
 #endregion

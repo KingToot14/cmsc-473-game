@@ -86,7 +86,7 @@ var server_map: ServerTileMap
 var world_map: WorldTileMap
 
 var block_updater: BlockUpdater
-var water_updater: WaterUpdater
+var liquid_updater: WaterUpdater
 var light_updater: LightUpdater
 
 # - Player Interactions

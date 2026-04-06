@@ -212,6 +212,8 @@ chest_interact={
 
 [layer_names]
 
+2d_render/layer_1="main"
+2d_render/layer_2="lighting"
 2d_physics/layer_1="world"
 2d_physics/layer_2="player"
 2d_physics/layer_3="player_projectile"
@@ -238,10 +240,6 @@ mouse_position={
 "type": "vec2",
 "value": Vector2(0, 0)
 }
-water_texture={
-"type": "sampler2D",
-"value": "res://water_test.png"
-}
 light_texture={
 "type": "sampler2D",
 "value": ""
@@ -261,4 +259,12 @@ sky_texture={
 current_time={
 "type": "float",
 "value": 0.5
+}
+lava_texture={
+"type": "sampler2D",
+"value": "res://water_test.png"
+}
+water_texture={
+"type": "sampler2D",
+"value": ""
 }

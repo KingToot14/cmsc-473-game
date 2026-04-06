@@ -8,9 +8,10 @@ global uniform vec2 light_offset;
 global uniform float current_time;
 
 uniform sampler2D sky_gradient;
-//uniform vec4 sky_color: source_color = vec4(1.0);
 
 varying vec2 world_position;
+
+uniform sampler2D light_viewport;
 
 // --- Functions --- //
 void vertex() {
@@ -24,7 +25,8 @@ void fragment() {
 	vec2 tex_size = vec2(textureSize(light_texture, 0));
 	vec4 sky_color = texture(sky_gradient, vec2(current_time, 0.0));
 	
-	vec4 color = texture(light_texture, tile_position / tex_size) + 
+	vec4 color = texture(light_texture, tile_position / tex_size) +
+		texture(light_viewport, UV) +
 		sky_color * texture(sky_texture, tile_position / tex_size).r;
 	
 	COLOR *= color;

@@ -43,8 +43,6 @@
 [ext_resource type="Shader" uid="uid://dx7x5jlhrdcwk" path="res://blocks/_resources/light_renderer.gdshader" id="28_8q4fm"]
 [ext_resource type="Shader" uid="uid://dy7gjudcsx5yp" path="res://blocks/_resources/lava_renderer.gdshader" id="35_2h0qb"]
 [ext_resource type="Script" uid="uid://dxrcqdbm8wdgn" path="res://entities/player/chest_ui.gd" id="35_np63p"]
-[ext_resource type="Shader" uid="uid://uqt715s0dnrc" path="res://blocks/_resources/lava_glow_renderer.gdshader" id="36_g3pa7"]
-[ext_resource type="Script" uid="uid://betgog4qxu8gb" path="res://scripts/viewport_setup.gd" id="37_mmk7k"]
 [ext_resource type="PackedScene" uid="uid://ff25uaoxac3r" path="res://ui/inventory/armor_slot.tscn" id="40_pacje"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
@@ -782,8 +780,6 @@ shader_parameter/line_size = 1.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_24ehl"]
 shader = ExtResource("24_bwdx1")
-shader_parameter/water_color = Color(0, 0, 1, 0.6)
-shader_parameter/foam_color = Color(0, 0, 1, 0.6)
 
 [sub_resource type="Resource" id="Resource_2soq1"]
 script = ExtResource("27_2soq1")
@@ -811,13 +807,6 @@ shader = ExtResource("35_2h0qb")
 shader_parameter/water_color = Color(0.9, 0.23699999, 0.13499998, 0.9019608)
 shader_parameter/foam_color = Color(0.95, 0.57, 0.37999997, 0.9019608)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7otdo"]
-shader = ExtResource("36_g3pa7")
-shader_parameter/glow_color = Color(1, 0.5, 0.25, 1)
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_mmk7k"]
-viewport_path = NodePath("sub_viewport")
-
 [sub_resource type="Gradient" id="Gradient_pacje"]
 offsets = PackedFloat32Array(0, 0.16666667, 0.25, 0.33333334, 0.5, 0.6666667, 0.75, 0.8333333, 1)
 colors = PackedColorArray(0.14901961, 0.14901961, 0.2, 1, 0.14901961, 0.14901961, 0.2, 1, 0.68, 0.58933336, 0.544, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.68, 0.544, 0.68, 1, 0.15, 0.15, 0.2, 1, 0.14901961, 0.14901961, 0.2, 1)
@@ -829,10 +818,8 @@ gradient = SubResource("Gradient_pacje")
 width = 960
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_np63p"]
-resource_local_to_scene = true
 shader = ExtResource("28_8q4fm")
 shader_parameter/sky_gradient = SubResource("GradientTexture1D_2h0qb")
-shader_parameter/light_viewport = SubResource("ViewportTexture_mmk7k")
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 25
@@ -845,16 +832,6 @@ water_gravity_mod = 0.25
 water_movement_mod = 0.3
 knockback_power = 160.0
 hp = NodePath("player_hp")
-
-[node name="cam_sync" type="RemoteTransform2D" parent="." unique_id=482058131]
-remote_path = NodePath("../sub_viewport/camera")
-update_rotation = false
-update_scale = false
-
-[node name="glow_sync" type="RemoteTransform2D" parent="." unique_id=1817708277]
-remote_path = NodePath("../glow_holder")
-update_rotation = false
-update_scale = false
 
 [node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=335326042]
 stream = SubResource("AudioStreamPolyphonic_ghoj8")
@@ -1183,35 +1160,9 @@ water_rules = Dictionary[int, ExtResource("27_2soq1")]({
 })
 
 [node name="lava_overlay" type="ColorRect" parent="." unique_id=745821424]
-visible = false
 show_behind_parent = true
 z_index = 10
 material = SubResource("ShaderMaterial_mmk7k")
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -500.0
-offset_top = -300.0
-offset_right = 500.0
-offset_bottom = 300.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="glow_holder" type="Node2D" parent="." unique_id=528999383]
-top_level = true
-light_mask = 2
-visibility_layer = 2
-
-[node name="lava_glow" type="ColorRect" parent="glow_holder" unique_id=1895365802]
-visible = false
-show_behind_parent = true
-light_mask = 2
-visibility_layer = 2
-z_index = 10
-material = SubResource("ShaderMaterial_7otdo")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -1245,20 +1196,6 @@ mouse_filter = 2
 
 [node name="placement_preview" type="Sprite2D" parent="." unique_id=196635326]
 self_modulate = Color(1, 1, 1, 0.7058824)
-
-[node name="sub_viewport" type="SubViewport" parent="." unique_id=2078714227]
-disable_3d = true
-transparent_bg = true
-handle_input_locally = false
-canvas_cull_mask = 4293918722
-size = Vector2i(1000, 600)
-script = ExtResource("37_mmk7k")
-target_layer = 1
-
-[node name="camera" type="Camera2D" parent="sub_viewport" unique_id=1481074132]
-limit_enabled = false
-limit_left = 0
-limit_top = 0
 
 [node name="inventory_ui" type="CanvasLayer" parent="." unique_id=1897387478]
 

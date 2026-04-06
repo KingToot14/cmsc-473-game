@@ -139,8 +139,9 @@ func start(gen: WorldGeneration) -> void:
 						TileManager.set_wall_unsafe(x, y, replace_tile)
 					ReplaceLayer.LIQUID:
 						TileManager.set_block_unsafe(x, y, 0)
-						TileManager.set_water_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
-		
+						TileManager.set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
+						TileManager.set_liquid_type(x, y, replace_tile)
+
 		# move towards direction
 		position += direction
 		
