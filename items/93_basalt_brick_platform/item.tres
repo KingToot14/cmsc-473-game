@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bbfshbaonjvpd"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_3bh3o"]
+[ext_resource type="Texture2D" uid="uid://csso8uewprwvu" path="res://blocks/27_basalt_brick_platform/icon.png" id="2_3bh3o"]
+
+[resource]
+script = ExtResource("1_3bh3o")
+tile_id = 27
+use_speed = 0.25
+item_name = "Basalt Brick Platform"
+texture = ExtResource("2_3bh3o")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
