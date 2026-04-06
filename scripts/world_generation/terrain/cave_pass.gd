@@ -41,7 +41,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 		var steps := gen.rng.randi_range(50, 300)
 		
 		if gen.rng.randf() < 0.10:
-			TileRunner.new(size, steps, x, y, 0).set_replace_layer(TileRunner.ReplaceLayer.LIQUID).start(gen)
+			var liquid := WaterUpdater.LAVA_TYPE if (y > gen.lava_line) else WaterUpdater.WATER_TYPE
+			TileRunner.new(size, steps, x, y, liquid)\
+				.set_replace_layer(TileRunner.ReplaceLayer.LIQUID).start(gen)
 		else:
 			TileRunner.new(size, steps, x, y, 0).start(gen)
 	

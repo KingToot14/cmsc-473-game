@@ -118,6 +118,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 	gen.surface_low = surface_low
 	gen.underground_line = surface_low + 64
 	gen.cavern_line = underground_low
+	gen.lava_line = gen.cavern_line + floori((world_size.y - gen.cavern_line) * 0.40)
 	
 	Globals.surface = surface_low
 	Globals.underground = gen.underground_line
