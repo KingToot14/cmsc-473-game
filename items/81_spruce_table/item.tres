@@ -7,7 +7,7 @@
 script = ExtResource("1_4gs70")
 tile_type = 2
 tile_id = 6
-tile_variant = &"oak"
+tile_variant = &"spruce"
 use_speed = 0.25
 item_name = "Spruce Table"
 texture = ExtResource("2_4gs70")

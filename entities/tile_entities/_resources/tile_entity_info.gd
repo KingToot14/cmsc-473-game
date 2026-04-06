@@ -8,6 +8,8 @@ extends EntityInfo
 @export var preview_position_offset := Vector2(-4.0, 0.0)
 @export var preview_sprite_offset := Vector2(8.0, 0.0)
 
+@export var face_towards_player := false
+
 # --- Functions --- #
 func setup_placement_preview(mouse_position: Vector2, variant: StringName) -> void:
 	# set tile position
@@ -29,8 +31,17 @@ func setup_placement_preview(mouse_position: Vector2, variant: StringName) -> vo
 			preview.texture = preview_sprite
 	else:
 		preview.texture = preview_sprite
+	
+	# check for flip direction
+	if face_towards_player and Globals.player.face_direction == -1:
+		preview.flip_h = true
+	else:
+		preview.flip_h = false
 
-@rpc('any_peer', 'call_remote', 'reliable')
-@warning_ignore('unused_parameter')
 func create_entity(player_id: int, tile_pos: Vector2i, variant: StringName) -> void:
-	entity_script.create(tile_pos, variant)
+	if face_towards_player:
+		var player := ServerManager.get_player(player_id)
+		
+		entity_script.create(tile_pos, variant, player.face_direction)
+	else:
+		entity_script.create(tile_pos, variant)
