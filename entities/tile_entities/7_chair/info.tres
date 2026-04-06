@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="TileEntityInfo" format=3 uid="uid://bu2qyvxk5olvs"]
+
+[ext_resource type="Texture2D" uid="uid://ov4mclyjr040" path="res://entities/tile_entities/7_chair/oak.png" id="1_8q7q0"]
+[ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="1_mpnut"]
+[ext_resource type="PackedScene" uid="uid://bmt2l3cwdi3if" path="res://entities/tile_entities/7_chair/chair.tscn" id="1_yhxdq"]
+[ext_resource type="Texture2D" uid="uid://c8q6r27lrg8m8" path="res://entities/tile_entities/7_chair/spruce.png" id="2_eyb8i"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_g36w4"]
+[ext_resource type="Script" uid="uid://brdb36p733di7" path="res://entities/tile_entities/7_chair/chair_entity.gd" id="2_h3yss"]
+[ext_resource type="Texture2D" uid="uid://bqkthwuysngr6" path="res://entities/tile_entities/7_chair/palm.png" id="3_yhxdq"]
+
+[resource]
+script = ExtResource("1_mpnut")
+preview_sprite = ExtResource("1_8q7q0")
+preview_sprite_variants = Dictionary[StringName, Texture2D]({
+&"oak": ExtResource("1_8q7q0"),
+&"palm": ExtResource("3_yhxdq"),
+&"spruce": ExtResource("2_eyb8i")
+})
+preview_position_offset = Vector2(0, 0)
+preview_sprite_offset = Vector2(4, 4)
+entity_scene = ExtResource("1_yhxdq")
+entity_script = ExtResource("2_h3yss")
+metadata/_custom_type_script = "uid://bnvse52ucpibv"

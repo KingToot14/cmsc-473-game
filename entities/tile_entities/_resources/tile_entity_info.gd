@@ -29,3 +29,8 @@ func setup_placement_preview(mouse_position: Vector2, variant: StringName) -> vo
 			preview.texture = preview_sprite
 	else:
 		preview.texture = preview_sprite
+
+@rpc('any_peer', 'call_remote', 'reliable')
+@warning_ignore('unused_parameter')
+func create_entity(player_id: int, tile_pos: Vector2i, variant: StringName) -> void:
+	entity_script.create(tile_pos, variant)

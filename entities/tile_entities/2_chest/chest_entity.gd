@@ -69,18 +69,6 @@ func spawn_item() -> void:
 #endregion
 
 #region Interaction
-#func _unhandled_input(event: InputEvent) -> void:
-	#if event.is_action_pressed("interact"):
-		#var mouse_pos = get_global_mouse_position()
-		#var chest_size_pixels = TileManager.TILE_SIZE * 2
-		#var chest_size = Vector2(chest_size_pixels, chest_size_pixels)
-		#var top_left_corner = global_position - Vector2(0, TileManager.TILE_SIZE)
-		#var click_rect = Rect2(top_left_corner, chest_size)
-		#
-		#if click_rect.has_point(mouse_pos):
-			#if interact_with(mouse_pos):
-				#get_viewport().set_input_as_handled()
-
 func interact_with(mouse_position: Vector2) -> bool:
 	if is_dead:
 		return false
