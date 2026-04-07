@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Item" format=3 uid="uid://fbtux6ohw0uu"]
+
+[ext_resource type="Script" uid="uid://cbpxcb7ird2qr" path="res://items/_resources/item.gd" id="1_sewn6"]
+[ext_resource type="Texture2D" uid="uid://csau102rx050i" path="res://items/98_gold_bar/icon.png" id="2_sewn6"]
+
+[resource]
+script = ExtResource("1_sewn6")
+item_name = "Gold Bar"
+texture = ExtResource("2_sewn6")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
