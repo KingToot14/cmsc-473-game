@@ -12,14 +12,13 @@ var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
 
 var owner_id := 0
-
+#Crafting Stuff
 var recipes: Array[Recipe] = [] #add more recipes in the inspector
+var _is_crafting := false
 
 #Armor Stuff
 signal armor_updated(slot_index: int) # 0: Head, 1: Body, 2: Legs
-
-# Holds Head, Body, and Legs respectively
-var armor_items: Array[ItemStack] = [ItemStack.new(-1, 0), ItemStack.new(-1, 0), ItemStack.new(-1, 0)]
+var armor_items: Array[ItemStack] = [ItemStack.new(-1, 0), ItemStack.new(-1, 0), ItemStack.new(-1, 0)] # holds head, body, and legs respectively
 
 # --- Functions --- #
 func _init():
@@ -34,9 +33,9 @@ func add_item(item_id: int, amount: int) -> int:
 		return 0
 	
 	var item: Item = ItemDatabase.get_item(item_id)
-	
 	if not item:
 		return amount
+	var original_amount = amount 
 	
 	# attempt to add to existing stacks
 	for stack in items:
@@ -47,13 +46,10 @@ func add_item(item_id: int, amount: int) -> int:
 			amount -= adding
 			if amount <= 0: 
 				inventory_updated.emit()
-				
-				# send to server
 				if multiplayer.is_server():
 					send_inventory()
 				else:
-					send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
-				
+					send_add_item.rpc_id(Globals.SERVER_ID, item_id, original_amount) 
 				return 0
 	
 	# add to first empty stack
@@ -62,20 +58,16 @@ func add_item(item_id: int, amount: int) -> int:
 			stack.item_id = item_id
 			stack.count = amount
 			inventory_updated.emit()
-			
-			# send to server
 			if multiplayer.is_server():
 				send_inventory()
 			else:
-				send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
-			
+				send_add_item.rpc_id(Globals.SERVER_ID, item_id, original_amount) 
 			return 0
 	
-	# send to server
 	if multiplayer.is_server():
 		send_inventory()
 	else:
-		send_add_item.rpc_id(Globals.SERVER_ID, item_id, amount)
+		send_add_item.rpc_id(Globals.SERVER_ID, item_id, original_amount) 
 	
 	return amount # return leftovers if full
 
@@ -84,9 +76,10 @@ func remove_item(item_id: int, count: int) -> void:
 		return
 	
 	var item: Item = ItemDatabase.get_item(item_id)
-	
 	if not item:
 		return
+		
+	var original_count = count
 	
 	for stack in items:
 		if count <= 0:
@@ -103,14 +96,12 @@ func remove_item(item_id: int, count: int) -> void:
 			else:
 				count = 0
 	
-	# send to server
 	if multiplayer.is_server():
 		send_inventory()
 	else:
-		send_remove_item.rpc_id(Globals.SERVER_ID, item_id, count)
+		send_remove_item.rpc_id(Globals.SERVER_ID, item_id, original_count)
 	
 	inventory_updated.emit()
-
 
 # Logic to handle picking up/swapping items at a specific slot
 func interact_with_slot(index: int) -> void:
@@ -288,18 +279,26 @@ func load_inventory() -> void:
 #region Synchronization
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_add_item(item_id: int, amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return
 	add_item(item_id, amount)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_remove_item(item_id: int, amount: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return
 	remove_item(item_id, amount)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_remove_item_at(item_id: int, amount: int, slot: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return
 	remove_item_at(item_id, amount, slot)
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_mouse_input(index: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return
 	interact_with_slot(index)
 
 func serialize_inventory() -> PackedByteArray:
@@ -325,7 +324,8 @@ func serialize_inventory() -> PackedByteArray:
 	return buffer.data_array
 
 func send_inventory() -> void:
-	# send to client
+	if _is_crafting: 
+		return #don't send while crafting to avoid overloading network
 	receive_inventory.rpc_id(owner_id, serialize_inventory())
 
 @rpc('authority', 'call_remote', 'reliable')
@@ -360,35 +360,51 @@ func _load_recipes() -> void:
 	var dir = DirAccess.open(path)
 	
 	if dir:
+		var file_names: Array[String] = []
 		dir.list_dir_begin()
 		var file_name = dir.get_next().trim_suffix(".remap")
 		
+		# 1. Collect all valid file names first
 		while file_name != "":
 			if file_name.ends_with(".tres") or file_name.ends_with(".res"):
-				var recipe = load(path + "/" + file_name) as Recipe
-				if recipe:
-					recipes.append(recipe)
+				file_names.append(file_name)
 			file_name = dir.get_next()
+		
+		# 2. Sort the array alphabetically so indexes match everywhere!
+		file_names.sort()
+		
+		# 3. Load the resources
+		for f in file_names:
+			var recipe = load(path + "/" + f) as Recipe
+			if recipe:
+				recipes.append(recipe)
 
 # requests the server to craft a specific recipe
 func request_craft(recipe_index: int) -> void:
 	if multiplayer.is_server():
-		
 		if recipe_index >= 0 and recipe_index < recipes.size():
 			var recipe = recipes[recipe_index]
 			if CraftingManager.can_craft(recipe, self):
+				_is_crafting = true # Pause networking
 				CraftingManager.craft_item(recipe, self) 
+				_is_crafting = false # Resume networking
+				send_inventory() # Send ONE single final update
 	else:
-		send_craft_request.rpc_id(1, recipe_index)
+		send_craft_request.rpc_id(Globals.SERVER_ID, recipe_index)
 
 
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_craft_request(recipe_index: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return 
+		
 	request_craft(recipe_index)
 
 #Armor sync
 @rpc('any_peer', 'call_remote', 'reliable')
 func send_armor_input(index: int) -> void:
+	if multiplayer.get_remote_sender_id() != owner_id:
+		return 
 	interact_with_armor_slot(index)
 
 
