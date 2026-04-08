@@ -24,6 +24,7 @@ metadata/_custom_type_script = "uid://cqx62b7syxl08"
 [node name="sprite" type="Sprite2D" parent="." unique_id=1160549193]
 position = Vector2(8, 4)
 texture = ExtResource("2_7koqc")
+hframes = 3
 
 [node name="entity_interpolator" type="Node" parent="." unique_id=475839953 node_paths=PackedStringArray("root")]
 script = ExtResource("3_hcmix")

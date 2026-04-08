@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://d1w66o8kvkds" path="res://entities/_resources/combat/entity_pool_hp.gd" id="3_a71pf"]
 [ext_resource type="Texture2D" uid="uid://daf6booejc2aq" path="res://entities/tile_entities/0_tree/top.png" id="3_ered6"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_awuoa"]
+[ext_resource type="Texture2D" uid="uid://bcck55fedah27" path="res://entities/tile_entities/0_tree/palm_top.png" id="4_nyccr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ered6"]
 resource_local_to_scene = true
@@ -23,7 +24,8 @@ collision_mask = 0
 script = ExtResource("1_h6ae8")
 top_variants = Dictionary[int, Texture2D]({
 0: ExtResource("3_ered6"),
-1: ExtResource("3_4vy6n")
+1: ExtResource("3_4vy6n"),
+2: ExtResource("4_nyccr")
 })
 use_standard_damage = false
 always_snapshot = false
