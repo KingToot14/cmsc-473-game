@@ -83,11 +83,7 @@ func break_place(_mouse_position: Vector2) -> bool:
 
 #region Placement
 func setup_variant() -> void:
-	match variant:
-		TreeEntity.TreeVariant.FOREST:
-			print("Forest")
-		TreeEntity.TreeVariant.WINTER:
-			print("Winter")
+	$'sprite'.frame = int(variant)
 
 #endregion
 
@@ -124,6 +120,8 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# growth state
 	buffer.put_u8(growth)
+	
+	setup_variant()
 
 #endregion
 

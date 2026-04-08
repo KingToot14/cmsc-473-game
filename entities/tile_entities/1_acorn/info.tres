@@ -6,12 +6,30 @@
 [ext_resource type="Texture2D" uid="uid://dkfpr876efkey" path="res://entities/tile_entities/1_acorn/sprite.png" id="3_d05a8"]
 [ext_resource type="Script" uid="uid://ddjlewfse3la8" path="res://entities/tile_entities/1_acorn/acorn_entity_info.gd" id="4_d05a8"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_d05a8"]
+atlas = ExtResource("3_d05a8")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vid5m"]
+load_path = "res://.godot/imported/sprite.png-900000f4e76d356afafb6843a264926a.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6xm47"]
+atlas = SubResource("CompressedTexture2D_vid5m")
+region = Rect2(16, 0, 16, 0)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_uh2qe"]
+load_path = "res://.godot/imported/sprite.png-900000f4e76d356afafb6843a264926a.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ql1y"]
+atlas = SubResource("CompressedTexture2D_uh2qe")
+region = Rect2(32, 0, 16, 0)
+
 [resource]
 script = ExtResource("4_d05a8")
 preview_sprites = Dictionary[int, Texture2D]({
-0: ExtResource("3_d05a8"),
-1: ExtResource("3_d05a8"),
-2: ExtResource("3_d05a8")
+0: SubResource("AtlasTexture_d05a8"),
+1: SubResource("AtlasTexture_6xm47"),
+2: SubResource("AtlasTexture_6ql1y")
 })
 preview_sprite = ExtResource("3_d05a8")
 preview_sprite_offset = Vector2(8, 4)
