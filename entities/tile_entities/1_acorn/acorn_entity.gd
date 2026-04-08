@@ -165,34 +165,20 @@ static func get_variant(tile_pos: Vector2i) -> int:
 	var block_bl := TileManager.get_block(tile_pos.x,     tile_pos.y + 1)
 	var block_br := TileManager.get_block(tile_pos.x + 1, tile_pos.y + 1)
 	
-	# check placement blocks
-	var curr_variant := 0
+	# make sure blocks match
+	if block_bl != block_br:
+		return -1
 	
 	match block_bl:
 		# dirt or grass
 		1, 2:
-			curr_variant = TreeEntity.TreeVariant.FOREST
-		
+			return TreeEntity.TreeVariant.FOREST
 		# snow blocks
 		6:
-			curr_variant = TreeEntity.TreeVariant.WINTER
-		# uncatched
-		_:
-			return -1
-	
-	match block_br:
-		# dirt or grass
-		1, 2:
-			if curr_variant == TreeEntity.TreeVariant.FOREST:
-				return TreeEntity.TreeVariant.FOREST
-		
-		# snow blocks
-		6:
-			if curr_variant == TreeEntity.TreeVariant.WINTER:
-				return TreeEntity.TreeVariant.WINTER
-		# uncatched
-		_:
-			return -1
+			return TreeEntity.TreeVariant.WINTER
+		# sand blocks
+		8:
+			return TreeEntity.TreeVariant.PALM
 	
 	return -1
 

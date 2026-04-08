@@ -10,7 +10,8 @@
 script = ExtResource("4_d05a8")
 preview_sprites = Dictionary[int, Texture2D]({
 0: ExtResource("3_d05a8"),
-1: ExtResource("3_d05a8")
+1: ExtResource("3_d05a8"),
+2: ExtResource("3_d05a8")
 })
 preview_sprite = ExtResource("3_d05a8")
 preview_sprite_offset = Vector2(8, 4)

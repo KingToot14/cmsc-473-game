@@ -4,7 +4,8 @@ extends TileEntity
 # --- Enums --- #
 enum TreeVariant {
 	FOREST,
-	WINTER
+	WINTER,
+	PALM
 }
 
 # --- Variables --- #
@@ -215,6 +216,8 @@ func _on_layer_death(pool_id: int) -> void:
 				wood_id = 0
 			TreeVariant.WINTER:
 				wood_id = 54
+			TreeVariant.PALM:
+				wood_id = 56
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
@@ -253,8 +256,6 @@ func _on_layer_death(pool_id: int) -> void:
 				)
 				
 				ItemDropEntity.spawn(acorn_pos, 11, rng.randi_range(1, 2))
-				#rng.randi_range(0, 1) determines left or right side of the tree
-				#-(y + pool_id + 2)) determines what y value
 	
 	curr_height = pool_id
 	

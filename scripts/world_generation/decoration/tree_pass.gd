@@ -11,9 +11,9 @@ func get_pass_name() -> String:
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
-	var x := 300
+	var x := 160
 	
-	while x < world_size.x - 300:
+	while x < world_size.x - 160:
 		var y := 0
 		
 		while y < gen.underground_line and TileManager.get_block_unsafe(x, y + 1) == 0:
@@ -54,5 +54,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 			# snow
 			6:
 				TreeEntity.create(Vector2i(x, y), TreeEntity.TreeVariant.WINTER)
+			# palm
+			8:
+				TreeEntity.create(Vector2i(x, y), TreeEntity.TreeVariant.PALM)
 		
 		x += gen.rng.randi_range(4, 8)
