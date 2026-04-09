@@ -795,28 +795,9 @@ func hurt_block(x: int, y:int, tool_power: int):
 	
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return true
-	
-	var block_id := get_block(x, y)
-	var max_health = get_block_health(block_id)
-	var key := Vector2i(x, y) #key for the dictionary is the position of the block
-	
-	
-	if not block_damaged.has(key):
-		block_damaged[key] = max_health
-		## damage should work only at the value for the dictionary
-
-	block_damaged[key] -= tool_power
-
-
-	if block_damaged[key] <= 0:
-		# block is destroyed
-		block_damaged.erase(key) #deletes the entry in block_damaged
-		var block := BlockDatabase.get_block(block_id) #grabs the block
-		if block:
-			play_sfx(block.break_sfx, x, y, block.break_volume) #plays block break sound.
-		send_destroy_block.rpc_id(1, x, y) #tells the server to destroy the block
-	else:
-		send_hurt_block.rpc_id(1, x, y, tool_power)
+		
+	#tell server to hurt block at cords.
+	send_hurt_block.rpc_id(1, x, y, tool_power)
 	return true
 		
 		
@@ -834,15 +815,30 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 	
 	if not ServerManager.is_player_finalized(multiplayer.get_remote_sender_id()):
 		return
-	
-	return
+		
 	
 
 	# sends the damage state to all nearby clients
-
-	broadcast_block_damage(x, y)
-
+	var block_id := get_block(x, y)
+	var max_health = get_block_health(block_id)
+	var key := Vector2i(x, y) #key for the dictionary is the position of the block
 	
+	
+	if not block_damaged.has(key):
+		block_damaged[key] = max_health
+		## damage should work only at the value for the dictionary
+
+	block_damaged[key] -= tool_power
+
+	if block_damaged[key] <= 0:
+		# block is destroyed
+		block_damaged.erase(key) #deletes the entry in block_damaged
+		send_destroy_block(x, y) #tells the server to destroy the block
+	else:
+		#send damage state to nearby clients.
+		broadcast_block_damage(x, y)
+
+	return
 
 func broadcast_block_damage(x: int, y: int):
 	# sync to clients
@@ -862,11 +858,49 @@ func broadcast_block_damage(x: int, y: int):
 		if y < start.y or y > end.y:
 			continue
 		#makes all players in range get the block damage.
-		receive_block_damage.rpc_id(player_id, x, y, block_damaged[Vector2i(x, y)])
+		receive_block_damage(x, y, block_damaged[Vector2i(x, y)])
 	
-@rpc('authority', 'call_remote', 'reliable')
 func receive_block_damage(x:int, y:int, block_health:int) -> void:
 	block_damaged[Vector2i(x, y)] = block_health
+	
+	
+@rpc('authority', 'call_remote', 'reliable')
+func broadcast_block_sfx(x:int, y:int, block_id:int):
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue #this skips any players who disconnected
+			
+		#checks to see if players have loaded the chunk.
+		var center_point := world_to_tile(floori(player.center_point.x), floori(player.center_point.y))
+		var start := center_point - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := center_point + ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		
+		if x < start.x or x > end.x:
+			continue
+		
+		if y < start.y or y > end.y:
+			continue
+			
+		receive_break_sfx.rpc_id(player_id, x, y, block_id)
+
+		
+		
+	return
+	
+@rpc('authority', 'call_remote', 'reliable')
+func receive_break_sfx(x: int, y: int, block_id: int):
+	var block := BlockDatabase.get_block(block_id)
+	if block:
+		play_sfx(block.break_sfx, x, y, block.break_volume)
+
+
+
+
+
+
+
+
 	
 	
 ## Attempts to destroy the block at the given [param x] and [param y] position.
@@ -1201,7 +1235,8 @@ func send_destroy_block(x: int, y: int) -> void:
 	# update lighting
 	Globals.light_updater.update_region(x - 16, y - 16, 33, 33)
 	
-	# sync to clients
+	# sync sfx and tile updates to clients
+	broadcast_block_sfx(x,y, block_id)
 	send_tile_update(x, y)
 
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
