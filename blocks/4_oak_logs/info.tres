@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://m6eh1bclb1pq" path="res://blocks/4_oak_logs/tiles.png" id="1_26scf"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_aisgh"]
+[ext_resource type="AudioStream" uid="uid://cn11bkpk1imux" path="res://blocks/4_oak_logs/sfx/oak hit.wav" id="1_o16fo"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o16fo"]
 atlas = ExtResource("1_26scf")
@@ -10,4 +11,8 @@ region = Rect2(0, 0, 8, 8)
 [resource]
 script = ExtResource("1_aisgh")
 preview_sprite = SubResource("AtlasTexture_o16fo")
+break_sfx = ExtResource("1_o16fo")
+break_volume = 25.0
+place_sfx = ExtResource("1_o16fo")
+place_volume = 25.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

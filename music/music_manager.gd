@@ -37,7 +37,9 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/winter/winter_day_1.ogg",
 		"res://music/winter/winter_day_2.ogg",
 	],
-	Area.WINTER_NIGHT: [],
+	Area.WINTER_NIGHT: [
+		"res://music/winter/Ice Night 1.ogg"
+	],
 	Area.UNDERGROUND: [
 		"res://music/Caves/Cave 2.ogg",
 	],
@@ -56,7 +58,19 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		#"res://music/ocean/ocean_day_3.ogg",
 		"res://music/Ocean/Ocean 1.ogg",
 	],
-	Area.OCEAN_NIGHT: [],
+	Area.OCEAN_NIGHT: [
+		"res://music/Ocean/Ocean Night 1.ogg"
+	],
+}
+
+# Maps each day area to its night equivalent and vice versa.
+const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
+	Area.FOREST_DAY:   Area.FOREST_NIGHT,
+	Area.FOREST_NIGHT: Area.FOREST_DAY,
+	Area.WINTER_DAY:   Area.WINTER_NIGHT,
+	Area.WINTER_NIGHT: Area.WINTER_DAY,
+	Area.OCEAN_DAY:    Area.OCEAN_NIGHT,
+	Area.OCEAN_NIGHT:  Area.OCEAN_DAY,
 }
 
 # Areas that use a shuffled queue instead of random selection
@@ -68,16 +82,14 @@ const QUEUED_AREAS: Array[Area] = [
 	Area.OCEAN_NIGHT,
 ]
 
-# The track to always play first when entering a queued area.
-const AREA_INTRO_TRACKS: Dictionary[Area, String] = {
-	Area.FOREST_DAY: "res://music/forest/forest_day_2.ogg",
-	Area.OCEAN_DAY: "res://music/Ocean/Ocean 1.ogg",
-}
+# No fixed intro tracks — all areas start on a random track.
+const AREA_INTRO_TRACKS: Dictionary[Area, String] = {}
 
 var _track_queues: Dictionary[Area, Array] = {}
 var _intro_played: Dictionary[Area, bool] = {}
 var _last_played: Dictionary[Area, String] = {}
 var _current_area: Area = Area.TITLE_SCREEN
+var _is_day: bool = true
 
 # --- Functions --- #
 func _ready() -> void:
@@ -95,22 +107,39 @@ func _ready() -> void:
 		AudioServer.set_bus_volume_db(0, -1000)
 		return
 
+	# Don't read DaytimeManager here — world isn't loaded yet.
+	# _process will sync _is_day once the world is running.
 	play_track(Area.TITLE_SCREEN)
+
+
+func _process(_delta: float) -> void:
+	# Poll DaytimeManager each frame and trigger a music switch if day/night has flipped.
+	var is_day: bool = DaytimeManager.is_day()
+	if is_day != _is_day:
+		_on_time_changed(is_day)
 
 
 func _on_track_finished() -> void:
 	play_track(_current_area)
 
 
+## Called when the time of day crosses the day/night boundary.
+func _on_time_changed(is_day: bool) -> void:
+	_is_day = is_day
+
+	# Only switch if we're in a surface biome with a day/night pair
+	if _current_area not in DAY_NIGHT_PAIRS:
+		return
+
+	var target_area: Area = DAY_NIGHT_PAIRS[_current_area]
+	# If the target area has no tracks, stay on the current one
+	if not AREA_TRACKS[target_area].is_empty():
+		enter_area(target_area)
+
+
 ## Returns the next track path for a queued area, refilling and reshuffling
 ## the queue once all tracks have been played.
 func _next_queued_track(area: Area) -> String:
-	# Play the intro track once if one is defined and hasn't been played yet
-	if AREA_INTRO_TRACKS.has(area) and not _intro_played.get(area, false):
-		_intro_played[area] = true
-		_last_played[area] = AREA_INTRO_TRACKS[area]
-		return AREA_INTRO_TRACKS[area]
-
 	if not _track_queues.has(area) or _track_queues[area].is_empty():
 		var new_queue: Array = AREA_TRACKS[area].duplicate()
 		new_queue.shuffle()
@@ -124,7 +153,7 @@ func _next_queued_track(area: Area) -> String:
 	return track
 
 
-## Plays a music track for the given [param area].
+## Plays a music track for a given [param area].
 func play_track(area: Area, variant := -1) -> void:
 	print("play_track called, area: ", area, " is_server: ", multiplayer.is_server())
 
@@ -165,14 +194,14 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 			enter_area(Area.CAVERN)
 			return
 
-	# surface biome music
+	# surface biome music — respect current time of day
 	match new_biome:
 		BiomeManager.Biome.SNOW:
-			enter_area(Area.WINTER_DAY)
+			enter_area(Area.WINTER_DAY if _is_day else Area.WINTER_NIGHT)
 		BiomeManager.Biome.FOREST:
-			enter_area(Area.FOREST_DAY)
+			enter_area(Area.FOREST_DAY if _is_day else Area.FOREST_NIGHT)
 		BiomeManager.Biome.OCEAN:
-			enter_area(Area.OCEAN_DAY)
+			enter_area(Area.OCEAN_DAY if _is_day else Area.OCEAN_NIGHT)
 
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
@@ -187,7 +216,7 @@ func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 			enter_area(Area.CAVERN)
 
 
-## Switches to a new area, resetting the queue so the intro plays again.
+## Switches to a new area, resetting the queue so a fresh random track plays.
 func enter_area(area: Area) -> void:
 	if area == _current_area:
 		return
@@ -195,8 +224,8 @@ func enter_area(area: Area) -> void:
 	play_track(area)
 
 
-## Resets the queue and intro state for [param area], so the intro plays
-## again next time the player enters it.
+## Resets the queue and intro state for [param area], so a fresh random track
+## plays next time the player enters it.
 func reset_area(area: Area) -> void:
 	_intro_played.erase(area)
 	_track_queues.erase(area)

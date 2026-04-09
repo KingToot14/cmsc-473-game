@@ -40,6 +40,7 @@ ItemDatabase="*uid://bmdvy4d1xjyp3"
 DatabaseManager="*uid://lrme4ahma8q3"
 BlockDatabase="*uid://b21pv7qr3jic3"
 BiomeManager="*uid://cgql53i2vhk0c"
+DaytimeManager="*uid://mwn8lucf2stn"
 
 [display]
 
@@ -203,9 +204,16 @@ drop_item={
 "events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":2,"position":Vector2(123, 16),"global_position":Vector2(132, 64),"factor":1.0,"button_index":2,"canceled":false,"pressed":true,"double_click":false,"script":null)
 ]
 }
+chest_interact={
+"deadzone": 0.2,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":2,"position":Vector2(149, 10),"global_position":Vector2(158, 58),"factor":1.0,"button_index":2,"canceled":false,"pressed":true,"double_click":false,"script":null)
+]
+}
 
 [layer_names]
 
+2d_render/layer_1="main"
+2d_render/layer_2="lighting"
 2d_physics/layer_1="world"
 2d_physics/layer_2="player"
 2d_physics/layer_3="player_projectile"
@@ -213,6 +221,7 @@ drop_item={
 2d_physics/layer_5="enemy_projectile"
 2d_physics/layer_6="neutral"
 2d_physics/layer_7="tile"
+2d_physics/layer_8="platform"
 
 [physics]
 
@@ -231,11 +240,31 @@ mouse_position={
 "type": "vec2",
 "value": Vector2(0, 0)
 }
-water_texture={
+light_texture={
 "type": "sampler2D",
-"value": "res://water_test.png"
+"value": ""
 }
 water_offset={
 "type": "vec2",
 "value": Vector2(0, 0)
+}
+light_offset={
+"type": "vec2",
+"value": Vector2(0, 0)
+}
+sky_texture={
+"type": "sampler2D",
+"value": ""
+}
+current_time={
+"type": "float",
+"value": 0.5
+}
+lava_texture={
+"type": "sampler2D",
+"value": "res://water_test.png"
+}
+water_texture={
+"type": "sampler2D",
+"value": ""
 }

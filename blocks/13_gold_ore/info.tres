@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://bjth3rjbq6va6"]
 
+[ext_resource type="AudioStream" uid="uid://bpvgeb0mt1ddt" path="res://blocks/3_stone/sfx/stone hit.wav" id="1_3rnne"]
 [ext_resource type="Texture2D" uid="uid://cgy5rcweee5ab" path="res://blocks/13_gold_ore/tiles.png" id="1_5vxcp"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_beonn"]
 
@@ -11,4 +12,12 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_beonn")
 preview_sprite = SubResource("AtlasTexture_3rnne")
 break_item_id = 19
+<<<<<<< Updated upstream
+=======
+break_sfx = ExtResource("1_3rnne")
+break_volume = 25.0
+place_sfx = ExtResource("1_3rnne")
+place_volume = 25.0
+block_health = 125
+>>>>>>> Stashed changes
 metadata/_custom_type_script = "uid://dymp18kf28isa"
