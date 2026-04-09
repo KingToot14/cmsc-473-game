@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cct11yumhknhr"
+path="res://.godot/imported/Ocean Night 1.ogg-751fe927b374ad1664d95e0866a04a56.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Ocean/Ocean Night 1.ogg"
+dest_files=["res://.godot/imported/Ocean Night 1.ogg-751fe927b374ad1664d95e0866a04a56.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

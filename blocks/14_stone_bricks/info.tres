@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_uhe60"]
 [ext_resource type="Texture2D" uid="uid://bu7awofth3yv5" path="res://blocks/14_stone_bricks/tiles.png" id="1_w5rpc"]
+[ext_resource type="AudioStream" uid="uid://xc8icf6h5sg3" path="res://blocks/14_stone_bricks/sfx/brick hit 1.wav" id="1_wel5d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wel5d"]
 atlas = ExtResource("1_w5rpc")
