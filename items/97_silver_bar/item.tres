@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Item" format=3 uid="uid://cfk1767djncej"]
+
+[ext_resource type="Script" uid="uid://cbpxcb7ird2qr" path="res://items/_resources/item.gd" id="1_e7uyy"]
+[ext_resource type="Texture2D" uid="uid://d1gxpf3nnjm8j" path="res://items/97_silver_bar/icon.png" id="2_e7uyy"]
+
+[resource]
+script = ExtResource("1_e7uyy")
+item_name = "Silver Bar"
+texture = ExtResource("2_e7uyy")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

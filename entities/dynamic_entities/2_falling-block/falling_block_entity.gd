@@ -8,8 +8,13 @@ var x_position := 0.0
 @export var gravity := 980.0
 @export var terminal_velocity := 380.0
 
+var landed := false
+
 # --- Functions --- #
 func _physics_process(delta: float) -> void:
+	if landed:
+		return
+	
 	# gravity
 	if not is_on_floor():
 		velocity.y = clampf(velocity.y + gravity * delta, -terminal_velocity, terminal_velocity)
@@ -30,12 +35,19 @@ func _physics_process(delta: float) -> void:
 	)
 	
 	if TileManager.get_block(below_position.x, below_position.y) != 0:
+		while TileManager.get_block(tile_position.x, tile_position.y) != 0:
+			tile_position.y -= 1
+		
+		landed = true
+		
 		TileManager.set_block(tile_position.x, tile_position.y, block_id)
 		TileManager.send_tile_update(tile_position.x, tile_position.y)
 		kill()
 
 func load_block() -> void:
-	pass
+	var sprite_tilemap := $'sprite'
+	
+	sprite_tilemap.set_cell(Vector2i.ZERO, block_id, Vector2i.ZERO)
 
 #region Serialization
 func serialize_spawn_data() -> PackedByteArray:

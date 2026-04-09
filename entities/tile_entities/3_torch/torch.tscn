@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://8nkic6on6mbb"]
+
+[ext_resource type="Script" uid="uid://86pgmj5q1yw4" path="res://entities/tile_entities/3_torch/torch_entity.gd" id="1_gik4x"]
+[ext_resource type="Texture2D" uid="uid://cdxpqiqlkpk4w" path="res://entities/tile_entities/3_torch/normal.png" id="2_6cvlj"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_f3g4o"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="4_0luwm"]
+[ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="5_t01cv"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rtt1u"]
+resource_local_to_scene = true
+size = Vector2(7.5, 7.5)
+
+[node name="torch" type="CharacterBody2D" unique_id=273698235 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
+y_sort_enabled = true
+collision_layer = 64
+collision_mask = 0
+script = ExtResource("1_gik4x")
+variant_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("2_6cvlj")
+})
+always_snapshot = false
+interpolator = NodePath("entity_interpolator")
+hp = NodePath("hp")
+metadata/_custom_type_script = "uid://86pgmj5q1yw4"
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=248120420]
+position = Vector2(4, 8)
+texture = ExtResource("2_6cvlj")
+hframes = 4
+
+[node name="entity_interpolator" type="Node" parent="." unique_id=1175804434 node_paths=PackedStringArray("root")]
+script = ExtResource("3_f3g4o")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="hp" type="Node" parent="." unique_id=413992925 node_paths=PackedStringArray("entity")]
+script = ExtResource("4_0luwm")
+entity = NodePath("..")
+max_hp = 1
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=718470920]
+position = Vector2(4, 4)
+shape = SubResource("RectangleShape2D_rtt1u")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=128995144 node_paths=PackedStringArray("entity")]
+position = Vector2(4, 4)
+collision_layer = 64
+collision_mask = 65
+script = ExtResource("5_t01cv")
+entity = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=111215057]
+shape = SubResource("RectangleShape2D_rtt1u")

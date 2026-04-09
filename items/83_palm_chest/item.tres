@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://qg8bdmels60v"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_pjfw1"]
+[ext_resource type="Texture2D" uid="uid://mquinuhjusul" path="res://entities/tile_entities/2_chest/palm_icon.png" id="2_pjfw1"]
+
+[resource]
+script = ExtResource("1_pjfw1")
+tile_type = 2
+tile_id = 2
+tile_variant = &"palm"
+use_speed = 0.25
+item_name = "Palm Chest"
+texture = ExtResource("2_pjfw1")
+tooltip = "A simple storage solution"
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

@@ -4,13 +4,17 @@ extends TileEntity
 # --- Enums --- #
 enum TreeVariant {
 	FOREST,
-	WINTER
+	WINTER,
+	PALM
 }
 
 # --- Variables --- #
 const HP_UPDATE_ACTION := 16
 
-const APPLE_DROP_ODDS := 0.10
+const APPLE_DROP_ODDS := 0.01
+const ACORN_DROP_ODDS := 0.10
+
+@export var top_variants: Dictionary[TreeVariant, Texture2D] = {}
 
 var branch_seed := 0
 
@@ -97,9 +101,13 @@ func setup_entity() -> void:
 	
 	# tree top
 	var tree_top := $'tree_top'
+	tree_top.texture = top_variants[variant]
 	
 	tree_top.position.y = -(height + 2) * 8.0
 	tree_top.show()
+	
+	# select random variant
+	tree_top.frame = rng.randi_range(0, 2)
 	
 	# hitbox
 	$'shape'.position.y = -(height * 4.0)
@@ -192,7 +200,7 @@ func _on_layer_death(pool_id: int) -> void:
 		kill()
 		
 		if multiplayer.is_server():
-			EntityManager.clear_entity_data(self)
+			EntityManager.erase_entity(self)
 	
 	# server spawns items
 	if multiplayer and multiplayer.is_server():
@@ -200,6 +208,16 @@ func _on_layer_death(pool_id: int) -> void:
 		rng.seed = branch_seed
 		
 		var base_position := TileManager.world_to_tile(floori(position.x), floori(position.y))
+		
+		var wood_id := 0
+		
+		match variant:
+			TreeVariant.FOREST:
+				wood_id = 0
+			TreeVariant.WINTER:
+				wood_id = 54
+			TreeVariant.PALM:
+				wood_id = 56
 		
 		# create items for each layer
 		for y in range(curr_height - pool_id):
@@ -211,7 +229,7 @@ func _on_layer_death(pool_id: int) -> void:
 				floori(item_pos.y)
 			)
 			
-			ItemDropEntity.spawn(item_pos, 0, rng.randi_range(1, 2))
+			ItemDropEntity.spawn(item_pos, wood_id, rng.randi_range(1, 2))
 			
 			# consistent with seed
 			if rng.randf() < APPLE_DROP_ODDS:
@@ -226,6 +244,18 @@ func _on_layer_death(pool_id: int) -> void:
 				ItemDropEntity.spawn(apple_pos, 1, rng.randi_range(1, 2))
 				#rng.randi_range(0, 1) determines left or right side of the tree
 				#-(y + pool_id + 2)) determines what y value
+			
+			# consistent with seed
+			if rng.randf() < ACORN_DROP_ODDS:
+				var acorn_pos := base_position + Vector2i(rng.randi_range(0, 1), -(y + pool_id + 2))
+				
+				# convert from tile position to world position
+				acorn_pos = TileManager.tile_to_world(
+					floori(acorn_pos.x),
+					floori(acorn_pos.y)
+				)
+				
+				ItemDropEntity.spawn(acorn_pos, 11, rng.randi_range(1, 2))
 	
 	curr_height = pool_id
 	

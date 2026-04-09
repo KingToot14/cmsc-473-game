@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_nvdnv"]
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_cw7kl"]
-[ext_resource type="Texture2D" uid="uid://ci48q1pyhkcn5" path="res://items/10_wooden_axe/hammer.png" id="3_06a1m"]
+[ext_resource type="Texture2D" uid="uid://d2dcpkyltntms" path="res://items/10_wooden_axe/sprite.png" id="3_ke3t8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
-size = Vector2(9, 12)
+size = Vector2(11, 9)
 
 [node name="wooden_axe" type="Node2D" unique_id=123055615]
 script = ExtResource("1_nvdnv")
@@ -16,10 +16,10 @@ script = ExtResource("2_cw7kl")
 damage = 10
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
-position = Vector2(12.5, 0)
+position = Vector2(11.5, 1.5)
 shape = SubResource("RectangleShape2D_w0180")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
 position = Vector2(8, 0)
 rotation = 0.7853982
-texture = ExtResource("3_06a1m")
+texture = ExtResource("3_ke3t8")

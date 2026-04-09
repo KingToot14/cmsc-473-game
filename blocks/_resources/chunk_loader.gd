@@ -16,12 +16,6 @@ var current_chunk: Vector2i
 func _ready() -> void:
 	set_process(false)
 	
-	if not multiplayer.is_server():
-		if len(TileManager.tiles) == 0:
-			TileManager.load_chunks()
-		
-		return
-	
 	await player.ready
 	
 	current_chunk = TileManager.world_to_chunk(floori(player.position.x), floori(player.position.y))
@@ -264,7 +258,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	var center_y = start_y + height / 2
 	
 	data = data.decompress(
-		width * height * TileManager.CHUNK_AREA * 4,
+		width * height * TileManager.CHUNK_AREA * (2 + 2 + 2 + 1 + 3),
 		FileAccess.COMPRESSION_ZSTD
 	)
 	
@@ -273,17 +267,7 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 	var world_width   = width * TileManager.CHUNK_SIZE
 	var world_height  = height * TileManager.CHUNK_SIZE
 	
-	var tiles := PackedInt32Array()
-	var offset := 0
-	
-	tiles.resize(world_width * world_height)
-	
-	for y in range(world_height):
-		for x in range(world_width):
-			tiles[x + y * world_width] = data.decode_u32(offset)
-			offset += 4
-	
-	await TileManager.load_region(tiles, world_start_x, world_start_y, world_width, world_height)
+	await TileManager.load_region(data, world_start_x, world_start_y, world_width, world_height)
 	
 	# autotile initial packet
 	if autotile:
@@ -293,12 +277,12 @@ func load_chunks(meta: int, data: PackedByteArray) -> void:
 		await autotile_region(
 			center_x - VISUAL_RANGE.x,
 			center_y - VISUAL_RANGE.y,
-			center_x + VISUAL_RANGE.x,
-			center_y + VISUAL_RANGE.y
+			center_x + VISUAL_RANGE.x + 1,
+			center_y + VISUAL_RANGE.y + 1
 		)
 	
 	# build water texture
-	TileManager.build_water_texture()
+	#TileManager.build_water_texture()
 	
 	# load entities
 	EntityManager.load_region.rpc_id(

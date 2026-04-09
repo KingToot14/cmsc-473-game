@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://b8pssk6ogshb"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_8m760"]
+[ext_resource type="Texture2D" uid="uid://dkiw74al1eeko" path="res://blocks/26_stone_brick_platform/icon.png" id="2_8m760"]
+
+[resource]
+script = ExtResource("1_8m760")
+tile_id = 26
+use_speed = 0.25
+item_name = "Stone Brick Platform"
+texture = ExtResource("2_8m760")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="TileEntityInfo" format=3 uid="uid://djb38mcsn5f15"]
+
+[ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="1_3fh77"]
+[ext_resource type="PackedScene" uid="uid://bhu3ku3tbsq5n" path="res://entities/tile_entities/6_table/table.tscn" id="1_h5jds"]
+[ext_resource type="Texture2D" uid="uid://btnik1cb8rs1m" path="res://entities/tile_entities/6_table/oak.png" id="1_j1fne"]
+[ext_resource type="Script" uid="uid://c6wwxk57fp28s" path="res://entities/tile_entities/6_table/table_entity.gd" id="2_iu62g"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_j1fne"]
+[ext_resource type="Texture2D" uid="uid://dvx522fgl00mv" path="res://entities/tile_entities/6_table/spruce.png" id="2_urqq4"]
+[ext_resource type="Texture2D" uid="uid://dvmak4qajdv1x" path="res://entities/tile_entities/6_table/palm.png" id="3_c4tau"]
+
+[resource]
+script = ExtResource("1_3fh77")
+preview_sprite = ExtResource("1_j1fne")
+preview_sprite_variants = Dictionary[StringName, Texture2D]({
+&"oak": ExtResource("1_j1fne"),
+&"palm": ExtResource("3_c4tau"),
+&"spruce": ExtResource("2_urqq4")
+})
+preview_position_offset = Vector2(-8, 0)
+preview_sprite_offset = Vector2(12, 4)
+entity_scene = ExtResource("1_h5jds")
+entity_script = ExtResource("2_iu62g")
+metadata/_custom_type_script = "uid://bnvse52ucpibv"

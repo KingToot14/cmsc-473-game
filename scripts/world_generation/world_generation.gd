@@ -20,10 +20,13 @@ var rng: RandomNumberGenerator
 
 var surface_high := 0
 var surface_low := 0
-var underground_high := 0
-var underground_low := 0
+var underground_line := 0
+var cavern_line := 0
+
+var lava_line := 0
 
 var hill_positions: Array[Vector2i] = []
+var lake_positions: Array[Vector2i] = []
 
 var winter_on_right := false
 
@@ -60,13 +63,23 @@ func generate_world() -> void:
 	await run_pass(TerrainPass.new())
 	await run_pass(DirtWallPass.new())
 	
+	await run_pass(HillPass.new())
+	
 	await run_pass(RocksInDirtPass.new())
 	await run_pass(DirtInRocksPass.new())
+	
+	await run_pass(SmallHolesPass.new())
+	await run_pass(CavePass.new())
+	
 	await run_pass(SandPatchPass.new())
 	await run_pass(ClayPatchPass.new())
 	
-	await run_pass(SmallHolesPass.new())
+	await run_pass(OrePass.new())
 	
+	await run_pass(LakePass.new())
+	await run_pass(OceanPass.new())
+	
+	# biomes
 	await run_pass(DirtToSnowPass.new())
 	await run_pass(StoneToIcePass.new())
 	
@@ -81,7 +94,13 @@ func generate_world() -> void:
 	await run_pass(SpawnPass.new())
 	
 	# add tiles that need updates to the queue
+	await run_pass(SettlePass.new())
+	await run_pass(LightPass.new())
 	await run_pass(ActivationPass.new())
+	
+	# start block updates
+	Globals.block_updater.set_physics_process(true)
+	Globals.liquid_updater.set_active()
 	
 	print("[Wizbowo's Conquest] Done Generating World")
 	

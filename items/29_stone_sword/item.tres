@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://by4mlj6t7iyu8"]
+
+[ext_resource type="PackedScene" uid="uid://b50wk3lj76h80" path="res://items/29_stone_sword/stone_sword.tscn" id="1_rhy6g"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_n4ly7"]
+[ext_resource type="Texture2D" uid="uid://d2qcpswpj1l5m" path="res://items/29_stone_sword/icon.png" id="3_rhy6g"]
+
+[resource]
+script = ExtResource("2_n4ly7")
+force_towards_mouse = true
+use_speed = 0.45
+default_swing_object = ExtResource("1_rhy6g")
+item_name = "Stone Sword"
+texture = ExtResource("3_rhy6g")
+tooltip = "This stone sword makes you slightly better than a caveman."
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

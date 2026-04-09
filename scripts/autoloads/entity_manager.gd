@@ -102,8 +102,7 @@ func load_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArray) -
 	entity.deserialize_spawn_data(buffer)
 	
 	# set id and name
-	entity.id = spawn_id
-	entity.name = "entity_%s" % spawn_id
+	entity.set_entity_id(spawn_id, registry_id)
 	
 	# store entity reference
 	if not ref:
@@ -143,9 +142,8 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	entity.deserialize_spawn_data(buffer)
 	
 	# set id and name
-	entity.id = spawn_id
-	entity.name = "entity_%s" % spawn_id
-	
+	entity.set_entity_id(spawn_id, registry_id)
+	entity.name = "entity_%s" % entity.id
 	# store entity reference
 	if not ref:
 		ref = EntityReference.new()
@@ -161,21 +159,23 @@ func load_tile_entity(spawn_id: int, registry_id: int, spawn_data: PackedByteArr
 	entity.scan_interest()
 
 @rpc('any_peer', 'call_remote', 'reliable')
-func create_tile_entity(entity_id: int, tile_pos: Vector2i) -> void:
-	var info: EntityInfo = tile_entity_registry.get(entity_id)
+func create_tile_entity(entity_id: int, tile_pos: Vector2i, tile_variant := &'normal') -> void:
+	var info: TileEntityInfo = tile_entity_registry.get(entity_id)
 	
 	if not info:
 		return
 	
-	info.entity_script.create(tile_pos)
+	info.create_entity(multiplayer.get_remote_sender_id(), tile_pos, tile_variant)
 
 #endregion
 
 #region Data Persistence
 func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
+	get_tree().current_scene.get_node(^'entities').add_child(entity)
+	
 	# set ids
-	entity.id = curr_id
-	entity.registry_id = registry_id
+	entity.set_entity_id(curr_id, registry_id)
+	entity.name = "entity_%s" % entity.id
 	curr_id += 1
 	
 	# create new reference
@@ -195,7 +195,6 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 	anchored_entities[chunk].append(entity.id)
 	
 	# attempt to load instantly
-	get_tree().current_scene.get_node(^'entities').add_child(entity)
 	entity.scan_interest()
 	
 	# if no entities exist, just store data for now
@@ -205,6 +204,7 @@ func store_tile_entity(registry_id: int, entity: TileEntity) -> void:
 		# make sure entity is setup
 		var buffer := StreamPeerBuffer.new()
 		buffer.data_array = ref.spawn_data
+		
 		entity.deserialize_spawn_data(buffer)
 		
 		ref.current_instance = entity

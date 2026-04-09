@@ -1,8 +1,15 @@
 [gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://1dui6ynkd7gb"]
 
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_55iyu"]
+[ext_resource type="Texture2D" uid="uid://rqj1jlvw7m4o" path="res://walls/4_ice_wall/tiles.png" id="1_flyqs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t7b4y"]
+atlas = ExtResource("1_flyqs")
+region = Rect2(0, 0, 8, 8)
 
 [resource]
 script = ExtResource("1_55iyu")
+preview_sprite = SubResource("AtlasTexture_t7b4y")
 break_item_id = 22
+block_health = 60
 metadata/_custom_type_script = "uid://dymp18kf28isa"

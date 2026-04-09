@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bd0lkuxdu4x7l"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_8uc35"]
+[ext_resource type="Texture2D" uid="uid://cdgglfipxrogx" path="res://entities/tile_entities/6_table/palm_icon.png" id="2_8uc35"]
+
+[resource]
+script = ExtResource("1_8uc35")
+tile_type = 2
+tile_id = 6
+tile_variant = &"palm"
+use_speed = 0.25
+item_name = "Palm Table"
+texture = ExtResource("2_8uc35")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

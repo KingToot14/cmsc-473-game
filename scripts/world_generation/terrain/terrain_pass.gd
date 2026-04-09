@@ -116,11 +116,13 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# set world paramters
 	gen.surface_high = surface_high
 	gen.surface_low = surface_low
-	gen.underground_high = max(underground_high, surface_low + 20)
-	gen.underground_low = underground_low
+	gen.underground_line = surface_low + 64
+	gen.cavern_line = underground_low
+	gen.lava_line = gen.cavern_line + floori((world_size.y - gen.cavern_line) * 0.40)
 	
 	Globals.surface = surface_low
-	Globals.underground = underground_low
+	Globals.underground = gen.underground_line
+	Globals.cavern = gen.cavern_line
 
 func fill_column(x: int) -> void:
 	for y in range(Globals.world_size.y):

@@ -17,7 +17,7 @@ func create_tables():
             password_hash TEXT
         );
 	""")
-
+	
 	db.query("""
         CREATE TABLE IF NOT EXISTS player (
             id INTEGER PRIMARY KEY,
@@ -27,15 +27,19 @@ func create_tables():
             pos_z REAL
         );
 	""")
-
+	
+	#Create table for inventory
 	db.query("""
-        CREATE TABLE IF NOT EXISTS inventory (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER,
-            item_name TEXT,
-            quantity INTEGER
-        );
+		CREATE TABLE IF NOT EXISTS inventory (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			player_id INTEGER,
+			item_id INTEGER,
+			quantity INTEGER,
+			slot_index INTEGER,
+			slot_type TEXT
+		);
 	""")
+	
 
 # PASSWORD HASHING
 func hash_password(password: String) -> String:
@@ -136,31 +140,68 @@ func load_player(player_id: int) -> Dictionary:
 
 	return {}
 
+
+#region Inventory
+
 # SAVE INVENTORY (SERVER ONLY)
-func save_inventory(player_id: int, items: Array):
+func save_inventory(player_id: int, inventory_data: Dictionary):
 	if not multiplayer.is_server():
 		return
 
+	# clear old entries for this player to prevent duplicates
 	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
 
-	for item in items:
+	# Save Main Inventory
+	for item in inventory_data["main_inventory"]:
 		db.query("""
-            INSERT INTO inventory (player_id, item_name, quantity)
-            VALUES (%d, '%s', %d);
-		""" % [player_id, item["name"], item["qty"]])
+			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
+			VALUES (%d, %d, %d, %d, 'main');
+		""" % [player_id, item["id"], item["qty"], item["index"]])
+		
+	# Save Armor Inventory
+	for item in inventory_data["armor_inventory"]:
+		db.query("""
+			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
+			VALUES (%d, %d, %d, %d, 'armor');
+		""" % [player_id, item["id"], item["qty"], item["index"]])
+		
+	# Save Held Item
+	if inventory_data["held_item"] != null:
+		var h_item = inventory_data["held_item"]
+		db.query("""
+			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
+			VALUES (%d, %d, %d, -1, 'held');
+		""" % [player_id, h_item["id"], h_item["qty"]])
 
 # LOAD INVENTORY (SERVER ONLY)
-func load_inventory(player_id: int) -> Array:
+func load_inventory(player_id: int) -> Dictionary:
 	if not multiplayer.is_server():
-		return []
+		return {}
 
 	db.query("SELECT * FROM inventory WHERE player_id = %d;" % player_id)
 
-	var items = []
+	var data = {
+		"main_inventory": [],
+		"armor_inventory": [],
+		"held_item": null
+	}
+	
 	while db.next_row():
-		items.append({
-			"name": db.get_column("item_name"),
+		var s_type = db.get_column("slot_type")
+		var item_dict = {
+			"index": db.get_column("slot_index"),
+			"id": db.get_column("item_id"),
 			"qty": db.get_column("quantity")
-		})
+		}
+		
+		if s_type == "main":
+			data["main_inventory"].append(item_dict)
+		elif s_type == "armor":
+			data["armor_inventory"].append(item_dict)
+		elif s_type == "held":
+			data["held_item"] = item_dict
 
-	return items
+	return data
+
+
+#endregion

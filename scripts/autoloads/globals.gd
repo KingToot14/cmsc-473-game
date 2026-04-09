@@ -64,7 +64,7 @@ var world_size := Vector2i(4200, 1200):
 			ceili(float(_size.y) / TileManager.CHUNK_SIZE)
 		)
 	
-		space = _size.y * 0.10
+		space = floori(_size.y * 0.10)
 		
 		world_size = _size
 		world_size_changed.emit(world_size)
@@ -76,16 +76,18 @@ var world_chunks: Vector2i = Vector2i(
 )
 var world_spawn: Vector2i
 
-var space := world_size.y * 0.10
+var space := floori(world_size.y * 0.10)
 var surface := 0
 var underground := 0
+var cavern := 0
 
 # - TileMaps
 var server_map: ServerTileMap
 var world_map: WorldTileMap
 
 var block_updater: BlockUpdater
-var water_updater: WaterUpdater
+var liquid_updater: WaterUpdater
+var light_updater: LightUpdater
 
 # - Player Interactions
 var hovered_hitbox: TileEntityHitbox
@@ -138,6 +140,11 @@ func _ready() -> void:
 	config.add_property(^':underground')
 	config.property_set_replication_mode(
 		^':underground',
+		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
+	)
+	config.add_property(^':cavern')
+	config.property_set_replication_mode(
+		^':cavern',
 		SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE
 	)
 	

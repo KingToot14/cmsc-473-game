@@ -3,18 +3,27 @@
 [ext_resource type="Script" uid="uid://cg0bss5y65hdm" path="res://entities/tile_entities/2_chest/chest_entity.gd" id="1_xxhxo"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_0cexg"]
 [ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="2_fac27"]
+[ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="3_chduy"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="3_fac27"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="4_00tvw"]
+[ext_resource type="Texture2D" uid="uid://cfd7e5rpyelrs" path="res://entities/tile_entities/2_chest/spruce.png" id="4_fjxu0"]
+[ext_resource type="Texture2D" uid="uid://6obavjw8et52" path="res://entities/tile_entities/2_chest/palm.png" id="5_ofera"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jvdps"]
 resource_local_to_scene = true
-size = Vector2(14, 14)
+size = Vector2(13.5, 13.5)
 
 [node name="chest" type="CharacterBody2D" unique_id=1877535798 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
 collision_layer = 64
 collision_mask = 0
 script = ExtResource("1_xxhxo")
+variant_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("2_fac27"),
+1: ExtResource("3_chduy"),
+2: ExtResource("4_fjxu0"),
+3: ExtResource("5_ofera")
+})
 interpolator = NodePath("entity_interpolator")
 hp = NodePath("hp")
 metadata/_custom_type_script = "uid://cg0bss5y65hdm"
@@ -35,7 +44,6 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1112182761]
-visible = false
 position = Vector2(8, 1)
 shape = SubResource("RectangleShape2D_jvdps")
 

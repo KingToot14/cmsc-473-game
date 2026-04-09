@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://ci3irl5r5um3"]
+
+[ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_tn3w8"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_qmkir"]
+[ext_resource type="Texture2D" uid="uid://cd42m7x5n8lpe" path="res://items/25_stone_pickaxe/sprite.png" id="3_2htse"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
+size = Vector2(9, 18)
+
+[node name="stone_pickaxe" type="Node2D" unique_id=123055615]
+script = ExtResource("1_tn3w8")
+metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
+
+[node name="damage_source" type="Area2D" parent="." unique_id=791205798]
+script = ExtResource("2_qmkir")
+damage = 15
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
+position = Vector2(13.5, 0)
+shape = SubResource("RectangleShape2D_w0180")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
+position = Vector2(8, 0)
+rotation = 0.7853982
+texture = ExtResource("3_2htse")

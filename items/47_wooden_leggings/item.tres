@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ArmorItem" format=3 uid="uid://cdiare7stklg6"]
+
+[ext_resource type="Script" uid="uid://c3boyhcbly2e4" path="res://entities/player/armor.gd" id="1_0d2pq"]
+[ext_resource type="Texture2D" uid="uid://bupk8wvxhg6wo" path="res://items/47_wooden_leggings/icon.png" id="2_5l3os"]
+
+[resource]
+script = ExtResource("1_0d2pq")
+armor_type = 2
+defense = 10
+armor_name = &"wooden"
+texture = ExtResource("2_5l3os")

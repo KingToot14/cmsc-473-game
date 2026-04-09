@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ArmorItem" format=3 uid="uid://cgalfnploei3a"]
+
+[ext_resource type="Script" uid="uid://c3boyhcbly2e4" path="res://entities/player/armor.gd" id="1_0mavs"]
+[ext_resource type="Texture2D" uid="uid://nnu80u70mm8p" path="res://items/48_wooden_chestplate/icon.png" id="2_vc205"]
+
+[resource]
+script = ExtResource("1_0mavs")
+armor_type = 1
+defense = 10
+armor_name = &"wooden"
+item_id = 48
+item_name = "Wooden Chestplate"
+texture = ExtResource("2_vc205")
+max_stack = 1

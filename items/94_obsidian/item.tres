@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://gjvvn8hewbyd"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_3p4bx"]
+[ext_resource type="Texture2D" uid="uid://dykecamul8la6" path="res://blocks/28_obsidian/icon.png" id="2_3p4bx"]
+
+[resource]
+script = ExtResource("1_3p4bx")
+tile_id = 28
+use_speed = 0.25
+item_name = "Obsidian"
+texture = ExtResource("2_3p4bx")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

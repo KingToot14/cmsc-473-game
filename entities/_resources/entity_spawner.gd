@@ -5,7 +5,7 @@ extends Node
 const PLAYER_CAP := 20.0
 const GLOBAL_CAP := 150.0
 
-@export var spawn_rate := 6.0
+@export var spawn_rate := 8.0
 var spawn_timer := spawn_rate
 
 var current_player_count := 0
@@ -112,7 +112,7 @@ func attempt_spawn() -> void:
 	# get entity from pool
 	var biome := BiomeManager.get_player_biome(spawn_player_id)
 	var layer := BiomeManager.get_player_layer(spawn_player_id)
-	var time := SpawnRule.TimeState.DAY
+	var time := SpawnRule.TimeState.DAY if DaytimeManager.is_day() else SpawnRule.TimeState.NIGHT
 	
 	var spawn_rule_ids: Dictionary[SpawnRule, int] = {}
 	var possible_rules: Array[SpawnRule] = []

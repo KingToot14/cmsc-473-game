@@ -80,9 +80,12 @@ func send_damage(
 	send_damage_data(buffer.data_array)
 
 func send_damage_data(data: PackedByteArray) -> void:
-	EntityManager.entity_receive_damage.rpc_id(Globals.SERVER_ID, entity.id, data)
+	if multiplayer.is_server():
+		EntityManager.entity_receive_damage(entity.id, data)
+	else:
+		EntityManager.entity_receive_damage.rpc_id(Globals.SERVER_ID, entity.id, data)
 
-@rpc('any_peer', 'call_remote', 'reliable')
+@rpc('any_peer', 'call_local', 'reliable')
 func receive_damage(damage_info: PackedByteArray) -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.data_array = damage_info

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://dbp1msae5fw6j"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_wxwij"]
+[ext_resource type="Texture2D" uid="uid://cagccigik1l7" path="res://walls/13_spruce_log_wall/icon.png" id="2_wxwij"]
+
+[resource]
+script = ExtResource("1_wxwij")
+tile_type = 1
+tile_id = 13
+use_speed = 0.25
+item_name = "Spruce Log Wall"
+texture = ExtResource("2_wxwij")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

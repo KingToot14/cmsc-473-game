@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="TorchEntityInfo" format=3 uid="uid://dc8numfc4dj07"]
+
+[ext_resource type="Texture2D" uid="uid://cdxpqiqlkpk4w" path="res://entities/tile_entities/3_torch/normal.png" id="1_3dm23"]
+[ext_resource type="PackedScene" uid="uid://8nkic6on6mbb" path="res://entities/tile_entities/3_torch/torch.tscn" id="1_mp20e"]
+[ext_resource type="Script" uid="uid://d057x46ehu035" path="res://entities/tile_entities/3_torch/torch_entity_info.gd" id="1_pfqn3"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_3dm23"]
+[ext_resource type="Script" uid="uid://86pgmj5q1yw4" path="res://entities/tile_entities/3_torch/torch_entity.gd" id="2_njb5x"]
+
+[resource]
+script = ExtResource("1_pfqn3")
+preview_sprite = ExtResource("1_3dm23")
+preview_sprite_variants = Dictionary[StringName, Texture2D]({
+&"normal": ExtResource("1_3dm23")
+})
+preview_position_offset = Vector2(0, 0)
+preview_sprite_offset = Vector2(4, 8)
+entity_scene = ExtResource("1_mp20e")
+entity_script = ExtResource("2_njb5x")
+metadata/_custom_type_script = "uid://bnvse52ucpibv"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://bpj4y134dar0m"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_6qd57"]
+[ext_resource type="Texture2D" uid="uid://bwhewgofyntc8" path="res://entities/tile_entities/4_door/palm_icon.png" id="2_6qd57"]
+
+[resource]
+script = ExtResource("1_6qd57")
+tile_type = 2
+tile_id = 4
+tile_variant = &"palm"
+use_speed = 0.25
+item_name = "Palm Door"
+texture = ExtResource("2_6qd57")
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

@@ -159,6 +159,12 @@ func _ready() -> void:
 		
 		# Initialize the UI via the script on the container
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
+	
+	if multiplayer.is_server():
+		setup_save_timer()
+	
+	#connect armor signal
+	my_inventory.armor_updated.connect(_on_armor_updated)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if owner_id != multiplayer.get_unique_id():
@@ -166,10 +172,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed(&"inventory_toggle"):
 		var inv_container = $inventory_ui/inventory_container
-		inv_container.visible = !inv_container.visible
-	#if event.is_action_pressed(&"crafting_toggle"):
 		var craft_container = $inventory_ui/crafting_container
+		var armor_container = $inventory_ui/armor_container
+		
+		inv_container.visible = !inv_container.visible
 		craft_container.visible = !craft_container.visible
+		armor_container.visible = !armor_container.visible
 	
 #region Animation
 func _process(_delta: float) -> void:
@@ -280,14 +288,26 @@ func apply_input(delta: float) -> void:
 		floori(global_position.y)
 	)
 	
-	var in_water := \
-		TileManager.get_water_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
-		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	# check if feet is underwater
+	var in_water := (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > WaterUpdater.WATER_TYPE
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	)
 	
 	# check if head is under water
-	var head_in_water := \
-		TileManager.get_water_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
-		TileManager.get_water_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	var head_in_water := (
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > WaterUpdater.WATER_TYPE
+	) and (
+		TileManager.get_liquid_level(tile_pos.x, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
+		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y - 2) > WaterUpdater.MAX_WATER_LEVEL * 0.50
+	)
+	
+	# check if any tile is touching lava
+	check_lava(tile_pos)
 	
 	# start drowning
 	if head_in_water and not multiplayer.is_server():
@@ -318,6 +338,10 @@ func apply_input(delta: float) -> void:
 		)
 	else:
 		base_velocity.y = min(velocity.y + gravity * delta, terminal_velocity)
+	
+	# try to drop through platforms
+	if is_on_floor() and $'input_sync'.input_direction.y > 0.0:
+		position.y += 1.0
 	
 	# check free cam
 	if $'input_sync'.input_free_cam:
@@ -389,6 +413,15 @@ func apply_input(delta: float) -> void:
 		) - Vector2(4, 4)
 	)
 
+func check_lava(tile_pos: Vector2i) -> void:
+	for x in range(2):
+		for y in range(3):
+			# check if lava
+			if TileManager.get_liquid_type(tile_pos.x + x, tile_pos.y - y):
+				if TileManager.get_liquid_level(tile_pos.x + x, tile_pos.y - y) > 32:
+					hp.take_damage(1, DamageSource.DamageSourceType.WORLD)
+					return
+
 ## Force an [method is_on_floor] update since NetFox can have some issues when running
 ## rollbacks and detecting the floor.
 func update_is_on_floor() -> void:
@@ -419,9 +452,15 @@ func done_initial_load() -> void:
 		Globals.set_game_state(Globals.GameState.IN_GAME)
 	
 	# only change music for the local client
-	# TODO: Move to BiomeManager when implemented
 	if owner_id == multiplayer.get_unique_id():
 		enter_biome(Globals.music.Area.FOREST_DAY)
+		
+		# enable shaders
+		$'grid_overlay'.show()
+		$'water_overlay'.show()
+		$'lava_overlay'.show()
+		$'glow_holder/lava_glow'.show()
+		$'light_overlay'.show()
 
 #endregion
 
@@ -438,6 +477,27 @@ func remove_interest(entity_id: int) -> void:
 
 #endregion
 
+#region Saving Stuff to Database
+
+func setup_save_timer():
+	var timer = Timer.new()
+	timer.name = "SaveTimer"
+	timer.wait_time = 300.0 # 5 minutes
+	timer.autostart = true
+	timer.timeout.connect(_on_save_timer_timeout)
+	add_child(timer)
+
+#currently only saves inventory stuff
+func _on_save_timer_timeout():
+	if not multiplayer.is_server():
+		return
+		
+	print("Auto-saving inventory for player: ", owner_id)
+	
+	#save inventory to database using the database manager 
+	var data = my_inventory.get_save_data()
+	DatabaseManager.save_inventory(owner_id, data)
+
 #region Helper Functions
 ## Returns whether or not [param point] is in range of this player.
 ## [br]Has an optional [param range_modifier] which gets added to
@@ -447,4 +507,38 @@ func is_point_in_range(point: Vector2, range_modifier := 0) -> bool:
 	
 	return point.distance_to(center_point) <= player_range
 
+#endregion
+
+#region Armor
+func _on_armor_updated(slot_index: int) -> void:
+	recalculate_defense()
+	update_armor_visuals(slot_index)
+
+func recalculate_defense() -> void:
+	var total_defense = 0
+	for stack in my_inventory.armor_items:
+		if not stack.is_empty():
+			var item_data = ItemDatabase.get_item(stack.item_id) as ArmorItem
+			if item_data:
+				total_defense += item_data.defense
+	
+	defense = total_defense #this updates your exported defense variable
+
+func update_armor_visuals(slot_index: int) -> void:
+	var stack = my_inventory.armor_items[slot_index]
+	var equip_name = &'none'
+	
+	if not stack.is_empty():
+		var item_data = ItemDatabase.get_item(stack.item_id) as ArmorItem
+		if item_data:
+			equip_name = item_data.armor_name
+	
+	#map the inventory slot index to the OutfitLoader BodySection enum
+	var section: OutfitLoader.BodySection
+	if slot_index == 0: section = OutfitLoader.BodySection.HEAD
+	elif slot_index == 1: section = OutfitLoader.BodySection.BODY
+	else: section = OutfitLoader.BodySection.LEGS
+	
+	#make sure your OutfitLoader node is accessible via $'outfit_loader'
+	$'outfit'.load_armor(equip_name, section)
 #endregion

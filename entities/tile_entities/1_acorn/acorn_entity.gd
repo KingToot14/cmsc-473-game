@@ -56,7 +56,7 @@ func grow_to_tree() -> void:
 	kill()
 		
 	if multiplayer.is_server():
-		EntityManager.clear_entity_data(self)
+		EntityManager.erase_entity(self)
 
 #endregion
 
@@ -83,11 +83,7 @@ func break_place(_mouse_position: Vector2) -> bool:
 
 #region Placement
 func setup_variant() -> void:
-	match variant:
-		TreeEntity.TreeVariant.FOREST:
-			print("Forest")
-		TreeEntity.TreeVariant.WINTER:
-			print("Winter")
+	$'sprite'.frame = int(variant)
 
 #endregion
 
@@ -124,6 +120,8 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# growth state
 	buffer.put_u8(growth)
+	
+	setup_variant()
 
 #endregion
 
@@ -133,7 +131,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 ## [code]AcornEntity.rpc_id(Globals.SERVER_ID, tile_pos)[/code]
 ## when calling from a client.
 @rpc('any_peer', 'call_local', 'reliable')
-static func create(tile_pos: Vector2i, _tile_variant := &'') -> void:
+static func create(tile_pos: Vector2i, _tile_variant := &'normal') -> void:
 	# create new tree entity
 	var entity_scene: PackedScene = EntityManager.tile_entity_registry.get(1).entity_scene
 	if not entity_scene:
@@ -147,6 +145,7 @@ static func create(tile_pos: Vector2i, _tile_variant := &'') -> void:
 	
 	# setup default parameters
 	entity.tile_position = tile_pos
+	entity.global_position = TileManager.tile_to_world(tile_pos.x, tile_pos.y)
 	
 	entity.branch_seed = randi()
 	entity.variant = get_variant(tile_pos) as TreeEntity.TreeVariant
@@ -164,34 +163,20 @@ static func get_variant(tile_pos: Vector2i) -> int:
 	var block_bl := TileManager.get_block(tile_pos.x,     tile_pos.y + 1)
 	var block_br := TileManager.get_block(tile_pos.x + 1, tile_pos.y + 1)
 	
-	# check placement blocks
-	var curr_variant := 0
+	# make sure blocks match
+	if block_bl != block_br:
+		return -1
 	
 	match block_bl:
 		# dirt or grass
 		1, 2:
-			curr_variant = TreeEntity.TreeVariant.FOREST
-		
+			return TreeEntity.TreeVariant.FOREST
 		# snow blocks
 		6:
-			curr_variant = TreeEntity.TreeVariant.WINTER
-		# uncatched
-		_:
-			return -1
-	
-	match block_br:
-		# dirt or grass
-		1, 2:
-			if curr_variant == TreeEntity.TreeVariant.FOREST:
-				return TreeEntity.TreeVariant.FOREST
-		
-		# snow blocks
-		6:
-			if curr_variant == TreeEntity.TreeVariant.WINTER:
-				return TreeEntity.TreeVariant.WINTER
-		# uncatched
-		_:
-			return -1
+			return TreeEntity.TreeVariant.WINTER
+		# sand blocks
+		8:
+			return TreeEntity.TreeVariant.PALM
 	
 	return -1
 

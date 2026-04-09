@@ -13,7 +13,7 @@ func load_tiles(start_x: int, start_y: int, width: int, height: int) -> void:
 	
 	for x in range(width):
 		for y in range(height):
-			var block = TileManager.get_block_unsafe(start_x + x, start_y + y)
+			var block = TileManager.get_block(start_x + x, start_y + y)
 			
 			if block == 0:
 				erase_cell(Vector2i(start_x + x, start_y + y))
@@ -27,7 +27,7 @@ func load_tiles(start_x: int, start_y: int, width: int, height: int) -> void:
 				processed = 0
 
 func update_tile(x: int, y: int) -> void:
-	var block = TileManager.get_block_unsafe(x, y)
+	var block = TileManager.get_block(x, y)
 	
 	if not block:
 		erase_cell(Vector2i(x, y))
