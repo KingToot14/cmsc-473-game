@@ -198,22 +198,18 @@ func login_button_pressed() -> void:
 	if multiplayer.is_server():
 		return
 	
-	# TODO (Abby): Fetch username and password from fields (LineEdit nodes)
 	var username: String = %'username_field'.text.strip_edges()
 	var password: String = %'password_field'.text.strip_edges()
 
-	#if username.is_empty() or password.is_empty():
-		#print("[Login] Username or password empty")
-		#return
-#
-	#print("[Login] Sending login request to server...")
+	if username.is_empty() or password.is_empty():
+		print("[Login] Username or password empty")
+		return
 
-	#DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
-	
-	# TODO: We'll eventually want to move this line to somewhere in the login function so
-	# the server has the final decision on whether or not to load the player
-	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
-	set_active_panel("panel_join")
+	print("[Login] Sending login request to server...")
+
+	# Ask server to verify login
+	DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
+
 	
 	# TODO (Abby): Verify username and password combo in database
 func _on_login_result(player_id: int) -> void:
@@ -255,3 +251,38 @@ func _on_create_account_result(player_id: int) -> void:
 	pass
 	
 	%'username_field'.text
+@rpc("authority", "call_remote", "reliable")
+func login_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Login] Account not found. Creating new account...")
+
+		var username: String = %'username_field'.text.strip_edges()
+		var password: String = %'password_field'.text.strip_edges()
+
+		DatabaseManager.create_account.rpc_id(Globals.SERVER_ID, username, password)
+		return
+
+	print("[Login] Login successful! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	# Tell server to spawn/load player
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+
+
+@rpc("authority", "call_remote", "reliable")
+func create_account_result(player_id: int) -> void:
+	if player_id == -1:
+		print("[Account] Failed to create account (username taken?)")
+	return
+
+	print("[Account] Account created! Player ID: %s" % player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	# Now that the account exists, spawn the player
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
