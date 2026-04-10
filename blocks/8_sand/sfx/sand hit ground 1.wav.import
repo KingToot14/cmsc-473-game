@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://col50ydwtb682"
+path="res://.godot/imported/sand hit ground 1.wav-50da42e10d78ae548d432cbb10f2a525.sample"
+
+[deps]
+
+source_file="res://blocks/8_sand/sfx/sand hit ground 1.wav"
+dest_files=["res://.godot/imported/sand hit ground 1.wav-50da42e10d78ae548d432cbb10f2a525.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://xc8icf6h5sg3"
+path="res://.godot/imported/brick hit 1.wav-2c80819a6546a70ebad9a83b96c572ac.sample"
+
+[deps]
+
+source_file="res://blocks/14_stone_bricks/sfx/brick hit 1.wav"
+dest_files=["res://.godot/imported/brick hit 1.wav-2c80819a6546a70ebad9a83b96c572ac.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
