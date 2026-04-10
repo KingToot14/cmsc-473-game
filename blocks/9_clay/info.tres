@@ -11,4 +11,6 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_6c6xw")
 preview_sprite = SubResource("AtlasTexture_kishw")
 break_item_id = 15
+break_volume = 10.0
+place_volume = 10.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

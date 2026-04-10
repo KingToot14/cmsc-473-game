@@ -13,5 +13,11 @@ script = ExtResource("1_j58il")
 preview_sprite = SubResource("AtlasTexture_j4rqv")
 break_item_id = 3
 break_sfx = ExtResource("1_d38y0")
+<<<<<<< Updated upstream
 break_volume = 2.0
+=======
+break_volume = 10.0
+place_sfx = ExtResource("1_d38y0")
+place_volume = 10.0
+>>>>>>> Stashed changes
 metadata/_custom_type_script = "uid://dymp18kf28isa"

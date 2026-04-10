@@ -11,5 +11,12 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_3l4wl")
 preview_sprite = SubResource("AtlasTexture_q5lnr")
 break_item_id = 4
+<<<<<<< Updated upstream
+=======
+break_sfx = ExtResource("1_q5lnr")
+break_volume = 10.0
+place_sfx = SubResource("AudioStreamWAV_q5lnr")
+place_volume = 10.0
+>>>>>>> Stashed changes
 block_health = 60
 metadata/_custom_type_script = "uid://dymp18kf28isa"

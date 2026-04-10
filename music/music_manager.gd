@@ -17,12 +17,10 @@ enum Area {
 
 # --- Variables --- #
 const AREA_TRACKS: Dictionary[Area, Array] = {
-	Area.TITLE_SCREEN: [
-		"res://music/menus/title.ogg",
-	],
+	Area.TITLE_SCREEN: ["res://music/menus/title.ogg"],
 	Area.FOREST_DAY: [
 		"res://music/forest/forest_day_2.ogg",
-		"res://music/forest/Day Overworld.ogg",
+		#"res://music/forest/Day Overworld.ogg",
 		#"res://music/forest/Surface Track.ogg",
 		#"res://music/forest/Grass in The Night 1.ogg",
 		#"res://music/forest/Day 5.ogg",
@@ -32,11 +30,13 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 	Area.FOREST_NIGHT: [
 		"res://music/forest/Night Track.ogg",
 		"res://music/forest/Grass in The Night 1.ogg",
+		"res://music/forest/Day Overworld.ogg",
 	],
 	Area.WINTER_DAY: [
 		"res://music/winter/winter_day_1.ogg",
 		"res://music/winter/winter_day_2.ogg",
 	],
+<<<<<<< Updated upstream
 	Area.WINTER_NIGHT: [],
 	Area.UNDERGROUND: [
 		"res://music/Caves/Cave 2.ogg",
@@ -44,6 +44,11 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 	Area.CAVERN: [
 		"res://music/Caves/Deep Cave 1.ogg",
 	],
+=======
+	Area.WINTER_NIGHT: ["res://music/winter/Ice Night 1.ogg"],
+	Area.UNDERGROUND: ["res://music/Caves/Cave 2.ogg"],
+	Area.CAVERN: ["res://music/Caves/Deep Cave 1.ogg"],
+>>>>>>> Stashed changes
 	Area.DUNGEON: [],
 	Area.SPACE: [
 		"res://music/Space/Space 1.ogg",
@@ -56,6 +61,7 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		#"res://music/ocean/ocean_day_3.ogg",
 		"res://music/Ocean/Ocean 1.ogg",
 	],
+<<<<<<< Updated upstream
 	Area.OCEAN_NIGHT: [],
 }
 
@@ -73,35 +79,72 @@ const AREA_INTRO_TRACKS: Dictionary[Area, String] = {
 	Area.FOREST_DAY: "res://music/forest/forest_day_2.ogg",
 	Area.OCEAN_DAY: "res://music/Ocean/Ocean 1.ogg",
 }
+=======
+	Area.OCEAN_NIGHT: ["res://music/Ocean/Ocean Night 1.ogg"],
+}
+
+const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
+	Area.FOREST_DAY:   Area.FOREST_NIGHT,
+	Area.FOREST_NIGHT: Area.FOREST_DAY,
+	Area.WINTER_DAY:   Area.WINTER_NIGHT,
+	Area.WINTER_NIGHT: Area.WINTER_DAY,
+	Area.OCEAN_DAY:    Area.OCEAN_NIGHT,
+	Area.OCEAN_NIGHT:  Area.OCEAN_DAY,
+}
+
+const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY]
+const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT]
+>>>>>>> Stashed changes
 
 var _track_queues: Dictionary[Area, Array] = {}
-var _intro_played: Dictionary[Area, bool] = {}
 var _last_played: Dictionary[Area, String] = {}
 var _current_area: Area = Area.TITLE_SCREEN
+<<<<<<< Updated upstream
+=======
+var _is_day: bool = true
+var _initialized: bool = false # NEW: Prevents premature music starts
+>>>>>>> Stashed changes
 
 # --- Functions --- #
+
 func _ready() -> void:
+	bus = "Music"
 	Globals.music = self
 	finished.connect(_on_track_finished)
-
 	BiomeManager.biome_changed.connect(_on_biome_changed)
 	BiomeManager.layer_changed.connect(_on_layer_changed)
 
-	# start playback
 	var args = Globals.parse_arguments()
-
-	# only play on clients that haven't disabled music
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
-		AudioServer.set_bus_volume_db(0, -1000)
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), -1000)
 		return
 
+<<<<<<< Updated upstream
 	play_track(Area.TITLE_SCREEN)
 
 
+=======
+	# Only play the title screen music. 
+	# Do NOT call resolve logic here because world time isn't synced yet.
+	play_track(Area.TITLE_SCREEN)
+
+
+func _process(_delta: float) -> void:
+	# Only sync if we've actually entered the game
+	if _current_area == Area.TITLE_SCREEN: return
+	
+	var current_day_state: bool = DaytimeManager.is_day()
+	if current_day_state != _is_day:
+		_is_day = current_day_state
+		_on_time_changed(_is_day)
+
+
+>>>>>>> Stashed changes
 func _on_track_finished() -> void:
 	play_track(_current_area)
 
 
+<<<<<<< Updated upstream
 ## Returns the next track path for a queued area, refilling and reshuffling
 ## the queue once all tracks have been played.
 func _next_queued_track(area: Area) -> String:
@@ -125,10 +168,23 @@ func _next_queued_track(area: Area) -> String:
 
 
 ## Plays a music track for the given [param area].
-func play_track(area: Area, variant := -1) -> void:
-	print("play_track called, area: ", area, " is_server: ", multiplayer.is_server())
+=======
+func _on_time_changed(is_day: bool) -> void:
+	if _current_area in DAY_NIGHT_PAIRS or _current_area in DAY_AREAS:
+		enter_area(_current_area)
 
+
+func _resolve_area(area: Area) -> Area:
+	if area not in DAY_NIGHT_PAIRS and area not in DAY_AREAS:
+		return area
+	var day_version = area if area in DAY_AREAS else DAY_NIGHT_PAIRS[area]
+	return day_version if _is_day else DAY_NIGHT_PAIRS[day_version]
+
+
+>>>>>>> Stashed changes
+func play_track(area: Area, variant := -1) -> void:
 	_current_area = area
+	if multiplayer.is_server() and OS.has_feature("dedicated_server"): return
 
 	var path: String
 	if variant != -1:
@@ -136,24 +192,54 @@ func play_track(area: Area, variant := -1) -> void:
 	elif area in QUEUED_AREAS:
 		path = _next_queued_track(area)
 	elif AREA_TRACKS[area].is_empty():
+		stop()
 		return
 	else:
-		path = AREA_TRACKS[area][randi_range(0, len(AREA_TRACKS[area]) - 1)]
+		path = AREA_TRACKS[area].pick_random()
 
-	print("Loading path: ", path)
-	var new_stream: AudioStreamOggVorbis = load(path)
-	if new_stream == null:
-		push_error("MusicManager: failed to load track: " + path)
-		return
+	print("[MusicManager] Playing: ", path, " (Area: ", Area.keys()[area], ")")
+	var new_stream = load(path)
+	if new_stream:
+		stream = new_stream
+		play()
 
-	new_stream.loop = AREA_TRACKS[area].size() == 1
 
-	stream = new_stream
-	play()
-	print("Is playing: ", playing)
+func enter_area(area: Area) -> void:
+	# Immediately check time upon entering any game area
+	_is_day = DaytimeManager.is_day()
+	var resolved: Area = _resolve_area(area)
+	
+	print("[Music] System Check | Time: %s | Requested: %s | Resolved: %s | Current: %s" % [
+		"Day" if _is_day else "Night", Area.keys()[area], Area.keys()[resolved], Area.keys()[_current_area]
+	])
 
+	# Force play if we are moving from Title Screen or if the resolved track differs
+	if resolved != _current_area or not playing or _current_area == Area.TITLE_SCREEN:
+		reset_area(resolved)
+		play_track(resolved)
+
+
+func reset_area(area: Area) -> void:
+	_track_queues.erase(area)
+	_last_played.erase(area)
+
+
+func _next_queued_track(area: Area) -> String:
+	if not _track_queues.has(area) or _track_queues[area].is_empty():
+		var new_queue: Array = AREA_TRACKS[area].duplicate()
+		new_queue.shuffle()
+		if new_queue.size() > 1 and new_queue.front() == _last_played.get(area, ""):
+			new_queue.append(new_queue.pop_front())
+		_track_queues[area] = new_queue
+	var track: String = _track_queues[area].pop_front()
+	_last_played[area] = track
+	return track
+
+
+# --- Signal Handlers --- #
 
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
+<<<<<<< Updated upstream
 	# layer overrides biome music for non-surface layers
 	match BiomeManager.current_layer:
 		BiomeManager.Layer.SPACE:
@@ -173,10 +259,18 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 			enter_area(Area.FOREST_DAY)
 		BiomeManager.Biome.OCEAN:
 			enter_area(Area.OCEAN_DAY)
+=======
+	if BiomeManager.current_layer != BiomeManager.Layer.SURFACE: return
+	match new_biome:
+		BiomeManager.Biome.SNOW: enter_area(Area.WINTER_DAY)
+		BiomeManager.Biome.FOREST: enter_area(Area.FOREST_DAY)
+		BiomeManager.Biome.OCEAN: enter_area(Area.OCEAN_DAY)
+>>>>>>> Stashed changes
 
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
+<<<<<<< Updated upstream
 		BiomeManager.Layer.SPACE:
 			enter_area(Area.SPACE)
 		BiomeManager.Layer.SURFACE:
@@ -201,3 +295,9 @@ func reset_area(area: Area) -> void:
 	_intro_played.erase(area)
 	_track_queues.erase(area)
 	_last_played.erase(area)
+=======
+		BiomeManager.Layer.SPACE: enter_area(Area.SPACE)
+		BiomeManager.Layer.SURFACE: _on_biome_changed(BiomeManager.current_biome)
+		BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
+		BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)
+>>>>>>> Stashed changes

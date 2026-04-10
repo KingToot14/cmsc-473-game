@@ -11,4 +11,11 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_asejx")
 preview_sprite = SubResource("AtlasTexture_eaqn2")
 break_item_id = 52
+<<<<<<< Updated upstream
+=======
+break_sfx = ExtResource("1_eaqn2")
+break_volume = 10.0
+place_sfx = ExtResource("1_eaqn2")
+place_volume = 10.0
+>>>>>>> Stashed changes
 metadata/_custom_type_script = "uid://dymp18kf28isa"
