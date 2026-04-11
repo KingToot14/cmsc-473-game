@@ -17,7 +17,12 @@ enum Area {
 
 # --- Variables --- #
 const AREA_TRACKS: Dictionary[Area, Array] = {
-	Area.TITLE_SCREEN: ["res://music/menus/title.ogg"],
+	Area.TITLE_SCREEN: [
+		"res://music/menus/title.ogg",
+		"res://music/menus/Menu A Theme.ogg",
+		
+		
+		],
 	Area.FOREST_DAY: [
 		"res://music/forest/forest_day_2.ogg",
 		#"res://music/forest/Day Overworld.ogg",
@@ -31,14 +36,34 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/forest/Night Track.ogg",
 		"res://music/forest/Grass in The Night 1.ogg",
 		"res://music/forest/Day Overworld.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		
+		
 	],
 	Area.WINTER_DAY: [
 		"res://music/winter/winter_day_1.ogg",
 		"res://music/winter/winter_day_2.ogg",
 	],
-	Area.WINTER_NIGHT: ["res://music/winter/Ice Night 1.ogg"],
-	Area.UNDERGROUND: ["res://music/Caves/Cave 2.ogg"],
-	Area.CAVERN: ["res://music/Caves/Deep Cave 1.ogg"],
+	Area.WINTER_NIGHT: [
+		"res://music/winter/Ice Night 1.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		
+		],
+	Area.UNDERGROUND: [
+		"res://music/Caves/Cave 2.ogg",
+		"res://music/Caves/Ice Caves.ogg",
+		"res://music/Caves/Ice Caves 2.ogg",
+		
+		
+	
+	],
+	Area.CAVERN: [
+		"res://music/Caves/Deep Cave 1.ogg",
+		"res://music/Caves/Deep Cave 2.ogg",
+	
+	],
 	Area.DUNGEON: [],
 	Area.SPACE: [
 		"res://music/Space/Space 1.ogg",
@@ -51,7 +76,13 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		#"res://music/ocean/ocean_day_3.ogg",
 		"res://music/Ocean/Ocean 1.ogg",
 	],
-	Area.OCEAN_NIGHT: ["res://music/Ocean/Ocean Night 1.ogg"],
+	Area.OCEAN_NIGHT: [
+		"res://music/Ocean/Ocean Night 1.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		
+		
+	],
 }
 
 const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
