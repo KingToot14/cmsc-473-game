@@ -22,9 +22,10 @@
 [ext_resource type="AudioStream" uid="uid://cxmwn0448gob8" path="res://music/Caves/Ice Caves.ogg" id="14_pmpi7"]
 [ext_resource type="AudioStream" uid="uid://dusm7884cm1lc" path="res://music/menus/Menu A Theme.ogg" id="15_1fhif"]
 [ext_resource type="AudioStream" uid="uid://v8ocoxkxic0o" path="res://music/Caves/Ice Caves 2.ogg" id="15_drlwh"]
+[ext_resource type="AudioStream" uid="uid://dg3aimd8uofdt" path="res://music/forest/Another-Night.ogg" id="16_uyr16"]
 
 [resource]
-clip_count = 22
+clip_count = 23
 clip_0/name = &"Title"
 clip_0/stream = ExtResource("1_mx5f5")
 clip_0/auto_advance = 0
@@ -91,3 +92,6 @@ clip_20/auto_advance = 0
 clip_21/name = &"Menu Abby’s Theme"
 clip_21/stream = ExtResource("15_1fhif")
 clip_21/auto_advance = 0
+clip_22/name = &"Another Night"
+clip_22/stream = ExtResource("16_uyr16")
+clip_22/auto_advance = 0
