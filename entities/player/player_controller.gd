@@ -63,6 +63,7 @@ var is_grounded := false
 @export var water_breath := 10.0
 var breath_timer := 0.0
 @export var water_drown_damage := 1
+var was_in_water := false  # Track water state for entry/exit sounds
 
 ## How strong incoming knockback is applied. Represents the player's "weight"
 @export var knockback_power := 200.0
@@ -288,15 +289,60 @@ func apply_input(delta: float) -> void:
 		floori(global_position.y)
 	)
 	
-	# check if feet is underwater
 	var in_water := (
-		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
-		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) > WaterUpdater.WATER_TYPE
+		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) >= WaterUpdater.WATER_TYPE or
+		TileManager.get_liquid_type(tile_pos.x + 1, tile_pos.y) >= WaterUpdater.WATER_TYPE
 	) and (
 		TileManager.get_liquid_level(tile_pos.x, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50 or \
 		TileManager.get_liquid_level(tile_pos.x + 1, tile_pos.y) > WaterUpdater.MAX_WATER_LEVEL * 0.50
 	)
 	
+	# Play water entry/exit sounds
+	if in_water and not was_in_water:
+		Globals.music.play_water_entry_sound()
+	elif not in_water and was_in_water:
+		Globals.music.play_water_exit_sound()
+	was_in_water = in_water
+	
+# Check for nearby water or lava (within 20 tile radius)
+	var near_liquid := false
+	var liquid_type = 0
+	var closest_distance = 999.0
+	
+	for x in range(-20, 21):
+		for y in range(-20, 21):
+			var check_pos = tile_pos + Vector2i(x, y)
+			var l_type = TileManager.get_liquid_type(check_pos.x, check_pos.y)
+			var liquid_level = TileManager.get_liquid_level(check_pos.x, check_pos.y)
+			
+			# Check if it's water or lava and has sufficient level
+			if l_type > 0 and liquid_level > WaterUpdater.MAX_WATER_LEVEL * 0.50:
+				near_liquid = true
+				liquid_type = l_type
+				
+				# Calculate distance to this liquid tile
+				var distance = sqrt(float(x*x + y*y))
+				if distance < closest_distance:
+					closest_distance = distance
+	
+	# Update liquid ambience based on proximity with fade
+	if near_liquid:
+		# Calculate fade volume based on distance (0 to 20 tiles)
+		# At 20 tiles away: quiet, at 0 tiles: loud
+		var fade_volume = clamp(1.0 - (closest_distance / 20.0), 0.0, 1.0)
+		var db = linear_to_db(fade_volume) if fade_volume > 0.0 else -80.0
+		
+		if not Globals.music._water_ambience_playing:
+			if liquid_type == WaterUpdater.WATER_TYPE:
+				Globals.music.start_water_ambience()
+			else:  # Lava or other liquid
+				Globals.music.start_lava_ambience()
+		
+		# Set volume based on distance
+		Globals.music.set_liquid_ambience_volume(db)
+	elif Globals.music._water_ambience_playing:
+		Globals.music.stop_water_ambience()
+
 	# check if head is under water
 	var head_in_water := (
 		TileManager.get_liquid_type(tile_pos.x, tile_pos.y) > WaterUpdater.WATER_TYPE or
