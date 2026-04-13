@@ -15,36 +15,43 @@ enum Area {
 	OCEAN_NIGHT,
 }
 
-# --- Variables --- #
+# --- Constants --- #
 const AREA_TRACKS: Dictionary[Area, Array] = {
 	Area.TITLE_SCREEN: [
 		"res://music/menus/title.ogg",
+		"res://music/menus/Menu A Theme.ogg",
 	],
 	Area.FOREST_DAY: [
 		"res://music/forest/forest_day_2.ogg",
-		"res://music/forest/Day Overworld.ogg",
-		#"res://music/forest/Surface Track.ogg",
-		#"res://music/forest/Grass in The Night 1.ogg",
-		#"res://music/forest/Day 5.ogg",
 		"res://music/forest/Day 4.ogg",
 		"res://music/forest/Forest in the Day.ogg",
 	],
 	Area.FOREST_NIGHT: [
 		"res://music/forest/Night Track.ogg",
 		"res://music/forest/Grass in The Night 1.ogg",
+		"res://music/forest/Day Overworld.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		"res://music/forest/Another-Night.ogg",
 	],
 	Area.WINTER_DAY: [
 		"res://music/winter/winter_day_1.ogg",
 		"res://music/winter/winter_day_2.ogg",
 	],
 	Area.WINTER_NIGHT: [
-		"res://music/winter/Ice Night 1.ogg"
+		"res://music/winter/Ice Night 1.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		"res://music/forest/Another-Night.ogg",
 	],
 	Area.UNDERGROUND: [
 		"res://music/Caves/Cave 2.ogg",
+		"res://music/Caves/Ice Caves.ogg",
+		"res://music/Caves/Ice Caves 2.ogg",
 	],
 	Area.CAVERN: [
 		"res://music/Caves/Deep Cave 1.ogg",
+		"res://music/Caves/Deep Cave 2.ogg",
 	],
 	Area.DUNGEON: [],
 	Area.SPACE: [
@@ -53,97 +60,236 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/Space/Space 3.ogg",
 	],
 	Area.OCEAN_DAY: [
-		#"res://music/ocean/ocean_day_1.ogg",
-		#"res://music/ocean/ocean_day_2.ogg",
-		#"res://music/ocean/ocean_day_3.ogg",
 		"res://music/Ocean/Ocean 1.ogg",
 	],
 	Area.OCEAN_NIGHT: [
-		"res://music/Ocean/Ocean Night 1.ogg"
+		"res://music/Ocean/Ocean Night 1.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		"res://music/forest/Another-Night.ogg",
 	],
 }
 
-# Maps each day area to its night equivalent and vice versa.
-const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
-	Area.FOREST_DAY:   Area.FOREST_NIGHT,
-	Area.FOREST_NIGHT: Area.FOREST_DAY,
-	Area.WINTER_DAY:   Area.WINTER_NIGHT,
-	Area.WINTER_NIGHT: Area.WINTER_DAY,
-	Area.OCEAN_DAY:    Area.OCEAN_NIGHT,
-	Area.OCEAN_NIGHT:  Area.OCEAN_DAY,
+const AREA_AMBIENCE: Dictionary[Area, String] = {
+	Area.TITLE_SCREEN: "",
+	Area.FOREST_DAY: "res://music/Ambience/Forest Day/Ambiance_Forest_Birds_Loop_Stereo.ogg",
+	Area.FOREST_NIGHT: "res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
+	Area.WINTER_DAY: "res://music/Ambience/Winter/Ambiance_Wind_Calm_Loop_Stereo.ogg",
+	Area.WINTER_NIGHT: "res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
+	Area.UNDERGROUND: "res://music/Ambience/Cave/Ambiance_Cave_Drips_Loop_Stereo.ogg",
+	Area.CAVERN: "res://music/Ambience/Deep Cave/Ambiance_Cave_Dark_Loop_Stereo.ogg",
+	Area.DUNGEON: "",
+	Area.SPACE: "res://music/Ambience/Space/liecio-space-sound-hi-109577.ogg",
+	Area.OCEAN_DAY: "res://music/Ambience/Beach/beach - very close, waves & foam.ogg",
+	Area.OCEAN_NIGHT: "res://music/Ambience/Beach/prettysleepy-crickets-chirping-amp-ocean-waves-by-prettysleepy-art-10372.ogg",
 }
 
-# Areas that use a shuffled queue instead of random selection
-const QUEUED_AREAS: Array[Area] = [
-	Area.FOREST_DAY,
-	Area.FOREST_NIGHT,
-	Area.SPACE,
-	Area.OCEAN_DAY,
-	Area.OCEAN_NIGHT,
+const WATER_ENTRY_SOUNDS: Array[String] = ["res://music/Water Sounds/splash big 5.wav"]
+const WATER_EXIT_SOUNDS: Array[String] = ["res://music/Water Sounds/IMG_9708.wav"]
+const TREE_DAMAGE_SOUNDS: Array[String] = ["res://music/Tree sfx/wood hit 16.wav", "res://music/Tree sfx/wood hit 26.wav"]
+const TREE_BREAK_SOUNDS: Array[String] = ["res://music/Tree sfx/mollyroselee-falling-tree-ai-generated-431321.wav"]
+const ITEM_PICKUP_SOUNDS: Array[String] = ["res://music/Inventory Sounds/Poping Sound.wav"]
+const ARMOR_EQUIP_SOUNDS: Array[String] = ["res://music/Inventory Sounds/freesound_community-item-equip-6904.wav"]
+const WATER_AMBIENCE_SOUNDS: Array[String] = [
+	"res://music/Liquid Ambience/Ambiance_River_Moderate_Loop_Stereo.wav",
+	"res://music/Liquid Ambience/Ambiance_Stream_Calm_Loop_Stereo.wav",
+]
+const LAVA_AMBIENCE_SOUNDS: Array[String] = [
+	"res://music/Liquid Ambience/freesound_community-lava-loop-1-67307.wav",
+	"res://music/Liquid Ambience/freesound_community-lava-loop-2-67306.wav",
+]
+const TORCH_PLACE_SOUNDS: Array[String] = [
+	"res://music/Torch sfx/floraphonic-fire-torch-whoosh-3-190299.wav",
+]
+const TORCH_BREAK_SOUNDS: Array[String] = [
+	"res://music/Tree sfx/wood hit 16.wav",
 ]
 
-# No fixed intro tracks — all areas start on a random track.
-const AREA_INTRO_TRACKS: Dictionary[Area, String] = {}
+const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
+	Area.FOREST_DAY: Area.FOREST_NIGHT,
+	Area.FOREST_NIGHT: Area.FOREST_DAY,
+	Area.WINTER_DAY: Area.WINTER_NIGHT,
+	Area.WINTER_NIGHT: Area.WINTER_DAY,
+	Area.OCEAN_DAY: Area.OCEAN_NIGHT,
+	Area.OCEAN_NIGHT: Area.OCEAN_DAY,
+}
 
+const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY]
+const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT]
+
+# --- Variables --- #
 var _track_queues: Dictionary[Area, Array] = {}
-var _intro_played: Dictionary[Area, bool] = {}
 var _last_played: Dictionary[Area, String] = {}
 var _current_area: Area = Area.TITLE_SCREEN
 var _is_day: bool = true
 
+var _ambience_player: AudioStreamPlayer
+var _current_ambience_area: Area = Area.TITLE_SCREEN
+
+var _water_sfx_player: AudioStreamPlayer
+var _tiles_sfx_player: AudioStreamPlayer
+var _inventory_sfx_player: AudioStreamPlayer
+var _armor_sfx_player: AudioStreamPlayer
+var _torch_sfx_player: AudioStreamPlayer
+var _water_ambience_player: AudioStreamPlayer
+var _water_ambience_playing := false
+
+# --- Signals --- #
+signal area_changed(area: Area)
+signal ambience_changed(area: Area)
+signal water_entered
+signal water_exited
+
 # --- Functions --- #
+
 func _ready() -> void:
+	bus = "Music"
 	Globals.music = self
 	finished.connect(_on_track_finished)
-
 	BiomeManager.biome_changed.connect(_on_biome_changed)
 	BiomeManager.layer_changed.connect(_on_layer_changed)
 
-	# start playback
-	var args = Globals.parse_arguments()
+	_setup_players()
 
-	# only play on clients that haven't disabled music
+	var args = Globals.parse_arguments()
 	if OS.has_feature('dedicated_server') or args.get('server', false) or args.get('no-music', false):
-		AudioServer.set_bus_volume_db(0, -1000)
+		_mute_audio_server()
 		return
 
-	# Don't read DaytimeManager here — world isn't loaded yet.
-	# _process will sync _is_day once the world is running.
 	play_track(Area.TITLE_SCREEN)
 
+func _setup_players() -> void:
+	_ambience_player = AudioStreamPlayer.new()
+	add_child(_ambience_player)
+	_ambience_player.bus = "Ambiance"
+	_ambience_player.finished.connect(_on_ambience_finished)
+
+	_water_sfx_player = AudioStreamPlayer.new()
+	add_child(_water_sfx_player)
+	_water_sfx_player.bus = "Water Effects"
+
+	_water_ambience_player = AudioStreamPlayer.new()
+	add_child(_water_ambience_player)
+	_water_ambience_player.bus = "Liquid Ambiance"
+	_water_ambience_player.finished.connect(_on_water_ambience_finished)
+
+	_tiles_sfx_player = AudioStreamPlayer.new()
+	add_child(_tiles_sfx_player)
+	_tiles_sfx_player.bus = "Tiles"
+
+	_inventory_sfx_player = AudioStreamPlayer.new()
+	add_child(_inventory_sfx_player)
+	_inventory_sfx_player.bus = "Inventory"
+	
+	_armor_sfx_player = AudioStreamPlayer.new()
+	add_child(_armor_sfx_player)
+	_armor_sfx_player.bus = "Armor"
+
+	_torch_sfx_player = AudioStreamPlayer.new()
+	add_child(_torch_sfx_player)
+	_torch_sfx_player.bus = "Torch"
+
+func _mute_audio_server() -> void:
+	var buses: Array[String] = ["Music", "Ambiance", "Water Effects", "Tiles", "Inventory", "Armor", "Liquid Ambiance", "Torch"]
+	for b in buses:
+		var idx = AudioServer.get_bus_index(b)
+		if idx != -1:
+			AudioServer.set_bus_mute(idx, true)
 
 func _process(_delta: float) -> void:
-	# Poll DaytimeManager each frame and trigger a music switch if day/night has flipped.
+	if _current_area == Area.TITLE_SCREEN: return
+	
 	var is_day: bool = DaytimeManager.is_day()
 	if is_day != _is_day:
 		_on_time_changed(is_day)
 
-
 func _on_track_finished() -> void:
 	play_track(_current_area)
 
+func _on_ambience_finished() -> void:
+	if _current_ambience_area != Area.TITLE_SCREEN:
+		play_ambience(_current_ambience_area)
 
-## Called when the time of day crosses the day/night boundary.
+func _on_water_ambience_finished() -> void:
+	# Loop the water/lava ambience
+	if _water_ambience_playing:
+		_water_ambience_player.play()
+
 func _on_time_changed(is_day: bool) -> void:
 	_is_day = is_day
+	if _current_area in DAY_NIGHT_PAIRS or _current_area in DAY_AREAS:
+		enter_area(_current_area)
 
-	# Only switch if we're in a surface biome with a day/night pair
-	if _current_area not in DAY_NIGHT_PAIRS:
+func _resolve_area(area: Area) -> Area:
+	if area not in DAY_NIGHT_PAIRS and area not in DAY_AREAS:
+		return area
+	var day_version = area if area in DAY_AREAS else DAY_NIGHT_PAIRS[area]
+	return day_version if _is_day else DAY_NIGHT_PAIRS[day_version]
+
+func _load_audio_stream(path: String) -> AudioStream:
+	if path == "": return null
+	var audio_stream = load(path)
+	if not audio_stream:
+		print("[MusicManager] Failed to load: ", path)
+	return audio_stream
+
+func play_track(area: Area, variant := -1) -> void:
+	_current_area = area
+	if multiplayer.is_server() and OS.has_feature("dedicated_server"): return
+
+	var path: String = ""
+	if variant != -1:
+		path = AREA_TRACKS[area][variant]
+	elif area in QUEUED_AREAS:
+		path = _next_queued_track(area)
+	elif not AREA_TRACKS[area].is_empty():
+		path = AREA_TRACKS[area].pick_random()
+
+	if path != "":
+		var new_stream = _load_audio_stream(path)
+		if new_stream:
+			stream = new_stream
+			play()
+	else:
+		stop()
+	
+	play_ambience(area)
+
+func play_ambience(area: Area) -> void:
+	var resolved_area: Area = _resolve_area(area)
+	if resolved_area == _current_ambience_area and _ambience_player.playing:
 		return
 
-	var target_area: Area = DAY_NIGHT_PAIRS[_current_area]
-	# If the target area has no tracks, stay on the current one
-	if not AREA_TRACKS[target_area].is_empty():
-		enter_area(target_area)
+	_current_ambience_area = resolved_area
+	var ambience_path: String = AREA_AMBIENCE.get(resolved_area, "")
+	
+	if ambience_path == "":
+		_ambience_player.stop()
+		return
 
+	var ambience_stream = _load_audio_stream(ambience_path)
+	if ambience_stream:
+		_ambience_player.stream = ambience_stream
+		_ambience_player.play()
+		ambience_changed.emit(resolved_area)
 
-## Returns the next track path for a queued area, refilling and reshuffling
-## the queue once all tracks have been played.
+func enter_area(area: Area) -> void:
+	_is_day = DaytimeManager.is_day()
+	var resolved: Area = _resolve_area(area)
+	
+	if resolved != _current_area or not playing or _current_area == Area.TITLE_SCREEN:
+		reset_area(resolved)
+		play_track(resolved)
+		area_changed.emit(resolved)
+
+func reset_area(area: Area) -> void:
+	_track_queues.erase(area)
+	_last_played.erase(area)
+
 func _next_queued_track(area: Area) -> String:
 	if not _track_queues.has(area) or _track_queues[area].is_empty():
 		var new_queue: Array = AREA_TRACKS[area].duplicate()
 		new_queue.shuffle()
-		# if the first track in the new queue matches the last played, move it to the end
 		if new_queue.size() > 1 and new_queue.front() == _last_played.get(area, ""):
 			new_queue.append(new_queue.pop_front())
 		_track_queues[area] = new_queue
@@ -152,81 +298,146 @@ func _next_queued_track(area: Area) -> String:
 	_last_played[area] = track
 	return track
 
+# --- Sound Effects --- #
 
-## Plays a music track for a given [param area].
-func play_track(area: Area, variant := -1) -> void:
-	print("play_track called, area: ", area, " is_server: ", multiplayer.is_server())
+func play_torch_place_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_torch_sfx(TORCH_PLACE_SOUNDS.pick_random())
 
-	_current_area = area
+func play_torch_break_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_torch_sfx(TORCH_BREAK_SOUNDS.pick_random())
 
-	var path: String
-	if variant != -1:
-		path = AREA_TRACKS[area][variant]
-	elif area in QUEUED_AREAS:
-		path = _next_queued_track(area)
-	elif AREA_TRACKS[area].is_empty():
+func _is_audio_safe() -> bool:
+	return Engine.get_frames_drawn() > 30
+
+func play_water_entry_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_sfx(_water_sfx_player, WATER_ENTRY_SOUNDS.pick_random())
+	water_entered.emit()
+
+func play_water_exit_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_sfx(_water_sfx_player, WATER_EXIT_SOUNDS.pick_random())
+	water_exited.emit()
+
+func play_tree_damage_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_sfx(_tiles_sfx_player, TREE_DAMAGE_SOUNDS.pick_random())
+
+func play_tree_break_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_sfx(_tiles_sfx_player, TREE_BREAK_SOUNDS.pick_random())
+
+func play_item_pickup_sound() -> void:
+	if not _is_audio_safe(): 
 		return
+		
+	if _inventory_sfx_player.playing and _inventory_sfx_player.get_playback_position() < 0.05:
+		return
+		
+	_play_sfx(_inventory_sfx_player, ITEM_PICKUP_SOUNDS.pick_random())
+
+func play_armor_equip_sound() -> void:
+	if not _is_audio_safe():
+		return
+		
+	if _armor_sfx_player:
+		_play_sfx(_armor_sfx_player, ARMOR_EQUIP_SOUNDS.pick_random())
+
+func start_water_ambience() -> void:
+	if _water_ambience_playing:
+		return
+	
+	_water_ambience_playing = true
+	if _water_ambience_player:
+		var sound_path = WATER_AMBIENCE_SOUNDS.pick_random()
+		_water_ambience_player.stream = _load_audio_stream(sound_path)
+		_water_ambience_player.play()
+		print("[MusicManager] Started water ambience")
+
+func start_lava_ambience() -> void:
+	if _water_ambience_playing:
+		return
+	
+	_water_ambience_playing = true
+	if _water_ambience_player:
+		var sound_path = LAVA_AMBIENCE_SOUNDS.pick_random()
+		_water_ambience_player.stream = _load_audio_stream(sound_path)
+		_water_ambience_player.play()
+		print("[MusicManager] Started lava ambience")
+
+func stop_water_ambience() -> void:
+	if not _water_ambience_playing:
+		return
+	
+	_water_ambience_playing = false
+	if _water_ambience_player:
+		_water_ambience_player.stop()
+		print("[MusicManager] Stopped liquid ambience")
+
+func set_liquid_ambience_volume(db: float) -> void:
+	"""Set liquid ambience volume with smooth fade"""
+	if _water_ambience_player:
+		_water_ambience_player.volume_db = db
+
+func _play_sfx(player: AudioStreamPlayer, path: String) -> void:
+	var sfx_stream = load(path)
+	if sfx_stream:
+		player.stream = sfx_stream
+		player.play()
 	else:
-		path = AREA_TRACKS[area][randi_range(0, len(AREA_TRACKS[area]) - 1)]
+		print("ERROR: Could not load sound at: ", path)
 
-	print("Loading path: ", path)
-	var new_stream: AudioStreamOggVorbis = load(path)
-	if new_stream == null:
-		push_error("MusicManager: failed to load track: " + path)
+func _play_torch_sfx(path: String) -> void:
+	print("[MusicManager] _play_torch_sfx() called with: ", path)
+	
+	# Check if Torch bus exists
+	var bus_idx = AudioServer.get_bus_index("Torch")
+	print("[MusicManager] Torch bus index: ", bus_idx)
+	
+	if bus_idx == -1:
+		print("[MusicManager] ERROR: 'Torch' bus does not exist!")
 		return
+	
+	var is_muted = AudioServer.is_bus_mute(bus_idx)
+	var bus_vol = AudioServer.get_bus_volume_db(bus_idx)
+	print("[MusicManager] Torch bus - Muted: ", is_muted, " Volume: ", bus_vol, " dB")
+	print("[MusicManager] Torch player volume_db: ", _torch_sfx_player.volume_db)
+	
+	var sfx_stream = load(path)
+	if sfx_stream:
+		
+		_torch_sfx_player.stream = sfx_stream
+		_torch_sfx_player.play()
+		
+	else:
+		print("[MusicManager] ERROR: Could not load torch sound at: ", path)
 
-	new_stream.loop = AREA_TRACKS[area].size() == 1
+# --- Volume Control --- #
 
-	stream = new_stream
-	play()
-	print("Is playing: ", playing)
+func set_bus_vol(bus_name: String, db: float) -> void:
+	var idx = AudioServer.get_bus_index(bus_name)
+	if idx != -1:
+		AudioServer.set_bus_volume_db(idx, db)
 
+# --- Signal Handlers --- #
 
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
-	# layer overrides biome music for non-surface layers
-	match BiomeManager.current_layer:
-		BiomeManager.Layer.SPACE:
-			return
-		BiomeManager.Layer.UNDERGROUND:
-			enter_area(Area.UNDERGROUND)
-			return
-		BiomeManager.Layer.CAVERN:
-			enter_area(Area.CAVERN)
-			return
+	if BiomeManager.current_layer != BiomeManager.Layer.SURFACE:
+		match BiomeManager.current_layer:
+			BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
+			BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)
+		return
 
-	# surface biome music — respect current time of day
 	match new_biome:
-		BiomeManager.Biome.SNOW:
-			enter_area(Area.WINTER_DAY if _is_day else Area.WINTER_NIGHT)
-		BiomeManager.Biome.FOREST:
-			enter_area(Area.FOREST_DAY if _is_day else Area.FOREST_NIGHT)
-		BiomeManager.Biome.OCEAN:
-			enter_area(Area.OCEAN_DAY if _is_day else Area.OCEAN_NIGHT)
-
+		BiomeManager.Biome.SNOW: enter_area(Area.WINTER_DAY)
+		BiomeManager.Biome.FOREST: enter_area(Area.FOREST_DAY)
+		BiomeManager.Biome.OCEAN: enter_area(Area.OCEAN_DAY)
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
-		BiomeManager.Layer.SPACE:
-			enter_area(Area.SPACE)
-		BiomeManager.Layer.SURFACE:
-			_on_biome_changed(BiomeManager.current_biome)
-		BiomeManager.Layer.UNDERGROUND:
-			enter_area(Area.UNDERGROUND)
-		BiomeManager.Layer.CAVERN:
-			enter_area(Area.CAVERN)
-
-
-## Switches to a new area, resetting the queue so a fresh random track plays.
-func enter_area(area: Area) -> void:
-	if area == _current_area:
-		return
-	reset_area(area)
-	play_track(area)
-
-
-## Resets the queue and intro state for [param area], so a fresh random track
-## plays next time the player enters it.
-func reset_area(area: Area) -> void:
-	_intro_played.erase(area)
-	_track_queues.erase(area)
-	_last_played.erase(area)
+		BiomeManager.Layer.SPACE: enter_area(Area.SPACE)
+		BiomeManager.Layer.SURFACE: _on_biome_changed(BiomeManager.current_biome)
+		BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
+		BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)

@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://7nxmawig45po" path="res://walls/11_basalt_brick_wall/tiles.png" id="1_co57e"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_oou1m"]
+[ext_resource type="AudioStream" uid="uid://xc8icf6h5sg3" path="res://blocks/14_stone_bricks/sfx/brick hit 1.wav" id="1_whie3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_whie3"]
 atlas = ExtResource("1_co57e")
@@ -11,4 +12,8 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_oou1m")
 preview_sprite = SubResource("AtlasTexture_whie3")
 break_item_id = 67
+break_sfx = ExtResource("1_whie3")
+break_volume = 10.0
+place_sfx = ExtResource("1_whie3")
+place_volume = 10.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

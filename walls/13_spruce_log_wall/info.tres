@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://d0sqx0og1qhs7" path="res://walls/13_spruce_log_wall/tiles.png" id="1_danco"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_n30eh"]
+[ext_resource type="AudioStream" uid="uid://cge3w252sspt4" path="res://blocks/5_oak_wood/sfx/wood hit.wav" id="1_unb04"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_unb04"]
 atlas = ExtResource("1_danco")
@@ -11,4 +12,8 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_n30eh")
 preview_sprite = SubResource("AtlasTexture_unb04")
 break_item_id = 69
+break_sfx = ExtResource("1_unb04")
+break_volume = 10.0
+place_sfx = ExtResource("1_unb04")
+place_volume = 10.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

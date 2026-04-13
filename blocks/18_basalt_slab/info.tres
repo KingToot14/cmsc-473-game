@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="BlockInfo" format=3 uid="uid://cwww2rnvy6m60"]
 
 [ext_resource type="Texture2D" uid="uid://0q2ohq1scjc5" path="res://blocks/18_basalt_slab/tiles.png" id="1_fynno"]
+[ext_resource type="AudioStream" uid="uid://xc8icf6h5sg3" path="res://blocks/14_stone_bricks/sfx/brick hit 1.wav" id="1_g846j"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_knia4"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g846j"]
@@ -11,4 +12,8 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_knia4")
 preview_sprite = SubResource("AtlasTexture_g846j")
 break_item_id = 53
+break_sfx = ExtResource("1_g846j")
+break_volume = 10.0
+place_sfx = ExtResource("1_g846j")
+place_volume = 10.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://sxf7u5tfnlco"
+path="res://.godot/imported/freesound_community-item-equip-6904.wav-47a5ffe74abb93cc2a0c66cb37fa8878.sample"
+
+[deps]
+
+source_file="res://music/Inventory Sounds/freesound_community-item-equip-6904.wav"
+dest_files=["res://.godot/imported/freesound_community-item-equip-6904.wav-47a5ffe74abb93cc2a0c66cb37fa8878.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

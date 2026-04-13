@@ -67,7 +67,19 @@ func _on_death() -> void:
 	if multiplayer.is_server():
 		# remove light
 		Globals.light_updater.remove_point_light(tile_position)
+		
+		# BROADCAST: This tells the server to run it locally AND send to all clients
+		play_torch_break_sound.rpc()
+	
+	print("[TorchEntity] Torch breaking")
 
+# Change to "call_local" so the host also hears the sound if they are playing
+@rpc("authority", "call_local", "reliable")
+func play_torch_break_sound() -> void:
+	if Globals.music:
+		# This will now print on the Client's console
+		print("[TorchEntity] Playing torch break sound")
+		Globals.music.play_torch_break_sound()
 #endregion
 
 #region Serialization
@@ -117,7 +129,18 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	
 	EntityManager.store_tile_entity(3, entity)
 	
+	if entity.multiplayer.is_server():
+		entity.play_torch_place_sound.rpc() # Tell everyone a torch was placed
+	
 	return
+	
+@rpc("authority", "call_local", "reliable")
+func play_torch_place_sound() -> void:
+	if Globals.music:
+		Globals.music.play_torch_place_sound()
+	
+
+	
 
 ## Returns whether or not the placement is valid. This uses
 ## [method get_collision_grid] to check for collision and 
