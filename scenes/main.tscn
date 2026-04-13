@@ -32,8 +32,8 @@
 [ext_resource type="Texture2D" path="res://backgrounds/underground/ice.png" id="21_og1vs"]
 [ext_resource type="Texture2D" path="res://backgrounds/cavern/background.png" id="22_2wyq8"]
 [ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="22_jscy8"]
-[ext_resource type="Texture2D" path="res://backgrounds/space/background.png" id="23_vxglm"]
-[ext_resource type="Texture2D" path="res://backgrounds/ocean/background.png" id="24_2f3dj"]
+[ext_resource type="Texture2D" uid="uid://baq1hd7pnexsp" path="res://backgrounds/space/background.png" id="23_vxglm"]
+[ext_resource type="Texture2D" uid="uid://cd4s7fx0bf7nd" path="res://backgrounds/ocean/background.png" id="24_2f3dj"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")

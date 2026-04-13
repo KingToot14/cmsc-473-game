@@ -13,7 +13,7 @@ metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
 
 [node name="damage_source" type="Area2D" parent="." unique_id=791205798]
 script = ExtResource("2_m56lf")
-damage = 10
+damage = 20
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
 position = Vector2(11.5, 1.5)

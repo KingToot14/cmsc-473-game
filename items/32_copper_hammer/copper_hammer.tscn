@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_723vt"]
 [ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_4fsuk"]
-[ext_resource type="Texture2D" uid="uid://ditm1dkurfm3s" path="res://items/36_iron_hammer/sprite.png" id="3_fckmr"]
+[ext_resource type="Texture2D" uid="uid://ctwfvx1n4ymjv" path="res://items/32_copper_hammer/sprite.png" id="3_723vt"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
 size = Vector2(9, 12)
@@ -13,7 +13,7 @@ metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
 
 [node name="damage_source" type="Area2D" parent="." unique_id=791205798]
 script = ExtResource("2_4fsuk")
-damage = 10
+damage = 20
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
 position = Vector2(12.5, 0)
@@ -22,4 +22,4 @@ shape = SubResource("RectangleShape2D_w0180")
 [node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
 position = Vector2(8, 0)
 rotation = 0.7853982
-texture = ExtResource("3_fckmr")
+texture = ExtResource("3_723vt")

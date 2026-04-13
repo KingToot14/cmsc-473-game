@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://crdc551mj2vpc"]
+
+[ext_resource type="PackedScene" uid="uid://day14ytko5egv" path="res://items/40_silver_hammer/silver_hammer.tscn" id="1_njj6j"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_5xlec"]
+[ext_resource type="Texture2D" uid="uid://dhqe5mxs1ynj3" path="res://items/40_silver_hammer/icon.png" id="3_njj6j"]
+
+[resource]
+script = ExtResource("2_5xlec")
+tool_type = 4
+tool_power = 45
+force_towards_mouse = true
+use_speed = 0.4
+default_swing_object = ExtResource("1_njj6j")
+item_id = 40
+item_name = "Silver Hammer"
+texture = ExtResource("3_njj6j")
+tooltip = "A tool that might be able to break down Weyandt Hall."
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

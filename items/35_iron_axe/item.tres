@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://dpqouvnkvh88b"]
+
+[ext_resource type="PackedScene" uid="uid://ndg0thmt602f" path="res://items/35_iron_axe/iron_axe.tscn" id="1_3h5hd"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_gm4xu"]
+[ext_resource type="Texture2D" uid="uid://mwoqttxfiqib" path="res://items/35_iron_axe/icon.png" id="3_lynep"]
+
+[resource]
+script = ExtResource("2_gm4xu")
+tool_type = 1
+tool_power = 40
+force_towards_mouse = true
+use_speed = 0.45
+default_swing_object = ExtResource("1_3h5hd")
+item_id = 35
+item_name = "Iron Axe"
+texture = ExtResource("3_lynep")
+tooltip = "You can contribute to global warming much faster with this axe!"
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

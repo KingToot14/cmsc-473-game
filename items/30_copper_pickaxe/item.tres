@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://c8qtj3owccl3n"]
 
-[ext_resource type="PackedScene" uid="uid://cuplg84yd21bp" path="res://items/7_wooden_pickaxe/wooden_pickaxe.tscn" id="1_t863o"]
+[ext_resource type="PackedScene" uid="uid://b80doaa2u7vuf" path="res://items/30_copper_pickaxe/copper_pickaxe.tscn" id="1_ytyhc"]
 [ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_6ut4m"]
 [ext_resource type="Texture2D" uid="uid://cnywmu4mmefwq" path="res://items/30_copper_pickaxe/icon.png" id="3_ytyhc"]
 
 [resource]
 script = ExtResource("2_6ut4m")
 tool_type = 2
-tool_power = 40
+tool_power = 35
 force_towards_mouse = true
 use_speed = 0.5
-default_swing_object = ExtResource("1_t863o")
-item_id = 7
+default_swing_object = ExtResource("1_ytyhc")
+item_id = 30
 item_name = "Copper Pickaxe"
 texture = ExtResource("3_ytyhc")
 tooltip = "An untrusty pickaxe. "

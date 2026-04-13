@@ -877,7 +877,8 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 
 	if block_damaged[key] <= 0:
 		# block is destroyed
-		block_damaged.erase(key) #deletes the entry in block_damaged
+		broadcast_block_damage(x, y) #tells the clients the block is destroyed
+		block_damaged.erase(key) #deletes the entry in block_damaged for the server
 		send_destroy_block(x, y) #tells the server to destroy the block
 	else:
 		#send damage state to nearby clients.
@@ -902,11 +903,17 @@ func broadcast_block_damage(x: int, y: int):
 		
 		if y < start.y or y > end.y:
 			continue
+		
 		#makes all players in range get the block damage.
-		receive_block_damage(x, y, block_damaged[Vector2i(x, y)])
-	
+		receive_block_damage.rpc_id(player_id, x, y, block_damaged[Vector2i(x, y)])
+
+@rpc('authority', 'call_remote', 'reliable')
 func receive_block_damage(x:int, y:int, block_health:int) -> void:
-	block_damaged[Vector2i(x, y)] = block_health
+	if block_health <= 0:
+		block_damaged.erase(Vector2i(x, y))
+	else:
+		block_damaged[Vector2i(x, y)] = block_health
+		
 	
 	
 @rpc('authority', 'call_remote', 'reliable')
@@ -927,14 +934,14 @@ func broadcast_block_sfx(x:int, y:int, block_id:int):
 		if y < start.y or y > end.y:
 			continue
 			
-		receive_break_sfx.rpc_id(player_id, x, y, block_id)
+		receive_block_break_sfx.rpc_id(player_id, x, y, block_id)
 
 		
 		
 	return
 	
 @rpc('authority', 'call_remote', 'reliable')
-func receive_break_sfx(x: int, y: int, block_id: int):
+func receive_block_break_sfx(x: int, y: int, block_id: int):
 	var block := BlockDatabase.get_block(block_id)
 	if block:
 		play_sfx(block.break_sfx, x, y, block.break_volume)
@@ -1016,9 +1023,27 @@ func hurt_wall(x: int, y:int, tool_power: int):
 	if not direct_space.intersect_shape(query, 1).is_empty():
 		return true
 	
+	send_hurt_wall.rpc_id(1, x, y, tool_power)
+	return
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func send_hurt_wall(x: int, y:int, tool_power: int):
+	# check bounds (consume interaction)
+	if x < 0 or x >= world_width:
+		return
+	if y < 0 or y >= world_height:
+		return
+	
+	# do not process if no wall exists
+	if not get_wall_unsafe(x, y):
+		return
+	
+	if not ServerManager.is_player_finalized(multiplayer.get_remote_sender_id()):
+		return
+	
 	var wall_id := get_wall(x, y)
 	var max_health = get_wall_health(wall_id)
-	var key := Vector2i(x, y) #key for the dictionary is the position of the block
+	var key := Vector2i(x, y) #key for the dictionary is the position of the wall
 	
 	
 	if not wall_damaged.has(key):
@@ -1029,10 +1054,72 @@ func hurt_wall(x: int, y:int, tool_power: int):
 
 
 	if wall_damaged[key] <= 0:
-		# wall is destroyed — let destroy_wall handle the rest
-		wall_damaged.erase(key)
-		destroy_wall(x, y)
+		# wall is destroyed
+		broadcast_wall_damage(x, y) #deletes the entry on wall_damaged for the clients first
+		wall_damaged.erase(key) #tells the server to erase the wall_damaged key
+		send_destroy_wall(x, y) #destroys the wall
+	else:
+		broadcast_wall_damage(x, y)
+	return
+
+func broadcast_wall_damage(x: int, y: int):
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue #this skips any players who disconnected
+			
+		#checks to see if players have loaded the chunk.
+		var center_point := world_to_tile(floori(player.center_point.x), floori(player.center_point.y))
+		var start := center_point - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := center_point + ChunkLoader.LOAD_RANGE * CHUNK_SIZE
 		
+		if x < start.x or x > end.x:
+			continue
+		
+		if y < start.y or y > end.y:
+			continue
+		#makes all players in range get the wall damage.
+		receive_wall_damage.rpc_id(player_id, x, y, wall_damaged[Vector2i(x, y)])
+	
+	return
+	
+	
+@rpc('authority', 'call_remote', 'reliable')
+func receive_wall_damage(x:int, y:int, wall_health:int) -> void:
+	if wall_health <= 0:
+		wall_damaged.erase(Vector2i(x,y))
+	else:
+		wall_damaged[Vector2i(x, y)] = wall_health
+
+@rpc('authority', 'call_remote', 'reliable')
+func broadcast_wall_sfx(x:int, y:int, wall_id:int):
+	for player_id in ServerManager.connected_players.keys():
+		var player := ServerManager.connected_players[player_id]
+		if not is_instance_valid(player):
+			continue #this skips any players who disconnected
+			
+		#checks to see if players have loaded the chunk.
+		var center_point := world_to_tile(floori(player.center_point.x), floori(player.center_point.y))
+		var start := center_point - ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		var end := center_point + ChunkLoader.LOAD_RANGE * CHUNK_SIZE
+		
+		if x < start.x or x > end.x:
+			continue
+		
+		if y < start.y or y > end.y:
+			continue
+			
+		receive_wall_break_sfx.rpc_id(player_id, x, y, wall_id)
+
+		
+		
+	return
+	
+@rpc('authority', 'call_remote', 'reliable')
+func receive_wall_break_sfx(x: int, y: int, wall_id: int):
+	var wall := BlockDatabase.get_wall(wall_id)
+	if wall:
+		play_sfx(wall.break_sfx, x, y, wall.break_volume)
 
 ## Attempts to destroy the wall at the given [param x] and [param y] position.
 ## [br][br]Returns [code]true[/code] if the interaction should be consumed. This is

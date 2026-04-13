@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://dhdobowyc2i5o"]
+
+[ext_resource type="PackedScene" uid="uid://cerrw162o6bsb" path="res://items/34_iron_pickaxe/iron_pickaxe.tscn" id="1_65lfy"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_a7mdo"]
+[ext_resource type="Texture2D" uid="uid://1ai8v2q2qut1" path="res://items/34_iron_pickaxe/icon.png" id="3_cqea8"]
+
+[resource]
+script = ExtResource("2_a7mdo")
+tool_type = 2
+tool_power = 40
+force_towards_mouse = true
+use_speed = 0.45
+default_swing_object = ExtResource("1_65lfy")
+item_id = 34
+item_name = "Iron Pickaxe"
+texture = ExtResource("3_cqea8")
+tooltip = " I hope you fill up the holes you are digging."
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

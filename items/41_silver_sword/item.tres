@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://bngocegys8dea"]
+
+[ext_resource type="PackedScene" uid="uid://qlcxfylmc7v" path="res://items/41_silver_sword/silver_sword.tscn" id="1_552tt"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_tpec7"]
+[ext_resource type="Texture2D" uid="uid://ds3we0s6jfntb" path="res://items/41_silver_sword/icon.png" id="3_552tt"]
+
+[resource]
+script = ExtResource("2_tpec7")
+force_towards_mouse = true
+use_speed = 0.35
+default_swing_object = ExtResource("1_552tt")
+item_id = 41
+item_name = "Silver Sword"
+texture = ExtResource("3_552tt")
+tooltip = "
+"
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
