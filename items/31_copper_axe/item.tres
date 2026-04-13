@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://cu5gvp10ynt5m"]
 
-[ext_resource type="PackedScene" uid="uid://cd51qmnhmiiba" path="res://items/10_wooden_axe/wooden_axe.tscn" id="1_r8n7u"]
+[ext_resource type="PackedScene" uid="uid://bqyahcx0k7uim" path="res://items/31_copper_axe/copper_axe.tscn" id="1_r8n7u"]
 [ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_xb7yp"]
 [ext_resource type="Texture2D" uid="uid://blkffax02yeyg" path="res://items/31_copper_axe/icon.png" id="3_r8n7u"]
 
 [resource]
 script = ExtResource("2_xb7yp")
 tool_type = 1
-tool_power = 40
+tool_power = 35
 force_towards_mouse = true
 use_speed = 0.5
 default_swing_object = ExtResource("1_r8n7u")
-item_id = 10
+item_id = 31
 item_name = "Copper Axe"
 texture = ExtResource("3_r8n7u")
 tooltip = "This must be how it feels to be a lumberjack."

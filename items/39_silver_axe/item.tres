@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://bcs3pgwu06c10"]
+
+[ext_resource type="PackedScene" uid="uid://krv4hxcpw163" path="res://items/39_silver_axe/silver_axe.tscn" id="1_s4mk2"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_pmjwq"]
+[ext_resource type="Texture2D" uid="uid://dsli6ai2lht88" path="res://items/39_silver_axe/icon.png" id="3_s4mk2"]
+
+[resource]
+script = ExtResource("2_pmjwq")
+tool_type = 1
+tool_power = 45
+force_towards_mouse = true
+use_speed = 0.4
+default_swing_object = ExtResource("1_s4mk2")
+item_id = 39
+item_name = "Iron Axe"
+texture = ExtResource("3_s4mk2")
+tooltip = "Trees fear you with this axe."
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

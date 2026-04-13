@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://b0oqy07uu6ync"]
+
+[ext_resource type="PackedScene" uid="uid://feitv1iom246" path="res://items/36_iron_hammer/iron_hammer.tscn" id="1_4vlvi"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_gw3uj"]
+[ext_resource type="Texture2D" uid="uid://b2wnfo8x2byrj" path="res://items/36_iron_hammer/icon.png" id="3_4vlvi"]
+
+[resource]
+script = ExtResource("2_gw3uj")
+tool_type = 4
+tool_power = 40
+force_towards_mouse = true
+use_speed = 0.45
+default_swing_object = ExtResource("1_4vlvi")
+item_id = 36
+item_name = "Iron Hammer"
+texture = ExtResource("3_4vlvi")
+tooltip = "A tool that might be able to break down Weyandt Hall."
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

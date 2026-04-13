@@ -9,6 +9,7 @@ script = ExtResource("2_n4ly7")
 force_towards_mouse = true
 use_speed = 0.45
 default_swing_object = ExtResource("1_rhy6g")
+item_id = 29
 item_name = "Stone Sword"
 texture = ExtResource("3_rhy6g")
 tooltip = "This stone sword makes you slightly better than a caveman."

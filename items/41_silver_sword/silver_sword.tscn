@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://qlcxfylmc7v"]
+
+[ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_4xpiq"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_8khx2"]
+[ext_resource type="Texture2D" uid="uid://c1lgcnnl71cb7" path="res://items/41_silver_sword/sprite.png" id="3_77htd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_221hk"]
+size = Vector2(17, 6)
+
+[node name="silver_sword" type="Node2D" unique_id=128167609 node_paths=PackedStringArray("disabled_on_simulate")]
+script = ExtResource("1_4xpiq")
+disabled_on_simulate = [NodePath("damage_source")]
+metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
+
+[node name="damage_source" type="Area2D" parent="." unique_id=153954951]
+collision_layer = 2
+collision_mask = 24
+script = ExtResource("2_8khx2")
+source_type = 1
+damage = 45
+metadata/_custom_type_script = "uid://dxggq75lo7l8i"
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=623042369]
+position = Vector2(9.5, -3.5762787e-07)
+shape = SubResource("RectangleShape2D_221hk")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=248731820]
+position = Vector2(8, -6.039832e-07)
+rotation = 0.7853982
+scale = Vector2(0.99999994, 0.99999994)
+texture = ExtResource("3_77htd")

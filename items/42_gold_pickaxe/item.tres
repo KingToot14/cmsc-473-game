@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ToolItem" format=3 uid="uid://8b4psfnla38x"]
+
+[ext_resource type="PackedScene" uid="uid://dko62gyp0btnq" path="res://items/42_gold_pickaxe/gold_pickaxe.tscn" id="1_c7yel"]
+[ext_resource type="Script" uid="uid://dfkswaldm4e5a" path="res://items/_resources/tool_item.gd" id="2_o2ny1"]
+[ext_resource type="Texture2D" uid="uid://cy7uncfibidqw" path="res://items/42_gold_pickaxe/icon.png" id="3_ov8x5"]
+
+[resource]
+script = ExtResource("2_o2ny1")
+tool_type = 2
+tool_power = 50
+force_towards_mouse = true
+use_speed = 0.35
+default_swing_object = ExtResource("1_c7yel")
+item_id = 42
+item_name = "Gold Pickaxe"
+texture = ExtResource("3_ov8x5")
+tooltip = "I bet you could dig all the way to China with this Pickaxe!"
+max_stack = 1
+metadata/_custom_type_script = "uid://dfkswaldm4e5a"

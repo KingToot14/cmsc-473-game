@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://cerrw162o6bsb"]
+
+[ext_resource type="Script" uid="uid://cuwd31m5h3p5s" path="res://items/_resources/item_tool_object.gd" id="1_hmuao"]
+[ext_resource type="Script" uid="uid://dxggq75lo7l8i" path="res://entities/_resources/combat/damage_source.gd" id="2_08msn"]
+[ext_resource type="Texture2D" uid="uid://dwvey8s7vyp8l" path="res://items/34_iron_pickaxe/sprite.png" id="3_kpkrg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w0180"]
+size = Vector2(8, 18)
+
+[node name="iron_pickaxe" type="Node2D" unique_id=123055615]
+script = ExtResource("1_hmuao")
+metadata/_custom_type_script = "uid://cuwd31m5h3p5s"
+
+[node name="damage_source" type="Area2D" parent="." unique_id=791205798]
+script = ExtResource("2_08msn")
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=888351320]
+position = Vector2(13, 0)
+shape = SubResource("RectangleShape2D_w0180")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1867403434]
+position = Vector2(8, 0)
+rotation = 0.7853982
+texture = ExtResource("3_kpkrg")

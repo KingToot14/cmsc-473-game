@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://crk0vp4km4wlo"]
+
+[ext_resource type="PackedScene" uid="uid://oltktx6hcqw1" path="res://items/45_gold_sword/gold_sword.tscn" id="1_k38cq"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_734g0"]
+[ext_resource type="Texture2D" uid="uid://dswly0sxf6q3s" path="res://items/45_gold_sword/icon.png" id="3_sbiqa"]
+
+[resource]
+script = ExtResource("2_734g0")
+force_towards_mouse = true
+use_speed = 0.3
+default_swing_object = ExtResource("1_k38cq")
+item_id = 45
+item_name = "Gold Sword"
+texture = ExtResource("3_sbiqa")
+tooltip = "A sword worthy of a hero.
+"
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"
