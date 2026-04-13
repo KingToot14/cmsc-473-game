@@ -31,7 +31,30 @@ func _ready() -> void:
 	
 	inventory.inventory_updated.connect(send_inventory_update)
 	inventory.inventory_updated.connect(EntityManager.update_entity_data.bind(self))
+# Play chest place sound
+	play_chest_place_sound.rpc()
 
+# Change "call_remote" to "call_local"
+# Change "authority" to "any_peer" so the client can trigger the sound
+@rpc("any_peer", "call_local", "reliable")
+func play_chest_place_sound() -> void:
+	if Globals.music:
+		Globals.music.play_chest_place_sound()
+
+@rpc("any_peer", "call_local", "reliable")
+func play_chest_break_sound() -> void:
+	if Globals.music:
+		Globals.music.play_chest_break_sound()
+
+@rpc("any_peer", "call_local", "reliable")
+func play_chest_open_sound() -> void:
+	if Globals.music:
+		Globals.music.play_chest_open_sound()
+
+@rpc("any_peer", "call_local", "reliable")
+func play_chest_close_sound() -> void:
+	if Globals.music:
+		Globals.music.play_chest_close_sound()
 #region Sprite
 func setup_variant() -> void:
 	$'sprite'.texture = variant_sprites[variant]
@@ -64,6 +87,8 @@ func spawn_item() -> void:
 			ItemDropEntity.spawn(drop_pos, stack.item_id, stack.count)
 			
 	# 3. Tell the server AND all clients to delete the chest visuals!
+	# 4. Play break sound
+	play_chest_break_sound.rpc()
 	destroy_chest.rpc()
 
 #endregion
@@ -75,6 +100,8 @@ func interact_with(mouse_position: Vector2) -> bool:
 	
 	if not Globals.player.is_point_in_range(mouse_position):
 		return false
+	# Play open sound
+	play_chest_open_sound.rpc()
 	
 	# ask the server for permission to open this chest
 	if multiplayer.is_server():
@@ -128,7 +155,8 @@ func release_chest() -> void:
 		
 		# update open state
 		send_open_state(false)
-
+		# Play close sound
+		play_chest_close_sound.rpc()
 # This RPC forces the node to delete itself on every single player's screen
 @rpc('authority', 'call_local', 'reliable')
 func destroy_chest() -> void:

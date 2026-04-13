@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://7gkupekc6irw"
+path="res://.godot/imported/wooed chest break.wav-6faf6d8fcc2088c7a8d29a4fdb4b64c6.sample"
+
+[deps]
+
+source_file="res://music/Chest Sounds/wooed chest break.wav"
+dest_files=["res://.godot/imported/wooed chest break.wav-6faf6d8fcc2088c7a8d29a4fdb4b64c6.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
