@@ -126,6 +126,17 @@ func set_door_state(state: int) -> void:
 #endregion
 
 #region Door State
+
+@rpc("any_peer", "call_local", "reliable")
+func play_door_open_sound() -> void:
+	if Globals.music:
+		Globals.music.play_door_open_sound()
+
+@rpc("any_peer", "call_local", "reliable")
+func play_door_close_sound() -> void:
+	if Globals.music:
+		Globals.music.play_door_close_sound()
+		
 @rpc('any_peer', 'call_remote', 'reliable')
 func close_door() -> void:
 	$'blocker'.process_mode = Node.PROCESS_MODE_INHERIT
@@ -133,7 +144,7 @@ func close_door() -> void:
 	$'sprite'.flip_h = false
 	
 	is_open = false
-	
+	play_door_close_sound.rpc()
 	send_action_door_state(0)
 
 @rpc('any_peer', 'call_remote', 'reliable')
@@ -163,7 +174,7 @@ func open_door(direction := 0, try_again := true) -> void:
 		$'sprite'.flip_h = false
 		
 		is_open = true
-		
+		play_door_open_sound.rpc()
 		send_action_door_state(1)
 	# open right
 	elif direction == 1:
@@ -181,7 +192,7 @@ func open_door(direction := 0, try_again := true) -> void:
 		$'sprite'.flip_h = true
 		
 		is_open = true
-		
+		play_door_open_sound.rpc()
 		send_action_door_state(2)
 
 #endregion

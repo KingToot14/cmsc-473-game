@@ -98,12 +98,16 @@ const LAVA_AMBIENCE_SOUNDS: Array[String] = [
 	"res://music/Liquid Ambience/freesound_community-lava-loop-1-67307.wav",
 	"res://music/Liquid Ambience/freesound_community-lava-loop-2-67306.wav",
 ]
-const TORCH_PLACE_SOUNDS: Array[String] = [
-	"res://music/Torch sfx/floraphonic-fire-torch-whoosh-3-190299.wav",
-]
-const TORCH_BREAK_SOUNDS: Array[String] = [
-	"res://music/Tree sfx/wood hit 16.wav",
-]
+const TORCH_PLACE_SOUNDS: Array[String] = ["res://music/Torch sfx/floraphonic-fire-torch-whoosh-3-190299.wav"]
+const TORCH_BREAK_SOUNDS: Array[String] = ["res://music/Tree sfx/wood hit 16.wav"]
+
+const CHEST_PLACE_SOUNDS: Array[String] = ["res://music/Chest Sounds/wood chest place.wav"]
+const CHEST_BREAK_SOUNDS: Array[String] = ["res://music/Chest Sounds/wooed chest break.wav"]
+const CHEST_OPEN_SOUNDS: Array[String] = ["res://music/Chest Sounds/Chest Open.wav"]
+const CHEST_CLOSE_SOUNDS: Array[String] = ["res://music/Chest Sounds/Chest Close.wav"]
+
+const DOOR_OPEN_SOUNDS: Array[String] = ["res://music/Door Sounds/Household_Door_Wood_Open_Stereo.wav"]
+const DOOR_CLOSE_SOUNDS: Array[String] = ["res://music/Door Sounds/bathroom door close 2.wav"]
 
 const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
 	Area.FOREST_DAY: Area.FOREST_NIGHT,
@@ -131,6 +135,8 @@ var _tiles_sfx_player: AudioStreamPlayer
 var _inventory_sfx_player: AudioStreamPlayer
 var _armor_sfx_player: AudioStreamPlayer
 var _torch_sfx_player: AudioStreamPlayer
+var _chest_sfx_player: AudioStreamPlayer
+var _door_sfx_player: AudioStreamPlayer
 var _water_ambience_player: AudioStreamPlayer
 var _water_ambience_playing := false
 
@@ -189,8 +195,16 @@ func _setup_players() -> void:
 	add_child(_torch_sfx_player)
 	_torch_sfx_player.bus = "Torch"
 
+	_chest_sfx_player = AudioStreamPlayer.new()
+	add_child(_chest_sfx_player)
+	_chest_sfx_player.bus = "Chest"
+
+	_door_sfx_player = AudioStreamPlayer.new()
+	add_child(_door_sfx_player)
+	_door_sfx_player.bus = "Door"
+
 func _mute_audio_server() -> void:
-	var buses: Array[String] = ["Music", "Ambiance", "Water Effects", "Tiles", "Inventory", "Armor", "Liquid Ambiance", "Torch"]
+	var buses: Array[String] = ["Music", "Ambiance", "Water Effects", "Tiles", "Inventory", "Armor", "Liquid Ambiance", "Torch", "Chest", "Door"]
 	for b in buses:
 		var idx = AudioServer.get_bus_index(b)
 		if idx != -1:
@@ -211,7 +225,6 @@ func _on_ambience_finished() -> void:
 		play_ambience(_current_ambience_area)
 
 func _on_water_ambience_finished() -> void:
-	# Loop the water/lava ambience
 	if _water_ambience_playing:
 		_water_ambience_player.play()
 
@@ -308,6 +321,30 @@ func play_torch_break_sound() -> void:
 	if not _is_audio_safe(): return 
 	_play_torch_sfx(TORCH_BREAK_SOUNDS.pick_random())
 
+func play_chest_place_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_chest_sfx(CHEST_PLACE_SOUNDS.pick_random())
+
+func play_chest_break_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_chest_sfx(CHEST_BREAK_SOUNDS.pick_random())
+
+func play_chest_open_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_chest_sfx(CHEST_OPEN_SOUNDS.pick_random())
+
+func play_chest_close_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_chest_sfx(CHEST_CLOSE_SOUNDS.pick_random())
+
+func play_door_open_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_door_sfx(DOOR_OPEN_SOUNDS.pick_random())
+
+func play_door_close_sound() -> void:
+	if not _is_audio_safe(): return 
+	_play_door_sfx(DOOR_CLOSE_SOUNDS.pick_random())
+
 func _is_audio_safe() -> bool:
 	return Engine.get_frames_drawn() > 30
 
@@ -330,54 +367,38 @@ func play_tree_break_sound() -> void:
 	_play_sfx(_tiles_sfx_player, TREE_BREAK_SOUNDS.pick_random())
 
 func play_item_pickup_sound() -> void:
-	if not _is_audio_safe(): 
-		return
-		
-	if _inventory_sfx_player.playing and _inventory_sfx_player.get_playback_position() < 0.05:
-		return
-		
+	if not _is_audio_safe(): return
+	if _inventory_sfx_player.playing and _inventory_sfx_player.get_playback_position() < 0.05: return
 	_play_sfx(_inventory_sfx_player, ITEM_PICKUP_SOUNDS.pick_random())
 
 func play_armor_equip_sound() -> void:
-	if not _is_audio_safe():
-		return
-		
+	if not _is_audio_safe(): return
 	if _armor_sfx_player:
 		_play_sfx(_armor_sfx_player, ARMOR_EQUIP_SOUNDS.pick_random())
 
 func start_water_ambience() -> void:
-	if _water_ambience_playing:
-		return
-	
+	if _water_ambience_playing: return
 	_water_ambience_playing = true
 	if _water_ambience_player:
 		var sound_path = WATER_AMBIENCE_SOUNDS.pick_random()
 		_water_ambience_player.stream = _load_audio_stream(sound_path)
 		_water_ambience_player.play()
-		print("[MusicManager] Started water ambience")
 
 func start_lava_ambience() -> void:
-	if _water_ambience_playing:
-		return
-	
+	if _water_ambience_playing: return
 	_water_ambience_playing = true
 	if _water_ambience_player:
 		var sound_path = LAVA_AMBIENCE_SOUNDS.pick_random()
 		_water_ambience_player.stream = _load_audio_stream(sound_path)
 		_water_ambience_player.play()
-		print("[MusicManager] Started lava ambience")
 
 func stop_water_ambience() -> void:
-	if not _water_ambience_playing:
-		return
-	
+	if not _water_ambience_playing: return
 	_water_ambience_playing = false
 	if _water_ambience_player:
 		_water_ambience_player.stop()
-		print("[MusicManager] Stopped liquid ambience")
 
 func set_liquid_ambience_volume(db: float) -> void:
-	"""Set liquid ambience volume with smooth fade"""
 	if _water_ambience_player:
 		_water_ambience_player.volume_db = db
 
@@ -390,29 +411,28 @@ func _play_sfx(player: AudioStreamPlayer, path: String) -> void:
 		print("ERROR: Could not load sound at: ", path)
 
 func _play_torch_sfx(path: String) -> void:
-	print("[MusicManager] _play_torch_sfx() called with: ", path)
-	
-	# Check if Torch bus exists
-	var bus_idx = AudioServer.get_bus_index("Torch")
-	print("[MusicManager] Torch bus index: ", bus_idx)
-	
-	if bus_idx == -1:
-		print("[MusicManager] ERROR: 'Torch' bus does not exist!")
-		return
-	
-	var is_muted = AudioServer.is_bus_mute(bus_idx)
-	var bus_vol = AudioServer.get_bus_volume_db(bus_idx)
-	print("[MusicManager] Torch bus - Muted: ", is_muted, " Volume: ", bus_vol, " dB")
-	print("[MusicManager] Torch player volume_db: ", _torch_sfx_player.volume_db)
-	
 	var sfx_stream = load(path)
 	if sfx_stream:
-		
 		_torch_sfx_player.stream = sfx_stream
 		_torch_sfx_player.play()
-		
 	else:
-		print("[MusicManager] ERROR: Could not load torch sound at: ", path)
+		print("ERROR: Could not load torch sound at: ", path)
+
+func _play_chest_sfx(path: String) -> void:
+	var sfx_stream = load(path)
+	if sfx_stream:
+		_chest_sfx_player.stream = sfx_stream
+		_chest_sfx_player.play()
+	else:
+		print("ERROR: Could not load chest sound at: ", path)
+
+func _play_door_sfx(path: String) -> void:
+	var sfx_stream = load(path)
+	if sfx_stream:
+		_door_sfx_player.stream = sfx_stream
+		_door_sfx_player.play()
+	else:
+		print("ERROR: Could not load door sound at: ", path)
 
 # --- Volume Control --- #
 
