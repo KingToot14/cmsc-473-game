@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://cbyf1na34fduy"]
+
+[ext_resource type="PackedScene" uid="uid://cvpcehimatca4" path="res://items/33_copper_sword/copper_sword.tscn" id="1_4llbv"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_j0xno"]
+[ext_resource type="Texture2D" uid="uid://cdw6twt3voh6d" path="res://items/33_copper_sword/icon.png" id="3_4llbv"]
+
+[resource]
+script = ExtResource("2_j0xno")
+force_towards_mouse = true
+use_speed = 0.4
+default_swing_object = ExtResource("1_4llbv")
+item_id = 33
+item_name = "Copper Sword"
+texture = ExtResource("3_4llbv")
+tooltip = "A sword for a true hero!
+"
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

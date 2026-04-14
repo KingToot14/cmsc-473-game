@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://rcadj32ojlfs"
+path="res://.godot/imported/Night 2.ogg-678bf6e1c807262df03e386de8eed0fe.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/forest/Night 2.ogg"
+dest_files=["res://.godot/imported/Night 2.ogg-678bf6e1c807262df03e386de8eed0fe.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

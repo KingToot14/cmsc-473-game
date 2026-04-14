@@ -190,11 +190,14 @@ func break_place(mouse_position: Vector2) -> bool:
 func damage_layer(layer_id: int, dmg: int) -> void:
 	var layer := layer_hp[layer_id]
 	layer.take_damage(dmg, DamageSource.DamageSourceType.PLAYER)
-	
+	# Play tree damage sound
+	Globals.music.play_tree_damage_sound()
 	# update sprite
 	update_layer_damage(layer_id)
 
 func _on_layer_death(pool_id: int) -> void:
+	# Play tree break sound when layer dies
+	Globals.music.play_tree_break_sound()
 	# destroy tree when last layer is broken
 	if pool_id == 0:
 		kill()

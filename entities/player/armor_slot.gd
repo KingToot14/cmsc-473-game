@@ -20,11 +20,16 @@ func _gui_input(event: InputEvent) -> void:
 	if is_display_only:
 		return
 		
-	if event.is_action_pressed(&"inventory_item_transfer"):
-		if not target_inventory or not Globals.player:
+	# Check for standard Left Click
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if target_inventory:
+			# Pass the enum value as the index (0, 1, or 2)
+			target_inventory.interact_with_armor_slot(int(expected_type))
+			get_viewport().set_input_as_handled()
 			return
-			
-		if target_inventory == Globals.player.my_inventory:
-			target_inventory.interact_with_armor_slot(expected_type)
-			
-		get_viewport().set_input_as_handled()
+
+	# Keep your Shift+Click (transfer) logic if you want it
+	if event.is_action_pressed(&"inventory_item_transfer"):
+		if target_inventory:
+			target_inventory.interact_with_armor_slot(int(expected_type))
+			get_viewport().set_input_as_handled()

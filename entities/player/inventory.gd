@@ -10,7 +10,8 @@ const INVENTORY_SLOTS := 50
 var items: Array[ItemStack] = []
 var hotbar_slot := 0
 var held_item := ItemStack.new(-1, 0)
-
+var _is_first_load := true
+var _can_play_sounds := false
 var owner_id := 0
 #Crafting Stuff
 var recipes: Array[Recipe] = [] #add more recipes in the inspector
@@ -26,6 +27,18 @@ func _init():
 		items.append(ItemStack.new(-1, 0))
 	_load_recipes()
 
+
+func _ready() -> void:
+	_can_play_sounds = false
+	_is_first_load = true
+	
+	# Wait longer for the initial server burst AND inventory loading
+	await get_tree().create_timer(10.0).timeout
+	
+	_can_play_sounds = true
+	_is_first_load = false  # NOW we're done with the initial load
+	print("Inventory warm-up complete. Sounds enabled.")
+
 #region Inventory Management
 
 func add_item(item_id: int, amount: int) -> int:
@@ -36,7 +49,7 @@ func add_item(item_id: int, amount: int) -> int:
 	if not item:
 		return amount
 	var original_amount = amount 
-	
+
 	# attempt to add to existing stacks
 	for stack in items:
 		if not stack.is_empty() and stack.item_id == item_id:
@@ -192,10 +205,13 @@ func interact_with_armor_slot(index: int) -> void:
 	else:
 		send_armor_input.rpc_id(Globals.SERVER_ID, index)
 	
+	# Play armor equip sound on the client side
+	if not multiplayer.is_server() and _can_play_sounds and not _is_first_load:
+		if Globals.music:
+			Globals.music.play_armor_equip_sound()
+	
 	armor_updated.emit(index)
 	inventory_updated.emit()
-
-
 ## Drops the currently held item at the specified world position.
 ## Inside inventory.gd
 func drop_held_item(drop_position: Vector2) -> void:
@@ -333,24 +349,64 @@ func receive_inventory(inventory_data: PackedByteArray) -> void:
 	var buffer := StreamPeerBuffer.new()
 	buffer.data_array = inventory_data
 	
-	# held item
-	held_item.item_id = buffer.get_16()
-	held_item.count   = buffer.get_16()
+	# Capture old armor state BEFORE reading new data
+	var old_armor_ids = []
+	for slot in armor_items:
+		old_armor_ids.append(slot.item_id)
 	
-	# main inventory
+	# Capture old count
+	var old_count: int = 0
+	for stack in items: 
+		old_count += stack.count
+	
+	# --- SYNC DATA ---
+	held_item.item_id = buffer.get_16()
+	held_item.count = buffer.get_16()
+	
+	var new_count: int = 0
 	for i in range(len(items)):
 		items[i].item_id = buffer.get_16()
-		items[i].count   = buffer.get_16()
-		
-	# armor inventory
+		items[i].count = buffer.get_16()
+		new_count += items[i].count
+	
+	# Read armor data and detect changes
+	var armor_changed = false
 	for i in range(len(armor_items)):
-		armor_items[i].item_id = buffer.get_16()
-		armor_items[i].count   = buffer.get_16()
-	
-	# update inventory
+		var new_id = buffer.get_16()
+		var new_qty = buffer.get_16()
+		
+		armor_items[i].item_id = new_id
+		armor_items[i].count = new_qty
+		
+		# Check if this slot changed
+		if new_id != old_armor_ids[i]:
+			armor_changed = true
+			print("[Inventory] Armor slot ", i, " changed from ", old_armor_ids[i], " to ", new_id)
+
+	# --- THE MUZZLE ---
+	var audio_is_suppressed = _is_first_load or not _can_play_sounds or Engine.get_frames_drawn() < 30
+
+	# SOUND LOGIC - Play sounds ONLY if not suppressed
+	if not multiplayer.is_server() and not audio_is_suppressed:
+		if armor_changed:
+			print("[Inventory] Playing armor equip sound")
+			if Globals.music:
+				Globals.music.play_armor_equip_sound()
+		elif new_count > old_count:
+			if Globals.music:
+				Globals.music.play_item_pickup_sound()
+	else:
+		if audio_is_suppressed:
+			print("[Inventory] Sounds suppressed - _is_first_load: ", _is_first_load, " _can_play_sounds: ", _can_play_sounds, " frames: ", Engine.get_frames_drawn())
+
+	# Mark initial load as done (after checking sounds)
+	if _is_first_load:
+		_is_first_load = false
+
+	_trigger_ui_updates()
+
+func _trigger_ui_updates():
 	inventory_updated.emit()
-	
-	# Tell the player controller to update visuals/stats for all 3 armor slots
 	for i in range(3):
 		armor_updated.emit(i)
 

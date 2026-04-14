@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SwordItem" format=3 uid="uid://qof483mh0fso"]
+
+[ext_resource type="PackedScene" uid="uid://bpej424jkfgex" path="res://items/37_iron_sword/iron_sword.tscn" id="1_erx4t"]
+[ext_resource type="Script" uid="uid://dmt54cufud5oe" path="res://items/_swords/sword_item.gd" id="2_m3uyv"]
+[ext_resource type="Texture2D" uid="uid://ctegqjmo4gti8" path="res://items/37_iron_sword/icon.png" id="3_shvy7"]
+
+[resource]
+script = ExtResource("2_m3uyv")
+force_towards_mouse = true
+use_speed = 0.375
+default_swing_object = ExtResource("1_erx4t")
+item_id = 37
+item_name = "Iron Sword"
+texture = ExtResource("3_shvy7")
+tooltip = "Forged from the fires of Stright Hall.
+"
+max_stack = 1
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

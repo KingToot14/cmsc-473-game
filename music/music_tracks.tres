@@ -15,10 +15,17 @@
 [ext_resource type="AudioStream" uid="uid://cct11yumhknhr" path="res://music/Ocean/Ocean Night 1.ogg" id="8_3sfa2"]
 [ext_resource type="AudioStream" uid="uid://c7ymwcuue8ukx" path="res://music/forest/Night Track.ogg" id="8_cdg3t"]
 [ext_resource type="AudioStream" uid="uid://rfja7l0kn5eo" path="res://music/forest/Grass in The Night 1.ogg" id="9_fv61n"]
+[ext_resource type="AudioStream" uid="uid://rcadj32ojlfs" path="res://music/forest/Night 2.ogg" id="10_1fhif"]
 [ext_resource type="AudioStream" uid="uid://o5rlr7cehmqb" path="res://music/forest/Day 5.ogg" id="10_cdg3t"]
+[ext_resource type="AudioStream" uid="uid://cvkxfsqmqnftc" path="res://music/forest/Night 5.ogg" id="11_uyr16"]
+[ext_resource type="AudioStream" uid="uid://3g51ucrmu7sw" path="res://music/Caves/Deep Cave 2.ogg" id="12_ej4rx"]
+[ext_resource type="AudioStream" uid="uid://cxmwn0448gob8" path="res://music/Caves/Ice Caves.ogg" id="14_pmpi7"]
+[ext_resource type="AudioStream" uid="uid://dusm7884cm1lc" path="res://music/menus/Menu A Theme.ogg" id="15_1fhif"]
+[ext_resource type="AudioStream" uid="uid://v8ocoxkxic0o" path="res://music/Caves/Ice Caves 2.ogg" id="15_drlwh"]
+[ext_resource type="AudioStream" uid="uid://dg3aimd8uofdt" path="res://music/forest/Another-Night.ogg" id="16_uyr16"]
 
 [resource]
-clip_count = 16
+clip_count = 23
 clip_0/name = &"Title"
 clip_0/stream = ExtResource("1_mx5f5")
 clip_0/auto_advance = 0
@@ -67,3 +74,24 @@ clip_14/auto_advance = 0
 clip_15/name = &"Ocean Night 1"
 clip_15/stream = ExtResource("8_3sfa2")
 clip_15/auto_advance = 0
+clip_16/name = &"Night 2"
+clip_16/stream = ExtResource("10_1fhif")
+clip_16/auto_advance = 0
+clip_17/name = &"Night 5"
+clip_17/stream = ExtResource("11_uyr16")
+clip_17/auto_advance = 0
+clip_18/name = &"Deep Cave 2"
+clip_18/stream = ExtResource("12_ej4rx")
+clip_18/auto_advance = 0
+clip_19/name = &"Ice Caves"
+clip_19/stream = ExtResource("14_pmpi7")
+clip_19/auto_advance = 0
+clip_20/name = &"Ice Caves 2"
+clip_20/stream = ExtResource("15_drlwh")
+clip_20/auto_advance = 0
+clip_21/name = &"Menu Abby’s Theme"
+clip_21/stream = ExtResource("15_1fhif")
+clip_21/auto_advance = 0
+clip_22/name = &"Another Night"
+clip_22/stream = ExtResource("16_uyr16")
+clip_22/auto_advance = 0

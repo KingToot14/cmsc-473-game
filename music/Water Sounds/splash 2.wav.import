@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cuav6v0viwp3h"
+path="res://.godot/imported/splash 2.wav-874072a1df256f501ae9b78ecc38174e.sample"
+
+[deps]
+
+source_file="res://music/Water Sounds/splash 2.wav"
+dest_files=["res://.godot/imported/splash 2.wav-874072a1df256f501ae9b78ecc38174e.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

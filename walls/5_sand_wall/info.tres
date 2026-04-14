@@ -2,6 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://c2wpc2heirmcn" path="res://walls/5_sand_wall/tiles.png" id="1_4pwrw"]
 [ext_resource type="Script" uid="uid://dymp18kf28isa" path="res://blocks/_resources/block_info.gd" id="1_7fsd4"]
+[ext_resource type="AudioStream" uid="uid://dm4v044shfu47" path="res://blocks/8_sand/sfx/sand foley 49.wav" id="1_oevxp"]
+[ext_resource type="AudioStream" uid="uid://col50ydwtb682" path="res://blocks/8_sand/sfx/sand hit ground 1.wav" id="2_mi5n1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o3gc2"]
 atlas = ExtResource("1_4pwrw")
@@ -11,4 +13,8 @@ region = Rect2(0, 0, 8, 8)
 script = ExtResource("1_7fsd4")
 preview_sprite = SubResource("AtlasTexture_o3gc2")
 break_item_id = 23
+break_sfx = ExtResource("1_oevxp")
+break_volume = 10.0
+place_sfx = ExtResource("2_mi5n1")
+place_volume = 10.0
 metadata/_custom_type_script = "uid://dymp18kf28isa"

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cxmwn0448gob8"
+path="res://.godot/imported/Ice Caves.ogg-58b8305bad7f7fbcea8e6d644d28365d.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Caves/Ice Caves.ogg"
+dest_files=["res://.godot/imported/Ice Caves.ogg-58b8305bad7f7fbcea8e6d644d28365d.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
