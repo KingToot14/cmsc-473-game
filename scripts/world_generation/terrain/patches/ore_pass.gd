@@ -20,28 +20,36 @@ func perform_pass(gen: WorldGeneration) -> void:
 	# 1: 0.00016 + 0.00008 + 0.00002 + 0.00000 = 0.00026
 	
 	# generate copper
+	push_message("(1/4) Copper")
+
 	generate_ores(gen, COPPER_ID, gen.surface_high, gen.surface_low, 0.00002)
 	generate_ores(gen, COPPER_ID, start + world_slice * 0, start + world_slice * 1, 0.00024)
 	generate_ores(gen, COPPER_ID, start + world_slice * 1, start + world_slice * 2, 0.00016)
-	generate_ores(gen, COPPER_ID, start + world_slice * 2, start + world_slice * 3, 0.00010)
+	generate_ores(gen, COPPER_ID, start + world_slice * 2, start + world_slice * 3, 0.00004)
 	generate_ores(gen, COPPER_ID, start + world_slice * 3, start + world_slice * 4, 0.00000)
 	
 	# generate iron
+	push_message("(2/4) Iron")
+	
 	generate_ores(gen, COPPER_ID, gen.surface_high, gen.surface_low, 0.00002)
-	generate_ores(gen, IRON_ID, start + world_slice * 0, start + world_slice * 1, 0.00010)
+	generate_ores(gen, IRON_ID, start + world_slice * 0, start + world_slice * 1, 0.00004)
 	generate_ores(gen, IRON_ID, start + world_slice * 1, start + world_slice * 2, 0.00024)
-	generate_ores(gen, IRON_ID, start + world_slice * 2, start + world_slice * 3, 0.00010)
-	generate_ores(gen, IRON_ID, start + world_slice * 3, start + world_slice * 4, 0.00006)
+	generate_ores(gen, IRON_ID, start + world_slice * 2, start + world_slice * 3, 0.00016)
+	generate_ores(gen, IRON_ID, start + world_slice * 3, start + world_slice * 4, 0.00004)
 	
 	# generate silver
-	generate_ores(gen, SILVER_ID, start + world_slice * 0, start + world_slice * 1, 0.00006)
-	generate_ores(gen, SILVER_ID, start + world_slice * 1, start + world_slice * 2, 0.00010)
+	push_message("(3/4) Silver")
+	
+	generate_ores(gen, SILVER_ID, start + world_slice * 0, start + world_slice * 1, 0.00000)
+	generate_ores(gen, SILVER_ID, start + world_slice * 1, start + world_slice * 2, 0.00008)
 	generate_ores(gen, SILVER_ID, start + world_slice * 2, start + world_slice * 3, 0.00024)
-	generate_ores(gen, SILVER_ID, start + world_slice * 3, start + world_slice * 4, 0.00010)
+	generate_ores(gen, SILVER_ID, start + world_slice * 3, start + world_slice * 4, 0.00016)
 	
 	# generate gold
+	push_message("(4/4) Gold")
+	
 	generate_ores(gen, GOLD_ID, start + world_slice * 0, start + world_slice * 1, 0.00000)
-	generate_ores(gen, GOLD_ID, start + world_slice * 1, start + world_slice * 2, 0.00010)
+	generate_ores(gen, GOLD_ID, start + world_slice * 1, start + world_slice * 2, 0.00004)
 	generate_ores(gen, GOLD_ID, start + world_slice * 2, start + world_slice * 3, 0.00016)
 	generate_ores(gen, GOLD_ID, start + world_slice * 3, start + world_slice * 4, 0.00024)
 

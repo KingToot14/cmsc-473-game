@@ -13,6 +13,10 @@ const AIR_FALLOFF := 16
 const BLOCK_FALLOFF := 40
 const WALL_FALLOFF := 0
 
+const UNDERWORLD_R := 255
+const UNDERWORLD_G := 225
+const UNDERWORLD_B := 180
+
 var active := false
 
 var update_timer := 0.0
@@ -97,6 +101,17 @@ func update_region(start_x: int, start_y: int, width: int, height: int) -> void:
 				buffer_sky[bx + by * (width + 32)] = MAX_LIGHT_LEVEL
 				
 				sky_queue[Vector2i(bx, by)] = true
+			elif wy > (Globals.world_size.y - 150) and \
+				TileManager.get_block(wx, wy) == 0 and TileManager.get_wall(wx, wy) == 0:
+				
+				var bx := x
+				var by := y
+				
+				buffer_r[bx + by * (width + 32)] = UNDERWORLD_R
+				buffer_g[bx + by * (width + 32)] = UNDERWORLD_G
+				buffer_b[bx + by * (width + 32)] = UNDERWORLD_B
+				
+				queue[Vector2i(bx, by)] = true
 			else:
 				buffer_sky[x + y * (width + 32)] = 0
 	

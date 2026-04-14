@@ -12,6 +12,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# create tiny rocks
+	push_message("(1/2) Tiny Rocks")
+
 	for i in range(world_size.x * world_size.y * 0.0015):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.surface_low, world_size.y)
@@ -29,7 +31,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		TileRunner.new(size, steps, x, y, 0).start(gen)
 	
-	# create tiny rocks
+	# create small rocks
+	push_message("(2/2) Small Rocks")
+	
 	for i in range(world_size.x * world_size.y * 0.0015):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.surface_low, world_size.y)

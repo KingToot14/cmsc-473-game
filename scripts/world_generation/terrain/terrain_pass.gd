@@ -39,8 +39,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 		surface_depth + Globals.world_size.y * UNDERGROUND_OFFSET * gen.rng.randf_range(0.90, 1.10)
 	)
 	
-	var world_size   := Globals.world_size
+	var world_size := Globals.world_size
 	var world_center := Vector2i(Globals.world_size / 2.0)
+	var progress_step := Globals.world_size.x * 0.25
 	
 	var surface_high = surface_depth
 	var surface_low = surface_depth
@@ -50,6 +51,9 @@ func perform_pass(gen: WorldGeneration) -> void:
 	surface_history.resize(500)
 	
 	for x in range(Globals.world_size.x):
+		if x % floori(progress_step) == 0:
+			push_message("%.0f%% Complete" % (float(x) / world_size.x * 100.0))
+		
 		# check feature
 		if feature_timer <= 0:
 			var dist := absi(x - world_center.x)
@@ -99,6 +103,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 			surface_depth = min(surface_depth, floori(world_size.y * SURFACE_HEIGHT_TARGET))
 			
 			if surface_history[0] > surface_depth:
+				push_message("Smoothing Right Beach")
 				smooth_terrain()
 		
 		# adjust underground height
@@ -112,6 +117,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		# apply depth
 		fill_column(x)
+	
+	push_message("100% complete")
 	
 	# set world paramters
 	gen.surface_high = surface_high

@@ -675,10 +675,14 @@ func set_active() -> void:
 #region Settling
 func settle_all(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
+	var progress_step := floori((world_size.y - 6) * 0.10)
+	var dummy := WorldGenPass.new()
 	
 	# loop from bottom of the world to the top
 	for y in range(world_size.y - 3, 3, -1):
-		print(y)
+		if (world_size.y - y - 3) % progress_step == 0:
+			dummy.push_message("%d%% Complete (Fast)" % \
+				(float(world_size.y - y + 3) / (world_size.y - 6) * 100.0))
 		
 		for x in range(3, world_size.x - 3):
 			var liquid_level := TileManager.get_liquid_level(x, y)
@@ -713,8 +717,16 @@ func settle_all(gen: WorldGeneration) -> void:
 	var prev_tiles: Array[Vector2i]
 	var settle_counter := 0
 	
+	var start_size := len(tiles)
+	var prev := 0.0
+	
 	while not tiles.is_empty():
-		print(len(tiles))
+		var size := len(tiles)
+		var progress := floori((start_size - size) / float(start_size) * 5.0) / 5.0
+		
+		if prev == 0.0 or progress > prev:
+			prev = progress
+			dummy.push_message("%d%% Complete (Slow)" % (progress * 100))
 		
 		if prev_tiles == tiles:
 			settle_counter += 1

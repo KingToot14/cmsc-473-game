@@ -12,6 +12,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# dirt layer caves
+	push_message("(1/6) Dirt Caves")
+
 	for i in range(world_size.x * world_size.y * 0.00003):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.underground_line, gen.cavern_line)
@@ -33,6 +35,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 			TileRunner.new(size, steps, x, y, 0).start(gen)
 	
 	# rock layer caves
+	push_message("(2/6) Rock Caves")
+	
 	for i in range(world_size.x * world_size.y * 0.00013):
 		var x := gen.rng.randi_range(0, world_size.x - 1)
 		var y := gen.rng.randi_range(gen.cavern_line, world_size.y)
@@ -48,6 +52,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 			TileRunner.new(size, steps, x, y, 0).start(gen)
 	
 	# surface-level caves (small)
+	push_message("(3/6) Surface-Level (Small)")
+	
 	for i in range(world_size.x * 0.002):
 		var x := gen.rng.randi_range(320, world_size.x - 320)
 		
@@ -69,6 +75,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 		TileRunner.new(size, steps, x, y, 0).set_direction(dir.x, dir.y).start(gen)
 	
 	# surface-level caves (medium)
+	push_message("(4/6) Surface-Level (Medium)")
+	
 	for i in range(world_size.x * 0.0007):
 		var x := gen.rng.randi_range(320, world_size.x - 320)
 		
@@ -90,6 +98,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 		TileRunner.new(size, steps, x, y, 0).set_direction(dir.x, dir.y).start(gen)
 	
 	# surface-level caves (large)
+	push_message("(5/6) Surface-Level (Large)")
+	
 	for i in range(world_size.x * 0.0003):
 		var x := gen.rng.randi_range(320, world_size.x - 320)
 		
@@ -125,6 +135,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 		.start(gen)
 	
 	# surface-level caves (extra)
+	push_message("(6/6) Just a few more")
 	for i in range(world_size.x * 0.0004):
 		var x := gen.rng.randi_range(320, world_size.x - 320)
 		
