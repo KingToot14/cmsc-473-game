@@ -24,7 +24,9 @@ const TILE_SIZE := 8
 var block_damaged: Dictionary = {} #uses the coordinates for key
 ## Stores health for tiles that have been damaged
 var wall_damaged: Dictionary = {} #uses the coordinates for key
-
+#stores timers for regen for the walls and blocks after they were damaged.
+var block_regen: Dictionary = {}  #uses coordinates for key
+var wall_regen: Dictionary = {} #uses coordinates for key
 ## How often to autosave in seconds
 const AUTOSAVE_RATE := 60.0
 
@@ -124,6 +126,7 @@ var light_texture := ImageTexture.create_from_image(light_image)
 ## The top-left point where the light texture should be offset from
 var light_origin: Vector2
 
+
 # --- Functions --- #
 func _ready() -> void:
 	Globals.world_size_changed.connect(_update_world_size)
@@ -144,6 +147,24 @@ func _idx(x: int, y: int) -> int:
 	return x + y * world_width
 
 func _process(delta: float) -> void:
+	#this whole if statement is just for block / wall health regen.
+	if multiplayer.is_server():
+		var current_time := Time.get_ticks_msec()
+		for key in block_regen.keys():
+			if current_time - block_regen[key] >= 5000: 
+				#if the current time since last hit is more than 5 seconds
+				block_regen.erase(key) #delete entry in block_regen
+				block_damaged.erase(key) #delete the entry from block_damaged (the block is full health)
+				broadcast_block_damage(key.x, key.y, 0) 
+				#syncs with other clients. sets block_health to 0 so it deletes the entry for clients
+		for key in wall_regen.keys():
+			if current_time - wall_regen[key] >= 5000:
+				#if the current time since last hit to wall is more than 5 seconds.
+				wall_regen.erase(key) #delete entry in block_regen
+				wall_damaged.erase(key) #delete the entry from wall_damaged (the wall is full health)
+				broadcast_wall_damage(key.x, key.y, 0)
+				#syncs with other clients. sets wall_health to 0 so it deletes the entry for clients.
+	
 	autosave_timer -= delta
 	
 	if autosave_timer <= 0.0:
@@ -877,16 +898,19 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 
 	if block_damaged[key] <= 0:
 		# block is destroyed
-		broadcast_block_damage(x, y) #tells the clients the block is destroyed
+		broadcast_block_damage(x, y, block_damaged[key]) #tells the clients the block is destroyed
 		block_damaged.erase(key) #deletes the entry in block_damaged for the server
 		send_destroy_block(x, y) #tells the server to destroy the block
 	else:
+		#creates a timer
+		block_regen[key] = Time.get_ticks_msec()
+		print("I grabbed the time?")
 		#send damage state to nearby clients.
-		broadcast_block_damage(x, y)
+		broadcast_block_damage(x, y, block_damaged[key])
 
 	return
 
-func broadcast_block_damage(x: int, y: int):
+func broadcast_block_damage(x: int, y: int, block_health):
 	# sync to clients
 	for player_id in ServerManager.connected_players.keys():
 		var player := ServerManager.connected_players[player_id]
@@ -905,7 +929,7 @@ func broadcast_block_damage(x: int, y: int):
 			continue
 		
 		#makes all players in range get the block damage.
-		receive_block_damage.rpc_id(player_id, x, y, block_damaged[Vector2i(x, y)])
+		receive_block_damage.rpc_id(player_id, x, y, block_health)
 
 @rpc('authority', 'call_remote', 'reliable')
 func receive_block_damage(x:int, y:int, block_health:int) -> void:
@@ -1055,14 +1079,18 @@ func send_hurt_wall(x: int, y:int, tool_power: int):
 
 	if wall_damaged[key] <= 0:
 		# wall is destroyed
-		broadcast_wall_damage(x, y) #deletes the entry on wall_damaged for the clients first
+		broadcast_wall_damage(x, y, wall_damaged[key]) #deletes the entry on wall_damaged for the clients first
 		wall_damaged.erase(key) #tells the server to erase the wall_damaged key
 		send_destroy_wall(x, y) #destroys the wall
 	else:
-		broadcast_wall_damage(x, y)
+		wall_regen[key] = Time.get_ticks_msec()
+		#sends current time to wall_regen so we know how long it takes to heal
+		print("added wall damage")
+		broadcast_wall_damage(x, y, wall_damaged[key])
+		#sync damage to clients
 	return
 
-func broadcast_wall_damage(x: int, y: int):
+func broadcast_wall_damage(x: int, y: int, wall_health: int):
 	for player_id in ServerManager.connected_players.keys():
 		var player := ServerManager.connected_players[player_id]
 		if not is_instance_valid(player):
@@ -1079,7 +1107,7 @@ func broadcast_wall_damage(x: int, y: int):
 		if y < start.y or y > end.y:
 			continue
 		#makes all players in range get the wall damage.
-		receive_wall_damage.rpc_id(player_id, x, y, wall_damaged[Vector2i(x, y)])
+		receive_wall_damage.rpc_id(player_id, x, y, wall_health)
 	
 	return
 	
