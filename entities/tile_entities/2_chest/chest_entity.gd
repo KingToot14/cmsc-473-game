@@ -55,13 +55,10 @@ func play_chest_open_sound() -> void:
 func play_chest_close_sound() -> void:
 	if Globals.music:
 		Globals.music.play_chest_close_sound()
+
 #region Sprite
 func setup_variant() -> void:
 	$'sprite'.texture = variant_sprites[variant]
-	
-	match variant:
-		ChestVariant.NORMAL:
-			pass
 
 #endregion
 
@@ -157,6 +154,7 @@ func release_chest() -> void:
 		send_open_state(false)
 		# Play close sound
 		play_chest_close_sound.rpc()
+
 # This RPC forces the node to delete itself on every single player's screen
 @rpc('authority', 'call_local', 'reliable')
 func destroy_chest() -> void:

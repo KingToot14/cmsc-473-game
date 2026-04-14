@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="TileEntityInfo" format=3 uid="uid://bjxqa6bq68c0c"]
+
+[ext_resource type="PackedScene" uid="uid://cdx7rgfwp2wu0" path="res://entities/tile_entities/9_crafting_station/crafting_station.tscn" id="1_c7bfv"]
+[ext_resource type="Script" uid="uid://bqswfcsar1ydj" path="res://entities/tile_entities/9_crafting_station/crafting_station_entity.gd" id="2_4ljii"]
+[ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="3_c7fv3"]
+[ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="4_g3j5g"]
+[ext_resource type="Texture2D" uid="uid://6obavjw8et52" path="res://entities/tile_entities/2_chest/palm.png" id="5_iieew"]
+[ext_resource type="Texture2D" uid="uid://cfd7e5rpyelrs" path="res://entities/tile_entities/2_chest/spruce.png" id="6_4m256"]
+[ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="7_oqs3n"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="8_oyx11"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jrxia"]
+atlas = ExtResource("3_c7fv3")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ymjkn"]
+load_path = "res://.godot/imported/tiles.png-6f6eb22f95356abfdada98b66ca84c48.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h5elx"]
+atlas = SubResource("CompressedTexture2D_ymjkn")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_byw3l"]
+atlas = ExtResource("4_g3j5g")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_imlmp"]
+atlas = ExtResource("5_iieew")
+region = Rect2(0, 0, 16, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0228c"]
+atlas = ExtResource("6_4m256")
+region = Rect2(0, 0, 16, 0)
+
+[resource]
+script = ExtResource("7_oqs3n")
+preview_sprite = SubResource("AtlasTexture_jrxia")
+preview_sprite_variants = Dictionary[StringName, Texture2D]({
+&"normal": SubResource("AtlasTexture_h5elx"),
+&"oak": SubResource("AtlasTexture_byw3l"),
+&"palm": SubResource("AtlasTexture_imlmp"),
+&"spruce": SubResource("AtlasTexture_0228c")
+})
+preview_sprite_offset = Vector2(8, 4)
+entity_scene = ExtResource("1_c7bfv")
+entity_script = ExtResource("2_4ljii")
+metadata/_custom_type_script = "uid://bnvse52ucpibv"

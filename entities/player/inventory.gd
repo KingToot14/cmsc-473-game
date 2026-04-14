@@ -289,6 +289,7 @@ func load_inventory() -> void:
 	add_item(46, 1)		# wooden helmet
 	add_item(48, 1)		# wooden chestplate
 	add_item(47, 1)		# wooden leggings
+	add_item(100, 1)	# crafting station
 
 #endregion
 

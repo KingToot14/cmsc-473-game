@@ -67,6 +67,8 @@ func create_account(username: String, password: String) -> void:
 		if db.next_row():
 			new_id = db.get_column("id")
 
+	
+	
 	# Send result back to the client who requested it
 	var peer_id = multiplayer.get_remote_sender_id()
 	create_account_result.rpc_id(peer_id, new_id)
@@ -89,11 +91,16 @@ func login(username: String, password: String) -> void:
 	""" % [username, hashed])
 
 	var player_id := -1
-	if db.next_row():
-		player_id = db.get_column("id")
-
-	# Send result back to the client who requested login
+	var results := db.query_result
+	
+	if len(results) > 0:
+		player_id = results[0]['id']
+	
 	var peer_id = multiplayer.get_remote_sender_id()
+	ServerManager.create_player(peer_id)
+	Globals.join_ui.set_active_panel("panel_join")
+	
+	# Send result back to the client who requested login
 	login_result.rpc_id(peer_id, player_id)
 
 @rpc("authority", "call_remote", "reliable")
