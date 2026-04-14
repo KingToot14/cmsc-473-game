@@ -1180,6 +1180,7 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset_ratio = Vector2(0.5, 0.5)
 flat = true
+secret = true
 
 [node name="underline" type="ColorRect" parent="join_ui/panel_login/password_holder" unique_id=1491897469]
 layout_mode = 1
