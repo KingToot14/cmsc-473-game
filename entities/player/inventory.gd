@@ -292,6 +292,8 @@ func load_inventory() -> void:
 	
 	add_item(16, 10)	#copper ore
 	
+	add_item(100, 1)	# crafting station
+
 #endregion
 
 #region Synchronization
