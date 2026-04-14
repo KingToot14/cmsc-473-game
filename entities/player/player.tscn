@@ -897,6 +897,7 @@ properties = Array[String]([":global_transform"])
 [node name="snapshot_interpolator" type="Node" parent="." unique_id=1149663231 node_paths=PackedStringArray("root")]
 script = ExtResource("10_wq0jh")
 root = NodePath("..")
+auto_start = false
 
 [node name="chunk_loader" type="Node" parent="." unique_id=51122964 node_paths=PackedStringArray("player")]
 script = ExtResource("6_qiwj3")
