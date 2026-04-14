@@ -65,6 +65,7 @@ var world_size := Vector2i(4200, 1200):
 		)
 	
 		space = floori(_size.y * 0.10)
+		underworld = _size.y - 190
 		
 		world_size = _size
 		world_size_changed.emit(world_size)
@@ -80,6 +81,7 @@ var space := floori(world_size.y * 0.10)
 var surface := 0
 var underground := 0
 var cavern := 0
+var underworld := world_size.y - 190
 
 # - TileMaps
 var server_map: ServerTileMap

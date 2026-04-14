@@ -139,7 +139,7 @@ func handle_liquid_interaction(x: int, y: int, liquid_state: int) -> void:
 
 func flow_down(x: int, y: int, liquid_level: int, liquid_type: int) -> int:
 	# check if tile below is solid
-	if TileManager.get_block(x, y + 1) != 0:
+	if y + 1 >= Globals.world_size.y or TileManager.get_block(x, y + 1) != 0:
 		return liquid_level
 	
 	# check target type
@@ -678,8 +678,15 @@ func settle_all(gen: WorldGeneration) -> void:
 	
 	# loop from bottom of the world to the top
 	for y in range(world_size.y - 3, 3, -1):
+		print(y)
+		
 		for x in range(3, world_size.x - 3):
 			var liquid_level := TileManager.get_liquid_level(x, y)
+			
+			if TileManager.get_liquid_level(x - 1, y) == MAX_WATER_LEVEL and \
+				TileManager.get_liquid_level(x, y + 1) == MAX_WATER_LEVEL and \
+				TileManager.get_liquid_level(x + 1, y) == MAX_WATER_LEVEL:
+				continue
 			
 			if liquid_level > SETTLE_SIGNIFICANCE:
 				settle_tile(gen, x, y, liquid_level)
@@ -707,6 +714,8 @@ func settle_all(gen: WorldGeneration) -> void:
 	var settle_counter := 0
 	
 	while not tiles.is_empty():
+		print(len(tiles))
+		
 		if prev_tiles == tiles:
 			settle_counter += 1
 		else:

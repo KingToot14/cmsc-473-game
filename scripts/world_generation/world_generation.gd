@@ -76,6 +76,8 @@ func generate_world() -> void:
 	
 	await run_pass(OrePass.new())
 	
+	await run_pass(UnderworldPass.new())
+	
 	await run_pass(LakePass.new())
 	await run_pass(OceanPass.new())
 	
