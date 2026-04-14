@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://cva0e8e3l427c"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_577ms"]
+[ext_resource type="Texture2D" uid="uid://bdr0fqo3s5kav" path="res://entities/tile_entities/2_chest/icon.png" id="2_vyakj"]
+
+[resource]
+script = ExtResource("1_577ms")
+tile_type = 2
+tile_id = 8
+tile_variant = &"normal"
+use_speed = 0.25
+item_id = 99
+item_name = "Furnace"
+texture = ExtResource("2_vyakj")
+tooltip = "Smelts ores into bars"
+item_type = 1
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

@@ -1278,9 +1278,8 @@ y_sort_enabled = true
 scroll_scale = Vector2(0, 0)
 scroll_offset = Vector2(240, 800)
 
-[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863 node_paths=PackedStringArray("bodies")]
+[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863]
 script = ExtResource("15_yq6so")
-bodies = [NodePath("sun"), NodePath("moon"), NodePath("sun2"), NodePath("moon2"), NodePath("sun3"), NodePath("moon3")]
 radius = 900
 metadata/_custom_type_script = "uid://chnsv5dvluyew"
 

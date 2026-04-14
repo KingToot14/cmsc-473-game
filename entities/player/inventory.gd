@@ -276,7 +276,6 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 
 func load_inventory() -> void:
 	# TODO: fetch inventory from database
-	
 	# if database entry not available, setup standard inventory
 	add_item(6, 1)		# wooden sword
 	add_item(7, 1) 		# wooden pickaxe
@@ -289,7 +288,10 @@ func load_inventory() -> void:
 	add_item(46, 1)		# wooden helmet
 	add_item(48, 1)		# wooden chestplate
 	add_item(47, 1)		# wooden leggings
-
+	add_item(99, 10)		#furnace
+	
+	add_item(16, 10)	#copper ore
+	
 #endregion
 
 #region Synchronization
