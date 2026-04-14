@@ -46,6 +46,15 @@ func open_chest(chest: ChestEntity) -> void:
 		new_slot.update_slot(chest.inventory.items[i])
 		
 	chest.inventory.inventory_updated.connect(refresh_ui)
+	
+	if Globals.player:
+		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
+		var armor_ui = Globals.player.get_node_or_null("inventory_ui/armor_container")
+		
+		if player_inv_ui:
+			player_inv_ui.show()
+		if armor_ui:
+			armor_ui.show()
 
 func close_chest() -> void:
 	hide()
@@ -57,12 +66,18 @@ func close_chest() -> void:
 			
 		if current_chest.inventory.inventory_updated.is_connected(refresh_ui):
 			current_chest.inventory.inventory_updated.disconnect(refresh_ui)
-	
+			
 	if Globals.player:
 		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
+		var armor_ui = Globals.player.get_node_or_null("inventory_ui/armor_container")
+		
 		if player_inv_ui:
 			player_inv_ui.hide()
+		if armor_ui:
+			armor_ui.hide()
 	current_chest = null
+	
+	
 
 func refresh_ui() -> void:
 	if not current_chest: return

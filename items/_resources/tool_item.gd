@@ -56,6 +56,7 @@ func use_tool(player: PlayerController, mouse_position: Vector2, tile_position: 
 			return
 	
 	if tool_type & ToolType.PICKAXE:
+		print(Globals.hovered_hitbox)
 		# check if hitbox exists
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.break_place(mouse_position):
 			return

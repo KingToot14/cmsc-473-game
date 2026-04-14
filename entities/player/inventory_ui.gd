@@ -22,6 +22,8 @@ var hovered_slot := -1
 @export var armor_slot_scene: PackedScene # Drag your new armor_slot.tscn here in the inspector
 @onready var armor_grid = $"../armor_container/armor_grid"
 
+const FURNACE_ITEM_IDS = [95, 96, 97, 98]
+
 # --- Functions --- #
 func _input(event: InputEvent) -> void:
 	# check for hotbar inputs
@@ -61,7 +63,7 @@ func setup_ui(player_inventory: Inventory):
 	for i in range(player_inventory.items.size()):
 		var new_slot: InventorySlot = slot_scene.instantiate()
 		
-		# Assign our new reusable variables so the slot knows who it belongs to
+		# assign our new reusable variables so the slot knows who it belongs to
 		new_slot.target_inventory = player_inventory
 		new_slot.slot_index = i
 		
@@ -78,23 +80,23 @@ func setup_ui(player_inventory: Inventory):
 			
 		new_slot.update_slot(player_inventory.items[i])
 	
-	#set first hotbar slot to be selected
+	# set first hotbar slot to be selected
 	hotbar_grid.get_child(0).set_selected(true)
 	#setup the crafting menu
 	setup_crafting_ui()
 	
-	# Clear old armor slots
+	# clear old armor slots
 	for child in armor_grid.get_children():
 		child.free()
 		
-	# Create the 3 Armor Slots
+	# create the 3 Armor Slots
 	for i in range(3):
 		var new_armor_slot = armor_slot_scene.instantiate()
 		new_armor_slot.target_inventory = player_inventory
 		new_armor_slot.slot_index = i # 0: Head, 1: Body, 2: Legs
 		new_armor_slot.expected_type = i
 		
-		# Hook up hover effects
+		# hook up hover effects
 		new_armor_slot.mouse_entered.connect(_on_armor_slot_mouse_entered.bind(player_inventory, i)) 
 		new_armor_slot.mouse_exited.connect(_on_slot_mouse_exited.bind(player_inventory, i))
 		
@@ -105,18 +107,23 @@ func setup_ui(player_inventory: Inventory):
 	refresh_ui(player_inventory)
 
 func setup_crafting_ui():
-	# Clean up old buttons
+	# clean up old buttons
 	for child in crafting_buttons_container.get_children():
 		child.queue_free()
 	
-	# Get the recipes from the inventory we are displaying
+	# get the recipes from the inventory we are displaying
 	var player_inv = Globals.player.my_inventory
 	
 	for i in range(player_inv.recipes.size()):
 		var recipe = player_inv.recipes[i]
+		
+		# skip furnace recipes for the main menu ---
+		if recipe.result_item_id in FURNACE_ITEM_IDS:
+			continue 
+		
 		var btn = crafting_button_scene.instantiate()
 		btn.recipe = recipe
-		btn.recipe_index = i # This index perfectly matches the inventory array
+		btn.recipe_index = i 
 		crafting_buttons_container.add_child(btn)
 
 func refresh_ui(player_inventory: Inventory):
@@ -125,15 +132,21 @@ func refresh_ui(player_inventory: Inventory):
 	for i in range(player_inventory.items.size()):
 		all_slots[i].update_slot(player_inventory.items[i])
 	
-	# NEW: Update the armor slots
+	# update the armor slots
 	var armor_slots = armor_grid.get_children()
 	for i in range(player_inventory.armor_items.size()):
 		if i < armor_slots.size():
 			armor_slots[i].update_slot(player_inventory.armor_items[i])
 	
+	#update normal crafting
 	for button in crafting_buttons_container.get_children():
 		if button is CraftingButton:
 			button.update_availability(player_inventory)
+			
+	# update furnace crafting if it is currently visible
+	var furnace_ui = $"../furnace_container"
+	if furnace_ui and furnace_ui.visible:
+		furnace_ui.refresh_ui()
 	
 	# update cursors
 	set_is_holding(player_inventory.held_item.item_id != -1)
@@ -142,7 +155,7 @@ func _on_armor_slot_mouse_entered(inventory: Inventory, index: int) -> void:
 	hovered_slot = index
 	
 	if not holding_item:
-		# check the ARMOR array, not the main items array
+		# check the armor array, not the main items array
 		if inventory.armor_items[index].item_id == -1:
 			Globals.set_cursor(Globals.CursorType.ARROW)
 		else:
@@ -152,7 +165,7 @@ func _on_armor_slot_mouse_entered(inventory: Inventory, index: int) -> void:
 
 func refresh_crafting_ui():
 	var player_inv = Globals.player.my_inventory
-	# Assuming crafting_buttons is your VBoxContainer
+	# assuming crafting_buttons is your VBoxContainer
 	for button in $inventory_container/crafting_buttons.get_children():
 		if button is CraftingButton:
 			button.update_availability(player_inv)

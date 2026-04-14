@@ -202,15 +202,14 @@ func login_button_pressed() -> void:
 	var password: String = %'password_field'.text.strip_edges()
 
 	if username.is_empty() or password.is_empty():
-		print("[Login] Username or password empty")
+		print("[Wizbowo's Conquest] Username or password empty")
 		return
 
-	print("[Login] Sending login request to server...")
+	print("[Wizbowo's Conquest] Sending login request to server...")
 
 	# Ask server to verify login
 	DatabaseManager.login.rpc_id(Globals.SERVER_ID, username, password)
 
-	
 	# TODO (Abby): Verify username and password combo in database
 func _on_login_result(player_id: int) -> void:
 	if player_id == -1:

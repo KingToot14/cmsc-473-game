@@ -837,8 +837,6 @@ func get_break_block_id(id: int): #takes block id
 		return block.break_item_id #should return the variable for block item to drop in block info NOT in item.
 	else: 
 		return -1 #this should not happen
-		
-
 
 func hurt_block(x: int, y:int, tool_power: int):
 		# check bounds (consume interaction)
@@ -881,8 +879,6 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 	
 	if not ServerManager.is_player_finalized(multiplayer.get_remote_sender_id()):
 		return
-		
-	
 
 	# sends the damage state to all nearby clients
 	var block_id := get_block(x, y)
