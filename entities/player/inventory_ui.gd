@@ -155,7 +155,7 @@ func _on_armor_slot_mouse_entered(inventory: Inventory, index: int) -> void:
 	hovered_slot = index
 	
 	if not holding_item:
-		# check the ARMOR array, not the main items array
+		# check the armor array, not the main items array
 		if inventory.armor_items[index].item_id == -1:
 			Globals.set_cursor(Globals.CursorType.ARROW)
 		else:

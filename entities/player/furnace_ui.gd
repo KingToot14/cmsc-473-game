@@ -4,7 +4,7 @@ extends Control
 @export var crafting_button_scene: PackedScene
 @onready var furnace_buttons = $furnace_buttons
 
-# The item IDs for Copper, Iron, Silver, and Gold bars
+# the item IDs for Copper, Iron, Silver, and Gold bars
 const FURNACE_ITEM_IDS = [95, 96, 97, 98]
 
 var current_furnace: FurnaceEntity
@@ -30,7 +30,7 @@ func _process(_delta: float) -> void:
 			close_furnace()
 
 func setup_furnace_ui() -> void:
-	# Clean up old buttons
+	# clean up old buttons
 	for child in furnace_buttons.get_children():
 		child.queue_free()
 	
@@ -39,7 +39,7 @@ func setup_furnace_ui() -> void:
 	for i in range(player_inv.recipes.size()):
 		var recipe = player_inv.recipes[i]
 		
-		# ONLY add the recipe if it creates one of our bars
+		# only add the recipe if it creates one of our bars
 		if recipe.result_item_id in FURNACE_ITEM_IDS:
 			var btn = crafting_button_scene.instantiate()
 			btn.recipe = recipe
@@ -54,14 +54,14 @@ func open_furnace(furnace: FurnaceEntity) -> void:
 	
 	current_furnace = furnace
 	
-	# Only setup the buttons once to save performance
+	# only setup the buttons once to save performance
 	if furnace_buttons.get_child_count() == 0:
 		setup_furnace_ui()
 		
 	refresh_ui()
 	show()
 	
-	# Open Player Inventory and Armor, but HIDE normal crafting
+	# open Player Inventory and Armor, but HIDE normal crafting
 	if Globals.player:
 		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
 		var armor_ui = Globals.player.get_node_or_null("inventory_ui/armor_container")
@@ -82,7 +82,7 @@ func close_furnace() -> void:
 		else:
 			current_furnace.release_furnace.rpc_id(Globals.SERVER_ID)
 			
-	# Hide the inventory menus when we step away from the furnace
+	# hide the inventory menus when we step away from the furnace
 	if Globals.player:
 		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
 		var armor_ui = Globals.player.get_node_or_null("inventory_ui/armor_container")
@@ -99,5 +99,5 @@ func refresh_ui() -> void:
 	
 	var player_inv = Globals.player.my_inventory
 	for button in furnace_buttons.get_children():
-		if button is CraftingButton: # Ensure your button script has class_name CraftingButton
+		if button is CraftingButton: # ensure your button script has class_name CraftingButton
 			button.update_availability(player_inv)
