@@ -828,6 +828,7 @@ func hurt_block(x: int, y:int, tool_power: int):
 	
 	# do not process if no block exists
 	if not get_block_unsafe(x, y):
+		print("block unsafe")
 		return false
 		
 	# check for reserved tiles using physics query

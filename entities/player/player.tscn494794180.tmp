@@ -1408,7 +1408,6 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="crafting_container" type="ScrollContainer" parent="inventory_ui" unique_id=757538499]
-custom_minimum_size = Vector2(90, 54)
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -1423,7 +1422,7 @@ grow_vertical = 0
 horizontal_scroll_mode = 0
 
 [node name="crafting_buttons" type="GridContainer" parent="inventory_ui/crafting_container" unique_id=2117356799]
-custom_minimum_size = Vector2(90, 54)
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 theme_override_constants/h_separation = 2
 columns = 5
@@ -1466,24 +1465,9 @@ layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="furnace_container" type="ScrollContainer" parent="inventory_ui" unique_id=1311177402]
-custom_minimum_size = Vector2(90, 54)
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -44.0
-offset_top = -44.0
-offset_right = -4.0
-offset_bottom = -4.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-horizontal_scroll_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
 script = ExtResource("47_7otdo")
-crafting_button_scene = ExtResource("23_ghoj8")
 
 [node name="furnace_buttons" type="GridContainer" parent="inventory_ui/furnace_container" unique_id=63759148]
-custom_minimum_size = Vector2(90, 54)
 layout_mode = 2
-columns = 5
