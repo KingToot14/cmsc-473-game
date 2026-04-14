@@ -40,21 +40,13 @@ func perform_pass(gen: WorldGeneration) -> void:
 		
 		for y in range(world_size.y - 150, world_size.y):
 			if TileManager.get_block_unsafe(x, y) != 0 or TileManager.get_wall_unsafe(x, y) != 0:
-				break
+				continue
 			
 			TileManager.set_light_color(x, y, 
 				LightUpdater.UNDERWORLD_R,
 				LightUpdater.UNDERWORLD_G,
 				LightUpdater.UNDERWORLD_B
 			)
-			
-			# don't add to queue if all around is full
-			if TileManager.get_block_unsafe(x - 1, y) and TileManager.get_wall_unsafe(x - 1, y) and \
-				TileManager.get_block_unsafe(x, y - 1) and TileManager.get_wall_unsafe(x, y - 1) and \
-				TileManager.get_block_unsafe(x + 1, y) and TileManager.get_wall_unsafe(x + 1, y) and \
-				TileManager.get_block_unsafe(x, y + 1) and TileManager.get_wall_unsafe(x, y + 1):
-			
-				continue
 			
 			Globals.light_updater.add_to_queue(Vector2i(x, y), LightUpdater.MAX_LIGHT_LEVEL)
 	

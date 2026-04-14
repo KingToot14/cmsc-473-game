@@ -144,15 +144,61 @@ func update_region(start_x: int, start_y: int, width: int, height: int) -> void:
 
 func handle_update(pos: Vector2i) -> void:
 	var sky := TileManager.get_light_sky(pos.x, pos.y)
+	var r := TileManager.get_light_r(pos.x, pos.y)
+	var g := TileManager.get_light_g(pos.x, pos.y)
+	var b := TileManager.get_light_b(pos.x, pos.y)
 	
-	spread_to(pos + Vector2i( 1,  0), sky)
-	spread_to(pos + Vector2i( 0,  1), sky)
-	spread_to(pos + Vector2i(-1,  0), sky)
-	spread_to(pos + Vector2i( 0, -1), sky)
+	if sky > 0:
+		spread_to_single(pos + Vector2i( 1,  0), sky)
+		spread_to_single(pos + Vector2i( 0,  1), sky)
+		spread_to_single(pos + Vector2i(-1,  0), sky)
+		spread_to_single(pos + Vector2i( 0, -1), sky)
+	
+	if r > 0 or g > 0 or b > 0:
+		spread_to(pos + Vector2i( 1,  0), r, g, b)
+		spread_to(pos + Vector2i( 0,  1), r, g, b)
+		spread_to(pos + Vector2i(-1,  0), r, g, b)
+		spread_to(pos + Vector2i( 0, -1), r, g, b)
 	
 	remove_from_queue(pos)
 
-func spread_to(pos: Vector2i, sky: int) -> void:
+func spread_to(pos: Vector2i, r: int, g: int, b: int) -> void:
+	# check bounds
+	if pos.x < 0 or pos.x > Globals.world_size.x:
+		return
+	if pos.y < 0 or pos.y > Globals.world_size.y:
+		return
+	
+	var curr_r := TileManager.get_light_r(pos.x, pos.y)
+	var curr_g := TileManager.get_light_g(pos.x, pos.y)
+	var curr_b := TileManager.get_light_b(pos.x, pos.y)
+	
+	# falloff
+	if TileManager.get_block(pos.x, pos.y) == 0:
+		r -= AIR_FALLOFF
+		g -= AIR_FALLOFF
+		b -= AIR_FALLOFF
+		
+		if TileManager.get_wall(pos.x, pos.y) != 0:
+			r -= WALL_FALLOFF
+			g -= WALL_FALLOFF
+			b -= WALL_FALLOFF
+	else:
+		r -= BLOCK_FALLOFF
+		g -= BLOCK_FALLOFF
+		b -= BLOCK_FALLOFF
+	
+	if r > curr_r:
+		TileManager.set_light_r(pos.x, pos.y, r)
+		add_to_queue(pos)
+	if g > curr_g:
+		TileManager.set_light_g(pos.x, pos.y, g)
+		add_to_queue(pos)
+	if b > curr_b:
+		TileManager.set_light_b(pos.x, pos.y, b)
+		add_to_queue(pos)
+
+func spread_to_single(pos: Vector2i, sky: int) -> void:
 	# check bounds
 	if pos.x < 0 or pos.x > Globals.world_size.x:
 		return
