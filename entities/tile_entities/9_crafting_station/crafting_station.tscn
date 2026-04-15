@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cdx7rgfwp2wu0"]
 
-[ext_resource type="Script" uid="uid://bqswfcsar1ydj" path="res://entities/tile_entities/9_crafting_station/crafting_station_entity.gd" id="1_wfxba"]
+[ext_resource type="Script" uid="uid://bqswfcsar1ydj" path="res://entities/tile_entities/9_crafting_station/crafting_bench_entity.gd" id="1_wfxba"]
 [ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="2_560la"]
 [ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="3_1oibi"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_ou3re"]
