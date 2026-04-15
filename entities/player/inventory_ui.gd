@@ -23,6 +23,7 @@ var hovered_slot := -1
 @onready var armor_grid = $"../armor_container/armor_grid"
 
 const FURNACE_ITEM_IDS = [95, 96, 97, 98]
+const CRAFTING_BENCH_ITEM_IDS = [6, 7, 9, 10]
 
 # --- Functions --- #
 func _input(event: InputEvent) -> void:
@@ -117,9 +118,9 @@ func setup_crafting_ui():
 	for i in range(player_inv.recipes.size()):
 		var recipe = player_inv.recipes[i]
 		
-		# skip furnace recipes for the main menu ---
-		if recipe.result_item_id in FURNACE_ITEM_IDS:
-			continue 
+		# skip furnace and crafting recipes for the main crafting menu
+		if recipe.result_item_id in FURNACE_ITEM_IDS or recipe.result_item_id in CRAFTING_BENCH_ITEM_IDS:
+			continue
 		
 		var btn = crafting_button_scene.instantiate()
 		btn.recipe = recipe
@@ -147,6 +148,11 @@ func refresh_ui(player_inventory: Inventory):
 	var furnace_ui = $"../furnace_container"
 	if furnace_ui and furnace_ui.visible:
 		furnace_ui.refresh_ui()
+		
+	# update bench crafting if it is currently visible ---
+	var bench_ui = $"../crafting_bench_container"
+	if bench_ui and bench_ui.visible:
+		bench_ui.refresh_ui()
 	
 	# update cursors
 	set_is_holding(player_inventory.held_item.item_id != -1)

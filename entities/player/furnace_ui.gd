@@ -66,6 +66,7 @@ func open_furnace(furnace: FurnaceEntity) -> void:
 		var player_inv_ui = Globals.player.get_node_or_null("inventory_ui/inventory_container")
 		var armor_ui = Globals.player.get_node_or_null("inventory_ui/armor_container")
 		var standard_crafting_ui = Globals.player.get_node_or_null("inventory_ui/crafting_container")
+		var bench_ui = Globals.player.get_node_or_null("inventory_ui/crafting_bench_container")
 		
 		if player_inv_ui:
 			player_inv_ui.show()
@@ -73,6 +74,8 @@ func open_furnace(furnace: FurnaceEntity) -> void:
 			armor_ui.show()
 		if standard_crafting_ui:
 			standard_crafting_ui.hide()
+		if bench_ui: 
+			bench_ui.hide()
 
 func close_furnace() -> void:
 	hide()
