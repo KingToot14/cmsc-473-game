@@ -14,6 +14,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var lakes_to_generate := gen.rng.randi_range(floori(4 * world_scale), floori(6 * world_scale))
 	
 	for lake in range(lakes_to_generate):
+		push_message("(%d/%d) Creating Lake" % [lake + 1, lakes_to_generate])
+		
 		var attempts := floori(world_size.x * 0.20)
 		var lake_width := gen.rng.randi_range(30, 45)
 		var lake_depth := gen.rng.randi_range( 8, 16)

@@ -48,3 +48,6 @@ func perform_pass(_gen: WorldGeneration) -> void:
 func exit_pass() -> void:
 	running = false
 	done_with_pass.emit()
+
+func push_message(update_text) -> void:
+	print("                       ", update_text)

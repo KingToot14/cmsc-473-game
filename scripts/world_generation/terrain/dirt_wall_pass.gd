@@ -14,10 +14,14 @@ func get_pass_name() -> String:
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_width := Globals.world_size.x
 	var world_height := Globals.world_size.y
-	
+	var progress_step := Globals.world_size.x * 0.50
+
 	var underground_depth := gen.underground_line + UNDERGROUND_OFFSET
 	
 	for x in range(world_width):
+		if x % floori(progress_step) == 0:
+			push_message("%.0f%% Complete" % (float(x) / world_width * 100.0))
+		
 		var placing := false
 		
 		for y in range(world_height):
@@ -39,3 +43,5 @@ func perform_pass(gen: WorldGeneration) -> void:
 			gen.underground_line + UNDERGROUND_OFFSET - UNDERGROUND_RANGE,
 			gen.underground_line + UNDERGROUND_OFFSET + UNDERGROUND_RANGE
 		)
+	
+	push_message("100% complete")

@@ -12,7 +12,11 @@ func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# create large hills
-	for i in range(world_size.x * 0.001):
+	var hills := floori(world_size.x * 0.001)
+	
+	for i in range(hills):
+		push_message("(%d/%d) Creating Hill" % [i + 1, hills])
+		
 		# get random position
 		var x := 0
 		
