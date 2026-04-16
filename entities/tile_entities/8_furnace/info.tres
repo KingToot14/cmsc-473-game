@@ -2,46 +2,19 @@
 
 [ext_resource type="PackedScene" uid="uid://bb8fc0x154tdu" path="res://entities/tile_entities/8_furnace/furnace.tscn" id="1_i5iiv"]
 [ext_resource type="Script" uid="uid://67ydyxsh7yke" path="res://entities/tile_entities/8_furnace/furnace_entity.gd" id="2_26gy5"]
-[ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="3_d6i0a"]
-[ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="4_2sjue"]
-[ext_resource type="Texture2D" uid="uid://6obavjw8et52" path="res://entities/tile_entities/2_chest/palm.png" id="5_ckrr1"]
-[ext_resource type="Texture2D" uid="uid://cfd7e5rpyelrs" path="res://entities/tile_entities/2_chest/spruce.png" id="6_y3gby"]
+[ext_resource type="Texture2D" uid="uid://yi2rafcn2b0x" path="res://entities/tile_entities/8_furnace/furnace.png" id="3_mueke"]
 [ext_resource type="Script" uid="uid://bnvse52ucpibv" path="res://entities/tile_entities/_resources/tile_entity_info.gd" id="7_n58b8"]
 [ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="8_8d114"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_jrxia"]
-atlas = ExtResource("3_d6i0a")
-region = Rect2(0, 0, 16, 0)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ymjkn"]
-load_path = "res://.godot/imported/tiles.png-6f6eb22f95356abfdada98b66ca84c48.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_h5elx"]
-atlas = SubResource("CompressedTexture2D_ymjkn")
-region = Rect2(0, 0, 16, 0)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_byw3l"]
-atlas = ExtResource("4_2sjue")
-region = Rect2(0, 0, 16, 0)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_imlmp"]
-atlas = ExtResource("5_ckrr1")
-region = Rect2(0, 0, 16, 0)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0228c"]
-atlas = ExtResource("6_y3gby")
-region = Rect2(0, 0, 16, 0)
+[sub_resource type="AtlasTexture" id="AtlasTexture_m6pgv"]
+atlas = ExtResource("3_mueke")
+region = Rect2(0, 0, 24, 24)
 
 [resource]
 script = ExtResource("7_n58b8")
-preview_sprite = SubResource("AtlasTexture_jrxia")
-preview_sprite_variants = Dictionary[StringName, Texture2D]({
-&"normal": SubResource("AtlasTexture_h5elx"),
-&"oak": SubResource("AtlasTexture_byw3l"),
-&"palm": SubResource("AtlasTexture_imlmp"),
-&"spruce": SubResource("AtlasTexture_0228c")
-})
-preview_sprite_offset = Vector2(8, 4)
+preview_sprite = SubResource("AtlasTexture_m6pgv")
+preview_position_offset = Vector2(-8, 0)
+preview_sprite_offset = Vector2(12, 4)
 entity_scene = ExtResource("1_i5iiv")
 entity_script = ExtResource("2_26gy5")
 metadata/_custom_type_script = "uid://bnvse52ucpibv"

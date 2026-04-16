@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://dlu8ehl2vau1e"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_6xg5n"]
+[ext_resource type="Texture2D" uid="uid://cn5ebc17nrnk0" path="res://entities/tile_entities/9_crafting_station/spruce_icon.png" id="2_6xg5n"]
+
+[resource]
+script = ExtResource("1_6xg5n")
+tile_type = 2
+tile_id = 9
+tile_variant = &"spruce"
+item_name = "Spruce Crafting Station"
+texture = ExtResource("2_6xg5n")
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"
