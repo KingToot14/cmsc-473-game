@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="EntityInfo" format=3 uid="uid://gpph4dg6ht7k"]
+
+[ext_resource type="PackedScene" uid="uid://bcl14sm8ujlii" path="res://entities/dynamic_entities/3_zombie/zombie.tscn" id="1_3281m"]
+[ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_p1et5"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_3281m"]
+[ext_resource type="Script" uid="uid://dibgjwnp7q8qy" path="res://entities/dynamic_entities/3_zombie/zombie_spawn_rule.gd" id="3_p1et5"]
+
+[sub_resource type="Resource" id="Resource_3281m"]
+script = ExtResource("3_p1et5")
+spawn_biomes = 1
+spawn_layers = 2
+spawn_times = 3
+metadata/_custom_type_script = "uid://dibgjwnp7q8qy"
+
+[resource]
+script = ExtResource("1_p1et5")
+name = "Zombie"
+description = "A bloodthirsty zombie that is desperate for any sign of human life."
+entity_scene = ExtResource("1_3281m")
+spawn_rules = Array[ExtResource("2_3281m")]([SubResource("Resource_3281m")])
+metadata/_custom_type_script = "uid://d3xw170ysevnd"
