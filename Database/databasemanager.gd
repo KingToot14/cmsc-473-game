@@ -67,12 +67,13 @@ func create_account(username: String, password: String) -> void:
 	if success and len(results) > 0:
 		new_id = results[0]['id']
 	
-	print("[Wizbowo's Conquest] Creating account for player_id:", new_id)
 
 	# Send result back to the client who requested it
 	var peer_id = multiplayer.get_remote_sender_id()
+	print("[Wizbowo's Conquest] Creating account for player_id:", new_id)
+	ServerManager.add_player_info(new_id, peer_id, username)
 	
-	ServerManager.create_player(peer_id)
+	ServerManager.create_player(peer_id, new_id)
 	
 	create_account_result.rpc_id(peer_id, new_id)
 
@@ -102,12 +103,13 @@ func login(username: String, password: String) -> void:
 		create_account(username, password)
 		return
 	
-	print("[Wizbowo's Conquest] Logging in player_id:", player_id)
-	
 	# Send result back to the client who requested login
 	var peer_id = multiplayer.get_remote_sender_id()
 	
-	ServerManager.create_player(peer_id)
+	print("[Wizbowo's Conquest] Logging in player_id:", player_id)
+	ServerManager.add_player_info(player_id, peer_id, username)
+	
+	ServerManager.create_player(peer_id, player_id)
 	Globals.join_ui.set_active_panel("panel_join")
 	
 	login_result.rpc_id(peer_id, player_id)
