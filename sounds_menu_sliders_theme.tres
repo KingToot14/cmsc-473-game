@@ -1,0 +1,31 @@
+[gd_resource type="Theme" format=3 uid="uid://igfgek6hqx3a"]
+
+[ext_resource type="Texture2D" uid="uid://dl63lmonxwici" path="res://ui/fill_panel.png" id="1_8eyte"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8eyte"]
+bg_color = Color(0.15294118, 0.39215687, 0.7294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5xqmg"]
+bg_color = Color(0.21978864, 0.47420818, 0.84415627, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xrj4n"]
+content_margin_top = 6.0
+content_margin_bottom = 6.0
+bg_color = Color(0.15847227, 0.15847233, 0.15847221, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w32s3"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.15686275, 0.15686275, 0.15686275, 1)
+
+[resource]
+HSlider/icons/grabber = ExtResource("1_8eyte")
+HSlider/icons/grabber_highlight = ExtResource("1_8eyte")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_8eyte")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_5xqmg")
+HSlider/styles/slider = SubResource("StyleBoxFlat_xrj4n")
+Label/font_sizes/font_size = 8
+LineEdit/font_sizes/font_size = 8
+LineEdit/styles/normal = SubResource("StyleBoxFlat_w32s3")
