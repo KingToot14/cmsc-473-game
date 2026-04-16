@@ -70,18 +70,40 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 	],
 }
 
-const AREA_AMBIENCE: Dictionary[Area, String] = {
-	Area.TITLE_SCREEN: "",
-	Area.FOREST_DAY: "res://music/Ambience/Forest Day/Ambiance_Forest_Birds_Loop_Stereo.ogg",
-	Area.FOREST_NIGHT: "res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
-	Area.WINTER_DAY: "res://music/Ambience/Winter/Ambiance_Wind_Calm_Loop_Stereo.ogg",
-	Area.WINTER_NIGHT: "res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
-	Area.UNDERGROUND: "res://music/Ambience/Cave/Ambiance_Cave_Drips_Loop_Stereo.ogg",
-	Area.CAVERN: "res://music/Ambience/Deep Cave/Ambiance_Cave_Dark_Loop_Stereo.ogg",
-	Area.DUNGEON: "",
-	Area.SPACE: "res://music/Ambience/Space/liecio-space-sound-hi-109577.ogg",
-	Area.OCEAN_DAY: "res://music/Ambience/Beach/beach - very close, waves & foam.ogg",
-	Area.OCEAN_NIGHT: "res://music/Ambience/Beach/prettysleepy-crickets-chirping-amp-ocean-waves-by-prettysleepy-art-10372.ogg",
+# Updated to use Arrays for multiple ambient tracks per area
+const AREA_AMBIENCE: Dictionary[Area, Array] = {
+	Area.TITLE_SCREEN: [],
+	Area.FOREST_DAY: [
+		"res://music/Ambience/Forest Day/Ambiance_Forest_Birds_Loop_Stereo.ogg",
+		"res://music/Ambience/Forest Day/Ambiance_Nature_Meadow_Birds_Flies_Calm_Loop_Stereo.wav",
+		"res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
+	
+	],
+	Area.FOREST_NIGHT: [
+		"res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
+	],
+	Area.WINTER_DAY: [
+		"res://music/Ambience/Winter/Ambiance_Wind_Calm_Loop_Stereo.ogg",
+	],
+	Area.WINTER_NIGHT: [
+		"res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
+	],
+	Area.UNDERGROUND: [
+		"res://music/Ambience/Cave/Ambiance_Cave_Drips_Loop_Stereo.ogg",
+	],
+	Area.CAVERN: [
+		"res://music/Ambience/Deep Cave/Ambiance_Cave_Dark_Loop_Stereo.ogg",
+	],
+	Area.DUNGEON: [],
+	Area.SPACE: [
+		"res://music/Ambience/Space/liecio-space-sound-hi-109577.ogg",
+	],
+	Area.OCEAN_DAY: [
+		"res://music/Ambience/Beach/beach - very close, waves & foam.ogg",
+	],
+	Area.OCEAN_NIGHT: [
+		"res://music/Ambience/Beach/prettysleepy-crickets-chirping-amp-ocean-waves-by-prettysleepy-art-10372.ogg",
+	],
 }
 
 const WATER_ENTRY_SOUNDS: Array[String] = ["res://music/Water Sounds/splash big 5.wav"]
@@ -123,7 +145,10 @@ const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPAC
 
 # --- Variables --- #
 var _track_queues: Dictionary[Area, Array] = {}
+var _ambience_queues: Dictionary[Area, Array] = {}
 var _last_played: Dictionary[Area, String] = {}
+var _last_ambience_played: Dictionary[Area, String] = {}
+
 var _current_area: Area = Area.TITLE_SCREEN
 var _is_day: bool = true
 
@@ -270,16 +295,21 @@ func play_track(area: Area, variant := -1) -> void:
 
 func play_ambience(area: Area) -> void:
 	var resolved_area: Area = _resolve_area(area)
+	
+	# If we are already playing ambience for this area, don't restart it
 	if resolved_area == _current_ambience_area and _ambience_player.playing:
 		return
 
 	_current_ambience_area = resolved_area
-	var ambience_path: String = AREA_AMBIENCE.get(resolved_area, "")
+	var ambience_list: Array = AREA_AMBIENCE.get(resolved_area, [])
 	
-	if ambience_path == "":
+	if ambience_list.is_empty():
 		_ambience_player.stop()
 		return
 
+	# Use the queue system to pick the next ambient track
+	var ambience_path: String = _next_queued_ambience(resolved_area)
+	
 	var ambience_stream = _load_audio_stream(ambience_path)
 	if ambience_stream:
 		_ambience_player.stream = ambience_stream
@@ -297,7 +327,9 @@ func enter_area(area: Area) -> void:
 
 func reset_area(area: Area) -> void:
 	_track_queues.erase(area)
+	_ambience_queues.erase(area) # Added to clear ambience history
 	_last_played.erase(area)
+	_last_ambience_played.erase(area)
 
 func _next_queued_track(area: Area) -> String:
 	if not _track_queues.has(area) or _track_queues[area].is_empty():
@@ -309,6 +341,23 @@ func _next_queued_track(area: Area) -> String:
 
 	var track: String = _track_queues[area].pop_front()
 	_last_played[area] = track
+	return track
+
+# Helper to shuffle and cycle through multiple ambient loops
+func _next_queued_ambience(area: Area) -> String:
+	var ambience_list = AREA_AMBIENCE.get(area, [])
+	if ambience_list.is_empty(): return ""
+	
+	if not _ambience_queues.has(area) or _ambience_queues[area].is_empty():
+		var new_queue: Array = ambience_list.duplicate()
+		new_queue.shuffle()
+		# Avoid playing the same track again immediately if there are choices
+		if new_queue.size() > 1 and new_queue.front() == _last_ambience_played.get(area, ""):
+			new_queue.append(new_queue.pop_front())
+		_ambience_queues[area] = new_queue
+
+	var track: String = _ambience_queues[area].pop_front()
+	_last_ambience_played[area] = track
 	return track
 
 # --- Sound Effects --- #
