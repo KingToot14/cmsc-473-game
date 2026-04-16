@@ -73,13 +73,12 @@ func create_account(username: String, password: String) -> void:
 	var peer_id = multiplayer.get_remote_sender_id()
 	
 	ServerManager.create_player(peer_id)
-	Globals.join_ui.set_active_panel("panel_join")
 	
 	create_account_result.rpc_id(peer_id, new_id)
 
 @rpc("authority", "call_remote", "reliable")
-func create_account_result(player_id: int) -> void:
-	pass
+func create_account_result(_player_id: int) -> void:
+	Globals.join_ui.set_active_panel("panel_join")
 
 # LOGIN (SERVER RPC)
 @rpc("any_peer", "call_remote", "reliable")
@@ -114,9 +113,9 @@ func login(username: String, password: String) -> void:
 	login_result.rpc_id(peer_id, player_id)
 
 @rpc("authority", "call_remote", "reliable")
-func login_result(player_id: int) -> void:
+func login_result(_player_id: int) -> void:
 	# The client overrides this in join_ui.gd
-	pass
+	Globals.join_ui.set_active_panel("panel_join")
 
 # REMEMBER PLAYER ID (CLIENT SIDE)
 func remember_player_id(player_id: int):

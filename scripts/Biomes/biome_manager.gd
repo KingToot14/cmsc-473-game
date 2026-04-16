@@ -43,6 +43,8 @@ func check_biome(player_pos: Vector2) -> void:
 	) 
 	
 	# check layer (lower y = higher elevation)
+	if center_tile.y > Globals.underworld:
+		set_layer(Layer.UNDERWORLD)
 	if center_tile.y > Globals.cavern:
 		set_layer(Layer.CAVERN)
 	elif center_tile.y > Globals.underground:
