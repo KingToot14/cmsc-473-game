@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://cepu142vt62b6"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_fco25"]
+[ext_resource type="Texture2D" uid="uid://caxinasddxcb8" path="res://entities/tile_entities/9_crafting_station/palm_icon.png" id="2_fco25"]
+
+[resource]
+script = ExtResource("1_fco25")
+tile_type = 2
+tile_id = 9
+tile_variant = &"palm"
+item_name = "Palm Crafting Station"
+texture = ExtResource("2_fco25")
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

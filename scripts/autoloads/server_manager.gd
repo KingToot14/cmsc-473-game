@@ -10,6 +10,9 @@ const DEFAULT_PORT = 7000
 var connected_players: Dictionary[int, PlayerController] = {}
 var finalized_players: Dictionary[int, bool] = {}
 
+var player_names: Dictionary[int, String] = {}
+var player_ids: Dictionary[int, int] = {}
+
 # --- Functions --- #
 func _ready() -> void:
 	var args := Globals.parse_arguments()
@@ -159,7 +162,7 @@ func set_world_params(world_size: Vector2i) -> void:
 
 #region Player Management
 @rpc('any_peer', 'call_remote', 'reliable')
-func create_player(id: int) -> void:
+func create_player(id: int, db_id: int) -> void:
 	# wait for world generation
 	var gen: WorldGeneration = get_tree().current_scene.get_node(^'world_generation')
 	if gen.generating:
@@ -174,6 +177,8 @@ func create_player(id: int) -> void:
 	var player: PlayerController = preload("uid://do1dgabbmwjjn").instantiate()
 	player.name = "player_%s" % id
 	player.owner_id = id
+	player.db_id = db_id
+	player.username = player_names.get(db_id, "Player %d" % db_id)
 	connected_players[id] = player
 	
 	# set position
@@ -209,3 +214,7 @@ func is_player_finalized(player_id: int) -> bool:
 	return finalized_players.get(player_id, false)
 
 #endregion
+
+func add_player_info(player_id: int, peer_id: int, username: String) -> void:
+	player_names[player_id] = username
+	player_ids[player_id] = peer_id

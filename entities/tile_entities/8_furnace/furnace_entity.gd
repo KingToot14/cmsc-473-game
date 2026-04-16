@@ -77,30 +77,32 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	EntityManager.store_tile_entity(8, entity)
 
 static func is_placement_valid(tile_pos: Vector2i) -> bool:
-	if TileManager.get_block(tile_pos.x + 0, tile_pos.y + 1) == 0:
-		return false
-	if TileManager.get_block(tile_pos.x + 1, tile_pos.y + 1) == 0:
-		return false
+	# make sure bottom tiles are filled
+	for x in range(3):
+		if TileManager.get_block(tile_pos.x + x, tile_pos.y + 1) == 0:
+			return false
 	
+	# make sure collision grid is null
 	var collision_grid := get_collision_grid(tile_pos)
+	
 	for pos: Vector2i in collision_grid:
 		if collision_grid[pos]:
 			return false
-			
+	
 	return true
 
 static func get_collision_grid(tile_pos: Vector2i) -> Dictionary[Vector2i, bool]:
-	var pos_bl := Vector2i(tile_pos.x,     tile_pos.y)
-	var pos_br := Vector2i(tile_pos.x + 1, tile_pos.y)
-	var pos_tl := Vector2i(tile_pos.x,     tile_pos.y - 1)
-	var pos_tr := Vector2i(tile_pos.x + 1, tile_pos.y - 1)
+	var grid: Dictionary[Vector2i, bool] = {}
 	
-	var grid: Dictionary[Vector2i, bool] = {
-		pos_bl: false, pos_br: false, pos_tl: false, pos_tr: false
-	}
-	
-	for pos in [pos_bl, pos_br, pos_tl, pos_tr]:
-		if TileManager.get_block(pos.x, pos.y) != 0 or query_tile_collision(pos):
-			grid[pos] = true
+	for y in range(2):
+		for x in range(3):
+			var pos := Vector2i(tile_pos.x + x, tile_pos.y - y)
 			
+			grid[pos] = false
+			
+			if TileManager.get_block(pos.x, pos.y) != 0:
+				grid[pos] = true
+			elif query_tile_collision(pos):
+				grid[pos] = true
+
 	return grid
