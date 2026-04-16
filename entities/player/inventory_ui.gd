@@ -22,8 +22,8 @@ var hovered_slot := -1
 @export var armor_slot_scene: PackedScene # Drag your new armor_slot.tscn here in the inspector
 @onready var armor_grid = $"../armor_container/armor_grid"
 
-const FURNACE_ITEM_IDS = [95, 96, 97, 98, 49, 52]
-const CRAFTING_BENCH_ITEM_IDS = [6, 7, 9, 10, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 53, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87]
+const FURNACE_ITEM_IDS = [49, 50, 52, 53, 95, 96, 97, 98]
+const CRAFTING_BENCH_ITEM_IDS = [6, 7, 9, 10, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87]
 
 # --- Functions --- #
 func _input(event: InputEvent) -> void:
