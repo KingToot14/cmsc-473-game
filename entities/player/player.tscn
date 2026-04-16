@@ -48,6 +48,9 @@
 [ext_resource type="PackedScene" uid="uid://ff25uaoxac3r" path="res://ui/inventory/armor_slot.tscn" id="40_pacje"]
 [ext_resource type="Script" uid="uid://5a0nmaj5mot4" path="res://entities/player/furnace_ui.gd" id="47_7otdo"]
 [ext_resource type="Script" uid="uid://buxmx2xx8stl2" path="res://entities/player/crafting_bench_ui.gd" id="48_c112w"]
+[ext_resource type="Script" uid="uid://bqfrnq3pfjlia" path="res://entities/player/pause_menu.gd" id="49_ssgi7"]
+[ext_resource type="Script" uid="uid://c0dvc7i0d5g6j" path="res://entities/player/sounds_menu.gd" id="49_u37te"]
+[ext_resource type="Theme" uid="uid://igfgek6hqx3a" path="res://sounds_menu_sliders_theme.tres" id="50_rtlkk"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -836,6 +839,30 @@ shader = ExtResource("28_8q4fm")
 shader_parameter/sky_gradient = SubResource("GradientTexture1D_2h0qb")
 shader_parameter/light_viewport = SubResource("ViewportTexture_mmk7k")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rtlkk"]
+bg_color = Color(0.15294118, 0.21568628, 0.7294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a2brg"]
+bg_color = Color(0.061703037, 0.19595832, 0.38523623, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_arp52"]
+bg_color = Color(0.2656891, 0.6346102, 1.1547284, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jjk8f"]
+bg_color = Color(0.22256814, 0.5418828, 0.9920641, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ssgi7"]
+bg_color = Color(0.15294118, 0.21568628, 0.7294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cnswy"]
+bg_color = Color(0.0627451, 0.19607843, 0.38431373, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q5bfg"]
+bg_color = Color(0.2656891, 0.6346102, 1.1547284, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p22ii"]
+bg_color = Color(0.22256814, 0.5418828, 0.9920641, 1)
+
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 25
 y_sort_enabled = true
@@ -1508,3 +1535,93 @@ crafting_button_scene = ExtResource("23_ghoj8")
 custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 columns = 5
+
+[node name="pause_menu" type="CanvasLayer" parent="." unique_id=742749794]
+script = ExtResource("49_ssgi7")
+
+[node name="mouse_detector" type="Control" parent="pause_menu" unique_id=757218095 node_paths=PackedStringArray("player", "grid_overlay", "placement_preview")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("24_24ehl")
+player = NodePath("../..")
+grid_overlay = NodePath("../../grid_overlay")
+placement_preview = NodePath("../../placement_preview")
+
+[node name="texture" type="TextureRect" parent="pause_menu/mouse_detector" unique_id=277932175]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="main_panel" type="Panel" parent="pause_menu" unique_id=1369647490]
+custom_minimum_size = Vector2(130, 130)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -65.0
+offset_top = -65.0
+offset_right = 65.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("50_rtlkk")
+theme_override_styles/panel = SubResource("StyleBoxFlat_rtlkk")
+
+[node name="sounds_button" type="Button" parent="pause_menu/main_panel" unique_id=964503262]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_a2brg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_arp52")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jjk8f")
+text = "Sounds Menu"
+
+[node name="sounds_menu_panel" type="Panel" parent="pause_menu" unique_id=585575025]
+custom_minimum_size = Vector2(130, 130)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -65.0
+offset_top = -65.0
+offset_right = 65.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("50_rtlkk")
+theme_override_styles/panel = SubResource("StyleBoxFlat_ssgi7")
+script = ExtResource("49_u37te")
+
+[node name="back_button" type="Button" parent="pause_menu/sounds_menu_panel" unique_id=301341689]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 15.0
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_cnswy")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_q5bfg")
+theme_override_styles/hover = SubResource("StyleBoxFlat_p22ii")
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="pause_menu/sounds_menu_panel" unique_id=593045122]
+custom_minimum_size = Vector2(130, 116)
+layout_mode = 0
+offset_top = 14.0
+offset_right = 130.0
+offset_bottom = 130.0
+
+[node name="bus_vbox" type="VBoxContainer" parent="pause_menu/sounds_menu_panel/ScrollContainer" unique_id=1145929027]
+layout_mode = 2

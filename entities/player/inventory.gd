@@ -293,6 +293,14 @@ func load_inventory() -> void:
 	add_item(16, 10)	# copper ore
 	
 	add_item(100, 1)	# crafting station
+	
+	add_item(0, 9999)	# oak wood
+	add_item(54, 9999)	# spruce wood
+	add_item(56, 9999)	# palm wood
+	add_item(95, 9999)	# copper bar
+	add_item(96, 9999)	# iron bar
+	add_item(97, 9999)	# silver bar
+	add_item(98, 9999)	# gold bar
 
 #endregion
 
