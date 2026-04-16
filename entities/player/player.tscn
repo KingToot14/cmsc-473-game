@@ -1539,24 +1539,6 @@ columns = 5
 [node name="pause_menu" type="CanvasLayer" parent="." unique_id=742749794]
 script = ExtResource("49_ssgi7")
 
-[node name="mouse_detector" type="Control" parent="pause_menu" unique_id=757218095 node_paths=PackedStringArray("player", "grid_overlay", "placement_preview")]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
-script = ExtResource("24_24ehl")
-player = NodePath("../..")
-grid_overlay = NodePath("../../grid_overlay")
-placement_preview = NodePath("../../placement_preview")
-
-[node name="texture" type="TextureRect" parent="pause_menu/mouse_detector" unique_id=277932175]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="main_panel" type="Panel" parent="pause_menu" unique_id=1369647490]
 custom_minimum_size = Vector2(130, 130)
 anchors_preset = 8
