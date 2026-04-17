@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://c111vp48q1fw"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_42a8i"]
+[ext_resource type="Texture2D" uid="uid://dok7jby27ehl1" path="res://blocks/8_sand/icons.png" id="2_ojaxg"]
+
+[resource]
+script = ExtResource("1_42a8i")
+tile_id = 29
+use_speed = 0.25
+item_id = 103
+item_name = "Sandstone"
+texture = ExtResource("2_ojaxg")
+tooltip = "A piece of sandstone. May or may not break your bones."
+metadata/_custom_type_script = "uid://cbpxcb7ird2qr"

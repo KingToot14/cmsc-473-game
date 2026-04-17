@@ -23,6 +23,7 @@ signal layer_changed(new_layer: Layer)
 
 # --- Constants --- #
 const WINTER_THRESHOLD := 250 # number of blocks to be in scanning radius before signaling
+const DESERT_THRESHOLD := 250 # threshold for sand blocks inland
 const SCAN_RADIUS := 3 # number of chunks to scan around the player
 
 # --- Variables --- #
@@ -55,12 +56,14 @@ func check_biome(player_pos: Vector2) -> void:
 		set_layer(Layer.SPACE)
 	
 	# check for oceans
-	if center_tile.x <= 300 + 32 or center_tile.x >= Globals.world_size.x - 300 - 32:
+	var is_ocean_x = center_tile.x <= 300 + 32 or center_tile.x >= Globals.world_size.x - 300 - 32
+	if is_ocean_x:
 		set_biome(Biome.OCEAN)
 		return
 	
 	# check biome
 	var snow_ice_count := 0
+	var sand_count := 0
 	
 	var scan_range = SCAN_RADIUS * TileManager.CHUNK_SIZE
 	var start_x = clampi(center_tile.x - scan_range, 0, Globals.world_size.x)
@@ -77,9 +80,15 @@ func check_biome(player_pos: Vector2) -> void:
 			var block_id = TileManager.get_block_unsafe(x, y) 
 			if block_id == 6 or block_id == 7: # Snow or Ice
 				snow_ice_count += 1
+			elif block_id == 8: # Sand
+				sand_count += 1
 				
 			if snow_ice_count >= WINTER_THRESHOLD:
 				set_biome(Biome.SNOW)
+				return
+			
+			if sand_count >= DESERT_THRESHOLD:
+				set_biome(Biome.DESERT)
 				return
 			
 			processed += 1

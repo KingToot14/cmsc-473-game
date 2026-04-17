@@ -7,12 +7,15 @@ enum Area {
 	FOREST_NIGHT,
 	WINTER_DAY,
 	WINTER_NIGHT,
+	DESERT_DAY,
+	DESERT_NIGHT,
 	UNDERGROUND,
 	CAVERN,
 	DUNGEON,
 	SPACE,
 	OCEAN_DAY,
 	OCEAN_NIGHT,
+	UNDERWORLD,
 }
 
 # --- Constants --- #
@@ -53,7 +56,10 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/Caves/Deep Cave 1.ogg",
 		"res://music/Caves/Deep Cave 2.ogg",
 	],
-	Area.DUNGEON: [],
+	Area.DUNGEON: [
+		"res://music/Dungeon/He’ll.ogg"
+		
+	],
 	Area.SPACE: [
 		"res://music/Space/Space 1.ogg",
 		"res://music/Space/Space 2.ogg",
@@ -67,6 +73,19 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/forest/Night 2.ogg",
 		"res://music/forest/Night 5.ogg",
 		"res://music/forest/Another-Night.ogg",
+	],
+	Area.DESERT_DAY: [
+		#"res://music/Desert/Possible Desert.ogg",
+		"res://music/forest/Day Overworld.ogg",
+	],
+	Area.DESERT_NIGHT: [
+		"res://music/Desert/Possible night.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		"res://music/forest/Another-Night.ogg",
+	],
+	Area.UNDERWORLD:[
+		"res://music/Underworld/He’ll 2.ogg"
 	],
 }
 
@@ -104,6 +123,21 @@ const AREA_AMBIENCE: Dictionary[Area, Array] = {
 	Area.OCEAN_NIGHT: [
 		"res://music/Ambience/Beach/prettysleepy-crickets-chirping-amp-ocean-waves-by-prettysleepy-art-10372.ogg",
 	],
+	Area.DESERT_DAY:[
+		"res://music/Desert/tanweraman-desert-wind-2-350417.wav",
+		"res://music/Desert/tanweraman-desert-wind-1-350398.wav",
+		
+	],
+	Area.DESERT_NIGHT:[
+		"res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
+		"res://music/Desert/freesound_community-semi-desert-insects-ravens-birds-quiet-with-bad-mic-noise-badlands-ab-190818-7028.wav",
+	],
+	Area.UNDERWORLD:[
+		"res://music/Underworld/alex_jauk-nightmarish-hell-223594.wav",
+		"res://music/Underworld/freesound_community-ambinet-hell-23836.wav",
+		"res://music/Underworld/freesound_community-metallic-ambiance-53909.wav",
+		"res://music/Underworld/Ambiance_Fire_Big_Loop_Mono.wav",
+	],
 }
 
 const WATER_ENTRY_SOUNDS: Array[String] = ["res://music/Water Sounds/splash big 5.wav"]
@@ -138,10 +172,12 @@ const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
 	Area.WINTER_NIGHT: Area.WINTER_DAY,
 	Area.OCEAN_DAY: Area.OCEAN_NIGHT,
 	Area.OCEAN_NIGHT: Area.OCEAN_DAY,
+	Area.DESERT_DAY: Area.DESERT_NIGHT,
+	Area.DESERT_NIGHT: Area.DESERT_DAY,
 }
 
-const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY]
-const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT]
+const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY, Area.DESERT_DAY]
+const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT, Area.DESERT_DAY, Area.DESERT_NIGHT]
 
 # --- Variables --- #
 var _track_queues: Dictionary[Area, Array] = {}
@@ -494,15 +530,14 @@ func set_bus_vol(bus_name: String, db: float) -> void:
 
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	if BiomeManager.current_layer != BiomeManager.Layer.SURFACE:
-		match BiomeManager.current_layer:
-			BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
-			BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)
+		_on_layer_changed(BiomeManager.current_layer)
 		return
 
 	match new_biome:
 		BiomeManager.Biome.SNOW: enter_area(Area.WINTER_DAY)
 		BiomeManager.Biome.FOREST: enter_area(Area.FOREST_DAY)
 		BiomeManager.Biome.OCEAN: enter_area(Area.OCEAN_DAY)
+		BiomeManager.Biome.DESERT: enter_area(Area.DESERT_DAY)
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 	match new_layer:
@@ -510,3 +545,4 @@ func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
 		BiomeManager.Layer.SURFACE: _on_biome_changed(BiomeManager.current_biome)
 		BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
 		BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)
+		BiomeManager.Layer.UNDERWORLD: enter_area(Area.UNDERWORLD)

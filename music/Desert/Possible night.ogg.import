@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cscxfs6p0a0t5"
+path="res://.godot/imported/Possible night.ogg-3aa4f3ef4fb69437c74dddac6a11dbb0.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Desert/Possible night.ogg"
+dest_files=["res://.godot/imported/Possible night.ogg-3aa4f3ef4fb69437c74dddac6a11dbb0.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
