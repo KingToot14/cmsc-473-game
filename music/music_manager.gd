@@ -77,12 +77,13 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 	Area.DESERT_DAY: [
 		#"res://music/Desert/Possible Desert.ogg",
 		"res://music/forest/Day Overworld.ogg",
+		"res://music/Desert/Possible Desert 2.ogg",
 	],
 	Area.DESERT_NIGHT: [
 		"res://music/Desert/Possible night.ogg",
-		"res://music/forest/Night 2.ogg",
-		"res://music/forest/Night 5.ogg",
-		"res://music/forest/Another-Night.ogg",
+		#"res://music/forest/Night 2.ogg",
+		#"res://music/forest/Night 5.ogg",
+		#"res://music/forest/Another-Night.ogg",
 	],
 	Area.UNDERWORLD:[
 		"res://music/Underworld/He’ll 2.ogg"
@@ -274,9 +275,10 @@ func _mute_audio_server() -> void:
 func _process(_delta: float) -> void:
 	if _current_area == Area.TITLE_SCREEN: return
 	
-	var is_day: bool = DaytimeManager.is_day()
-	if is_day != _is_day:
-		_on_time_changed(is_day)
+	if BiomeManager.current_layer == BiomeManager.Layer.SURFACE:
+		var is_day: bool = DaytimeManager.is_day()
+		if is_day != _is_day:
+			_on_time_changed(is_day)
 
 func _on_track_finished() -> void:
 	play_track(_current_area)
@@ -320,6 +322,8 @@ func play_track(area: Area, variant := -1) -> void:
 		path = AREA_TRACKS[area].pick_random()
 
 	if path != "":
+		# --- Added Print --- #
+		print("[MusicManager] Now playing track: ", path.get_file())
 		var new_stream = _load_audio_stream(path)
 		if new_stream:
 			stream = new_stream
@@ -332,7 +336,6 @@ func play_track(area: Area, variant := -1) -> void:
 func play_ambience(area: Area) -> void:
 	var resolved_area: Area = _resolve_area(area)
 	
-	# If we are already playing ambience for this area, don't restart it
 	if resolved_area == _current_ambience_area and _ambience_player.playing:
 		return
 
@@ -343,7 +346,6 @@ func play_ambience(area: Area) -> void:
 		_ambience_player.stop()
 		return
 
-	# Use the queue system to pick the next ambient track
 	var ambience_path: String = _next_queued_ambience(resolved_area)
 	
 	var ambience_stream = _load_audio_stream(ambience_path)
@@ -357,13 +359,15 @@ func enter_area(area: Area) -> void:
 	var resolved: Area = _resolve_area(area)
 	
 	if resolved != _current_area or not playing or _current_area == Area.TITLE_SCREEN:
+		# --- Added Print --- #
+		print("[MusicManager] Entering New Area: ", Area.keys()[resolved])
 		reset_area(resolved)
 		play_track(resolved)
 		area_changed.emit(resolved)
 
 func reset_area(area: Area) -> void:
 	_track_queues.erase(area)
-	_ambience_queues.erase(area) # Added to clear ambience history
+	_ambience_queues.erase(area) 
 	_last_played.erase(area)
 	_last_ambience_played.erase(area)
 
@@ -379,7 +383,6 @@ func _next_queued_track(area: Area) -> String:
 	_last_played[area] = track
 	return track
 
-# Helper to shuffle and cycle through multiple ambient loops
 func _next_queued_ambience(area: Area) -> String:
 	var ambience_list = AREA_AMBIENCE.get(area, [])
 	if ambience_list.is_empty(): return ""
@@ -387,7 +390,6 @@ func _next_queued_ambience(area: Area) -> String:
 	if not _ambience_queues.has(area) or _ambience_queues[area].is_empty():
 		var new_queue: Array = ambience_list.duplicate()
 		new_queue.shuffle()
-		# Avoid playing the same track again immediately if there are choices
 		if new_queue.size() > 1 and new_queue.front() == _last_ambience_played.get(area, ""):
 			new_queue.append(new_queue.pop_front())
 		_ambience_queues[area] = new_queue
@@ -399,56 +401,56 @@ func _next_queued_ambience(area: Area) -> String:
 # --- Sound Effects --- #
 
 func play_torch_place_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_torch_sfx(TORCH_PLACE_SOUNDS.pick_random())
 
 func play_torch_break_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_torch_sfx(TORCH_BREAK_SOUNDS.pick_random())
 
 func play_chest_place_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_chest_sfx(CHEST_PLACE_SOUNDS.pick_random())
 
 func play_chest_break_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_chest_sfx(CHEST_BREAK_SOUNDS.pick_random())
 
 func play_chest_open_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_chest_sfx(CHEST_OPEN_SOUNDS.pick_random())
 
 func play_chest_close_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_chest_sfx(CHEST_CLOSE_SOUNDS.pick_random())
 
 func play_door_open_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_door_sfx(DOOR_OPEN_SOUNDS.pick_random())
 
 func play_door_close_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_door_sfx(DOOR_CLOSE_SOUNDS.pick_random())
 
 func _is_audio_safe() -> bool:
 	return Engine.get_frames_drawn() > 30
 
 func play_water_entry_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_sfx(_water_sfx_player, WATER_ENTRY_SOUNDS.pick_random())
 	water_entered.emit()
 
 func play_water_exit_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_sfx(_water_sfx_player, WATER_EXIT_SOUNDS.pick_random())
 	water_exited.emit()
 
 func play_tree_damage_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_sfx(_tiles_sfx_player, TREE_DAMAGE_SOUNDS.pick_random())
 
 func play_tree_break_sound() -> void:
-	if not _is_audio_safe(): return 
+	if not _is_audio_safe(): return
 	_play_sfx(_tiles_sfx_player, TREE_BREAK_SOUNDS.pick_random())
 
 func play_item_pickup_sound() -> void:
@@ -492,32 +494,24 @@ func _play_sfx(player: AudioStreamPlayer, path: String) -> void:
 	if sfx_stream:
 		player.stream = sfx_stream
 		player.play()
-	else:
-		print("ERROR: Could not load sound at: ", path)
 
 func _play_torch_sfx(path: String) -> void:
 	var sfx_stream = load(path)
 	if sfx_stream:
 		_torch_sfx_player.stream = sfx_stream
 		_torch_sfx_player.play()
-	else:
-		print("ERROR: Could not load torch sound at: ", path)
 
 func _play_chest_sfx(path: String) -> void:
 	var sfx_stream = load(path)
 	if sfx_stream:
 		_chest_sfx_player.stream = sfx_stream
 		_chest_sfx_player.play()
-	else:
-		print("ERROR: Could not load chest sound at: ", path)
 
 func _play_door_sfx(path: String) -> void:
 	var sfx_stream = load(path)
 	if sfx_stream:
 		_door_sfx_player.stream = sfx_stream
 		_door_sfx_player.play()
-	else:
-		print("ERROR: Could not load door sound at: ", path)
 
 # --- Volume Control --- #
 
@@ -530,8 +524,11 @@ func set_bus_vol(bus_name: String, db: float) -> void:
 
 func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	if BiomeManager.current_layer != BiomeManager.Layer.SURFACE:
-		_on_layer_changed(BiomeManager.current_layer)
 		return
+
+	# --- Added Print --- #
+	var biome_name = BiomeManager.Biome.keys()[BiomeManager.Biome.values().find(new_biome)]
+	print("[MusicManager] Biome Signal Received: ", biome_name)
 
 	match new_biome:
 		BiomeManager.Biome.SNOW: enter_area(Area.WINTER_DAY)
@@ -540,9 +537,14 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 		BiomeManager.Biome.DESERT: enter_area(Area.DESERT_DAY)
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
+	# --- Added Print --- #
+	var layer_name = BiomeManager.Layer.keys()[BiomeManager.Layer.values().find(new_layer)]
+	print("[MusicManager] Layer Signal Received: ", layer_name)
+
 	match new_layer:
 		BiomeManager.Layer.SPACE: enter_area(Area.SPACE)
-		BiomeManager.Layer.SURFACE: _on_biome_changed(BiomeManager.current_biome)
+		BiomeManager.Layer.SURFACE: 
+			_on_biome_changed(BiomeManager.current_biome)
 		BiomeManager.Layer.UNDERGROUND: enter_area(Area.UNDERGROUND)
 		BiomeManager.Layer.CAVERN: enter_area(Area.CAVERN)
 		BiomeManager.Layer.UNDERWORLD: enter_area(Area.UNDERWORLD)

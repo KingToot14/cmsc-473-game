@@ -25,18 +25,25 @@ func perform_pass(gen: WorldGeneration) -> void:
 			var progress = (float(x - start_x) / total_width) * 100.0
 			push_message("%d%% Complete" % progress)
 		
+		# Iterate from the bottom up or top down; top-down is usually safer for gravity checks
 		for y in range(world_size.y):
-			# Overwrite dirt blocks with Sand (Block ID 8)
 			var block = TileManager.get_block_unsafe(x, y)
 			
-			# Replace Dirt (1, 2) and variations (9), but ignore existing Sand (8)
+			# 1. Replace Dirt (1, 2, 9) with Sand (8)
 			if block in [1, 2, 9]: 
 				TileManager.set_block_unsafe(x, y, 8)
+				
+				# 2. GRAVITY PROTECTION: Check the block immediately below
+				if y + 1 < world_size.y:
+					var block_below = TileManager.get_block_unsafe(x, y + 1)
+					# If the block below is air (0), fill it with Sandstone (29) 
+					# so the sand we just placed doesn't fall.
+					if block_below == 0:
+						TileManager.set_block_unsafe(x, y + 1, 29)
 			
-			# Overwrite dirt walls (ID 1) with Sand walls (ID 5)
+			# 3. Overwrite dirt walls (ID 1) with Sand walls (ID 5)
 			if TileManager.get_wall_unsafe(x, y) == 1:
 				TileManager.set_wall_unsafe(x, y, 5)
 	
 	push_message("100% Complete")
-	
 	exit_pass()
