@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cokeqg0rbf5dm"
+path="res://.godot/imported/He’ll 2.ogg-d206bebc733d3d4a4d780efea45b9582.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Underworld/He’ll 2.ogg"
+dest_files=["res://.godot/imported/He’ll 2.ogg-d206bebc733d3d4a4d780efea45b9582.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
