@@ -135,8 +135,12 @@ func start(gen: WorldGeneration) -> void:
 				match replace_layer:
 					ReplaceLayer.BLOCK:
 						TileManager.set_block_unsafe(x, y, replace_tile)
+						TileManager.set_liquid_level(x, y, 0)
+						TileManager.set_liquid_type(x, y, 0)
 					ReplaceLayer.WALL:
 						TileManager.set_wall_unsafe(x, y, replace_tile)
+						TileManager.set_liquid_level(x, y, 0)
+						TileManager.set_liquid_type(x, y, 0)
 					ReplaceLayer.LIQUID:
 						TileManager.set_block_unsafe(x, y, 0)
 						TileManager.set_liquid_level(x, y, WaterUpdater.MAX_WATER_LEVEL)
