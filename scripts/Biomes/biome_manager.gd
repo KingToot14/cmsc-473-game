@@ -5,8 +5,9 @@ enum Biome {
 	FOREST = 1, 
 	DESERT = 2, 
 	SNOW = 4, 
-	OCEAN = 8 
-	}
+	OCEAN = 8,
+	JUNGLE = 16 # Added Jungle
+}
 	
 enum Layer { 
 	SPACE = 1, 
@@ -14,7 +15,7 @@ enum Layer {
 	UNDERGROUND = 4,
 	CAVERN = 8,
 	UNDERWORLD = 16
-	}
+}
 
 # --- Signals --- #
 signal biome_changed(new_biome: Biome)
@@ -90,6 +91,7 @@ func check_biome(player_pos: Vector2) -> void:
 	var is_ocean_x = center_tile.x <= 332 or center_tile.x >= Globals.world_size.x - 332
 	var snow_count := 0
 	var sand_count := 0
+	var mud_count := 0    # Added Jungle block counter
 	var forest_count := 0 
 	
 	var scan_range = SCAN_RADIUS * TileManager.CHUNK_SIZE
@@ -104,6 +106,7 @@ func check_biome(player_pos: Vector2) -> void:
 			var block_id = TileManager.get_block_unsafe(x, y) 
 			if block_id == 6 or block_id == 7: snow_count += 1
 			elif block_id == 8: sand_count += 1
+			elif block_id == 30: mud_count += 1 # Detecting Mud for Jungle
 			elif block_id == 1 or block_id == 2: forest_count += 1
 			
 			processed += 1
@@ -118,6 +121,7 @@ func check_biome(player_pos: Vector2) -> void:
 	if current_biome == Biome.SNOW:
 		if snow_count < EXIT_THRESHOLD:
 			if is_ocean_x: target_biome = Biome.OCEAN
+			elif mud_count >= ENTRY_THRESHOLD: target_biome = Biome.JUNGLE # Check for Jungle
 			elif sand_count >= ENTRY_THRESHOLD: target_biome = Biome.DESERT
 			elif forest_count >= ENTRY_THRESHOLD: target_biome = Biome.FOREST
 
@@ -125,19 +129,30 @@ func check_biome(player_pos: Vector2) -> void:
 	elif current_biome == Biome.DESERT:
 		if sand_count < EXIT_THRESHOLD:
 			if is_ocean_x: target_biome = Biome.OCEAN
+			elif mud_count >= ENTRY_THRESHOLD: target_biome = Biome.JUNGLE # Check for Jungle
 			elif snow_count >= ENTRY_THRESHOLD: target_biome = Biome.SNOW
 			elif forest_count >= ENTRY_THRESHOLD: target_biome = Biome.FOREST
 
-	# Rule C: In Ocean (Handles returning to Forest)
-	elif current_biome == Biome.OCEAN:
-		if not is_ocean_x:
-			if snow_count >= ENTRY_THRESHOLD: target_biome = Biome.SNOW
+	# Rule C: In Jungle
+	elif current_biome == Biome.JUNGLE:
+		if mud_count < EXIT_THRESHOLD:
+			if is_ocean_x: target_biome = Biome.OCEAN
+			elif snow_count >= ENTRY_THRESHOLD: target_biome = Biome.SNOW
 			elif sand_count >= ENTRY_THRESHOLD: target_biome = Biome.DESERT
 			else: target_biome = Biome.FOREST
 
-	# Rule D: In Forest (or Initial Spawn)
+	# Rule D: In Ocean
+	elif current_biome == Biome.OCEAN:
+		if not is_ocean_x:
+			if mud_count >= ENTRY_THRESHOLD: target_biome = Biome.JUNGLE # Check for Jungle
+			elif snow_count >= ENTRY_THRESHOLD: target_biome = Biome.SNOW
+			elif sand_count >= ENTRY_THRESHOLD: target_biome = Biome.DESERT
+			else: target_biome = Biome.FOREST
+
+	# Rule E: In Forest (or Initial Spawn)
 	else:
 		if is_ocean_x: target_biome = Biome.OCEAN
+		elif mud_count >= ENTRY_THRESHOLD: target_biome = Biome.JUNGLE # Check for Jungle
 		elif snow_count >= ENTRY_THRESHOLD: target_biome = Biome.SNOW
 		elif sand_count >= ENTRY_THRESHOLD: target_biome = Biome.DESERT
 
