@@ -900,7 +900,6 @@ func send_hurt_block(x: int, y:int, tool_power:int):
 	else:
 		#creates a timer
 		block_regen[key] = Time.get_ticks_msec()
-		print("I grabbed the time?")
 		#send damage state to nearby clients.
 		broadcast_block_damage(x, y, block_damaged[key])
 
