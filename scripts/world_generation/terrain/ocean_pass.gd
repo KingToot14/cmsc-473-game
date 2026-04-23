@@ -24,6 +24,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 		ocean_start += 1
 	
 	# create left ocean
+	push_message("(1/2) Left Ocean")
+
 	for x in range(0, OCEAN_WIDTH):
 		for y in range(ocean_start, ocean_start + OCEAN_DEPTH):
 			if is_water(x, y):
@@ -41,6 +43,8 @@ func perform_pass(gen: WorldGeneration) -> void:
 		ocean_start += 1
 	
 	# create right ocean
+	push_message("(2/2) Right Ocean")
+	
 	for x in range(0, OCEAN_WIDTH):
 		for y in range(ocean_start, ocean_start + OCEAN_DEPTH):
 			if is_water(x, y):

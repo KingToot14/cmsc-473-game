@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://i233e2khnwip"
+path="res://.godot/imported/Possible Desert.ogg-101a743d0109af87eed8b983255422d7.oggvorbisstr"
+
+[deps]
+
+source_file="res://music/Desert/Possible Desert.ogg"
+dest_files=["res://.godot/imported/Possible Desert.ogg-101a743d0109af87eed8b983255422d7.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

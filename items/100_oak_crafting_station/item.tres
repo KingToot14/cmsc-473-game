@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://pe8xb2q3xj7h"]
+
+[ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_uw45d"]
+[ext_resource type="Texture2D" uid="uid://btl0ksf3hqwnw" path="res://entities/tile_entities/9_crafting_station/oak_icon.png" id="2_0ulnn"]
+
+[resource]
+script = ExtResource("1_uw45d")
+tile_type = 2
+tile_id = 9
+tile_variant = &"oak"
+item_name = "Oak Crafting Station"
+texture = ExtResource("2_0ulnn")
+metadata/_custom_type_script = "uid://drm3bg40b8m1s"

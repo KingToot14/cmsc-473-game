@@ -31,6 +31,7 @@
 [ext_resource type="TileSet" uid="uid://jxy2b8joa4cm" path="res://walls/_resources/walls.tres" id="22_jscy8"]
 [ext_resource type="Texture2D" uid="uid://baq1hd7pnexsp" path="res://backgrounds/space/background.png" id="23_vxglm"]
 [ext_resource type="Texture2D" uid="uid://cd4s7fx0bf7nd" path="res://backgrounds/ocean/background.png" id="24_2f3dj"]
+[ext_resource type="Texture2D" uid="uid://cj1vxd3otukoq" path="res://backgrounds/desert/background.png" id="28_qkpxi"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eb6dy"]
 atlas = ExtResource("5_ya4ey")
@@ -1279,8 +1280,9 @@ y_sort_enabled = true
 scroll_scale = Vector2(0, 0)
 scroll_offset = Vector2(240, 800)
 
-[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863]
+[node name="sun_manager" type="Node2D" parent="sun_layer" unique_id=1840360863 node_paths=PackedStringArray("bodies")]
 script = ExtResource("15_yq6so")
+bodies = [NodePath("sun"), NodePath("moon"), NodePath("sun2"), NodePath("moon2"), NodePath("sun3"), NodePath("moon3")]
 radius = 900
 metadata/_custom_type_script = "uid://chnsv5dvluyew"
 
@@ -1399,7 +1401,7 @@ texture = ExtResource("17_fv21b")
 y_sort_enabled = true
 script = ExtResource("15_yc10j")
 allowed_layers = 2
-allowed_biomes = 3
+allowed_biomes = 1
 
 [node name="layer_1" type="Parallax2D" parent="background_forest" unique_id=698714807]
 y_sort_enabled = true
@@ -1816,6 +1818,110 @@ repeat_times = 3
 [node name="sprite" type="Sprite2D" parent="background_ocean/layer_4" unique_id=118492546]
 texture = ExtResource("24_2f3dj")
 vframes = 3
+
+[node name="background_desert" type="Node2D" parent="." unique_id=1028626213 groups=["background"]]
+modulate = Color(1, 1, 1, 0)
+y_sort_enabled = true
+script = ExtResource("15_yc10j")
+allowed_layers = 6
+allowed_biomes = 2
+
+[node name="layer_1" type="Parallax2D" parent="background_desert" unique_id=834516811]
+y_sort_enabled = true
+scroll_scale = Vector2(0, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sky" type="ColorRect" parent="background_desert/layer_1" unique_id=381045144]
+material = SubResource("ShaderMaterial_dp3eg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="layer_2" type="Parallax2D" parent="background_desert" unique_id=51592652]
+z_index = 2
+y_sort_enabled = true
+scroll_scale = Vector2(0.05, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_desert/layer_2" unique_id=1548264975]
+texture = ExtResource("28_qkpxi")
+vframes = 5
+frame = 1
+
+[node name="layer_3" type="Parallax2D" parent="background_desert" unique_id=69168986]
+z_index = 4
+y_sort_enabled = true
+scroll_scale = Vector2(0.075, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_desert/layer_3" unique_id=1346505371]
+texture = ExtResource("28_qkpxi")
+vframes = 5
+frame = 2
+
+[node name="fog" type="ColorRect" parent="background_desert/layer_3" unique_id=731555670]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.88, 0.5159733, 0.23759998, 0.11764706)
+
+[node name="layer_4" type="Parallax2D" parent="background_desert" unique_id=1826832482]
+z_index = 6
+y_sort_enabled = true
+scroll_scale = Vector2(0.125, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_desert/layer_4" unique_id=1174045384]
+texture = ExtResource("28_qkpxi")
+vframes = 5
+frame = 3
+
+[node name="fog" type="ColorRect" parent="background_desert/layer_4" unique_id=1786729368]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -270.0
+offset_right = 480.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.88, 0.5159733, 0.23759998, 0.11764706)
+
+[node name="layer_5" type="Parallax2D" parent="background_desert" unique_id=1893615611]
+z_index = 10
+y_sort_enabled = true
+scroll_scale = Vector2(0.2, 0)
+scroll_offset = Vector2(0, 135)
+repeat_size = Vector2(960, 0)
+repeat_times = 3
+
+[node name="sprite" type="Sprite2D" parent="background_desert/layer_5" unique_id=527463356]
+texture = ExtResource("28_qkpxi")
+vframes = 5
+frame = 4
 
 [node name="server_tiles" type="TileMapLayer" parent="." unique_id=1791430910]
 z_index = 50

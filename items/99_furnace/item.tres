@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="BlockItem" format=3 uid="uid://cva0e8e3l427c"]
 
 [ext_resource type="Script" uid="uid://drm3bg40b8m1s" path="res://items/_resources/block_item.gd" id="1_577ms"]
-[ext_resource type="Texture2D" uid="uid://bdr0fqo3s5kav" path="res://entities/tile_entities/2_chest/icon.png" id="2_vyakj"]
+[ext_resource type="Texture2D" uid="uid://ctgy5h2l40t6e" path="res://entities/tile_entities/8_furnace/icon.png" id="2_577ms"]
 
 [resource]
 script = ExtResource("1_577ms")
@@ -11,7 +11,7 @@ tile_variant = &"normal"
 use_speed = 0.25
 item_id = 99
 item_name = "Furnace"
-texture = ExtResource("2_vyakj")
+texture = ExtResource("2_577ms")
 tooltip = "Smelts ores into bars"
 item_type = 1
 metadata/_custom_type_script = "uid://drm3bg40b8m1s"

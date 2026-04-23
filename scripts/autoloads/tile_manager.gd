@@ -463,10 +463,10 @@ func _rebuild_liquid_texture_internal(origin: Vector2i) -> void:
 	
 	# rebuild texture
 	for y in range(WATER_HEIGHT):
-		var row := (origin.y + y) *  world_width
+		var row := (origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			if y < world_height and origin.x + x < world_width:
+			if origin.y + y < world_height and origin.x + x < world_width:
 				var type := liquid_type[row + origin.x + x]
 				
 				if type == WaterUpdater.WATER_TYPE:
@@ -701,13 +701,14 @@ func _rebuild_light_texture_internal(origin: Vector2i) -> void:
 		var row := (origin.y + y) * world_width
 		
 		for x in range(WATER_WIDTH):
-			var idx := row + origin.x + x
-			
-			sky_data[index] = light_sky[idx]
-			
-			light_data[(index * 3) + 0] = light_r[idx]
-			light_data[(index * 3) + 1] = light_g[idx]
-			light_data[(index * 3) + 2] = light_b[idx]
+			if origin.y + y < world_height and origin.x + x < world_width:
+				var idx := row + origin.x + x
+				
+				sky_data[index] = light_sky[idx]
+				
+				light_data[(index * 3) + 0] = light_r[idx]
+				light_data[(index * 3) + 1] = light_g[idx]
+				light_data[(index * 3) + 2] = light_b[idx]
 			
 			index += 1
 	

@@ -5,7 +5,7 @@ extends Control
 @onready var furnace_buttons = $furnace_buttons
 
 # the item IDs for Copper, Iron, Silver, and Gold bars
-const FURNACE_ITEM_IDS = [95, 96, 97, 98]
+const FURNACE_ITEM_IDS = [49, 50, 52, 53, 95, 96, 97, 98]
 
 var current_furnace: FurnaceEntity
 

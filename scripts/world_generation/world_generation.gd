@@ -76,12 +76,16 @@ func generate_world() -> void:
 	
 	await run_pass(OrePass.new())
 	
+	await run_pass(UnderworldPass.new())
+	
 	await run_pass(LakePass.new())
 	await run_pass(OceanPass.new())
 	
 	# biomes
 	await run_pass(DirtToSnowPass.new())
 	await run_pass(StoneToIcePass.new())
+	await run_pass(DirtToSandPass.new())
+	await run_pass(StoneToSandstonePass.new())
 	
 	# after terrain, before decoration
 	await run_pass(SmoothPass.new())

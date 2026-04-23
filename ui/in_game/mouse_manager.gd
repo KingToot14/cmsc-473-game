@@ -17,6 +17,8 @@ func _ready() -> void:
 		
 		# listen for inventory updates
 		player.my_inventory.inventory_updated.connect(_on_inventory_changed)
+	else:
+		set_process_input(false)
 
 func _process(_delta: float) -> void:
 	# update grid overlay position (snap to actual tile grid)
@@ -68,10 +70,14 @@ func _process(_delta: float) -> void:
 	Globals.set_cursor(Globals.CursorType.ARROW)
 
 func _input(event: InputEvent) -> void:
+	if player.owner_id != multiplayer.get_unique_id():
+		return
+	
 	var mouse_position := player.get_global_mouse_position()
 	
 	# only used for client-side interaction
 	if event.is_action_pressed(&'interact'):
+		print(get_path())
 		if Globals.hovered_hitbox and Globals.hovered_hitbox.entity.interact_with(mouse_position):
 			return
 

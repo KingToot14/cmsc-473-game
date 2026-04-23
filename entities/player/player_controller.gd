@@ -18,6 +18,11 @@ const INTERPOLATE_SPEED := 10.0
 		if multiplayer and multiplayer.get_unique_id() == id:
 			Globals.player = self
 
+## Identifies the main client that this player belongs to. This is set to
+## [method MultiplayerAPI.get_unique_id] when initialized by the server.
+@export var db_id := 1
+@export var username: String
+
 # - Positioning
 ## The current spawn point of the player. This defaults to [member Globals.world_spawn]
 @export var spawn_point: Vector2i
@@ -148,10 +153,13 @@ func _ready() -> void:
 		# disable overlays
 		$'grid_overlay'.hide()
 		$'water_overlay'.hide()
+		
+		# show name
+		$'player_name'.text = username
+		$'player_name'.show()
 	else:
 		# update position
 		position = spawn_point
-		
 		
 		# Ensure the sibling hotbar is visible
 		$inventory_ui/hotbar_container.show()

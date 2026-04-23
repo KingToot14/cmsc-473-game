@@ -10,13 +10,17 @@ func get_pass_name() -> String:
 
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
+	var progress_step := floori((gen.surface_low + 4) * 0.25)
 	
 	# create sliding window
 	var prev := TileManager.get_block_row(0, 0, world_size.x)
-	var curr := TileManager.get_block_row(0, 1, world_size.x)
-	var next := TileManager.get_block_row(0, 2, world_size.x)
+	var curr := TileManager.get_block_row(0, 0, world_size.x)
+	var next := TileManager.get_block_row(0, 1, world_size.x)
 	
-	for y in range(1, gen.surface_low + 1):
+	for y in range(gen.surface_low + 1):
+		if y % progress_step == 0:
+			push_message("%d%% Complete" % (float(y) / gen.surface_low * 100.0))
+		
 		for x in range(1, world_size.x - 1):
 			# only run on dirt tiles
 			if TileManager.get_block_unsafe(x, y) != 2:
@@ -31,3 +35,5 @@ func perform_pass(gen: WorldGeneration) -> void:
 		prev = curr
 		curr = next
 		next = TileManager.get_block_row(0, y + 2, world_size.x)
+	
+	push_message("100% Complete")

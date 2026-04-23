@@ -41,6 +41,7 @@
 [ext_resource type="Script" uid="uid://dhi7ubk8umji5" path="res://blocks/_resources/water_manager.gd" id="26_vewsg"]
 [ext_resource type="Script" uid="uid://bo71smfwf3o2c" path="res://blocks/_resources/water_rule.gd" id="27_2soq1"]
 [ext_resource type="Shader" uid="uid://dx7x5jlhrdcwk" path="res://blocks/_resources/light_renderer.gdshader" id="28_8q4fm"]
+[ext_resource type="FontFile" uid="uid://etghh0aili0c" path="res://ui/fonts/simple-pixel-8.ttf" id="31_a2brg"]
 [ext_resource type="Shader" uid="uid://dy7gjudcsx5yp" path="res://blocks/_resources/lava_renderer.gdshader" id="35_2h0qb"]
 [ext_resource type="Script" uid="uid://dxrcqdbm8wdgn" path="res://entities/player/chest_ui.gd" id="35_np63p"]
 [ext_resource type="Shader" uid="uid://uqt715s0dnrc" path="res://blocks/_resources/lava_glow_renderer.gdshader" id="36_g3pa7"]
@@ -48,6 +49,9 @@
 [ext_resource type="PackedScene" uid="uid://ff25uaoxac3r" path="res://ui/inventory/armor_slot.tscn" id="40_pacje"]
 [ext_resource type="Script" uid="uid://5a0nmaj5mot4" path="res://entities/player/furnace_ui.gd" id="47_7otdo"]
 [ext_resource type="Script" uid="uid://buxmx2xx8stl2" path="res://entities/player/crafting_bench_ui.gd" id="48_c112w"]
+[ext_resource type="Script" uid="uid://bqfrnq3pfjlia" path="res://entities/player/pause_menu.gd" id="49_ssgi7"]
+[ext_resource type="Script" uid="uid://c0dvc7i0d5g6j" path="res://entities/player/sounds_menu.gd" id="49_u37te"]
+[ext_resource type="Theme" uid="uid://igfgek6hqx3a" path="res://sounds_menu_sliders_theme.tres" id="50_rtlkk"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -742,6 +746,12 @@ properties/0/replication_mode = 0
 properties/1/path = NodePath(".:spawn_point")
 properties/1/spawn = true
 properties/1/replication_mode = 2
+properties/2/path = NodePath(".:db_id")
+properties/2/spawn = true
+properties/2/replication_mode = 0
+properties/3/path = NodePath(".:username")
+properties/3/spawn = true
+properties/3/replication_mode = 0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bectd"]
 radius = 12.0
@@ -835,6 +845,30 @@ resource_local_to_scene = true
 shader = ExtResource("28_8q4fm")
 shader_parameter/sky_gradient = SubResource("GradientTexture1D_2h0qb")
 shader_parameter/light_viewport = SubResource("ViewportTexture_mmk7k")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rtlkk"]
+bg_color = Color(0.15294118, 0.21568628, 0.7294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a2brg"]
+bg_color = Color(0.061703037, 0.19595832, 0.38523623, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_arp52"]
+bg_color = Color(0.2656891, 0.6346102, 1.1547284, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jjk8f"]
+bg_color = Color(0.22256814, 0.5418828, 0.9920641, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ssgi7"]
+bg_color = Color(0.15294118, 0.21568628, 0.7294118, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cnswy"]
+bg_color = Color(0.0627451, 0.19607843, 0.38431373, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q5bfg"]
+bg_color = Color(0.2656891, 0.6346102, 1.1547284, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p22ii"]
+bg_color = Color(0.22256814, 0.5418828, 0.9920641, 1)
 
 [node name="player" type="CharacterBody2D" unique_id=1210066617 node_paths=PackedStringArray("hp")]
 z_index = 25
@@ -1142,6 +1176,23 @@ hframes = 8
 vframes = 5
 script = ExtResource("17_t1t22")
 target = NodePath("../arm_front_outfit")
+
+[node name="player_name" type="RichTextLabel" parent="." unique_id=1800855579]
+visible = false
+offset_left = -30.0
+offset_top = -33.0
+offset_right = 50.0
+offset_bottom = -21.0
+scale = Vector2(0.75, 0.75)
+mouse_filter = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/normal_font = ExtResource("31_a2brg")
+theme_override_font_sizes/normal_font_size = 12
+text = "Name"
+scroll_active = false
+autowrap_mode = 0
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="grid_overlay" type="ColorRect" parent="." unique_id=691634126]
 visible = false
@@ -1508,3 +1559,75 @@ crafting_button_scene = ExtResource("23_ghoj8")
 custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 columns = 5
+
+[node name="pause_menu" type="CanvasLayer" parent="." unique_id=742749794]
+script = ExtResource("49_ssgi7")
+
+[node name="main_panel" type="Panel" parent="pause_menu" unique_id=1369647490]
+custom_minimum_size = Vector2(130, 130)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -65.0
+offset_top = -65.0
+offset_right = 65.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("50_rtlkk")
+theme_override_styles/panel = SubResource("StyleBoxFlat_rtlkk")
+
+[node name="sounds_button" type="Button" parent="pause_menu/main_panel" unique_id=964503262]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_a2brg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_arp52")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jjk8f")
+text = "Sounds Menu"
+
+[node name="sounds_menu_panel" type="Panel" parent="pause_menu" unique_id=585575025]
+custom_minimum_size = Vector2(130, 130)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -65.0
+offset_top = -65.0
+offset_right = 65.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("50_rtlkk")
+theme_override_styles/panel = SubResource("StyleBoxFlat_ssgi7")
+script = ExtResource("49_u37te")
+
+[node name="back_button" type="Button" parent="pause_menu/sounds_menu_panel" unique_id=301341689]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 15.0
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_cnswy")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_q5bfg")
+theme_override_styles/hover = SubResource("StyleBoxFlat_p22ii")
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="pause_menu/sounds_menu_panel" unique_id=593045122]
+custom_minimum_size = Vector2(130, 116)
+layout_mode = 0
+offset_top = 14.0
+offset_right = 130.0
+offset_bottom = 130.0
+
+[node name="bus_vbox" type="VBoxContainer" parent="pause_menu/sounds_menu_panel/ScrollContainer" unique_id=1145929027]
+layout_mode = 2

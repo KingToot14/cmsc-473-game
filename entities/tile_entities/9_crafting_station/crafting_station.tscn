@@ -1,35 +1,38 @@
 [gd_scene format=3 uid="uid://cdx7rgfwp2wu0"]
 
 [ext_resource type="Script" uid="uid://bqswfcsar1ydj" path="res://entities/tile_entities/9_crafting_station/crafting_bench_entity.gd" id="1_wfxba"]
-[ext_resource type="Texture2D" uid="uid://dcvdfrk4lfntm" path="res://entities/tile_entities/2_chest/tiles.png" id="2_560la"]
-[ext_resource type="Texture2D" uid="uid://dfcekcai5iw84" path="res://entities/tile_entities/2_chest/oak.png" id="3_1oibi"]
+[ext_resource type="Texture2D" uid="uid://btljt4n4plj4s" path="res://entities/tile_entities/9_crafting_station/oak.png" id="2_1oibi"]
+[ext_resource type="Texture2D" uid="uid://dvc52eyqrlx5g" path="res://entities/tile_entities/9_crafting_station/spruce.png" id="3_lbuno"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="3_ou3re"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="4_3xo0h"]
-[ext_resource type="Texture2D" uid="uid://cfd7e5rpyelrs" path="res://entities/tile_entities/2_chest/spruce.png" id="4_lbuno"]
-[ext_resource type="Texture2D" uid="uid://6obavjw8et52" path="res://entities/tile_entities/2_chest/palm.png" id="5_el4jr"]
+[ext_resource type="Texture2D" uid="uid://hx57spe6glfo" path="res://entities/tile_entities/9_crafting_station/palm.png" id="4_el4jr"]
 [ext_resource type="Script" uid="uid://dc11pr8l74ciu" path="res://entities/_resources/combat/tile_entity_hitbox.gd" id="5_vqd6a"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0nf7a"]
 resource_local_to_scene = true
-size = Vector2(13.5, 13.5)
+size = Vector2(15.5, 7.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c1nce"]
+resource_local_to_scene = true
+size = Vector2(15.5, 1)
 
 [node name="crafting_station" type="CharacterBody2D" unique_id=812077073 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 15
+collision_layer = 64
+collision_mask = 0
 script = ExtResource("1_wfxba")
 variant_sprites = Dictionary[int, Texture2D]({
-0: ExtResource("2_560la"),
-1: ExtResource("3_1oibi"),
-2: ExtResource("4_lbuno"),
-3: ExtResource("5_el4jr")
+0: ExtResource("2_1oibi"),
+1: ExtResource("3_lbuno"),
+2: ExtResource("4_el4jr")
 })
 interpolator = NodePath("entity_interpolator")
 hp = NodePath("hp")
 metadata/_custom_type_script = "uid://bqswfcsar1ydj"
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=1586909070]
-position = Vector2(8, 4)
-texture = ExtResource("2_560la")
-hframes = 2
+position = Vector2(8, 8)
+texture = ExtResource("2_1oibi")
 
 [node name="entity_interpolator" type="Node" parent="." unique_id=730928620 node_paths=PackedStringArray("root")]
 script = ExtResource("3_ou3re")
@@ -42,11 +45,11 @@ entity = NodePath("..")
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1371516074]
-position = Vector2(8, 1)
+position = Vector2(8, 4)
 shape = SubResource("RectangleShape2D_0nf7a")
 
 [node name="hitbox" type="Area2D" parent="." unique_id=1490014107 node_paths=PackedStringArray("entity")]
-position = Vector2(8, 1)
+position = Vector2(8, 4)
 collision_layer = 64
 collision_mask = 65
 script = ExtResource("5_vqd6a")
@@ -54,3 +57,13 @@ entity = NodePath("..")
 
 [node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=932094761]
 shape = SubResource("RectangleShape2D_0nf7a")
+
+[node name="top" type="StaticBody2D" parent="." unique_id=761826518]
+position = Vector2(12, 2)
+collision_layer = 97
+collision_mask = 30
+
+[node name="shape" type="CollisionShape2D" parent="top" unique_id=1963557350]
+position = Vector2(-4, -1.5)
+shape = SubResource("RectangleShape2D_c1nce")
+one_way_collision = true
