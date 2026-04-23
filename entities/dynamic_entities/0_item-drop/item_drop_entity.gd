@@ -162,6 +162,9 @@ func chase_physics(delta: float) -> void:
 		target_player.my_inventory.add_item(item_id, quantity)
 		quantity = 0
 	
+	velocity = velocity.lerp(Vector2.ZERO, 2.5 * delta)
+	#each frame, the velocity slows by 4% (delta is the time since the last frame)
+	#this should stop the item from overshooting past the player.
 	if distance <= SNAP_RADIUS:
 		velocity += difference.normalized() * fly_speed * delta * min(1.0, SNAP_RADIUS / distance) * SNAP_RADIUS
 	else:
