@@ -76,7 +76,7 @@ func handle_action(action_info: PackedByteArray) -> void:
 	buffer.data_array = action_info
 	
 	# action id
-	var action_id := buffer.get_u16() 
+	var action_id := buffer.get_u16()
 	
 	# actions
 	match action_id:
@@ -85,6 +85,8 @@ func handle_action(action_info: PackedByteArray) -> void:
 			set_door_state(buffer.get_u8())
 
 func set_door_state(state: int) -> void:
+	# Use existing variable to check for state transition
+	var was_open_local := is_open
 	door_state = state
 	
 	if door_state == 0:
@@ -98,6 +100,11 @@ func set_door_state(state: int) -> void:
 		$'hitbox'.position.y = 4
 		
 		is_open = false
+		
+		# Play close sound if it was previously open
+		if was_open_local:
+			Globals.music.play_door_close_sound()
+			
 	elif door_state == 1:
 		# open door left
 		$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
@@ -110,6 +117,11 @@ func set_door_state(state: int) -> void:
 		$'hitbox'.position.y = 0
 		
 		is_open = true
+		
+		# Play open sound if it was previously closed
+		if not was_open_local:
+			Globals.music.play_door_open_sound()
+			
 	elif door_state == 2:
 		# open door right
 		$'blocker'.process_mode = Node.PROCESS_MODE_DISABLED
@@ -122,6 +134,10 @@ func set_door_state(state: int) -> void:
 		$'hitbox'.position.y = 8
 		
 		is_open = true
+		
+		# Play open sound if it was previously closed
+		if not was_open_local:
+			Globals.music.play_door_open_sound()
 
 #endregion
 
@@ -262,9 +278,6 @@ static func create(tile_pos: Vector2i, tile_variant := &'normal') -> void:
 	
 	return
 
-## Returns whether or not the placement is valid. This uses
-## [method get_collision_grid] to check for collision and 
-## [method get_variant] to make sure the ground beneath is valid.
 static func is_placement_valid(tile_pos: Vector2i) -> bool:
 	# make sure left and right tiles are filled
 	if not BlockDatabase.is_solid[TileManager.get_block(tile_pos.x - 1, tile_pos.y)]:
@@ -282,10 +295,6 @@ static func is_placement_valid(tile_pos: Vector2i) -> bool:
 	
 	return true
 
-## Returns a collision grid representing obstacles that are in the way of placement.
-## The results is a [code]Dictionary[lb]Vector2i, bool[rb][/code] that maps
-## tile positions to whether or not a collision was detected (either a block or
-## another tile entity)
 static func get_collision_grid(tile_pos: Vector2i) -> Dictionary[Vector2i, bool]:
 	var grid: Dictionary[Vector2i, bool] = {}
 	
