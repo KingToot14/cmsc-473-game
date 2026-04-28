@@ -16,6 +16,8 @@ enum Area {
 	OCEAN_DAY,
 	OCEAN_NIGHT,
 	UNDERWORLD,
+	JUNGLE_DAY,   # Added Jungle Day
+	JUNGLE_NIGHT, # Added Jungle Night
 }
 
 # --- Constants --- #
@@ -30,6 +32,21 @@ const AREA_TRACKS: Dictionary[Area, Array] = {
 		"res://music/forest/Forest in the Day.ogg",
 	],
 	Area.FOREST_NIGHT: [
+		"res://music/forest/Night Track.ogg",
+		"res://music/forest/Grass in The Night 1.ogg",
+		"res://music/forest/Day Overworld.ogg",
+		"res://music/forest/Night 2.ogg",
+		"res://music/forest/Night 5.ogg",
+		"res://music/forest/Another-Night.ogg",
+	],
+	# Jungle Day Placeholder (using Forest Day tracks)
+	Area.JUNGLE_DAY: [
+		"res://music/forest/forest_day_2.ogg",
+		"res://music/forest/Day 4.ogg",
+		"res://music/forest/Forest in the Day.ogg",
+	],
+	# Jungle Night Placeholder (using Forest Night tracks)
+	Area.JUNGLE_NIGHT: [
 		"res://music/forest/Night Track.ogg",
 		"res://music/forest/Grass in The Night 1.ogg",
 		"res://music/forest/Day Overworld.ogg",
@@ -97,9 +114,17 @@ const AREA_AMBIENCE: Dictionary[Area, Array] = {
 		"res://music/Ambience/Forest Day/Ambiance_Forest_Birds_Loop_Stereo.ogg",
 		"res://music/Ambience/Forest Day/Ambiance_Nature_Meadow_Birds_Flies_Calm_Loop_Stereo.wav",
 		"res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
-	
 	],
 	Area.FOREST_NIGHT: [
+		"res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
+	],
+	# Jungle Ambience Placeholder
+	Area.JUNGLE_DAY: [
+		"res://music/Ambience/Forest Day/Ambiance_Forest_Birds_Loop_Stereo.ogg",
+		"res://music/Ambience/Forest Day/Ambiance_Nature_Meadow_Birds_Flies_Calm_Loop_Stereo.wav",
+		"res://music/Ambience/Forest Day/forest-wind_-birds.ogg",
+	],
+	Area.JUNGLE_NIGHT: [
 		"res://music/Ambience/Forest Night/Ambiance_Night_Loop_Stereo.ogg",
 	],
 	Area.WINTER_DAY: [
@@ -175,10 +200,12 @@ const DAY_NIGHT_PAIRS: Dictionary[Area, Area] = {
 	Area.OCEAN_NIGHT: Area.OCEAN_DAY,
 	Area.DESERT_DAY: Area.DESERT_NIGHT,
 	Area.DESERT_NIGHT: Area.DESERT_DAY,
+	Area.JUNGLE_DAY: Area.JUNGLE_NIGHT, # Added Pair
+	Area.JUNGLE_NIGHT: Area.JUNGLE_DAY, # Added Pair
 }
 
-const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY, Area.DESERT_DAY]
-const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT, Area.DESERT_DAY, Area.DESERT_NIGHT]
+const DAY_AREAS: Array[Area] = [Area.FOREST_DAY, Area.WINTER_DAY, Area.OCEAN_DAY, Area.DESERT_DAY, Area.JUNGLE_DAY]
+const QUEUED_AREAS: Array[Area] = [Area.FOREST_DAY, Area.FOREST_NIGHT, Area.SPACE, Area.OCEAN_DAY, Area.OCEAN_NIGHT, Area.DESERT_DAY, Area.DESERT_NIGHT, Area.JUNGLE_DAY, Area.JUNGLE_NIGHT]
 
 # --- Variables --- #
 var _track_queues: Dictionary[Area, Array] = {}
@@ -526,7 +553,6 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 	if BiomeManager.current_layer != BiomeManager.Layer.SURFACE:
 		return
 
-	# --- Added Print --- #
 	var biome_name = BiomeManager.Biome.keys()[BiomeManager.Biome.values().find(new_biome)]
 	print("[MusicManager] Biome Signal Received: ", biome_name)
 
@@ -535,9 +561,9 @@ func _on_biome_changed(new_biome: BiomeManager.Biome) -> void:
 		BiomeManager.Biome.FOREST: enter_area(Area.FOREST_DAY)
 		BiomeManager.Biome.OCEAN: enter_area(Area.OCEAN_DAY)
 		BiomeManager.Biome.DESERT: enter_area(Area.DESERT_DAY)
+		BiomeManager.Biome.JUNGLE: enter_area(Area.JUNGLE_DAY) # Switch to Jungle Day Area
 
 func _on_layer_changed(new_layer: BiomeManager.Layer) -> void:
-	# --- Added Print --- #
 	var layer_name = BiomeManager.Layer.keys()[BiomeManager.Layer.values().find(new_layer)]
 	print("[MusicManager] Layer Signal Received: ", layer_name)
 
