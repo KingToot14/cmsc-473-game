@@ -4,13 +4,13 @@ extends WorldGenPass
 func get_pass_name() -> String:
 	return "Establishing the coastal jungle"
 
-func perform_pass(_gen: WorldGeneration) -> void:
+func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# 1. Determine which side the jungle is on (randomly)
 	# You might want to store 'jungle_on_right' in your gen object 
 	# if other passes need to know where the jungle is.
-	var jungle_on_right: bool = randf() > 0.5
+	var jungle_on_right := gen.jungle_on_right
 	
 	# 2. Define the "Ocean Border" zone
 	# We target the first 15% of the world width on either the far left or far right.

@@ -6,7 +6,7 @@ func get_pass_name() -> String:
 
 func perform_pass(gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
-	var jungle_on_right: bool = gen.winter_on_right
+	var jungle_on_right: bool = gen.jungle_on_right
 	
 	# --- Ocean Awareness ---
 	# We use a value slightly larger than OceanPass.OCEAN_WIDTH 
@@ -25,7 +25,7 @@ func perform_pass(gen: WorldGeneration) -> void:
 		# Start after the left ocean ends
 		start_x = ocean_width_buffer
 		end_x = zone_width
-
+	
 	# Setup Smooth Perlin Noise
 	var j_noise = FastNoiseLite.new()
 	j_noise.noise_type = FastNoiseLite.TYPE_PERLIN

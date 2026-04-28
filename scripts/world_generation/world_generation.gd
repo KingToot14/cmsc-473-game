@@ -29,6 +29,7 @@ var hill_positions: Array[Vector2i] = []
 var lake_positions: Array[Vector2i] = []
 
 var winter_on_right := false
+var jungle_on_right := false
 
 # --- Functions --- #
 func set_seed(new_seed: Variant) -> void:
@@ -55,6 +56,7 @@ func generate_world() -> void:
 	rng.seed = world_seed
 	
 	winter_on_right = rng.randf() > 0.5
+	jungle_on_right = rng.randf() > 0.5
 	
 	# perform passes
 	await run_pass(ResetPass.new())
@@ -82,6 +84,7 @@ func generate_world() -> void:
 	await run_pass(OceanPass.new())
 	await run_pass(JungleShapePass.new())
 	await run_pass(JungleLakePass.new())
+	
 	# biomes
 	await run_pass(DirtToMudPass.new())
 	await run_pass(DirtToSnowPass.new())
