@@ -45,10 +45,13 @@ func perform_pass(_gen: WorldGeneration) -> void:
 					TileManager.set_block_unsafe(x, y, 17)
 			
 			# create other platforms
-			if not (rx < 8 or rx >= ARENA_WIDTH - 8) and \
-				ry > 12 and ry < ARENA_HEIGHT - PLATFORM_HEIGHT and ry % PLATFORM_SPACING == 3:
-				# basalt platforms
-				TileManager.set_block_unsafe(x, y, 27)
+			if not (rx < 8 or rx >= ARENA_WIDTH - 8):
+				if ry > 12 and ry < ARENA_HEIGHT - PLATFORM_HEIGHT and ry % PLATFORM_SPACING == 3:
+					# basalt platforms
+					TileManager.set_block_unsafe(x, y, 27)
+				if ry > 12 and ry < ARENA_HEIGHT - PLATFORM_HEIGHT and ry % PLATFORM_SPACING == 0 and \
+					rx % 15 == 7:
+					TorchEntity.create(Vector2i(x, y))
 			
 			if not (rx < 3 or rx >= ARENA_WIDTH - 3) and \
 				ry > ARENA_HEIGHT - PLATFORM_HEIGHT + 1 and ry < ARENA_HEIGHT - 3:
@@ -125,3 +128,6 @@ func perform_pass(_gen: WorldGeneration) -> void:
 				TileManager.set_wall_unsafe(x, y, 20)
 			if ry in [3 + 4, 3 + 5, 3 + 6, 3 + 7] and (rx % 15) in [5, 6, 7, 8, 9]:
 				TileManager.set_wall_unsafe(x, y, 20)
+			
+			if ry == 3 + 6 and (rx % 15) in [3, 11]:
+				TorchEntity.create(Vector2i(x, y))
