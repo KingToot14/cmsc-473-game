@@ -14,7 +14,7 @@ var ocean_start := 0
 func get_pass_name() -> String:
 	return "Blub Blub"
 
-func perform_pass(gen: WorldGeneration) -> void:
+func perform_pass(_gen: WorldGeneration) -> void:
 	var world_size := Globals.world_size
 	
 	# find left ocean start
