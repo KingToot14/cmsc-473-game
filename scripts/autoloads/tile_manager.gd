@@ -402,8 +402,6 @@ func set_liquid_level(x: int, y: int, liquid_level: int) -> void:
 		return
 	
 	# set liquid level
-	var idx := _idx(x, y)
-	
 	liquid[_idx(x, y)] = liquid_level
 
 ## Gets the liquid level at the given [param x] and [param y] position.
