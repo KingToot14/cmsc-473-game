@@ -10,11 +10,23 @@ var anchored_entities: Dictionary[Vector2i, Array] = {}
 
 var loaded_entities: Dictionary[int, EntityReference] = {}
 
+var enemy_count: Dictionary[int, int] = {}
+
 # --- Functions --- #
 func _ready() -> void:
 	# crawl files to add enemies to the list
 	crawl_registry('res://entities'.path_join('dynamic_entities'), enemy_registry)
 	crawl_registry('res://entities'.path_join('tile_entities'), tile_entity_registry)
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed(&'test_input'):
+		var mouse_pos := Globals.player.get_global_mouse_position()
+		
+		spawn_wizbowo.rpc_id(Globals.SERVER_ID, mouse_pos)
+
+@rpc("any_peer", 'call_remote', 'reliable')
+func spawn_wizbowo(pos: Vector2) -> void:
+	WizbowoEntity.spawn(pos)
 
 func crawl_registry(root_dir: String, registry: Dictionary[int, EntityInfo]) -> void:
 	var entity_dir := DirAccess.open(root_dir)
@@ -69,6 +81,9 @@ func add_entity(registry_id: int, entity: Entity) -> void:
 	if chunk not in anchored_entities:
 		anchored_entities[chunk] = []
 	anchored_entities[chunk].append(entity.id)
+	
+	# update count
+	enemy_count[registry_id] = enemy_count.get(registry_id, 0) + 1
 	
 	# send to interested players
 	var spawn_data := entity.serialize_spawn_data()
@@ -428,6 +443,9 @@ func erase_entity(entity: Entity) -> void:
 		
 		if chunk in anchored_entities:
 			anchored_entities[chunk].erase(entity.id)
+		
+		# remove from count
+		enemy_count[ref.registry_id] = enemy_count.get(ref.registry_id, 0) - 1
 
 func move_dynamic_entity(entity_id: int, prev_chunk: Vector2i, curr_chunk: Vector2i) -> void:
 	# erase old chunk
