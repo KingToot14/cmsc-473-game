@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EntityInfo" format=3 uid="uid://c1gx8yftmkg8o"]
+
+[ext_resource type="PackedScene" uid="uid://c88cxlfdmiteh" path="res://entities/dynamic_entities/5_projectile/projectile.tscn" id="1_0cjrl"]
+[ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_sgjrk"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_j4n3y"]
+[ext_resource type="Script" uid="uid://k5jxn8wdn48j" path="res://entities/dynamic_entities/5_projectile/projectile_entity.gd" id="2_sxakd"]
+
+[resource]
+script = ExtResource("1_sgjrk")
+entity_scene = ExtResource("1_0cjrl")
+entity_script = ExtResource("2_sxakd")
+metadata/_custom_type_script = "uid://d3xw170ysevnd"
