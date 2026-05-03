@@ -104,7 +104,7 @@ texture = ExtResource("11_msnea")
 
 [node name="hitbox" type="Area2D" parent="." unique_id=1190032722 node_paths=PackedStringArray("entity")]
 position = Vector2(0, -8)
-collision_layer = 8
+collision_layer = 16
 collision_mask = 38
 script = ExtResource("12_2i812")
 entity = NodePath("..")

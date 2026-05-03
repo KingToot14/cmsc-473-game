@@ -62,7 +62,8 @@ func do_float() -> void:
 	await float_tween.finished
 	
 	# play action
-	spawn_normal_projectiles()
+	#spawn_normal_projectiles()
+	spawn_homing_projectiles()
 	
 	# wait for delay
 	await get_tree().create_timer(float_delay).timeout
@@ -73,19 +74,49 @@ func do_float() -> void:
 func spawn_normal_projectiles() -> void:
 	# get projectile count
 	var projectiles := 5
+	var iterations := 1
 	
 	if hp.get_hp_percent() <= 0.25:
-		projectiles = 8
+		iterations = 3
 	elif hp.get_hp_percent() <= 0.50:
-		projectiles = 6
+		iterations = 2
 	
 	# get random offset
 	var base_angle := randf_range(0, 2 * PI)
 	
-	for i in range(projectiles):
-		var angle := base_angle + (1.0 * i / projectiles) * 2 * PI
+	for j in range(iterations):
+		for i in range(projectiles):
+			var angle := base_angle + (1.0 * i / projectiles) * 2 * PI
+			
+			ProjectileEntity.spawn_wizbowo(global_position, Vector2(cos(angle), sin(angle)))
 		
-		ProjectileEntity.spawn_wizbowo(global_position, Vector2(cos(angle), sin(angle)))
+		if j < iterations - 1:
+			await get_tree().create_timer(0.10).timeout
+
+func spawn_homing_projectiles() -> void:
+	# get projectile count
+	var projectiles := len(ServerManager.connected_players)
+	var iterations := 1
+	
+	if hp.get_hp_percent() <= 0.25:
+		iterations = 3
+	elif hp.get_hp_percent() <= 0.50:
+		iterations = 2
+	
+	# get random offset
+	var base_angle := randf_range(0, 2 * PI)
+	
+	for j in range(iterations):
+		var i := 0
+		for player_id in ServerManager.connected_players.keys():
+			var angle := base_angle + (1.0 * i / projectiles) * 2 * PI
+			
+			ProjectileEntity.spawn_wizbowo_homing(global_position, Vector2(cos(angle), sin(angle)), player_id)
+			
+			i += 1
+		
+		if j < iterations - 1:
+			await get_tree().create_timer(0.10).timeout
 
 #endregion
 

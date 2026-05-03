@@ -11,6 +11,10 @@ enum ProjectileType {
 var type: ProjectileType
 var direction: Vector2
 var size := Vector2(8, 8)
+var fly_speed: float
+
+var target_id: int
+var homing_speed := 4
 
 # --- Functions --- #
 func _ready() -> void:
@@ -23,28 +27,55 @@ func _ready() -> void:
 		
 		$'damage_source'.dealt_damage.connect(kill)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	# if homing, chase target
+	if target_id > 0:
+		look_at_target(delta)
+	
 	# move collision
 	move_and_slide()
 	
 	# check for tiles
-	check_block(Vector2(global_position.x - size.x / 2, global_position.y - size.y / 2))
-	check_block(Vector2(global_position.x + size.x / 2, global_position.y - size.y / 2))
-	check_block(Vector2(global_position.x - size.x / 2, global_position.y + size.y / 2))
-	check_block(Vector2(global_position.x + size.x / 2, global_position.y + size.y / 2))
+	if check_block(Vector2(global_position.x - size.x / 2, global_position.y - size.y / 2)):
+		return
+	if check_block(Vector2(global_position.x + size.x / 2, global_position.y - size.y / 2)):
+		return
+	if check_block(Vector2(global_position.x - size.x / 2, global_position.y + size.y / 2)):
+		return
+	if check_block(Vector2(global_position.x + size.x / 2, global_position.y + size.y / 2)):
+		return
 
-func check_block(pos: Vector2) -> void:
+func look_at_target(delta: float) -> void:
+	if not is_instance_valid(ServerManager.connected_players.get(target_id)):
+		target_id = 0
+		return
+	
+	var player: PlayerController = ServerManager.connected_players.get(target_id)
+	
+	var curr_dir := velocity.normalized()
+	var target_dir := (player.center_point - global_position).normalized()
+	
+	var new_dir := curr_dir.lerp(target_dir, delta * homing_speed)
+	
+	velocity = new_dir.normalized() * fly_speed
+
+func check_block(pos: Vector2) -> bool:
 	var tile_pos := TileManager.world_to_tile(floori(pos.x), floori(pos.y))
 	
 	if BlockDatabase.is_solid[TileManager.get_block(tile_pos.x, tile_pos.y)]:
 		kill()
+		return true
+	
+	return false
 
 func setup_type() -> void:
 	match type:
 		ProjectileType.WIZBOWO:
-			velocity = direction * 200
+			fly_speed = 200
+			velocity = direction
 		ProjectileType.WIZBOWO_HOMING:
-			velocity = direction * 150
+			fly_speed = 100
+			velocity = direction
 
 #region Damage
 func _on_death() -> void:
@@ -116,7 +147,7 @@ static func spawn_wizbowo(pos: Vector2, dir: Vector2) -> void:
 	# sync to players
 	EntityManager.add_entity(5, entity)
 
-static func spawn_wizbowo_homing(pos: Vector2) -> void:
+static func spawn_wizbowo_homing(pos: Vector2, dir: Vector2, target: int) -> void:
 	# create new item drop entity
 	var entity_scene: PackedScene = EntityManager.enemy_registry.get(5).entity_scene
 	if not entity_scene:
@@ -124,8 +155,10 @@ static func spawn_wizbowo_homing(pos: Vector2) -> void:
 	
 	var entity: ProjectileEntity = entity_scene.instantiate()
 	entity.global_position = pos
+	entity.direction = dir
 	
 	entity.type = ProjectileType.WIZBOWO_HOMING
+	entity.target_id = target
 	
 	# start entity logic
 	entity.setup_type()
