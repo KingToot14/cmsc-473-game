@@ -3,8 +3,15 @@ extends Entity
 
 # --- Variables --- #
 @export var float_time := 2.0
-@export var float_range := 4.0
+@export var float_delay := 2.0
+@export var float_range := 40.0
+var float_tween: Tween
+var float_pos: Vector2
+
+@export var idle_time := 0.50
+@export var idle_range := 2.0
 var idle_tween: Tween
+var idle_pos: Vector2
 
 var origin_pos: Vector2
 
@@ -18,25 +25,43 @@ func _ready() -> void:
 		hp.died.connect(_on_death)
 		
 		do_idle()
+		do_float()
 
-func _physics_process(delta: float) -> void:
-	pass
+func _physics_process(_delta: float) -> void:
+	global_position = float_pos + idle_pos
 
 func do_idle() -> void:
 	idle_tween = create_tween()
 	
-	var target_pos := origin_pos + Vector2(
+	var target_pos := Vector2(
 		randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)
-	).normalized() * float_range
+	).normalized() * idle_range
 	
 	idle_tween.tween_property(
-		self, ^'global_position', target_pos,
-		target_pos.distance_to(origin_pos) / float_range * float_time
+		self, ^'idle_pos', target_pos,
+		target_pos.distance_to(idle_pos) / idle_range * idle_time
 	)
 	
 	await idle_tween.finished
 	
 	do_idle()
+
+func do_float() -> void:
+	float_tween = create_tween()
+	
+	var target_pos := origin_pos + Vector2(
+		randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)
+	).normalized() * float_range
+	
+	float_tween.tween_property(
+		self, ^'float_pos', target_pos,
+		target_pos.distance_to(float_pos) / float_range * float_time
+	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	
+	await float_tween.finished
+	await get_tree().create_timer(float_delay).timeout
+	
+	do_float()
 
 #region Damage
 func _on_death() -> void:
@@ -60,7 +85,8 @@ func do_death() -> void:
 		# spawn items
 		#ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
 	else:
-		$'animator'.play(&'death')
+		queue_free()
+		#$'animator'.play(&'death')
 
 #endregion
 
@@ -116,6 +142,7 @@ static func spawn(pos: Vector2) -> void:
 	var entity: WizbowoEntity = entity_scene.instantiate()
 	entity.global_position = pos
 	entity.origin_pos = pos
+	entity.float_pos = pos
 	
 	# sync to players
 	EntityManager.add_entity(4, entity)
