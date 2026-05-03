@@ -1,0 +1,127 @@
+[gd_scene format=3 uid="uid://c88cxlfdmiteh"]
+
+[ext_resource type="Script" uid="uid://k5jxn8wdn48j" path="res://entities/dynamic_entities/5_projectile/projectile_entity.gd" id="1_msnea"]
+[ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_uqsbj"]
+[ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="3_cymbj"]
+[ext_resource type="AudioStream" uid="uid://jqlla25j2vok" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_death.wav" id="4_mjxsp"]
+[ext_resource type="AudioStream" uid="uid://dsweg4fen4v1i" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_hit.tres" id="5_6di0o"]
+[ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="6_koy53"]
+[ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="7_rs0n3"]
+[ext_resource type="AudioStream" uid="uid://dkawjs4hviwao" path="res://entities/dynamic_entities/1_basic-slime/sfx/poof.wav" id="8_swv40"]
+[ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="9_fa0c5"]
+[ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="10_xhrv8"]
+[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="11_msnea"]
+[ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/combat/entity_hitbox.gd" id="12_2i812"]
+[ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/combat/entity_damage_source.gd" id="13_loynp"]
+
+[sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_uf6bv"]
+
+[sub_resource type="Animation" id="Animation_l7c8k"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sprite:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_w31l7"]
+_data = {
+&"RESET": SubResource("Animation_l7c8k")
+}
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3c0lo"]
+resource_local_to_scene = true
+shader = ExtResource("10_xhrv8")
+shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/intensity = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_msnea"]
+radius = 5.0
+
+[node name="projectile" type="CharacterBody2D" unique_id=1169802262 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 20
+collision_layer = 8
+script = ExtResource("1_msnea")
+interpolator = NodePath("snapshot_interpolator")
+hp = NodePath("hp")
+damage = 10
+metadata/_custom_type_script = "uid://k5jxn8wdn48j"
+
+[node name="snapshot_interpolator" type="Node" parent="." unique_id=1915169893 node_paths=PackedStringArray("root")]
+script = ExtResource("2_uqsbj")
+root = NodePath("..")
+metadata/_custom_type_script = "uid://bsbf482xfcwg4"
+
+[node name="sfx" type="AudioStreamPlayer2D" parent="." unique_id=2078268598]
+stream = SubResource("AudioStreamPolyphonic_uf6bv")
+volume_db = -3.0
+autoplay = true
+max_distance = 832.0
+attenuation = 3.0
+max_polyphony = 2
+script = ExtResource("3_cymbj")
+sound_effects = Dictionary[StringName, AudioStream]({
+&"death": ExtResource("4_mjxsp"),
+&"hit": ExtResource("5_6di0o"),
+&"jump": ExtResource("6_koy53"),
+&"land": ExtResource("7_rs0n3"),
+&"poof": ExtResource("8_swv40")
+})
+metadata/_custom_type_script = "uid://bnhkrhfegsuwg"
+
+[node name="animator" type="AnimationPlayer" parent="." unique_id=434060783]
+libraries/ = SubResource("AnimationLibrary_w31l7")
+autoplay = &"idle"
+
+[node name="hp" type="Node" parent="." unique_id=467563670 node_paths=PackedStringArray("entity")]
+script = ExtResource("9_fa0c5")
+entity = NodePath("..")
+max_hp = 1
+metadata/_custom_type_script = "uid://b7qi6go1ayr26"
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=997491779]
+material = SubResource("ShaderMaterial_3c0lo")
+texture = ExtResource("11_msnea")
+
+[node name="hitbox" type="Area2D" parent="." unique_id=1190032722 node_paths=PackedStringArray("entity")]
+position = Vector2(0, -8)
+collision_layer = 8
+collision_mask = 38
+script = ExtResource("12_2i812")
+entity = NodePath("..")
+
+[node name="shape" type="CollisionShape2D" parent="hitbox" unique_id=1318872750]
+position = Vector2(0, 8)
+shape = SubResource("CircleShape2D_msnea")
+debug_color = Color(0.7, 0, 0, 0.41960785)
+
+[node name="damage_source" type="Area2D" parent="." unique_id=1588250450 node_paths=PackedStringArray("entity")]
+collision_layer = 16
+collision_mask = 6
+script = ExtResource("13_loynp")
+entity = NodePath("..")
+source_type = 0
+metadata/_custom_type_script = "uid://4bwchbw40ctn"
+
+[node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=1132958912]
+shape = SubResource("CircleShape2D_msnea")
+debug_color = Color(0.7, 0, 0, 0.41960785)

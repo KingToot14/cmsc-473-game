@@ -58,7 +58,16 @@ func do_float() -> void:
 		target_pos.distance_to(float_pos) / float_range * float_time
 	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	
+	# wait for tween to finish
 	await float_tween.finished
+	
+	# play action
+	ProjectileEntity.spawn_wizbowo(global_position, Vector2(-1,  0))
+	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 1,  0))
+	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 0, -1))
+	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 0,  1))
+	
+	# wait for delay
 	await get_tree().create_timer(float_delay).timeout
 	
 	do_float()

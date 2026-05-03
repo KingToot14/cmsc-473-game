@@ -59,6 +59,8 @@ height = 72.0
 
 [node name="wizbowo" type="CharacterBody2D" unique_id=1418659286 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 20
+collision_layer = 8
+collision_mask = 2
 script = ExtResource("1_3i2uy")
 float_range = 64.0
 interpolator = NodePath("snapshot_interpolator")
