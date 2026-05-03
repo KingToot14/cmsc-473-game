@@ -62,15 +62,32 @@ func do_float() -> void:
 	await float_tween.finished
 	
 	# play action
-	ProjectileEntity.spawn_wizbowo(global_position, Vector2(-1,  0))
-	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 1,  0))
-	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 0, -1))
-	ProjectileEntity.spawn_wizbowo(global_position, Vector2( 0,  1))
+	spawn_normal_projectiles()
 	
 	# wait for delay
 	await get_tree().create_timer(float_delay).timeout
 	
 	do_float()
+
+#region Attacks
+func spawn_normal_projectiles() -> void:
+	# get projectile count
+	var projectiles := 5
+	
+	if hp.get_hp_percent() <= 0.25:
+		projectiles = 8
+	elif hp.get_hp_percent() <= 0.50:
+		projectiles = 6
+	
+	# get random offset
+	var base_angle := randf_range(0, 2 * PI)
+	
+	for i in range(projectiles):
+		var angle := base_angle + (1.0 * i / projectiles) * 2 * PI
+		
+		ProjectileEntity.spawn_wizbowo(global_position, Vector2(cos(angle), sin(angle)))
+
+#endregion
 
 #region Damage
 func _on_death() -> void:
