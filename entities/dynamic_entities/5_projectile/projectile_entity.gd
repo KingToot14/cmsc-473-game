@@ -8,6 +8,9 @@ enum ProjectileType {
 }
 
 # --- Variables --- #
+@export var projectile_sprites: Dictionary[ProjectileType, Texture2D] = {}
+@export var trail_sprites: Dictionary[ProjectileType, Texture2D] = {}
+
 var type: ProjectileType
 var direction: Vector2
 var size := Vector2(8, 8)
@@ -69,6 +72,9 @@ func check_block(pos: Vector2) -> bool:
 	return false
 
 func setup_type() -> void:
+	$'sprite'.texture = projectile_sprites[type]
+	$'trail'.texture = trail_sprites[type]
+	
 	match type:
 		ProjectileType.WIZBOWO:
 			fly_speed = 200

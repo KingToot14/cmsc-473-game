@@ -3,16 +3,27 @@
 [ext_resource type="Script" uid="uid://k5jxn8wdn48j" path="res://entities/dynamic_entities/5_projectile/projectile_entity.gd" id="1_msnea"]
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="2_uqsbj"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="3_cymbj"]
+[ext_resource type="Texture2D" uid="uid://bsmij1w3xa4ol" path="res://entities/dynamic_entities/4_wizbowo/projectiles_homing.png" id="3_rnc7q"]
 [ext_resource type="AudioStream" uid="uid://jqlla25j2vok" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_death.wav" id="4_mjxsp"]
 [ext_resource type="AudioStream" uid="uid://dsweg4fen4v1i" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_hit.tres" id="5_6di0o"]
+[ext_resource type="Texture2D" uid="uid://yuoidnqw3w7d" path="res://entities/dynamic_entities/4_wizbowo/particles_homing.png" id="5_vvunl"]
 [ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="6_koy53"]
 [ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="7_rs0n3"]
 [ext_resource type="AudioStream" uid="uid://dkawjs4hviwao" path="res://entities/dynamic_entities/1_basic-slime/sfx/poof.wav" id="8_swv40"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="9_fa0c5"]
 [ext_resource type="Shader" uid="uid://iesq422mwvmm" path="res://entities/_resources/flash.gdshader" id="10_xhrv8"]
-[ext_resource type="Texture2D" uid="uid://bm5ijv5anwdvm" path="res://blocks/1_grass/icon.png" id="11_msnea"]
+[ext_resource type="Texture2D" uid="uid://brijfuhkrk47u" path="res://entities/dynamic_entities/4_wizbowo/projectiles_normal.png" id="11_loynp"]
 [ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/combat/entity_hitbox.gd" id="12_2i812"]
+[ext_resource type="Texture2D" uid="uid://s7aq4txsoe4t" path="res://entities/dynamic_entities/4_wizbowo/particles_normal.png" id="12_d5hyf"]
 [ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/combat/entity_damage_source.gd" id="13_loynp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d5hyf"]
+atlas = ExtResource("12_d5hyf")
+region = Rect2(0, 0, 4, 4)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vvunl"]
+atlas = ExtResource("5_vvunl")
+region = Rect2(0, 0, 4, 4)
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_uf6bv"]
 
@@ -48,6 +59,33 @@ _data = {
 &"RESET": SubResource("Animation_l7c8k")
 }
 
+[sub_resource type="Curve" id="Curve_vvunl"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_o11jp"]
+curve = SubResource("Curve_vvunl")
+
+[sub_resource type="Curve" id="Curve_d5hyf"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.30463576, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_vvunl"]
+curve = SubResource("Curve_d5hyf")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_d5hyf"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 4.0
+direction = Vector3(0, 0, 0)
+angular_velocity_min = 99.999985
+angular_velocity_max = 359.99997
+gravity = Vector3(0, 0, 0)
+tangential_accel_min = -26.460001
+tangential_accel_max = 26.449997
+scale_curve = SubResource("CurveTexture_vvunl")
+alpha_curve = SubResource("CurveTexture_o11jp")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3c0lo"]
 resource_local_to_scene = true
 shader = ExtResource("10_xhrv8")
@@ -61,6 +99,14 @@ radius = 5.0
 z_index = 20
 collision_layer = 8
 script = ExtResource("1_msnea")
+projectile_sprites = Dictionary[int, Texture2D]({
+0: ExtResource("11_loynp"),
+1: ExtResource("3_rnc7q")
+})
+trail_sprites = Dictionary[int, Texture2D]({
+0: SubResource("AtlasTexture_d5hyf"),
+1: SubResource("AtlasTexture_vvunl")
+})
 interpolator = NodePath("snapshot_interpolator")
 hp = NodePath("hp")
 damage = 10
@@ -98,9 +144,14 @@ entity = NodePath("..")
 max_hp = 1
 metadata/_custom_type_script = "uid://b7qi6go1ayr26"
 
+[node name="trail" type="GPUParticles2D" parent="." unique_id=1409641612]
+amount = 32
+texture = SubResource("AtlasTexture_d5hyf")
+process_material = SubResource("ParticleProcessMaterial_d5hyf")
+
 [node name="sprite" type="Sprite2D" parent="." unique_id=997491779]
 material = SubResource("ShaderMaterial_3c0lo")
-texture = ExtResource("11_msnea")
+texture = ExtResource("11_loynp")
 
 [node name="hitbox" type="Area2D" parent="." unique_id=1190032722 node_paths=PackedStringArray("entity")]
 position = Vector2(0, -8)
