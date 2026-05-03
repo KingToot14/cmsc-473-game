@@ -62,8 +62,10 @@ func do_float() -> void:
 	await float_tween.finished
 	
 	# play action
-	#spawn_normal_projectiles()
-	spawn_homing_projectiles()
+	if randf() < 0.50:
+		spawn_normal_projectiles()
+	else:
+		spawn_homing_projectiles()
 	
 	# wait for delay
 	await get_tree().create_timer(float_delay).timeout
