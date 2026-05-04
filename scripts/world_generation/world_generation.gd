@@ -106,9 +106,9 @@ func generate_world() -> void:
 	await run_pass(SpawnPass.new())
 	
 	# add tiles that need updates to the queue
-	#await run_pass(SettlePass.new())
-	#await run_pass(LightPass.new())
-	#await run_pass(ActivationPass.new())
+	await run_pass(SettlePass.new())
+	await run_pass(LightPass.new())
+	await run_pass(ActivationPass.new())
 	
 	# start block updates
 	Globals.block_updater.set_physics_process(true)
