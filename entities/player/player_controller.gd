@@ -53,6 +53,8 @@ var camera_point: Vector2:
 ## How high the player jumps when they perform a jump. Sets [member base_velocity.y]
 @export var jump_power := 350.0
 
+var needs_respawn := false
+
 var is_grounded := false
 
 ## How quickly the player accelerates towards the ground in [code]pixels/second[/cdoe]
@@ -147,8 +149,9 @@ func _ready() -> void:
 	if owner_id != multiplayer.get_unique_id():
 		interpolator.enabled = true
 		
-		# disable inventory ui
+		# disable UI for remote players
 		$'inventory_ui'.queue_free()
+		$'health_ui'.queue_free()
 		
 		# disable overlays
 		$'grid_overlay'.hide()
@@ -166,11 +169,13 @@ func _ready() -> void:
 		$inventory_ui/inventory_container.hide()
 		$inventory_ui/crafting_container.hide()
 		
-		# Initialize the UI via the script on the container
+		# Initialize the UIs
 		$inventory_ui/inventory_container.setup_ui(my_inventory)
+		$'health_ui'.setup_ui(hp)
 	
 	if multiplayer.is_server():
 		setup_save_timer()
+		hp.died.connect(_on_player_died)
 	
 	#connect armor signal
 	my_inventory.armor_updated.connect(_on_armor_updated)
@@ -277,15 +282,24 @@ func set_free_cam_mode(mode: bool) -> void:
 	$'shape'.disabled = free_cam_mode
 	z_index = 500 if mode else 25
 
+
 ## Run a rollback-friendly tick
 func _rollback_tick(delta, _tick, _is_fresh) -> void:
-	# update knockback (rollback-friendly)
+	
+	if needs_respawn:
+		var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
+		global_position = world_position
+		velocity = Vector2.ZERO
+		base_velocity = Vector2.ZERO
+		knockback_velocity = Vector2.ZERO
+		pending_knockback = Vector2.ZERO
+		needs_respawn = false
+		
 	if pending_knockback != Vector2.ZERO:
 		knockback_velocity = pending_knockback
 		base_velocity = Vector2.ZERO
 		pending_knockback = Vector2.ZERO
 	
-	# apply input if active
 	if active:
 		apply_input(delta)
 
@@ -487,6 +501,35 @@ func update_is_on_floor() -> void:
 
 #endregion
 
+#region Death and Respawn
+
+func _on_player_died() -> void:
+	print("Player ", db_id, " died! Respawning...")
+	# tell all clients to run the respawn logic
+	do_respawn.rpc()
+
+@rpc('authority', 'call_local', 'reliable')
+func do_respawn() -> void:
+	# restore Health 
+	hp.set_hp(hp.max_hp)
+	needs_respawn=true
+	
+	# reset Position to World Spawn
+	var world_position := TileManager.tile_to_world(Globals.world_spawn.x, Globals.world_spawn.y)
+	global_position = world_position
+	
+	#kill any leftover momentum so they don't spawn flying
+	velocity = Vector2.ZERO
+	base_velocity = Vector2.ZERO
+	knockback_velocity = Vector2.ZERO
+	pending_knockback = Vector2.ZERO
+	
+	#play a respawn sound for the local player
+	if owner_id == multiplayer.get_unique_id():
+		pass
+
+#endregion
+
 #region Loading
 ## The [ChunkLoader] has loaded and autotiled the initial region of tiles.
 ## [br]Enables input, the camera, and sets the camera bounds
@@ -500,7 +543,7 @@ func done_initial_load() -> void:
 	Globals.join_ui.hide()
 	
 	if multiplayer.is_server():
-		my_inventory.load_inventory()
+		my_inventory.load_inventory(db_id)
 	else:
 		# update game state
 		Globals.set_game_state(Globals.GameState.IN_GAME)
@@ -536,7 +579,7 @@ func remove_interest(entity_id: int) -> void:
 func setup_save_timer():
 	var timer = Timer.new()
 	timer.name = "SaveTimer"
-	timer.wait_time = 300.0 # 5 minutes
+	timer.wait_time = 10.0 # 10 seconds
 	timer.autostart = true
 	timer.timeout.connect(_on_save_timer_timeout)
 	add_child(timer)
@@ -546,11 +589,18 @@ func _on_save_timer_timeout():
 	if not multiplayer.is_server():
 		return
 		
-	print("Auto-saving inventory for player: ", owner_id)
+	print("Auto-saving inventory for player DB_ID: ", db_id)
 	
-	#save inventory to database using the database manager 
+	# save inventory to database using the database manager 
 	var data = my_inventory.get_save_data()
-	DatabaseManager.save_inventory(owner_id, data)
+	DatabaseManager.save_inventory(db_id, data)
+
+func _exit_tree() -> void:
+	# Only the server should be allowed to save to the database
+	if multiplayer and multiplayer.is_server():
+		print("Player disconnecting. Saving inventory for DB_ID: ", db_id)
+		var data = my_inventory.get_save_data()
+		DatabaseManager.save_inventory(db_id, data)
 
 #region Helper Functions
 ## Returns whether or not [param point] is in range of this player.

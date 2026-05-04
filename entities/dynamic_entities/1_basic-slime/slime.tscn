@@ -265,6 +265,7 @@ interpolator = NodePath("snapshot_interpolator")
 hp = NodePath("hp")
 flash_material = SubResource("ShaderMaterial_515sv")
 knockback_power = 400.0
+damage = 10
 metadata/_custom_type_script = "uid://cqsofxynpllnt"
 
 [node name="snapshot_interpolator" type="Node" parent="." unique_id=1558705634 node_paths=PackedStringArray("root")]
@@ -328,6 +329,7 @@ collision_mask = 2
 script = ExtResource("11_72hbc")
 entity = NodePath("..")
 source_type = 0
+damage = 10
 metadata/_custom_type_script = "uid://4bwchbw40ctn"
 
 [node name="shape" type="CollisionShape2D" parent="damage_source" unique_id=1528058351]

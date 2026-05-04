@@ -14,7 +14,7 @@ var _is_first_load := true
 var _can_play_sounds := false
 var owner_id := 0
 #Crafting Stuff
-var recipes: Array[Recipe] = [] #add more recipes in the inspector
+var recipes: Array[Recipe] = []
 var _is_crafting := false
 
 #Armor Stuff
@@ -274,33 +274,80 @@ func remove_item_at(item_id: int, count: int, slot: int) -> void:
 	
 	inventory_updated.emit()
 
-func load_inventory() -> void:
-	# TODO: fetch inventory from database
-	# if database entry not available, setup standard inventory
-	add_item(6, 1)		# wooden sword
-	add_item(7, 1) 		# wooden pickaxe
-	add_item(9, 1)		# wooden hammer
-	add_item(10, 1)		# wooden axe
-	add_item(3, 30)		# dirt blocks
-	add_item(24, 4)		# chests
-	add_item(28, 20)	# torches
-	add_item(89, 30)	# oak platforms
-	add_item(46, 1)		# wooden helmet
-	add_item(48, 1)		# wooden chestplate
-	add_item(47, 1)		# wooden leggings
-	add_item(99, 1)		# furnace
-	
-	add_item(16, 10)	# copper ore
-	
-	add_item(100, 1)	# crafting station
-	
-	add_item(0, 9999)	# oak wood
-	add_item(54, 9999)	# spruce wood
-	add_item(56, 9999)	# palm wood
-	add_item(95, 9999)	# copper bar
-	add_item(96, 9999)	# iron bar
-	add_item(97, 9999)	# silver bar
-	add_item(98, 9999)	# gold bar
+func load_inventory(db_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+
+	var data = DatabaseManager.load_inventory(db_id)
+
+	# 1. Clear current inventory to ensure it's empty
+	for stack in items:
+		stack.item_id = -1
+		stack.count = 0
+	for stack in armor_items:
+		stack.item_id = -1
+		stack.count = 0
+	held_item.item_id = -1
+	held_item.count = 0
+
+	# 2. Check if this is a brand new player (inventory is totally empty)
+	if data["main_inventory"].is_empty() and data["armor_inventory"].is_empty() and data["held_item"] == null:
+		# Directly assign the starter items to the first 4 slots
+		items[0].item_id = 6   # wooden sword
+		items[0].count = 1
+		items[1].item_id = 7   # wooden pickaxe
+		items[1].count = 1
+		items[2].item_id = 10  # wooden axe
+		items[2].count = 1
+		items[3].item_id = 9   # wooden hammer
+		items[3].count = 1
+	else:
+		# 3. Populate Main Inventory from Database
+		for item_data in data["main_inventory"]:
+			var index = item_data["index"]
+			if index >= 0 and index < items.size():
+				items[index].item_id = item_data["id"]
+				items[index].count = item_data["qty"]
+
+		# 4. Populate Armor Inventory from Database
+		if data.has("armor_inventory"):
+			for item_data in data["armor_inventory"]:
+				var index = item_data["index"]
+				if index >= 0 and index < armor_items.size():
+					armor_items[index].item_id = item_data["id"]
+					armor_items[index].count = item_data["qty"]
+
+		# 5. Populate Held Item from Database
+		if data.has("held_item") and data["held_item"] != null:
+			held_item.item_id = data["held_item"]["id"]
+			held_item.count = data["held_item"]["qty"]
+
+	# 6. Send updated inventory payload to the connected client
+	send_inventory()
+
+#func load_inventory() -> void:
+	## TODO: fetch inventory from database
+	## if database entry not available, setup standard inventory
+	#add_item(3, 30)		# dirt blocks
+	#add_item(24, 4)		# chests
+	#add_item(28, 20)	# torches
+	#add_item(89, 30)	# oak platforms
+	#add_item(46, 1)		# wooden helmet
+	#add_item(48, 1)		# wooden chestplate
+	#add_item(47, 1)		# wooden leggings
+	#add_item(99, 1)		# furnace
+	#
+	#add_item(16, 10)	# copper ore
+	#
+	#add_item(100, 1)	# crafting station
+	#
+	#add_item(0, 9999)	# oak wood
+	#add_item(54, 9999)	# spruce wood
+	#add_item(56, 9999)	# palm wood
+	#add_item(95, 9999)	# copper bar
+	#add_item(96, 9999)	# iron bar
+	#add_item(97, 9999)	# silver bar
+	#add_item(98, 9999)	# gold bar
 
 #endregion
 

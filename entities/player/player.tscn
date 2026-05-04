@@ -52,6 +52,7 @@
 [ext_resource type="Script" uid="uid://bqfrnq3pfjlia" path="res://entities/player/pause_menu.gd" id="49_ssgi7"]
 [ext_resource type="Script" uid="uid://c0dvc7i0d5g6j" path="res://entities/player/sounds_menu.gd" id="49_u37te"]
 [ext_resource type="Theme" uid="uid://igfgek6hqx3a" path="res://sounds_menu_sliders_theme.tres" id="50_rtlkk"]
+[ext_resource type="PackedScene" uid="uid://dqvgo34jvp30d" path="res://health_ui.tscn" id="53_arp52"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_ghoj8"]
 
@@ -1631,3 +1632,5 @@ offset_bottom = 130.0
 
 [node name="bus_vbox" type="VBoxContainer" parent="pause_menu/sounds_menu_panel/ScrollContainer" unique_id=1145929027]
 layout_mode = 2
+
+[node name="health_ui" parent="." unique_id=1711213525 instance=ExtResource("53_arp52")]
