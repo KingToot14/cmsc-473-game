@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="10_w5gtr"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="11_0iolv"]
 [ext_resource type="AudioStream" uid="uid://jqlla25j2vok" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_death.wav" id="12_ie1hh"]
+[ext_resource type="Texture2D" uid="uid://c4hbodvu4tbyi" path="res://entities/player/main_upper.png" id="12_p5x0e"]
 [ext_resource type="AudioStream" uid="uid://dsweg4fen4v1i" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_hit.tres" id="13_8f2ak"]
 [ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="14_gjd0n"]
 [ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="15_8jdm2"]
@@ -241,6 +242,7 @@ shader_parameter/intensity = 0.0
 size = Vector2(12, 25)
 
 [node name="zombie" type="CharacterBody2D" unique_id=228233111 node_paths=PackedStringArray("interpolator", "hp")]
+z_index = 15
 script = ExtResource("1_oc5ln")
 variant_normal_texture = ExtResource("18_vdyhl")
 interpolator = NodePath("snapshot_interpolator")
@@ -285,7 +287,7 @@ shape = SubResource("RectangleShape2D_hpqhm")
 [node name="sprite" type="Sprite2D" parent="." unique_id=789913785]
 material = SubResource("ShaderMaterial_3votx")
 position = Vector2(0, -7)
-texture = ExtResource("18_vdyhl")
+texture = ExtResource("12_p5x0e")
 hframes = 8
 vframes = 3
 

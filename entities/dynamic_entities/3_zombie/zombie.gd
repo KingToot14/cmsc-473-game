@@ -12,7 +12,7 @@ const LAND_ACTION := 17
 
 const JUMP_POWER_TINY := 0.35
 const JUMP_POWER_SMALL := 0.50
-const JUMP_POWER_LARGE := 1.50
+const JUMP_POWER_LARGE := 3.0
 const JUMP_MODIFIER_ODDS := 0.10
 
 @export_group("Jumps", "jump_")
@@ -22,8 +22,6 @@ const JUMP_MODIFIER_ODDS := 0.10
 @export var jump_power_base := 300.0
 @export var jump_power_variance := 100.0
 
-@export var jump_wait_base := 2.0
-@export var jump_wait_variance := 3.0
 
 @export_group("Movement", "move_")
 @export var move_power_base := 100.0
@@ -42,9 +40,10 @@ var variant := ZombieVariant.NORMAL
 
 var target_player: PlayerController
 
+
 var travel_direction := -1.0
 var jump_remaining := 0
-var jump_timer := 0.0
+
 var jump_velocity: Vector2
 var airborne := false
 
@@ -61,6 +60,9 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		hp.died.connect(_on_death)
+		
+	# set target if not already set
+
 
 func _physics_process(delta: float) -> void:
 	# check water
@@ -90,25 +92,30 @@ func _physics_process(delta: float) -> void:
 		hp.take_damage(1, DamageSource.DamageSourceType.WORLD)
 	
 	get_travel_direction(delta)
-	try_jump(delta)
+	# walk towards player
+	if is_on_floor():
+		velocity.x = move_power_base * travel_direction
+		if is_on_wall():
+			try_jump(delta)
+	
+	# gravity
+	velocity.y += gravity * delta
+	velocity.y = clampf(velocity.y, -terminal_velocity, terminal_velocity)
+	
+	move_and_slide()
 	
 	# gravity
 	if not is_on_floor():
 		velocity.x = jump_velocity.x
 	
-	velocity.y += gravity * delta
-	
 	# buoyancy
 	if in_water:
 		velocity.y -= buoyancy * delta
-	
-	velocity.y = clampf(velocity.y, -terminal_velocity, terminal_velocity)
-	
-	# movement
-	move_and_slide()
+
 	
 	# snap to floor
 	if is_on_floor():
+		
 		if airborne:
 			send_action_basic(LAND_ACTION)
 		
@@ -120,13 +127,27 @@ func get_travel_direction(delta: float) -> void:
 	if not multiplayer.is_server():
 		return
 	
+	#tries to find nearest player if no target
+	if not is_instance_valid(target_player):
+		var nearest_distance := INF
+		#nearest distance is set to infinity at first.
+		for player in ServerManager.connected_players.values():
+			#searches through all the players and  finds the closest one.
+			var distance := global_position.distance_squared_to(player.global_position)
+			#grabs position of player in for loop
+			if distance < nearest_distance:
+				#if the player is closer than the 'nearest distance'
+				nearest_distance = distance
+				target_player = player
+				#target player becomes this player as they are closer.
+	
 	# jump towards target player
 	if is_instance_valid(target_player):
 		var distance: Vector2 = target_player.center_point - global_position
 		
 		travel_direction += delta * signf(distance.x)
 		travel_direction = clampf(travel_direction, -1.0, 1.0)
-	# if no target, jump randomly
+	# if no target, move randomly
 	elif jump_remaining <= 0:
 		travel_direction = -travel_direction
 		jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
@@ -139,37 +160,30 @@ func try_jump(delta: float) -> void:
 	
 	# try to jump
 	if is_on_floor():
-		jump_timer -= delta
 		
-		if jump_timer <= 0:
-			jump_timer = jump_wait_base + randf_range(0, jump_wait_variance)
-			jump_remaining -= 1
+		jump_remaining -= 1
 			
-			# set velocity
-			jump_velocity.x =  (move_power_base + randf_range(0, move_power_variance)) * travel_direction
-			jump_velocity.y = -(jump_power_base + randf_range(0, jump_power_variance))
+		# set velocity
+		jump_velocity.x =  (move_power_base + randf_range(0, move_power_variance)) * travel_direction
+		jump_velocity.y = -(jump_power_base + randf_range(0, jump_power_variance))
 			
-			if is_instance_valid(target_player):
-				var distance = global_position.distance_squared_to(target_player.global_position)
-				
-				if distance < (4 * TileManager.TILE_SIZE)**2:
-					jump_velocity.y *= JUMP_POWER_TINY
-				elif distance < (12 * TileManager.TILE_SIZE)**2:
-					jump_velocity.y *= JUMP_POWER_SMALL
-				if distance > (20 * TileManager.TILE_SIZE)**2:
-					jump_velocity.y *= JUMP_POWER_LARGE
-			else:
-				var roll: float = randf()
+		if is_instance_valid(target_player):
+			#var distance = global_position.distance_squared_to(target_player.global_position)
+			#unneeded distance code
+			jump_velocity.y *= JUMP_POWER_LARGE
+		else:
+			var roll: float = randf()
+			#randf() returns a value between 0 and 1.0
 				
 				# random chance to perform a small jump
-				if roll < JUMP_MODIFIER_ODDS:
-					jump_velocity.y *= JUMP_POWER_SMALL
+			if roll < JUMP_MODIFIER_ODDS:
+				jump_velocity.y *= JUMP_POWER_SMALL
 				# random chance to perform a large jump (if not a small jump)
-				elif randf() < JUMP_MODIFIER_ODDS * 2.0:
-					jump_velocity.y *= JUMP_POWER_LARGE
+			elif randf() < JUMP_MODIFIER_ODDS * 2.0:
+				jump_velocity.y *= JUMP_POWER_LARGE
 			
-			$'animator'.play(&'jump')
-			send_action_basic(JUMP_ACTION)
+		$'animator'.play(&'jump')
+		send_action_basic(JUMP_ACTION)
 
 func apply_jump() -> void:
 	velocity = jump_velocity
@@ -231,8 +245,6 @@ func setup_variant() -> void:
 	
 	# set initial direction
 	travel_direction = 1 if randf() < 0.50 else -1
-	jump_remaining = jump_per_direction_base + randi_range(0, jump_per_direction_variance)
-	jump_timer = jump_wait_base + randf_range(0, jump_wait_variance)
 
 func handle_action(action_info: PackedByteArray) -> void:
 	super(action_info)
@@ -281,6 +293,7 @@ func deserialize_spawn_data(buffer: StreamPeerBuffer) -> void:
 	
 	# variant
 	variant = buffer.get_u16() as ZombieVariant
+	print("deserialize called, variant: ", variant)
 	
 	setup_variant()
 
