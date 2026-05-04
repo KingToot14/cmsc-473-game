@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dqvgo34jvp30d"]
+
+[ext_resource type="Script" uid="uid://ctrlx25kvx83v" path="res://health_ui.gd" id="1_tt5l4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_auvdd"]
+bg_color = Color(0.1349042, 0.66174066, 0.2576725, 1)
+
+[node name="health_ui" type="CanvasLayer" unique_id=1711213525]
+script = ExtResource("1_tt5l4")
+
+[node name="health_bar" type="ProgressBar" parent="." unique_id=676827292]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -48.0
+offset_bottom = 6.0
+grow_horizontal = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_auvdd")
+show_percentage = false

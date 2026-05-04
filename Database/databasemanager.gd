@@ -57,16 +57,20 @@ func create_account(username: String, password: String) -> void:
 	var hashed = hash_password(password)
 
 	var success = db.query("""
-        INSERT INTO users (username, password_hash)
-        VALUES ('%s', '%s');
+		INSERT INTO users (username, password_hash)
+		VALUES ('%s', '%s');
 	""" % [username, hashed])
 
 	var new_id := -1
-	var results := db.query_result
 
-	if success and len(results) > 0:
-		new_id = results[0]['id']
-	
+	# USE THIS INSTEAD OF query_result!
+	if success:
+		new_id = db.last_insert_rowid
+
+	# If it failed (e.g. username taken), abort
+	if new_id == -1:
+		create_account_result.rpc_id(multiplayer.get_remote_sender_id(), -1)
+		return
 
 	# Send result back to the client who requested it
 	var peer_id = multiplayer.get_remote_sender_id()
@@ -166,30 +170,42 @@ func save_inventory(player_id: int, inventory_data: Dictionary):
 	if not multiplayer.is_server():
 		return
 
-	# clear old entries for this player to prevent duplicates
-	db.query("DELETE FROM inventory WHERE player_id = %d;" % player_id)
+	# Clear old entries using the built-in delete function to prevent duplicates
+	db.delete_rows("inventory", "player_id = " + str(player_id))
 
-	# Save Main Inventory
+	# Save Main Inventory using dictionary inserts
 	for item in inventory_data["main_inventory"]:
-		db.query("""
-			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
-			VALUES (%d, %d, %d, %d, 'main');
-		""" % [player_id, item["id"], item["qty"], item["index"]])
+		var row_data = {
+			"player_id": player_id,
+			"item_id": item["id"],
+			"quantity": item["qty"],
+			"slot_index": item["index"],
+			"slot_type": "main"
+		}
+		db.insert_row("inventory", row_data)
 		
 	# Save Armor Inventory
 	for item in inventory_data["armor_inventory"]:
-		db.query("""
-			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
-			VALUES (%d, %d, %d, %d, 'armor');
-		""" % [player_id, item["id"], item["qty"], item["index"]])
+		var row_data = {
+			"player_id": player_id,
+			"item_id": item["id"],
+			"quantity": item["qty"],
+			"slot_index": item["index"],
+			"slot_type": "armor"
+		}
+		db.insert_row("inventory", row_data)
 		
 	# Save Held Item
 	if inventory_data["held_item"] != null:
 		var h_item = inventory_data["held_item"]
-		db.query("""
-			INSERT INTO inventory (player_id, item_id, quantity, slot_index, slot_type)
-			VALUES (%d, %d, %d, -1, 'held');
-		""" % [player_id, h_item["id"], h_item["qty"]])
+		var row_data = {
+			"player_id": player_id,
+			"item_id": h_item["id"],
+			"quantity": h_item["qty"],
+			"slot_index": -1,
+			"slot_type": "held"
+		}
+		db.insert_row("inventory", row_data)
 
 # LOAD INVENTORY (SERVER ONLY)
 func load_inventory(player_id: int) -> Dictionary:
@@ -204,12 +220,13 @@ func load_inventory(player_id: int) -> Dictionary:
 		"held_item": null
 	}
 	
-	while db.next_row():
-		var s_type = db.get_column("slot_type")
+	# Loop through the query_result array
+	for row in db.query_result:
+		var s_type = row["slot_type"]
 		var item_dict = {
-			"index": db.get_column("slot_index"),
-			"id": db.get_column("item_id"),
-			"qty": db.get_column("quantity")
+			"index": row["slot_index"],
+			"id": row["item_id"],
+			"qty": row["quantity"]
 		}
 		
 		if s_type == "main":
