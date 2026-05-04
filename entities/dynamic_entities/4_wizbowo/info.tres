@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EntityInfo" format=3 uid="uid://dkwfjs5umhdh3"]
+
+[ext_resource type="PackedScene" uid="uid://diir2m4kdw6y8" path="res://entities/dynamic_entities/4_wizbowo/wizbowo.tscn" id="1_02c7l"]
+[ext_resource type="Script" uid="uid://d3xw170ysevnd" path="res://entities/_resources/entity_info.gd" id="1_yol3e"]
+[ext_resource type="Script" uid="uid://cs5x3hhsvjx3t" path="res://entities/_resources/spawn_rule.gd" id="2_0hutm"]
+[ext_resource type="Script" uid="uid://bra262olra16r" path="res://entities/dynamic_entities/4_wizbowo/wizbowo_entity.gd" id="2_nsg2m"]
+
+[resource]
+script = ExtResource("1_yol3e")
+name = "Wizbowo"
+entity_scene = ExtResource("1_02c7l")
+entity_script = ExtResource("2_nsg2m")
+metadata/_custom_type_script = "uid://d3xw170ysevnd"

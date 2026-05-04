@@ -557,7 +557,7 @@ func done_initial_load() -> void:
 		$'water_overlay'.show()
 		$'lava_overlay'.show()
 		$'glow_holder/lava_glow'.show()
-		#$'light_overlay'.show()
+		$'light_overlay'.show()
 
 #endregion
 

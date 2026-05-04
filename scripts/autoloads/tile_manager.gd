@@ -181,17 +181,6 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_world()
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&'test_input'):
-		if multiplayer.is_server():
-			save_world()
-			return
-		
-		var mouse_position := Globals.player.get_global_mouse_position()
-		var tile_position := world_to_tile(floori(mouse_position.x), floori(mouse_position.y))
-		
-		place_lava(tile_position.x, tile_position.y)
-
 #region Positions
 ## Converts local chunk coordinates to global tile coordinates.
 ## [br][param chunk_x] and [param chunk_y] represent the chunk in the chunk grid,
