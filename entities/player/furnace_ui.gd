@@ -4,7 +4,7 @@ extends Control
 @export var crafting_button_scene: PackedScene
 @onready var furnace_buttons = $furnace_buttons
 
-# the item IDs for Copper, Iron, Silver, and Gold bars
+#the item IDs for everything in the furnace menu. MUST UPDATE THE FURNACE_ITEM_IDS IN inventory_ui.gd AS WELL!
 const FURNACE_ITEM_IDS = [49, 50, 52, 53, 95, 96, 97, 98]
 
 var current_furnace: FurnaceEntity
