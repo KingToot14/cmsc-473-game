@@ -78,7 +78,7 @@ func create_account_result(player_id: int) -> void:
 func login(username: String, password: String) -> void:
 	if not multiplayer.is_server():
 		return
-
+	var peer_id = multiplayer.get_remote_sender_id()
 	var hashed = hash_password(password)
 
 	db.query("""
@@ -86,12 +86,43 @@ func login(username: String, password: String) -> void:
         WHERE username = '%s' AND password_hash = '%s';
 	""" % [username, hashed])
 
+<<<<<<< Updated upstream
 	var player_id := -1
 	if db.next_row():
 		player_id = db.get_column("id")
 
 	# Send result back to the client who requested login
 	var peer_id = multiplayer.get_remote_sender_id()
+=======
+	var results := db.query_result
+	
+	if results.size() == 0:
+		login_result.rpc_id(peer_id, -2)
+		return
+
+	var stored_hash = results[0]["password_hash"]
+	var player_id = results[0]["id"]
+
+	# Wrong password
+	if stored_hash != hashed:
+		login_result.rpc_id(peer_id, -1)
+		return
+
+	# Correct login
+	print("Login successful for:", username)
+
+	ServerManager.add_player_info(player_id, peer_id, username)
+	ServerManager.create_player(peer_id, player_id)
+
+	login_result.rpc_id(peer_id, player_id)
+	
+	print("[Wizbowo's Conquest] Logging in player_id:", player_id)
+	ServerManager.add_player_info(player_id, peer_id, username)
+	
+	ServerManager.create_player(peer_id, player_id)
+	Globals.join_ui.set_active_panel("panel_join")
+	
+>>>>>>> Stashed changes
 	login_result.rpc_id(peer_id, player_id)
 
 @rpc("authority", "call_remote", "reliable")
