@@ -212,6 +212,7 @@ func login_button_pressed() -> void:
 	pass
 	
 	# TODO (Abby): Verify username and password combo in database
+<<<<<<< Updated upstream
 func _on_login_result(player_id: int) -> void:
 	if player_id == -1:
 		print("[Login] Account not found. Creating new account...")
@@ -229,7 +230,32 @@ func _on_login_result(player_id: int) -> void:
 
 	set_active_panel("panel_join")
 
+=======
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
 	pass
+=======
+func login_pass_fail(player_id: int) -> void:
+
+	# Username doesn't exist
+	if player_id == -2:
+		print("Account does not exist.")
+		return
+
+	# Wrong password
+	if player_id == -1:
+		print("Incorrect password.")
+		return
+
+	# Success
+	print("Login successful! Player ID:", player_id)
+
+	DatabaseManager.remember_player_id(player_id)
+
+	ServerManager.create_player.rpc_id(Globals.SERVER_ID, multiplayer.get_unique_id())
+
+	set_active_panel("panel_join")
+>>>>>>> Stashed changes
 	
 	# TODO (Abby): If username and password don't exist, create new one
 func _on_create_account_result(player_id: int) -> void:
