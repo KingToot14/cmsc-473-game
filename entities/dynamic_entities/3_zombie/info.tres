@@ -9,7 +9,7 @@
 script = ExtResource("3_p1et5")
 spawn_biomes = 1
 spawn_layers = 2
-spawn_times = 3
+spawn_times = 2
 metadata/_custom_type_script = "uid://dibgjwnp7q8qy"
 
 [resource]

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://bsbf482xfcwg4" path="res://scripts/multiplayer/entity_interpolator.gd" id="10_w5gtr"]
 [ext_resource type="Script" uid="uid://bnhkrhfegsuwg" path="res://entities/_resources/entity_sfx_manager.gd" id="11_0iolv"]
 [ext_resource type="AudioStream" uid="uid://jqlla25j2vok" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_death.wav" id="12_ie1hh"]
-[ext_resource type="Texture2D" uid="uid://c4hbodvu4tbyi" path="res://entities/player/main_upper.png" id="12_p5x0e"]
+[ext_resource type="Texture2D" uid="uid://fy5fjobr2xwg" path="res://entities/dynamic_entities/3_zombie/main.png" id="12_p5x0e"]
 [ext_resource type="AudioStream" uid="uid://dsweg4fen4v1i" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_hit.tres" id="13_8f2ak"]
 [ext_resource type="AudioStream" uid="uid://hwsaak6hm2a7" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_jump.tres" id="14_gjd0n"]
 [ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="15_8jdm2"]
@@ -17,7 +17,7 @@
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_p5x0e"]
 
-[sub_resource type="Animation" id="Animation_l7c8k"]
+[sub_resource type="Animation" id="Animation_siexs"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -31,24 +31,11 @@ tracks/0/keys = {
 "update": 1,
 "values": [0]
 }
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("sprite:visible")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
 
-[sub_resource type="Animation" id="Animation_mgvli"]
-resource_name = "airborne"
-length = 0.4
-loop_mode = 1
-step = 0.05
+[sub_resource type="Animation" id="Animation_3votx"]
+resource_name = "fall"
+length = 0.8
+step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -56,77 +43,34 @@ tracks/0/path = NodePath("sprite:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [12, 13, 14, 15]
+"values": [16, 17, 18, 19, 20, 21, 22, 23]
 }
 
-[sub_resource type="Animation" id="Animation_gchxs"]
-resource_name = "death"
-length = 0.2997
-step = 0.05
-tracks/0/type = "method"
+[sub_resource type="Animation" id="Animation_hpqhm"]
+resource_name = "jump"
+length = 0.8
+step = 0.1
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath(".")
+tracks/0/path = NodePath("sprite:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.2664),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"queue_free"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("sprite:frame")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.066599995, 0.13319999, 0.1998),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [16, 17, 18, 19]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("sprite:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.2664),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/3/type = "method"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("sfx")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.05),
-"transitions": PackedFloat32Array(1, 1),
-"values": [{
-"args": [&"death"],
-"method": &"play_sfx"
-}, {
-"args": [&"poof"],
-"method": &"play_sfx"
-}]
+"values": [8, 9, 10, 11, 12, 13, 14, 15]
 }
 
-[sub_resource type="Animation" id="Animation_en56l"]
-resource_name = "idle"
+[sub_resource type="Animation" id="Animation_p5x0e"]
+resource_name = "move"
 length = 0.8
 loop_mode = 1
-step = 0.05
+step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -134,99 +78,18 @@ tracks/0/path = NodePath("sprite:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.39999998, 0.49999997, 0.6, 0.7),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.70000005),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
-[sub_resource type="Animation" id="Animation_515sv"]
-resource_name = "jump"
-length = 0.5
-step = 0.05
-tracks/0/type = "method"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0.3, 0.45),
-"transitions": PackedFloat32Array(1, 1),
-"values": [{
-"args": [],
-"method": &"apply_jump"
-}, {
-"args": [],
-"method": &"client_apply_jump"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("sprite:frame")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 1,
-"values": [8, 9, 10, 11, 12]
-}
-tracks/2/type = "method"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("sfx")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0.1),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [&"jump"],
-"method": &"play_sfx"
-}]
-}
-
-[sub_resource type="Animation" id="Animation_rjtam"]
-resource_name = "land"
-length = 0.3
-step = 0.05
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("sprite:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [10, 9, 11]
-}
-tracks/1/type = "method"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("sfx")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [&"land"],
-"method": &"play_sfx"
-}]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_siexs"]
 _data = {
-&"RESET": SubResource("Animation_l7c8k"),
-&"airborne": SubResource("Animation_mgvli"),
-&"death": SubResource("Animation_gchxs"),
-&"idle": SubResource("Animation_en56l"),
-&"jump": SubResource("Animation_515sv"),
-&"land": SubResource("Animation_rjtam")
+&"RESET": SubResource("Animation_siexs"),
+&"fall": SubResource("Animation_3votx"),
+&"jump": SubResource("Animation_hpqhm"),
+&"move": SubResource("Animation_p5x0e")
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hpqhm"]
@@ -242,7 +105,7 @@ shader_parameter/intensity = 0.0
 size = Vector2(12, 25)
 
 [node name="zombie" type="CharacterBody2D" unique_id=228233111 node_paths=PackedStringArray("interpolator", "hp")]
-z_index = 15
+z_index = 20
 script = ExtResource("1_oc5ln")
 variant_normal_texture = ExtResource("18_vdyhl")
 interpolator = NodePath("snapshot_interpolator")
@@ -286,7 +149,7 @@ shape = SubResource("RectangleShape2D_hpqhm")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=789913785]
 material = SubResource("ShaderMaterial_3votx")
-position = Vector2(0, -7)
+position = Vector2(0, -12)
 texture = ExtResource("12_p5x0e")
 hframes = 8
 vframes = 3

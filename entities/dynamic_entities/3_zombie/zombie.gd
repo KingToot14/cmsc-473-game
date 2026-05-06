@@ -37,9 +37,7 @@ var variant := ZombieVariant.NORMAL
 
 @export var variant_normal_texture: Texture2D
 
-
 var target_player: PlayerController
-
 
 var travel_direction := -1.0
 var jump_remaining := 0
@@ -104,6 +102,14 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 	
+	# play animation
+	if velocity.y < -0.1:
+		$'animator'.play(&'jump')
+	elif velocity.y > 0.1:
+		$'animator'.play(&'fall')
+	else:
+		$'animator'.play(&'move')
+	
 	# gravity
 	if not is_on_floor():
 		velocity.x = jump_velocity.x
@@ -111,16 +117,11 @@ func _physics_process(delta: float) -> void:
 	# buoyancy
 	if in_water:
 		velocity.y -= buoyancy * delta
-
 	
 	# snap to floor
 	if is_on_floor():
-		
-		if airborne:
-			send_action_basic(LAND_ACTION)
-		
 		airborne = false
-		velocity.x = 0.0
+		#velocity.x = 0.0
 
 #region Physics
 func get_travel_direction(delta: float) -> void:
@@ -181,9 +182,8 @@ func try_jump(delta: float) -> void:
 				# random chance to perform a large jump (if not a small jump)
 			elif randf() < JUMP_MODIFIER_ODDS * 2.0:
 				jump_velocity.y *= JUMP_POWER_LARGE
-			
-		$'animator'.play(&'jump')
-		send_action_basic(JUMP_ACTION)
+		
+		velocity.y = jump_velocity.y
 
 func apply_jump() -> void:
 	velocity = jump_velocity
@@ -229,7 +229,7 @@ func do_death() -> void:
 		# spawn item
 		ItemDropEntity.spawn(global_position, 2, randi_range(1, 3))
 	else:
-		$'animator'.play(&'death')
+		queue_free()
 
 #endregion
 

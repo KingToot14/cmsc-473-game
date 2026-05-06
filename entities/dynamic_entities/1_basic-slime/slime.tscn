@@ -247,7 +247,7 @@ size = Vector2(14, 10)
 size = Vector2(14, 10)
 
 [node name="slime" type="CharacterBody2D" unique_id=484265242 node_paths=PackedStringArray("interpolator", "hp")]
-z_index = 15
+z_index = 20
 collision_layer = 8
 script = ExtResource("1_udgdv")
 jump_wait_base = 1.0

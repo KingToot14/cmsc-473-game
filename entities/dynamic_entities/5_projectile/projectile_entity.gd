@@ -27,8 +27,8 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		hp.died.connect(_on_death)
-		
-		$'damage_source'.dealt_damage.connect(kill)
+	else:
+		$'damage_source'.dealt_damage.connect(_on_dealt_damage.rpc_id.bind(Globals.SERVER_ID))
 
 func _physics_process(delta: float) -> void:
 	# if homing, chase target
@@ -47,6 +47,10 @@ func _physics_process(delta: float) -> void:
 		return
 	if check_block(Vector2(global_position.x + size.x / 2, global_position.y + size.y / 2)):
 		return
+
+@rpc('any_peer', 'call_remote', 'reliable')
+func _on_dealt_damage() -> void:
+	kill()
 
 func look_at_target(delta: float) -> void:
 	if not is_instance_valid(ServerManager.connected_players.get(target_id)):
@@ -78,10 +82,10 @@ func setup_type() -> void:
 	match type:
 		ProjectileType.WIZBOWO:
 			fly_speed = 200
-			velocity = direction
+			velocity = direction * fly_speed
 		ProjectileType.WIZBOWO_HOMING:
 			fly_speed = 100
-			velocity = direction
+			velocity = direction * fly_speed
 
 #region Damage
 func _on_death() -> void:
