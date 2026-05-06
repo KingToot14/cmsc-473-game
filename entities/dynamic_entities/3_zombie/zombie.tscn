@@ -11,7 +11,6 @@
 [ext_resource type="AudioStream" uid="uid://b2d5q6qkby881" path="res://entities/dynamic_entities/1_basic-slime/sfx/slime_land.tres" id="15_8jdm2"]
 [ext_resource type="AudioStream" uid="uid://dkawjs4hviwao" path="res://entities/dynamic_entities/1_basic-slime/sfx/poof.wav" id="16_766w1"]
 [ext_resource type="Script" uid="uid://b7qi6go1ayr26" path="res://entities/_resources/combat/entity_hp.gd" id="17_41ywn"]
-[ext_resource type="Texture2D" uid="uid://c0disvwd880p7" path="res://entities/player/main.png" id="18_vdyhl"]
 [ext_resource type="Script" uid="uid://moi5ayu0asum" path="res://entities/_resources/combat/entity_hitbox.gd" id="18_vxo4o"]
 [ext_resource type="Script" uid="uid://4bwchbw40ctn" path="res://entities/_resources/combat/entity_damage_source.gd" id="19_wx874"]
 
@@ -107,7 +106,7 @@ size = Vector2(12, 25)
 [node name="zombie" type="CharacterBody2D" unique_id=228233111 node_paths=PackedStringArray("interpolator", "hp")]
 z_index = 20
 script = ExtResource("1_oc5ln")
-variant_normal_texture = ExtResource("18_vdyhl")
+variant_normal_texture = ExtResource("12_p5x0e")
 interpolator = NodePath("snapshot_interpolator")
 hp = NodePath("hp")
 metadata/_custom_type_script = "uid://biujndltikktx"

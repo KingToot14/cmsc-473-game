@@ -22,7 +22,6 @@ const JUMP_MODIFIER_ODDS := 0.10
 @export var jump_power_base := 300.0
 @export var jump_power_variance := 100.0
 
-
 @export_group("Movement", "move_")
 @export var move_power_base := 100.0
 @export var move_power_variance := 50.0
