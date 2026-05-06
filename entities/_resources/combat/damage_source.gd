@@ -71,8 +71,3 @@ func damage_hitbox(hitbox: EntityHitbox) -> void:
 	# deal damage to entity
 	hitbox.deal_damage(get_damage(), source_type, get_knockback(hitbox))
 	dealt_damage.emit()
-	send_dealt_damage.rpc_id(Globals.SERVER_ID)
-
-@rpc('any_peer', 'call_remote', 'reliable')
-func send_dealt_damage() -> void:
-	dealt_damage.emit()
