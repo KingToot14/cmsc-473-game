@@ -293,20 +293,20 @@ func load_inventory(db_id: int) -> void:
 	# check if this is a brand new player (inventory is totally empty)
 	if data["main_inventory"].is_empty() and data["armor_inventory"].is_empty() and data["held_item"] == null:
 		# Directly assign the starter items to the first 4 slots
-		items[0].item_id = 45   # golden sword
+		items[0].item_id = 6   # wooden sword
 		items[0].count = 1
-		items[1].item_id = 42   # golden pickaxe
+		items[1].item_id = 7   # wooden pickaxe
 		items[1].count = 1
-		items[2].item_id = 43  # golden axe
+		items[2].item_id = 10  # wooden axe
 		items[2].count = 1
-		items[3].item_id = 44   # golden hammer
+		items[3].item_id = 9   # wooden hammer
 		items[3].count = 1
-		items[3].item_id = 46   # wooden helmet
-		items[3].count = 1
-		items[3].item_id = 47   # wooden leggings
-		items[3].count = 1
-		items[3].item_id = 48   # wooden chestplate
-		items[3].count = 1
+		items[4].item_id = 46   # wooden helmet
+		items[4].count = 1
+		items[5].item_id = 47   # wooden leggings
+		items[5].count = 1
+		items[6].item_id = 48   # wooden chestplated
+		items[6].count = 1
 	else:
 		# populate Main Inventory from Database
 		for item_data in data["main_inventory"]:
